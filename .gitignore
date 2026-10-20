@@ -1,0 +1,8 @@
+# Agentic & Private Files (NEVER push to public remote)
+conductor/
+GEMINI.md
+AGENTS.md
+CLAUDE.md
+Files/GEMINI.md
+todos.md
+.ruff_cache/
