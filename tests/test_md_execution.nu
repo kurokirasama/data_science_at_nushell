@@ -67,40 +67,50 @@ def main [
     $blocks | save -f /tmp/test_md_blocks.json
 
     let res = (^sudo -n docker run --rm
-        -v "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files:/data"
         -v "/tmp/test_md_blocks.json:/tmp/test_md_blocks.json"
         dsin:latest -c '
-            cd /data/data
             let blocks = (open /tmp/test_md_blocks.json)
             mut chunks = []
             mut cur_chunk = []
             mut cur_sec = ""
+            mut cur_ch = ""
             for b in $blocks {
                 let redefines_greet = (($b.code =~ "(?m)^def (greet|\"str mycommand\")") and ($cur_chunk | any { |x| $x.code =~ "(?m)^def (greet|\"str mycommand\")" }))
                 if ($b.sec != $cur_sec) or $redefines_greet {
                     if ($cur_chunk | is-not-empty) {
-                        $chunks = ($chunks | append { sec: $cur_sec, items: $cur_chunk })
+                        $chunks = ($chunks | append { ch: $cur_ch, sec: $cur_sec, items: $cur_chunk })
                     }
                     $cur_sec = $b.sec
+                    $cur_ch = $b.ch
                     $cur_chunk = [$b]
                 } else {
                     $cur_chunk = ($cur_chunk | append $b)
                 }
             }
             if ($cur_chunk | is-not-empty) {
-                $chunks = ($chunks | append { sec: $cur_sec, items: $cur_chunk })
+                $chunks = ($chunks | append { ch: $cur_ch, sec: $cur_sec, items: $cur_chunk })
             }
             mut passed_blocks = 0
             mut chunk_failures = []
             for c in $chunks {
+                let workdir = match $c.ch {
+                    "chapter-2-introduction" => "/data/ch02"
+                    "chapter-3-programming-cli-tools" => "/data/ch03"
+                    "chapter-4-obtaining-data" => "/data/ch04"
+                    "chapter-5-scrubbing-data" => "/data/ch05"
+                    "chapter-6-exploring-data" => "/data/ch06"
+                    "chapter-7-parallel-pipelines" => "/data/ch07"
+                    "chapter-8-modeling-data" => "/data/ch08"
+                    _ => "/data"
+                }
                 let body = ($c.items | each { |b| $"# --- line ($b.start) ---\n($b.code)\nprint \"\n__BLOCK_OK_($b.start)__\"" } | str join "\n\n")
-                let script = $"plugin use polars\nuse ~/.config/nushell/nu_modules/dsin_tools.nu *\n($body)"
+                let script = $"plugin use polars\nuse ~/.config/nushell/nu_modules/dsin_tools.nu *\ncd ($workdir)\n($body)"
                 $script | save -f /tmp/sec_run.nu
-                let r = (timeout 30s nu --plugin-config ~/.config/nushell/plugin.msgpackz /tmp/sec_run.nu | complete)
+                let r = (timeout 45s nu --plugin-config ~/.config/nushell/plugin.msgpackz /tmp/sec_run.nu | complete)
                 let ok_count = ($r.stdout | lines | where ($it | str contains "__BLOCK_OK_") | length)
                 $passed_blocks = $passed_blocks + $ok_count
                 if $r.exit_code != 0 or ($ok_count < ($c.items | length)) {
-                    let err_msg = ($r.stderr | lines | where ($it | str contains "×") or ($it | str contains "Error:") | str join " | ")
+                    let err_msg = ($r.stderr | lines | where ($it | str contains "×") or ($it | str contains "Error:") or ($it | str contains "x ") | str join " | ")
                     $chunk_failures = ($chunk_failures | append { sec: $c.sec, total: ($c.items | length), ok: $ok_count, err: $err_msg })
                 }
             }

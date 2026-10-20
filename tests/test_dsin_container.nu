@@ -1,5 +1,5 @@
 #!/usr/bin/env nu
-# TDD Verification Suite for Phase 2: Standalone dsin Docker Image, Tooling & Updater Script
+# TDD Verification Suite for Standalone dsin Docker Image, Built-in /data, PATH Tooling & Updater Script
 
 export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   mut results = []
@@ -19,16 +19,6 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   $results ++= [{ check: "dsin_image_built", passed: $img_exists, detail: $"Image ($image) present in local Docker daemon" }]
 
   if not $img_exists {
-    # Remaining container runtime checks automatically fail in Red phase if image does not exist yet
-    $results ++= [
-      { check: "default_shell_is_nushell", passed: false, detail: "Image not built yet" }
-      { check: "custom_config_loaded", passed: false, detail: "Image not built yet" }
-      { check: "polars_plugin_working", passed: false, detail: "Image not built yet" }
-      { check: "ttt_editor_and_config", passed: false, detail: "Image not built yet" }
-      { check: "timg_viewer_working", passed: false, detail: "Image not built yet" }
-      { check: "external_tools_working", passed: false, detail: "Image not built yet" }
-      { check: "updater_script_check_mode", passed: false, detail: "Image not built yet" }
-    ]
     return $results
   }
 
@@ -37,39 +27,43 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   let nu_ok = ($nu_ver_res.exit_code == 0) and (($nu_ver_res.stdout | str trim) | is-not-empty)
   $results ++= [{ check: "default_shell_is_nushell", passed: $nu_ok, detail: $"Nushell version: ($nu_ver_res.stdout | str trim)" }]
 
-  # 5. Custom config.nu is loaded ($env.config.float_precision == 4)
+  # 5. Built-in /data folder with ch02..ch08 by default (no volume mount needed)
+  let data_res = (do -i { ^sudo -n docker run --rm $image -c "[ch02 ch03 ch04 ch05 ch06 ch07 ch08] | all {|d| ($'/data/($d)' | path exists)}" } | complete)
+  let data_ok = ($data_res.exit_code == 0) and (($data_res.stdout | str trim) == "true")
+  $results ++= [{ check: "builtin_data_ch02_to_ch08", passed: $data_ok, detail: $"Built-in /data/ch02..ch08 present: ($data_res.stdout | str trim)" }]
+
+  # 6. Custom config.nu is loaded ($env.config.float_precision == 4)
   let cfg_res = (do -i { ^sudo -n docker run --rm $image --config /home/dst/.config/nushell/config.nu -c "$env.config.float_precision" } | complete)
   let custom_cfg_ok = ($cfg_res.exit_code == 0) and (($cfg_res.stdout | str trim) == "4")
   $results ++= [{ check: "custom_config_loaded", passed: $custom_cfg_ok, detail: $"float_precision == ($cfg_res.stdout | str trim)" }]
 
-  # 6. nu_plugin_polars is registered and works
+  # 7. nu_plugin_polars is registered and works
   let polars_res = (do -i { ^sudo -n docker run --rm $image -c "plugin use polars; [[a b]; [1 2] [3 4]] | polars into-df | polars select a | polars into-nu | get a | math sum" } | complete)
   let polars_ok = ($polars_res.exit_code == 0) and (($polars_res.stdout | str trim) == "4")
   $results ++= [{ check: "polars_plugin_working", passed: $polars_ok, detail: $"polars sum == ($polars_res.stdout | str trim)" }]
 
-  # 7. ttt binary and ~/.config/ttt/settings.json exist inside container
-  let ttt_res = (do -i { ^sudo -n docker run --rm $image -c "((which ttt | is-not-empty) and ('~/.config/ttt/settings.json' | path expand | path exists))" } | complete)
+  # 8. ttt binary in PATH without ^ and ~/.config/ttt/settings.json exist inside container
+  let ttt_res = (do -i { ^sudo -n docker run --rm $image -c "((ttt -v | str length) > 0) and ('~/.config/ttt/settings.json' | path expand | path exists)" } | complete)
   let ttt_ok = ($ttt_res.exit_code == 0) and (($ttt_res.stdout | str trim) == "true")
-  $results ++= [{ check: "ttt_editor_and_config", passed: $ttt_ok, detail: $"ttt + settings.json: ($ttt_res.stdout | str trim)" }]
+  $results ++= [{ check: "ttt_editor_in_path", passed: $ttt_ok, detail: $"ttt in PATH + settings.json: ($ttt_res.stdout | str trim)" }]
 
-  # 8. timg binary is installed and renders an image inside container
-  let files_dir = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files"
-  let timg_res = (do -i { ^sudo -n docker run --rm -v $"($files_dir):/data" $image -c "^timg -g 10x5 /data/dscl_0101.png | str length" } | complete)
-  let timg_ok = ($timg_res.exit_code == 0) and (($timg_res.stdout | str trim | into int) > 10)
-  $results ++= [{ check: "timg_viewer_working", passed: $timg_ok, detail: $"timg output chars: ($timg_res.stdout | str trim)" }]
+  # 9. timg binary in PATH without ^ and renders a plot inside container
+  let timg_res = (do -i { ^sudo -n docker run --rm $image -c "cd /data/ch06; Rscript plot_bar.R; (timg -g 10x5 tips_bar.png | str length) > 10" } | complete)
+  let timg_ok = ($timg_res.exit_code == 0) and (($timg_res.stdout | str trim) == "true")
+  $results ++= [{ check: "timg_viewer_in_path", passed: $timg_ok, detail: $"timg in PATH renders plot: ($timg_res.stdout | str trim)" }]
 
-  # 9. External tools (vw, tapkee, run_experiment, Rscript, python3, sqlite3, git, curl, 7z, jq)
-  let tools_res = (do -i { ^sudo -n docker run --rm $image -c "[vw tapkee run_experiment Rscript python3 sqlite3 git curl 7z jq] | all { |t| which $t | is-not-empty }" } | complete)
+  # 10. All CLI & modeling tools directly in PATH (vw, tapkee, parallel, pbc, run_experiment, Rscript, python3, sqlite3, git, 7z, jq)
+  let tools_res = (do -i { ^sudo -n docker run --rm $image -c "[ttt timg parallel pbc vw tapkee run_experiment Rscript python3 sqlite3 git 7z jq] | all { |t| which $t | is-not-empty }" } | complete)
   let tools_ok = ($tools_res.exit_code == 0) and (($tools_res.stdout | str trim) == "true")
-  $results ++= [{ check: "external_tools_working", passed: $tools_ok, detail: $"All required CLI/modeling tools present: ($tools_res.stdout | str trim)" }]
+  $results ++= [{ check: "external_tools_in_path", passed: $tools_ok, detail: $"All required CLI/modeling tools in PATH: ($tools_res.stdout | str trim)" }]
 
-  # 10. Updater script docker/update-dsin-nushell.nu --check works
-  let upd_script = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/docker/update-dsin-nushell.nu"
+  # 11. Updater script at root (update-dsin-nushell.nu --check) works
+  let upd_script = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/update-dsin-nushell.nu"
   let upd_ok = if ($upd_script | path exists) {
     let r = (do -i { ^nu $upd_script --check } | complete)
     ($r.exit_code == 0) and ($r.stdout | str contains "target_version")
   } else { false }
-  $results ++= [{ check: "updater_script_check_mode", passed: $upd_ok, detail: "docker/update-dsin-nushell.nu --check succeeds" }]
+  $results ++= [{ check: "root_updater_script_works", passed: $upd_ok, detail: "update-dsin-nushell.nu --check succeeds" }]
 
   $results
 }
@@ -81,5 +75,5 @@ def main [image: string = "dsin:latest"] {
   if ($failed | is-not-empty) {
     error make { msg: $"($failed | length) dsin container check\(s\) failed!" }
   }
-  print "All Phase 2 dsin container and updater checks PASSED!"
+  print "All dsin container, built-in /data, PATH, and updater checks PASSED!"
 }

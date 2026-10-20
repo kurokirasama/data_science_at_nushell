@@ -1,0 +1,773 @@
+#!/usr/bin/env nu
+# =============================================================================
+# setup_data_folders.nu — Builds clean /data/ch02..ch08 matching section numbers
+# =============================================================================
+
+let src_files = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtTheCommandLine/Files"
+let src_data = $"($src_files)/data"
+let dst_data = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/data"
+
+rm -rf $dst_data
+mkdir $dst_data
+mkdir $"($dst_data)/ch02"
+mkdir $"($dst_data)/ch03"
+mkdir $"($dst_data)/ch04"
+mkdir $"($dst_data)/ch05"
+mkdir $"($dst_data)/ch06"
+mkdir $"($dst_data)/ch07"
+mkdir $"($dst_data)/ch08"
+mkdir $"($dst_data)/.cache"
+
+# Extract .cache from cache.7z
+^7z x $"($src_data)/cache.7z" $"-o($dst_data)" -y | ignore
+
+# -----------------------------------------------------------------------------
+# ch02: Section 2 (Introducción y Fundamentos de Nushell)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch02/." $"($dst_data)/ch02/"
+for f in ["edition.json", "edition2.json", "edition2.csv", "edition2.yaml"] {
+    cp $"($src_data)/ch09/($f)" $"($dst_data)/ch02/($f)"
+}
+cp $"($src_data)/ch07/tips.csv" $"($dst_data)/ch02/tips.csv"
+cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch02/stream.py"
+
+# -----------------------------------------------------------------------------
+# ch03: Section 3 (Programación y Creación de Herramientas de Línea de Comandos)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch04/." $"($dst_data)/ch03/"
+
+# Fix top-words.py and top-words.R to use python3 and local stopwords file
+'#!/usr/bin/env python3
+import re
+import sys
+from collections import Counter
+from pathlib import Path
+
+def top_words(text, n):
+    sw_path = Path("stopwords")
+    if sw_path.exists():
+        stopwords = set(sw_path.read_text(encoding="utf-8").splitlines())
+    else:
+        stopwords = set()
+
+    words = re.findall(r"[a-z\x27]{2,}", text.lower())
+    words = (w for w in words if w not in stopwords)
+
+    for word, count in Counter(words).most_common(n):
+        print(f"{count},{word}")
+
+if __name__ == "__main__":
+    text = sys.stdin.read()
+    n = int(sys.argv[1]) if len(sys.argv) > 1 else 10
+    print("count,word")
+    top_words(text, n)
+' | save -f $"($dst_data)/ch03/top-words.py"
+
+'#!/usr/bin/env Rscript
+args <- commandArgs(trailingOnly = TRUE)
+n <- if (length(args) >= 1) as.integer(args[1]) else 10L
+
+stopwords <- if (file.exists("stopwords")) readLines("stopwords", warn = FALSE) else character(0)
+
+f_text <- file("stdin")
+lines <- tolower(readLines(f_text, warn = FALSE))
+close(f_text)
+
+words <- unlist(regmatches(lines, gregexpr("[a-z\x27]{2,}", lines)))
+words <- words[!(words %in% stopwords)]
+
+counts <- sort(table(words), decreasing = TRUE)
+top_n <- head(counts, n)
+cat("count,word\n")
+cat(sprintf("%d,%s\n", as.integer(top_n), names(top_n)), sep = "")
+' | save -f $"($dst_data)/ch03/top-words.R"
+
+'#!/usr/bin/env python3
+import sys
+
+CYCLE_OF_15 = ["fizzbuzz", None, None, "fizz", None,
+               "buzz", "fizz", None, None, "fizz",
+               "buzz", None, "fizz", None, None]
+
+def fizz_buzz(n: int) -> str:
+    return CYCLE_OF_15[n % 15] or str(n)
+
+if __name__ == "__main__":
+    for line in sys.stdin:
+        line = line.strip()
+        if line:
+            print(fizz_buzz(int(line)))
+' | save -f $"($dst_data)/ch03/fizzbuzz.py"
+
+'#!/usr/bin/env Rscript
+cycle_of_15 <- c("fizzbuzz", NA, NA, "fizz", NA,
+                 "buzz", "fizz", NA, NA, "fizz",
+                 "buzz", NA, "fizz", NA, NA)
+
+fizz_buzz <- function(n) {
+  word <- cycle_of_15[as.integer(n) %% 15 + 1]
+  ifelse(is.na(word), n, word)
+}
+
+lines <- readLines(file("stdin"), warn = FALSE)
+lines <- lines[nzchar(trimws(lines))]
+for (n in lines) {
+  cat(fizz_buzz(n), "\n", sep = "")
+}
+' | save -f $"($dst_data)/ch03/fizzbuzz.R"
+
+# Create Nushell top-words progression files in ch03
+'open --raw alice.txt
+| str downcase
+| parse --regex "(?P<word>[a-z]{2,})"
+| get word
+| uniq -c
+| sort-by count --reverse
+| first 10
+' | str replace "downcase" "lowercase" | save -f $"($dst_data)/ch03/top-words-1.nu"
+
+cp $"($dst_data)/ch03/top-words-1.nu" $"($dst_data)/ch03/top-words-2.nu"
+
+'#!/usr/bin/env nu
+open --raw alice.txt
+| str lowercase
+| parse --regex "(?P<word>[a-z]{2,})"
+| get word
+| uniq -c
+| sort-by count --reverse
+| first 10
+' | save -f $"($dst_data)/ch03/top-words-3.nu"
+
+'#!/usr/bin/env -S nu --stdin
+def main [] {
+    $in
+    | str lowercase
+    | parse --regex "(?P<word>[a-z]{2,})"
+    | get word
+    | uniq -c
+    | sort-by count --reverse
+    | first 10
+}
+' | save -f $"($dst_data)/ch03/top-words-4.nu"
+
+'#!/usr/bin/env -S nu --stdin
+
+# Extrae las palabras más frecuentes de un texto excluyendo stopwords
+def main [
+    num_words: int = 10 # Número de palabras frecuentes a retornar
+    --stopwords-file (-s): path = "stopwords" # Archivo de palabras vacías
+] {
+    let input_text = $in
+    let sw = if ($stopwords_file | path exists) {
+        open --raw $stopwords_file | lines | each { str trim | str lowercase }
+    } else {
+        []
+    }
+    $input_text
+    | str lowercase
+    | parse --regex "(?P<word>[a-z]{2,})"
+    | get word
+    | where { |w| not ($w in $sw) }
+    | uniq -c
+    | rename word count
+    | sort-by count --reverse
+    | first $num_words
+}
+' | save -f $"($dst_data)/ch03/top-words-5.nu"
+cp $"($dst_data)/ch03/top-words-5.nu" $"($dst_data)/ch03/top-words.nu"
+
+# stats_utils.nu, maps.nu, osm_maps.nu in ch03
+'# Módulo de utilidades estadísticas para Ciencia de Datos en Nushell
+
+export def resumen-columna [col: string]: table -> record {
+    let vals = ($in | get $col)
+    {
+        columna: $col
+        n: ($vals | length)
+        media: ($vals | math avg | math round --precision 3)
+        mediana: ($vals | math median | math round --precision 3)
+        desv_est: ($vals | math stddev | math round --precision 3)
+        minimo: ($vals | math min)
+        maximo: ($vals | math max)
+    }
+}
+
+export def filtrar-outliers [col: string, --z-max: float = 2.5]: table -> table {
+    let tbl = $in
+    let mu = ($tbl | get $col | math avg)
+    let sd = ($tbl | get $col | math stddev)
+    $tbl | where { |row| ((($row | get $col) - $mu) | math abs) <= ($z_max * $sd) }
+}
+' | save -f $"($dst_data)/ch03/stats_utils.nu"
+
+'# Módulo de geocodificación con la API de Google Maps
+
+export def loc-from-address [
+    address: string
+    --api-key (-k): string = "the_api_key"
+] {
+    let url = {
+        scheme: "https"
+        host: "maps.googleapis.com"
+        path: "/maps/api/geocode/json"
+        params: {
+            address: $address
+            key: $api_key
+        }
+    } | url join
+
+    http get $url | get results.geometry.location
+}
+
+export def address-from-loc [
+    latitude: number
+    longitude: number
+    --api-key (-k): string = "the_api_key"
+] {
+    let url = {
+        scheme: "https"
+        host: "maps.googleapis.com"
+        path: "/maps/api/geocode/json"
+        params: {
+            latlng: $"($latitude),($longitude)"
+            key: $api_key
+        }
+    } | url join
+
+    let response = (http get $url)
+    if $response.status != "OK" {
+        error make -u {msg: "address not found!"}
+    }
+    $response.results.0.formatted_address
+}
+' | save -f $"($dst_data)/ch03/maps.nu"
+
+chmod +x $"($dst_data)/ch03/top-words.py" $"($dst_data)/ch03/top-words.R" $"($dst_data)/ch03/fizzbuzz.py" $"($dst_data)/ch03/fizzbuzz.R" $"($dst_data)/ch03/top-words-2.nu" $"($dst_data)/ch03/top-words-3.nu" $"($dst_data)/ch03/top-words-4.nu" $"($dst_data)/ch03/top-words-5.nu" $"($dst_data)/ch03/top-words.nu"
+
+# -----------------------------------------------------------------------------
+# ch04: Section 4 (Obtención de Datos)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch03/." $"($dst_data)/ch04/"
+rm -f $"($dst_data)/ch04/wikimedia-stream-samplecd"
+
+{
+    urls: [
+        "https://jsonplaceholder.typicode.com/posts/1"
+        "https://jsonplaceholder.typicode.com/posts/2"
+        "https://jsonplaceholder.typicode.com/posts/3"
+    ]
+} | to json | save -f $"($dst_data)/ch04/urls.json"
+
+[
+    {userId: 1, id: 1, title: "sunt aut facere repellat provident", body: "quia et suscipit\nsuscipit recusandae consequuntur"}
+    {userId: 1, id: 2, title: "qui est esse", body: "est rerum tempore vitae\nsequi sint nihil"}
+    {userId: 1, id: 3, title: "ea molestias quasi exercitationem", body: "et iusto sed quo iure\nvoluptatem occaecati"}
+    {userId: 1, id: 4, title: "eum et est occaecati", body: "ullam et saepe reiciendis voluptatem"}
+    {userId: 1, id: 5, title: "nesciunt quas odio", body: "repudiandae veniam quaerat sunt sed"}
+] | to json | save -f $"($dst_data)/ch04/posts_sample.json"
+
+mkdir $"($dst_data)/ch04/.secret"
+"demo_newsapi_key_12345" | save -f $"($dst_data)/ch04/.secret/newsapi.org_apikey"
+
+# -----------------------------------------------------------------------------
+# ch05: Section 5 (Depuración y Transformación de Datos)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch05/." $"($dst_data)/ch05/"
+cp $"($dst_data)/ch03/fizzbuzz.py" $"($dst_data)/ch05/fizzbuzz.py"
+cp $"($src_files)/vgsales.csv" $"($dst_data)/ch05/vgsales.csv"
+cp $"($src_data)/my_data/vgsales_filtered.csv" $"($dst_data)/ch05/vgsales_filtered.csv"
+cp $"($src_data)/my_data/data_by_year.csv" $"($dst_data)/ch05/data_by_year.csv"
+
+# -----------------------------------------------------------------------------
+# ch06: Section 6 (Exploración de Datos y Visualización en la Terminal)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch07/." $"($dst_data)/ch06/"
+
+# Create standalone R and Python scripts for Section 6 (no inline scripts!)
+'#!/usr/bin/env Rscript
+df <- read.csv("tips.csv", stringsAsFactors = FALSE)
+df$percent <- round(df$tip / df$bill * 100, 2)
+write.csv(df, "percent.csv", row.names = FALSE, quote = FALSE)
+tryCatch(write.csv(df, stdout(), row.names = FALSE, quote = FALSE), error = function(e) invisible(NULL))
+' | save -f $"($dst_data)/ch06/mutate_tips.R"
+
+'#!/usr/bin/env Rscript
+df <- read.csv("tips.csv", stringsAsFactors = FALSE)
+df$pct_tip <- (df$tip / df$bill) * 100
+agg <- aggregate(cbind(bill, tip, pct_tip) ~ day + time, data = df, FUN = function(x) c(mean = mean(x), sd = sd(x), median = median(x), iqr = IQR(x)))
+out <- data.frame(
+  day = agg$day,
+  time = agg$time,
+  bill_mean = round(agg$bill[, "mean"], 2),
+  bill_sd = round(agg$bill[, "sd"], 2),
+  tip_mean = round(agg$tip[, "mean"], 2),
+  mean_tip = round(agg$tip[, "mean"], 2),
+  tip_median = round(agg$tip[, "median"], 2),
+  pct_tip_mean = round(agg$pct_tip[, "mean"], 2),
+  pct_tip_iqr = round(agg$pct_tip[, "iqr"], 2)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch06/summary_tips.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+import sys
+
+df = pd.read_csv("tips.csv")
+df["pct_tip"] = df["tip"] / df["bill"] * 100.0
+corr = df[["bill", "tip", "size", "pct_tip"]].corr().round(4)
+corr.index.name = "variable"
+corr.reset_index().to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch06/corr_tips.py"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = bill, y = tip, color = size)) +
+  geom_point() +
+  facet_wrap(~day) +
+  theme_minimal()
+ggsave("tips.png", plot = p, width = 7, height = 4.5, dpi = 120)
+ggsave("tips_faceted.png", plot = p, width = 7, height = 4.5, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_faceted.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = time, fill = time)) +
+  geom_bar() +
+  labs(title = "Recuento de observaciones por horario", x = "Horario (time)", y = "Frecuencia") +
+  theme_minimal()
+ggsave("plot-bar.png", plot = p, width = 6, height = 4, dpi = 120)
+ggsave("tips_bar.png", plot = p, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_bar.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = tip, fill = time)) +
+  geom_histogram(bins = 20, alpha = 0.85) +
+  labs(title = "Histograma apilado de propinas por horario", x = "Propina (USD)", y = "Frecuencia") +
+  theme_minimal()
+ggsave("plot-histogram.png", plot = p, width = 6, height = 4, dpi = 120)
+ggsave("tips_histogram.png", plot = p, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_histogram.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = tip, fill = time)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Densidad de propinas por horario", x = "Propina (USD)", y = "Densidad") +
+  theme_minimal()
+ggsave("plot-density.png", plot = p, width = 6, height = 4, dpi = 120)
+ggsave("tips_density.png", plot = p, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_density.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = tip, y = bill, color = size)) +
+  geom_path() +
+  labs(title = "Geometria erronea: geom_path en observaciones independientes") +
+  theme_minimal()
+ggsave("plot-accident.png", plot = p, width = 6, height = 4, dpi = 120)
+ggsave("fatalities_line.png", plot = p, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_accident.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = bill, y = tip, color = time)) +
+  geom_point(alpha = 0.8) +
+  labs(title = "Diagrama de dispersion: Factura vs Propina", x = "Factura (USD)", y = "Propina (USD)") +
+  theme_minimal()
+ggsave("plot-scatter.png", plot = p, width = 6, height = 4, dpi = 120)
+ggsave("tips_scatter.png", plot = p, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_scatter.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p1 <- ggplot(df, aes(x = bill, y = tip, color = time)) +
+  geom_smooth(method = "loess", formula = y ~ x) +
+  theme_minimal()
+ggsave("plot-trend.png", plot = p1, width = 6, height = 4, dpi = 120)
+
+p2 <- ggplot(df, aes(x = bill, y = tip, color = time)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", formula = y ~ x) +
+  theme_minimal()
+ggsave("plot-trend-points.png", plot = p2, width = 6, height = 4, dpi = 120)
+ggsave("tips_trend.png", plot = p2, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_trend.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = factor(size), y = bill, fill = factor(size))) +
+  geom_boxplot() +
+  labs(x = "factor(size)", y = "bill") +
+  theme_minimal()
+ggsave("plot-boxplot.png", plot = p, width = 6, height = 4, dpi = 120)
+ggsave("tips_boxplot.png", plot = p, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_boxplot.R"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("tips.csv")
+p <- ggplot(df, aes(x = factor(size), y = bill, fill = factor(size))) +
+  geom_violin(alpha = 0.7) +
+  labs(
+    title = "Distribucion del importe de la factura por tamano del grupo",
+    x = "Tamano del grupo",
+    y = "Factura (USD)"
+  ) +
+  theme_minimal()
+ggsave("plot-labels.png", plot = p, width = 6.5, height = 4.2, dpi = 120)
+ggsave("tips_violin.png", plot = p, width = 6.5, height = 4.2, dpi = 120)
+' | save -f $"($dst_data)/ch06/plot_violin.R"
+
+'#!/usr/bin/env python3
+import json
+import sys
+import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("tips.csv")
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), dpi=120)
+
+axes[0].hist(df["bill"], bins=20, color="#10b981", edgecolor="#064e3b", alpha=0.85)
+axes[0].set_title("Distribucion de Factura (Python / Matplotlib)")
+axes[0].set_xlabel("Monto de Factura (USD)")
+axes[0].set_ylabel("Frecuencia")
+
+for t, grp in df.groupby("time"):
+    axes[1].scatter(grp["bill"], grp["tip"], label=t, alpha=0.75)
+axes[1].set_title("Propina vs Factura por Horario")
+axes[1].set_xlabel("Factura (USD)")
+axes[1].set_ylabel("Propina (USD)")
+axes[1].legend()
+
+plt.tight_layout()
+plt.savefig("tips_python_grid.png")
+plt.savefig("tips_python.png")
+
+summary = df.groupby("day")[["bill", "tip"]].mean().round(2).reset_index().to_dict(orient="records")
+print(json.dumps(summary))
+' | save -f $"($dst_data)/ch06/plot_tips_py.py"
+
+if not ($"($dst_data)/ch06/Fatalities.csv" | path exists) {
+    cp $"($dst_data)/ch06/tips.csv" $"($dst_data)/ch06/Fatalities.csv"
+}
+
+glob $"($dst_data)/ch06/*.{R,py}" | each { |f| chmod +x $f }
+
+# -----------------------------------------------------------------------------
+# ch07: Section 7 (Procesamiento en Serie y Tuberías Paralelas)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch08/." $"($dst_data)/ch07/"
+
+# Populate input.csv in ch07 with valid name,email,quantity rows
+"name,email,quantity
+Alicia Rivera,alicia.rivera@example.com,12
+Bruno Soto,bruno.soto@example.com,25
+Carla Mendez,carla.mendez@example.com,18
+Diego Fuentes,diego.fuentes@example.com,30
+Elena Vargas,elena.vargas@example.com,15
+" | save -f $"($dst_data)/ch07/input.csv"
+
+'#!/usr/bin/env bash
+parallel --colsep "," "echo \"$1\" | bc -l"
+' | save -f $"($dst_data)/ch07/pbc"
+chmod +x $"($dst_data)/ch07/pbc" $"($dst_data)/ch07/slow.sh"
+
+# -----------------------------------------------------------------------------
+# ch08: Section 8 (Modelación Políglota de Datos)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch09/." $"($dst_data)/ch08/"
+rm -f $"($dst_data)/ch08/2026-10_hola.txt" $"($dst_data)/ch08/output.nu" $"($dst_data)/ch08/output.txt" $"($dst_data)/ch08/edition.json" $"($dst_data)/ch08/edition2.json" $"($dst_data)/ch08/edition2.csv" $"($dst_data)/ch08/edition2.yaml"
+cp $"($dst_data)/ch08/wine.csv" $"($dst_data)/ch08/wine-both.csv"
+open $"($dst_data)/ch08/wine-white-clean.csv" | save -f $"($dst_data)/ch08/wine-white.csv"
+open $"($dst_data)/ch08/wine.csv" | where type == "red" | reject type | save -f $"($dst_data)/ch08/wine-red.csv"
+
+# Create standalone R and Python modeling scripts in ch08 (no inline scripts!)
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("wine.csv")
+p1 <- ggplot(df, aes(x = quality, fill = type)) +
+  geom_density(adjust = 3, alpha = 0.5) +
+  labs(title = "Distribucion de Calidad por Tipo de Vino", x = "Calidad", y = "Densidad") +
+  theme_minimal()
+ggsave("wine-quality.png", plot = p1, width = 6, height = 4, dpi = 120)
+ggsave("wine_eda.png", plot = p1, width = 6, height = 4, dpi = 120)
+
+p2 <- ggplot(df, aes(x = alcohol, y = quality, color = type)) +
+  geom_smooth(method = "loess", formula = y ~ x) +
+  labs(title = "Relacion entre Alcohol y Calidad por Tipo de Vino", x = "Alcohol (%)", y = "Calidad") +
+  theme_minimal()
+ggsave("wine-alcohol-vs-quality.png", plot = p2, width = 6, height = 4, dpi = 120)
+' | save -f $"($dst_data)/ch08/plot_wine_eda.R"
+
+'#!/usr/bin/env Rscript
+df <- read.csv("wine.csv", stringsAsFactors = FALSE)
+num_cols <- setdiff(names(df), c("type", "quality"))
+pca <- prcomp(df[, num_cols], center = TRUE, scale. = TRUE)
+var_exp <- (pca$sdev^2) / sum(pca$sdev^2) * 100
+
+# Save loadings summary to stdout as CSV
+out <- data.frame(
+  component = paste0("PC", 1:5),
+  std_dev = round(pca$sdev[1:5], 4),
+  pct_variance = round(var_exp[1:5], 2),
+  cum_variance = round(cumsum(var_exp)[1:5], 2)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+
+# Also save 2D coordinates to wine_pca_r.csv
+coords <- data.frame(
+  pc1 = round(pca$x[, 1], 4),
+  pc2 = round(pca$x[, 2], 4),
+  type = df$type,
+  quality = df$quality
+)
+write.csv(coords, "wine_pca_r.csv", row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/pca_wine.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+import sys
+
+df = pd.read_csv("wine.csv")
+features = [c for c in df.columns if c not in ("type", "quality")]
+X = StandardScaler().fit_transform(df[features])
+
+pca = PCA(n_components=5, random_state=42)
+coords = pca.fit_transform(X)
+
+# Save 2D projection to wine_pca_py.csv
+proj = pd.DataFrame({
+    "pc1": coords[:, 0].round(4),
+    "pc2": coords[:, 1].round(4),
+    "type": df["type"],
+    "quality": df["quality"]
+})
+proj.to_csv("wine_pca_py.csv", index=False)
+
+# Output variance summary as CSV to stdout
+summary = pd.DataFrame({
+    "component": [f"PC{i+1}" for i in range(5)],
+    "explained_variance": pca.explained_variance_.round(4),
+    "pct_variance": (pca.explained_variance_ratio_ * 100).round(2),
+    "cum_variance": (pca.explained_variance_ratio_.cumsum() * 100).round(2)
+})
+summary.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/pca_wine.py"
+
+'#!/usr/bin/env Rscript
+set.seed(42)
+df <- read.csv("wine.csv", stringsAsFactors = FALSE)
+num_cols <- setdiff(names(df), c("type", "quality"))
+X <- scale(df[, num_cols])
+
+km <- kmeans(X, centers = 2, nstart = 20)
+df$cluster <- paste0("cluster_", km$cluster)
+
+# Save cluster assignments
+write.csv(df[, c("type", "quality", "alcohol", "volatile_acidity", "cluster")], "wine_kmeans_r.csv", row.names = FALSE, quote = FALSE)
+
+# Output cluster summary table to stdout
+tab <- as.data.frame.matrix(table(df$cluster, df$type))
+out <- data.frame(
+  cluster = rownames(tab),
+  size = as.integer(km$size),
+  withinss = round(km$withinss, 2),
+  red_count = tab$red,
+  white_count = tab$white,
+  dominant_type = ifelse(tab$red > tab$white, "red", "white")
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/cluster_wine.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import sys
+
+df = pd.read_csv("wine.csv")
+features = [c for c in df.columns if c not in ("type", "quality")]
+X = StandardScaler().fit_transform(df[features])
+
+rows = []
+for k in [2, 3, 4, 5]:
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    labels = km.fit_predict(X)
+    sil = silhouette_score(X, labels, sample_size=1500, random_state=42)
+    if k == 2:
+        df_out = df[["type", "quality", "alcohol", "volatile_acidity"]].copy()
+        df_out["cluster"] = [f"cluster_{l+1}" for l in labels]
+        df_out.to_csv("wine_kmeans_py.csv", index=False)
+    rows.append({
+        "k_clusters": k,
+        "inertia": round(float(km.inertia_), 2),
+        "silhouette": round(float(sil), 4),
+        "iterations": int(km.n_iter_)
+    })
+
+pd.DataFrame(rows).to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/cluster_wine.py"
+
+'#!/usr/bin/env Rscript
+set.seed(42)
+df <- read.csv("wine-white-clean.csv", stringsAsFactors = FALSE)
+n <- nrow(df)
+idx <- sample(seq_len(n), size = floor(0.8 * n))
+train <- df[idx, ]
+test  <- df[-idx, ]
+
+fit <- lm(quality ~ ., data = train)
+preds <- predict(fit, newdata = test)
+
+# Save predictions vs observed
+res_df <- data.frame(
+  observed = test$quality,
+  predicted = round(preds, 4),
+  abs_error = round(abs(test$quality - preds), 4)
+)
+write.csv(res_df, "wine_lm_predictions_r.csv", row.names = FALSE, quote = FALSE)
+
+# Output model coefficients to stdout as CSV
+coefs <- summary(fit)$coefficients
+out <- data.frame(
+  term = rownames(coefs),
+  estimate = round(coefs[, "Estimate"], 5),
+  std_error = round(coefs[, "Std. Error"], 5),
+  t_value = round(coefs[, "t value"], 3),
+  t_stat = round(coefs[, "t value"], 3),
+  p_value = signif(coefs[, "Pr(>|t|)"], 4)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/regress_wine.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import Ridge
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import sys
+
+df = pd.read_csv("wine-white-clean.csv")
+X = df.drop(columns=["quality"])
+y = df["quality"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+models = {
+    "Ridge(alpha=1.0)": make_pipeline(StandardScaler(), Ridge(alpha=1.0)),
+    "RandomForest(n=100)": RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+}
+
+rows = []
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+    rows.append({
+        "model": name,
+        "mae": round(float(mean_absolute_error(y_test, preds)), 4),
+        "rmse": round(float(np.sqrt(mean_squared_error(y_test, preds))), 4),
+        "r2": round(float(r2_score(y_test, preds)), 4)
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("wine_reg_metrics_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/regress_wine.py"
+
+'#!/usr/bin/env Rscript
+train <- read.csv("train/features.csv", stringsAsFactors = FALSE)
+test  <- read.csv("test/features.csv", stringsAsFactors = FALSE)
+
+train$target <- ifelse(train$type == "red", 1, 0)
+test$target  <- ifelse(test$type == "red", 1, 0)
+
+predictors <- setdiff(names(train), c("id", "type", "target"))
+formula_str <- paste("target ~", paste(predictors, collapse = " + "))
+
+fit <- glm(as.formula(formula_str), data = train, family = binomial(link = "logit"))
+probs <- predict(fit, newdata = test, type = "response")
+preds <- ifelse(probs >= 0.5, 1, 0)
+
+tp <- sum(preds == 1 & test$target == 1)
+tn <- sum(preds == 0 & test$target == 0)
+fp <- sum(preds == 1 & test$target == 0)
+fn <- sum(preds == 0 & test$target == 1)
+
+acc <- (tp + tn) / nrow(test)
+prec <- tp / (tp + fp)
+rec <- tp / (tp + fn)
+f1 <- 2 * prec * rec / (prec + rec)
+
+out <- data.frame(
+  model = "R_glm_binomial",
+  accuracy = round(acc, 4),
+  precision_red = round(prec, 4),
+  recall_red = round(rec, 4),
+  f1_red = round(f1, 4),
+  tp = tp, tn = tn, fp = fp, fn = fn
+)
+write.csv(out, "wine_clf_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/classify_wine.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import sys
+
+train = pd.read_csv("train/features.csv")
+test  = pd.read_csv("test/features.csv")
+
+features = [c for c in train.columns if c not in ("id", "type")]
+X_train, y_train = train[features], (train["type"] == "red").astype(int)
+X_test,  y_test  = test[features],  (test["type"] == "red").astype(int)
+
+models = {
+    "Python_LogisticRegression": make_pipeline(StandardScaler(), LogisticRegression(max_iter=500, random_state=42)),
+    "Python_RandomForestClassifier": RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+}
+
+rows = []
+for name, clf in models.items():
+    clf.fit(X_train, y_train)
+    preds = clf.predict(X_test)
+    rows.append({
+        "model": name,
+        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+        "precision_red": round(float(precision_score(y_test, preds)), 4),
+        "recall_red": round(float(recall_score(y_test, preds)), 4),
+        "f1_red": round(float(f1_score(y_test, preds)), 4)
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("wine_clf_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/classify_wine.py"
+
+glob $"($dst_data)/ch08/*.{R,py}" | each { |f| chmod +x $f }
+
+print "Successfully built /data/ch02..ch08 structure!"
+ls $dst_data | select name type
