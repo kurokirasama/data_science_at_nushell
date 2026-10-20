@@ -8,30 +8,53 @@
 
 Curso integrado de **Ciencia de Datos en la Línea de Comandos** construido íntegramente sobre **Nushell** como shell interactivo, lenguaje de programación funcional/estructurado y motor de pipelines de datos, utilizando el contenedor Docker propio **`dsin`** (*Data Science in Nushell*).
 
-El curso aborda desde los conceptos fundamentales de bajo nivel en Nushell (strings, listas, registros, tablas, tipado y creación de comandos personalizados) hasta el flujo completo OSEMN (Obtención, Depuración con Nushell nativo y **Polars**, Exploración y visualización en terminal con **`timg`**, Paralelización con **`par-each`**, y Modelación políglota integrando herramientas CLI como **`vw`** / **`tapkee`** / **`skll`** junto con **`Rscript`** y **`python3`** hacia tablas estructuradas de Nushell).
+El curso aborda desde la comparación con shells tradicionales (`bash`, `zsh` y la filosofía POSIX) y los conceptos fundamentales de bajo nivel en Nushell (strings, listas, registros, tablas, rutas de celda, tipado y creación de comandos personalizados) hasta el flujo completo OSEMN:
+
+- **Obtención de Datos:** `http get`, `http post`, `url join`, descompresión, hojas Excel `.xlsx`, bases SQLite (`query db`), Parquet y APIs web (REST, autenticación, geocodificación con Google Maps / OpenStreetMap y streaming SSE).
+- **Depuración y Transformación:** Nushell nativo + plugin `polars` (`nu_plugin_polars`).
+- **Exploración y Visualización en Terminal:** Estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript`, `python3`) junto con visualización gráfica en terminal mediante **`timg`**.
+- **Paralelización:** Ejecución concurrente nativa con **`par-each`** y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
+- **Modelación Políglota:** Reducción de Dimensionalidad (PCA y t-SNE), Clustering (K-Means), Regresión y Clasificación integrando herramientas CLI (**`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) junto con **`Rscript`** y **`python3`** hacia tablas estructuradas de Nushell.
 
 ## Contenidos (`Files/DataScienceNushell.md`)
 
 1. **Capítulo 1:** Instalación de Software (`dsin` Docker + Nushell)
-2. **Capítulo 2:** Introducción a la Terminal, Fundamentos de Nushell (Strings, Listas, Registros, Tablas, Editor `ttt`) y Control de Versiones (`git`)
-3. **Capítulo 3:** Programación en Nushell y Creación de Herramientas de Línea de Comandos (`def`, `export def`, flags, tipos, módulos e integración con R/Python)
-4. **Capítulo 4:** Obtención de Datos (`http get`, descompresión, Excel, SQLite, Parquet y APIs web)
+2. **Capítulo 2:** Introducción a la Terminal, Shells Tradicionales vs. Nushell, Fundamentos de Datos Estructurados (Strings, Listas, Registros, Tablas, Editor `ttt`) y Control de Versiones (`git`)
+3. **Capítulo 3:** Programación en Nushell y Creación de Herramientas de Línea de Comandos (`def`, `export def`, flags, tipos, módulos, API de Google Maps e integración con R/Python)
+4. **Capítulo 4:** Obtención de Datos (`http get`, descompresión, Excel, SQLite y APIs web)
 5. **Capítulo 5:** Depuración y Transformación de Datos (Nushell nativo + plugin `polars`)
-6. **Capítulo 6:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, R/Python y visualización con `timg`)
-7. **Capítulo 7:** Paralelización de Pipelines (`each` y `par-each`)
-8. **Capítulo 8:** Modelación de Datos Políglota (Reducción de Dimensionalidad, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
+6. **Capítulo 6:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
+7. **Capítulo 7:** Procesamiento en Serie y Tuberías Paralelas (`each`, `par-each` y GNU `parallel`)
+8. **Capítulo 8:** Modelación Políglota de Datos (Reducción de Dimensionalidad, Clustering K-Means, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
 
 ## Imagen Docker (`dsin`)
 
-La imagen oficial del curso (`kurokirasama/dsin:latest`) incluye:
-- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`) y **`nu_plugin_polars`** pre-registrado.
-- **`ttt`**: Editor de texto en terminal preconfigurado.
-- **`timg`**: Visor de imágenes y gráficos directamente en la terminal.
-- **Motores de modelación y análisis:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `vw` (Vowpal Wabbit), `tapkee` y `skll`.
+La imagen oficial del curso (`ghcr.io/kurokirasama/dsin:latest`) incluye:
+
+- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) y **`nu_plugin_polars`** pre-registrado.
+- **Directorio `/data` integrado por defecto:** Contiene las carpetas por capítulo (`/data/ch02` a `/data/ch08`) listas para usar sin necesidad de descargas adicionales.
+- **`ttt`**: Editor de texto en terminal preconfigurado en `$env.PATH`.
+- **`timg`**: Visor de imágenes y gráficos directamente en la terminal en `$env.PATH`.
+- **Motores de modelación, paralelización y análisis:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee` y `run_experiment` (SKLL).
 
 ```bash
-docker pull kurokirasama/dsin:latest
-docker run --rm -it -v "$(pwd):/data" kurokirasama/dsin:latest
+docker pull ghcr.io/kurokirasama/dsin:latest
+docker run --rm -it ghcr.io/kurokirasama/dsin:latest
+```
+
+## Actualización de Nushell en la Imagen `dsin`
+
+Cuando el equipo de Nushell publica una nueva versión oficial, el repositorio incluye el script automatizado `update-dsin-nushell.nu` que consulta la última versión en GitHub Releases, actualiza `docker/Dockerfile`, empaqueta la carpeta `/data` actualizada, reconstruye la imagen `dsin` con la versión correspondiente de `nu` y `nu_plugin_polars`, y opcionalmente la publica en el registro de contenedores:
+
+```nu
+# Consultar si existe una nueva versión de Nushell disponible sin reconstruir
+nu update-dsin-nushell.nu --check
+
+# Reconstruir la imagen dsin con la versión más reciente de Nushell
+nu update-dsin-nushell.nu
+
+# Reconstruir fijando una versión específica y publicar en GHCR
+nu update-dsin-nushell.nu --version 0.116.1 --push
 ```
 
 ## Estructura del Repositorio
@@ -39,14 +62,18 @@ docker run --rm -it -v "$(pwd):/data" kurokirasama/dsin:latest
 ```text
 ├── Files/
 │   ├── DataScienceNushell.md   # Libro principal del curso (Pandoc Markdown)
-│   ├── DataScienceNushell.pdf  # Versión compilada en PDF
-│   ├── *.csv                   # Datasets del curso (IES, COVID-19, vgsales)
-│   ├── *.png / *.jpg           # Figuras y diagramas
-│   └── data/                   # Datos por capítulo
+│   ├── DataScienceNushell.pdf  # Versión compilada en PDF (XeLaTeX)
+│   ├── *.png / *.jpg           # Figuras y diagramas del curso
+│   └── data/                   # Datos por capítulo (ch02..ch08) integrados en /data
 ├── docker/
 │   ├── Dockerfile              # Definición de la imagen independiente dsin
+│   ├── UPSTREAM_AUDIT.md       # Auditoría y corrección de issues de dsatcl2e
 │   ├── config.nu               # Configuración personalizada de Nushell para dsin
-│   └── update-dsin-nushell.nu  # Script para actualizar la versión de Nushell en dsin
+│   ├── dsin_tools.nu           # Comandos Nushell para modelación (VW, Tapkee, K-Means)
+│   └── update-dsin-nushell.nu  # Copia del script actualizador en docker/
+├── scripts/
+│   └── build_dsin_book.nu      # Script generador del documento DataScienceNushell.md
 ├── tests/                      # Suite de verificación automatizada en contenedor dsin
+├── update-dsin-nushell.nu      # Script principal para actualizar Nushell en dsin
 └── README.md
 ```
