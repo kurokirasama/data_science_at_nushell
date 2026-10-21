@@ -61,6 +61,18 @@ export def main [
     error make {msg: $"Failed to build dsin image: ($err.msg)"}
   }
 
+  # Refresh syntax highlighting definitions and pandoc theme with new Nushell commands
+  let syntax_script = $"($repo_root)/scripts/generate_nu_syntax.nu"
+  if ($syntax_script | path exists) {
+    print "Refreshing Nushell syntax highlighting definitions from updated dsin container..."
+    try {
+      ^nu $syntax_script --from-docker
+    } catch {
+      print "Falling back to host Nushell command extraction..."
+      ^nu $syntax_script
+    }
+  }
+
   # Run automated test suite to ensure all checks pass before pushing
   let test_script = $"($repo_root)/tests/test_dsin_container.nu"
   if ($test_script | path exists) {
