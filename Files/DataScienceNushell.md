@@ -1354,10 +1354,10 @@ El comando `wrap` convierte una lista en una tabla. Cada valor de la lista se co
 let zones = [UTC CET Europe/Moscow Asia/Yekaterinburg]
 
 # Mostrar el reloj mundial para las zonas horarias seleccionadas
-$zones
-| wrap 'Zone'
-| upsert Time {|row|
-   (date now | date to-timezone $row.Zone | format date '%Y.%m.%d %H:%M')
+$zones |
+  wrap 'Zone' |
+  upsert Time {|row|
+    (date now | date to-timezone $row.Zone | format date '%Y.%m.%d %H:%M')
   }
 ```
 
@@ -1439,9 +1439,9 @@ let first_record = { name: "Sam", rank: 10 }
 Se puede iterar sobre los pares clave-valor de un registro transponiéndolo primero a una tabla:
 
 ```nu
-{ "apples": 543, "bananas": 411, "oranges": 0 }
-| transpose fruit count
-| each {|f| $"We have ($f.count) ($f.fruit)" }
+{ "apples": 543, "bananas": 411, "oranges": 0 } |
+  transpose fruit count |
+  each {|f| $"We have ($f.count) ($f.fruit)" }
 ```
 
 <!--AQUI-->
@@ -1609,10 +1609,10 @@ open edition.json | save -f edition_copia.json
 Los cambios en Nu son cambios funcionales, lo que significa que trabajan en los valores en sí mismos en lugar de intentar causar un cambio permanente. Esto permite hacer muchos tipos diferentes de trabajo en la _pipeline_ hasta que se está listo para escribir el resultado con los cambios elegidos. Se puede escribir el resultado usando el comando `save`:
 
 ```nu
-open edition.json
-| insert next_edition 2025
-| append {edition: 2021 next_edition: 2023}
-| save -f edition2.json
+open edition.json |
+  insert next_edition 2025 |
+  append {edition: 2021 next_edition: 2023} |
+  save -f edition2.json
 
 open edition.json
 open edition2.json
@@ -2393,11 +2393,11 @@ let cats = ["Mr. Humphrey Montgomery", Kitten]
 El siguiente código es una versión equivalente usando `append`:
 
 ```nu
-$dogs
-| append Polly
-|append ($cats | each { |elt| $"($elt) \(cat\)" })
-| append [Porky Bessie]
-| append ...Nemo
+$dogs |
+  append Polly |
+  append ($cats | each { |elt| $"($elt) \(cat\)" }) |
+  append [Porky Bessie] |
+  append ...Nemo
 ```
 
 Considerar que cada llamada a `append` da como resultado la creación de una nueva lista, lo que significa que en este segundo
@@ -2586,11 +2586,11 @@ Muchos, si no la mayoría, de los casos de uso de variables mutables en Nushell 
 Por ejemplo, los contadores de bucles son un patrón común para las variables mutables y están integrados en la mayoría de los comandos de iteración. Por ejemplo, se puede obtener cada elemento y el índice de cada elemento usando `each` con `enumerate`:
 
 ```nu
-ls
-| enumerate
-| each { |elt|
-	$"Item #($elt.index) is size ($elt.item.size)"
-}
+ls |
+  enumerate |
+  each { |elt|
+    $"Item #($elt.index) is size ($elt.item.size)"
+  }
 ```
 
 También se puede usar el comando `reduce` para trabajar de la misma manera que podrías mutar una variable en un bucle. Por ejemplo, si se quisiera encontrar la cadena más grande en una lista de cadenas, se podría hacer:
@@ -3621,14 +3621,14 @@ Primero, veamos cómo obtener las 10 palabras más frecuentes de `alice.txt` en 
 
 ```nu
 cd /data/ch04
-open --raw alice.txt
-| str lowercase
-| parse --regex '(?P<word>[a-z]{2,})'
-| get word
-| uniq -c
-| rename word count
-| sort-by count --reverse
-| first 10
+open --raw alice.txt |
+  str lowercase |
+  parse --regex '(?P<word>[a-z]{2,})' |
+  get word |
+  uniq -c |
+  rename word count |
+  sort-by count --reverse |
+  first 10
 ```
 
 Ahora filtramos las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
@@ -4115,22 +4115,22 @@ Tambien se puede realizar consultas `post` con el comando `http post`:
 Se puede colocar todo esto en una _pipeline_ donde se leen datos, se manipulan y luego se envian de vuelta a la API. En el siguiente ejemplo se descarga una publicacióm, se incrementa el `id`, y se sube de vuelta al _endpoint_. En este ejemplo en particular, el _endpoint_ de prueba devuelve una respuesta arbitraria:
 
 ```nu
-open urls.json | get urls | first | http get $in | upsert id {|item| $item.id + 1}
-| to json | http post https://jsonplaceholder.typicode.com/posts $in
+open urls.json | get urls | first | http get $in | upsert id {|item| $item.id + 1} |
+  to json | http post https://jsonplaceholder.typicode.com/posts $in
 ```
 
 En nushell, también se pueden escribir comandos en varias lineas. El ejemplo anterior queda:
 
 ```nu
-open urls.json
-| get urls
-| first
-| http get $in
-| upsert id {|item|
-   $item.id + 1
-  }
-| to json
-| http post https://jsonplaceholder.typicode.com/posts $in
+open urls.json |
+  get urls |
+  first |
+  http get $in |
+  upsert id {|item|
+    $item.id + 1
+  } |
+  to json |
+  http post https://jsonplaceholder.typicode.com/posts $in
 ```
 
 
@@ -4611,11 +4611,13 @@ $df | polars select game price metascore
 Se observa que se obtiene lo siguiente:
 
 ```
-╭────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ plan           │ SELECT [col("game"), col("price"), col("metascore")]                                                    │
-│                │   DF ["number", "game", "release_date", "price", ...]; PROJECT */10 COLUMNS                             │
-│ optimized_plan │ DF ["number", "game", "release_date", "price", ...]; PROJECT["game", "price", "metascore"] 3/10 COLUMNS │
-╰────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭────────────────┬───────────────────────────────────────────────────────╮
+│ plan           │ SELECT [col("game"), col("price"), col("metascore")]  │
+│                │   DF ["number", "game", "release_date", "price",      │
+│                │   ...]; PROJECT */10 COLUMNS                          │
+│ optimized_plan │ DF ["number", "game", "release_date", "price", ...];  │
+│                │   PROJECT["game", "price", "metascore"] 3/10 COLUMNS  │
+╰────────────────┴───────────────────────────────────────────────────────╯
 ```
 
 Este resultado es el **plan de consulta** de Polars. Es una mirada interna a cómo el motor de Polars procesará la solicitud. Se divide en dos partes:
@@ -4670,24 +4672,24 @@ $df_filtered | polars sort-by price --reverse [true]
 Se pueden agrupar y agregar datos en un `DataFrame` usando los comandos `group-by` y `agg`. Por ejemplo, para agrupar el `DataFrame` de ventas de videojuegos por la columna `developer` y calcular el número total de juegos por cada desarrollador, se usaría el siguiente comando:
 
 ```nu
-$df_filtered
-| polars group-by developer
-| polars agg (polars col game | polars count)
-| polars sort-by game --reverse [true]
-| polars collect
+$df_filtered |
+  polars group-by developer |
+  polars agg (polars col game | polars count) |
+  polars sort-by game --reverse [true] |
+  polars collect
 ```
 
 - Para estadísticas por `developer`:
 
 ```nu
-$df_filtered
- | polars group-by developer
- | polars agg [
-     (polars col price | polars mean | polars as "price_mean"),
-     (polars col game  | polars count | polars as "n_games")
-   ]
- | polars sort-by developer
- | polars collect
+$df_filtered |
+  polars group-by developer |
+  polars agg [
+    (polars col price | polars mean | polars as "price_mean"),
+    (polars col game  | polars count | polars as "n_games")
+  ] |
+  polars sort-by developer |
+  polars collect
 ```
 
 - Para estadísticas por año de `release_date`:
@@ -4697,21 +4699,22 @@ $df_filtered
 $df_filtered | polars select release_date | polars collect
 
 #primero se extrae año, luego se agrupa
-let data_by_year = $df_filtered
-| polars with-column [
-	(polars col release_date
+let data_by_year = ($df_filtered |
+  polars with-column [
+    (polars col release_date
        | polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1" # extrae el año
        | polars str-replace-all --pattern "^\\s+|\\s+$" --replace ""        # trim
        | polars cast i64
        | polars as "year")
-   ]
- | polars group-by year
- | polars agg [
-     (polars col price | polars mean | polars as "price_mean"),
-     (polars col game  | polars count | polars as "n_games")
-   ]
- | polars sort-by year
- | polars collect
+   ] |
+  polars group-by year |
+  polars agg [
+    (polars col price | polars mean | polars as "price_mean"),
+    (polars col game  | polars count | polars as "n_games")
+  ] |
+  polars sort-by year |
+  polars collect
+)
 
 #se visualiza
 $data_by_year
@@ -4765,22 +4768,23 @@ Primero, se preparan los datos para el pivoteo:
 - Se calcula promedio de `price` de acuerdo al agrupamiento.
 
 ```nu
-let df_aggregated = $df_filtered
-	| polars with-column [
-		(polars col release_date
-      	| polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1"
-      	| polars str-replace-all --pattern "^\\s+|\\s+$" --replace ""
-      	| polars cast i64
-      	| polars as "year"
-    	)
-  	]
-	| polars select [
-     	(polars col developer)
-     	(polars col price)
-     	(polars col year)
-	]
-	| polars group-by [developer year]
-	| polars agg [(polars col price | polars mean | polars as price_mean)]
+let df_aggregated = ($df_filtered |
+  polars with-column [
+    (polars col release_date
+      | polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1"
+      | polars str-replace-all --pattern "^\\s+|\\s+$" --replace ""
+      | polars cast i64
+      | polars as "year"
+    )
+  ] |
+  polars select [
+    (polars col developer)
+    (polars col price)
+    (polars col year)
+  ] |
+  polars group-by [developer year] |
+  polars agg [(polars col price | polars mean | polars as price_mean)]
+)
 
 $df_aggregated | polars collect
 $df_aggregated | polars sort-by year | polars collect
