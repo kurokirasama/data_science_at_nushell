@@ -58,38 +58,41 @@ RUN mkdir -p /tmp/nu-install && \
     chmod +x /usr/local/bin/nu /usr/local/bin/nu_plugin_* && \
     rm -rf /tmp/nu-install && \
     grep -qxF '/usr/local/bin/nu' /etc/shells || echo '/usr/local/bin/nu' >> /etc/shells && \
-    chsh -s /usr/local/bin/nu dst
+    usermod -l dsin -d /home/dsin -m dst && \
+    groupmod -n dsin dst && \
+    chsh -s /usr/local/bin/nu dsin
 
 # 3. Install ttt editor and user configuration (ttt_config.7z)
 COPY ttt /usr/local/bin/ttt
 COPY ttt_config.7z /tmp/ttt_config.7z
 RUN chmod +x /usr/local/bin/ttt && \
-    mkdir -p /home/dst/.config /home/dst/.config/nushell/nu_modules /home/dst/bin /data && \
-    7z x /tmp/ttt_config.7z -o/home/dst/.config/ -y && \
+    mkdir -p /home/dsin/.config /home/dsin/.config/nushell/nu_modules /home/dsin/bin /data && \
+    7z x /tmp/ttt_config.7z -o/home/dsin/.config/ -y && \
     rm -f /tmp/ttt_config.7z
 
 # 4. Install custom Nushell configuration, course helper module, extra plugins, and pre-populated /data (ch03..ch09)
-COPY config.nu /home/dst/.config/nushell/config.nu
-COPY dsin_tools.nu /home/dst/.config/nushell/nu_modules/dsin_tools.nu
+COPY config.nu /home/dsin/.config/nushell/config.nu
+COPY dsin_tools.nu /home/dsin/.config/nushell/nu_modules/dsin_tools.nu
 COPY data/ /data/
 COPY plugins/* /usr/local/bin/
-RUN echo '$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dst/bin", "/usr/local/bin", "/usr/bin/dsutils", "/home/dst/.local/bin", "/usr/games"] | uniq); $env.PARALLEL_SHELL = "/bin/bash"' > /home/dst/.config/nushell/env.nu && \
+RUN echo '$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dsin/bin", "/usr/local/bin", "/usr/bin/dsutils", "/home/dsin/.local/bin", "/usr/games"] | uniq); $env.PARALLEL_SHELL = "/bin/bash"' > /home/dsin/.config/nushell/env.nu && \
     cp /data/ch08/pbc /usr/local/bin/pbc && \
     chmod +x /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
-    chown -R dst:dst /home/dst /data
+    chown -R dsin:dsin /home/dsin /data
 
-# 5. Register all Nushell plugins for user dst
-USER dst
-WORKDIR /data
+# 5. Register all Nushell plugins for user dsin
+USER dsin
+WORKDIR /home/dsin
 RUN for p in polars formats gstat inc query file plot port_extension; do \
       /usr/local/bin/nu -c "plugin add /usr/local/bin/nu_plugin_${p}"; \
     done
 
 ENV HOSTNAME="dsin"
+ENV HOME="/home/dsin"
 ENV SHELL="/usr/local/bin/nu"
 ENV PARALLEL_SHELL="/bin/bash"
 ENV EDITOR="ttt"
 ENV VISUAL="ttt"
-ENV PATH="/home/dst/bin:/usr/local/bin:/usr/bin/dsutils:/home/dst/.local/bin:/usr/games:/usr/sbin:/usr/bin:/sbin:/bin"
+ENV PATH="/home/dsin/bin:/usr/local/bin:/usr/bin/dsutils:/home/dsin/.local/bin:/usr/games:/usr/sbin:/usr/bin:/sbin:/bin"
 
 ENTRYPOINT ["/usr/local/bin/nu"]

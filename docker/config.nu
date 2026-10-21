@@ -31,8 +31,8 @@ $env.config.hooks.env_change.PWD = [
 # =========================================================
 $env.EDITOR = "ttt"
 $env.VISUAL = "ttt"
-$env.NU_LIB_DIRS = ["/home/dst/.config/nushell/nu_modules"]
-$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dst/bin", "/usr/local/bin"] | uniq)
+$env.NU_LIB_DIRS = ["/home/dsin/.config/nushell/nu_modules"]
+$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dsin/bin", "/usr/local/bin"] | uniq)
 
 # =========================================================
 # PROMPT CONFIGURATION
@@ -70,7 +70,7 @@ $env.PROMPT_INDICATOR = {||
 # =========================================================
 # COURSE MODULES & PLUGINS
 # =========================================================
-use /home/dst/.config/nushell/nu_modules/dsin_tools.nu *
+use /home/dsin/.config/nushell/nu_modules/dsin_tools.nu *
 plugin use polars
 plugin use formats
 plugin use gstat

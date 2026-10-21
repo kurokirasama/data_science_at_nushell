@@ -190,7 +190,7 @@ Si deseas iniciar el contenedor escribiendo únicamente `dsin` en tu terminal an
 alias dsin='docker run --rm -it ghcr.io/kurokirasama/dsin:latest'
 ```
 
-Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/data`, inspeccionamos las carpetas de los capítulos y comprobamos que todas las herramientas y complementos están disponibles:
+Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/home/dsin`, inspeccionamos las carpetas de los capítulos en `/data` y comprobamos que todas las herramientas y complementos están disponibles:
 
 ```nu
 pwd
@@ -3715,12 +3715,12 @@ open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
 
 ### Paso 6: Extender el `$env.PATH`
 
-Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch04` (o `/home/dst/bin`) a `$env.PATH`:
+Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch04` (o `/home/dsin/bin`) a `$env.PATH`:
 
 ```nu
 cd /data/ch04
-cp top-words-5.nu /home/dst/bin/top-words-nu
-chmod +x /home/dst/bin/top-words-nu
+cp top-words-5.nu /home/dsin/bin/top-words-nu
+chmod +x /home/dsin/bin/top-words-nu
 open --raw alice.txt | top-words-nu 5
 open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 ```
