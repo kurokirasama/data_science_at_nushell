@@ -1,0 +1,2 @@
+model,n_test,mae,bias
+Vowpal Wabbit (SGD),1398,0.5583,0.1677

@@ -1,0 +1,5 @@
+linkage,n_clusters,silhouette
+ward,2,0.5471
+ward,3,0.4899
+ward,4,0.4976
+ward,5,0.501

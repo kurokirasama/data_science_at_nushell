@@ -68,13 +68,13 @@ RUN chmod +x /usr/local/bin/ttt && \
     7z x /tmp/ttt_config.7z -o/home/dst/.config/ -y && \
     rm -f /tmp/ttt_config.7z
 
-# 4. Install custom Nushell configuration, course helper module, extra plugins, and pre-populated /data (ch02..ch08)
+# 4. Install custom Nushell configuration, course helper module, extra plugins, and pre-populated /data (ch03..ch09)
 COPY config.nu /home/dst/.config/nushell/config.nu
 COPY dsin_tools.nu /home/dst/.config/nushell/nu_modules/dsin_tools.nu
 COPY data/ /data/
 COPY plugins/* /usr/local/bin/
 RUN echo '$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dst/bin", "/usr/local/bin", "/usr/bin/dsutils", "/home/dst/.local/bin", "/usr/games"] | uniq); $env.PARALLEL_SHELL = "/bin/bash"' > /home/dst/.config/nushell/env.nu && \
-    cp /data/ch07/pbc /usr/local/bin/pbc && \
+    cp /data/ch08/pbc /usr/local/bin/pbc && \
     chmod +x /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
     chown -R dst:dst /home/dst /data
 

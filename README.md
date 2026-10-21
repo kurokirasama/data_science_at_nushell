@@ -18,21 +18,22 @@ El curso aborda desde la comparación con shells tradicionales (`bash`, `zsh` y 
 
 ## Contenidos (`Files/DataScienceNushell.md`)
 
-1. **Capítulo 1:** Instalación de Software (`dsin` Docker + Nushell)
-2. **Capítulo 2:** Introducción a la Terminal, Shells Tradicionales vs. Nushell, Fundamentos de Datos Estructurados (Strings, Listas, Registros, Tablas, Editor `ttt`) y Control de Versiones (`git`)
-3. **Capítulo 3:** Programación en Nushell y Creación de Herramientas de Línea de Comandos (`def`, `export def`, flags, tipos, módulos, API de Google Maps e integración con R/Python)
-4. **Capítulo 4:** Obtención de Datos (`http get`, descompresión, Excel, SQLite y APIs web)
-5. **Capítulo 5:** Depuración y Transformación de Datos (Nushell nativo + plugin `polars`)
-6. **Capítulo 6:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
-7. **Capítulo 7:** Procesamiento en Serie y Tuberías Paralelas (`each`, `par-each` y GNU `parallel`)
-8. **Capítulo 8:** Modelación Políglota de Datos (Reducción de Dimensionalidad, Clustering K-Means, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
+1. **Capítulo 1:** Introducción (La terminal como laboratorio científico, el paradigma Nushell de datos estructurados, sentido pedagógico de la omisión de salidas y entorno reproducible)
+2. **Capítulo 2:** Instalación de Software (`dsin` Docker + Nushell)
+3. **Capítulo 3:** Fundamentos y Estructuras de Datos en Nushell (Introducción a la Terminal, Shells Tradicionales vs. Nushell, Strings, Listas, Registros, Tablas, Editor `ttt` y Git)
+4. **Capítulo 4:** Programación en Nushell y Creación de Herramientas de Línea de Comandos (`def`, `export def`, flags, tipos, módulos, API de Google Maps e integración con R/Python)
+5. **Capítulo 5:** Obtención de Datos (`http get`, descompresión, Excel, SQLite y APIs web)
+6. **Capítulo 6:** Depuración y Transformación de Datos (Nushell nativo + plugin `polars`)
+7. **Capítulo 7:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
+8. **Capítulo 8:** Procesamiento en Serie y Tuberías Paralelas (`each`, `par-each` y GNU `parallel`)
+9. **Capítulo 9:** Modelado Políglota de Datos (Reducción de Dimensionalidad, Clustering K-Means / Jerárquico / DBSCAN / PAM, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
 
 ## Imagen Docker (`dsin`)
 
 La imagen oficial del curso (`ghcr.io/kurokirasama/dsin:latest`) incluye:
 
-- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) y **`nu_plugin_polars`** pre-registrado.
-- **Directorio `/data` integrado por defecto:** Contiene las carpetas por capítulo (`/data/ch02` a `/data/ch08`) listas para usar sin necesidad de descargas adicionales.
+- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) y plugins oficiales (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`) pre-registrados.
+- **Directorio `/data` integrado por defecto:** Contiene las carpetas por capítulo (`/data/ch03` a `/data/ch09`) listas para usar sin necesidad de descargas adicionales.
 - **`ttt`**: Editor de texto en terminal preconfigurado en `$env.PATH`.
 - **`timg`**: Visor de imágenes y gráficos directamente en la terminal en `$env.PATH`.
 - **Motores de modelación, paralelización y análisis:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee` y `run_experiment` (SKLL).
@@ -64,7 +65,7 @@ nu update-dsin-nushell.nu --version 0.116.1 --push
 │   ├── DataScienceNushell.md   # Libro principal del curso (Pandoc Markdown)
 │   ├── DataScienceNushell.pdf  # Versión compilada en PDF (XeLaTeX)
 │   ├── *.png / *.jpg           # Figuras y diagramas del curso
-│   └── data/                   # Datos por capítulo (ch02..ch08) integrados en /data
+│   └── data/                   # Datos por capítulo (ch03..ch09) integrados en /data
 ├── docker/
 │   ├── Dockerfile              # Definición de la imagen independiente dsin
 │   ├── UPSTREAM_AUDIT.md       # Auditoría y corrección de issues de dsatcl2e

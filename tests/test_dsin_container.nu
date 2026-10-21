@@ -27,10 +27,10 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   let nu_ok = ($nu_ver_res.exit_code == 0) and (($nu_ver_res.stdout | str trim) | is-not-empty)
   $results ++= [{ check: "default_shell_is_nushell", passed: $nu_ok, detail: $"Nushell version: ($nu_ver_res.stdout | str trim)" }]
 
-  # 5. Built-in /data folder with ch02..ch08 by default (no volume mount needed)
-  let data_res = (do -i { ^sudo -n docker run --rm $image -c "[ch02 ch03 ch04 ch05 ch06 ch07 ch08] | all {|d| ($'/data/($d)' | path exists)}" } | complete)
+  # 5. Built-in /data folder with ch03..ch09 by default (no volume mount needed)
+  let data_res = (do -i { ^sudo -n docker run --rm $image -c "[ch03 ch04 ch05 ch06 ch07 ch08 ch09] | all {|d| ($'/data/($d)' | path exists)}" } | complete)
   let data_ok = ($data_res.exit_code == 0) and (($data_res.stdout | str trim) == "true")
-  $results ++= [{ check: "builtin_data_ch02_to_ch08", passed: $data_ok, detail: $"Built-in /data/ch02..ch08 present: ($data_res.stdout | str trim)" }]
+  $results ++= [{ check: "builtin_data_ch03_to_ch09", passed: $data_ok, detail: $"Built-in /data/ch03..ch09 present: ($data_res.stdout | str trim)" }]
 
   # 6. Custom config.nu is loaded ($env.config.float_precision == 4)
   let cfg_res = (do -i { ^sudo -n docker run --rm $image --config /home/dst/.config/nushell/config.nu -c "$env.config.float_precision" } | complete)
@@ -48,7 +48,7 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   $results ++= [{ check: "ttt_editor_in_path", passed: $ttt_ok, detail: $"ttt in PATH + settings.json: ($ttt_res.stdout | str trim)" }]
 
   # 9. timg binary in PATH without ^ and renders a plot inside container
-  let timg_res = (do -i { ^sudo -n docker run --rm $image -c "cd /data/ch06; Rscript plot_bar.R; (timg -g 10x5 tips_bar.png | str length) > 10" } | complete)
+  let timg_res = (do -i { ^sudo -n docker run --rm $image -c "cd /data/ch07; Rscript plot_bar.R; (timg -g 10x5 tips_bar.png | str length) > 10" } | complete)
   let timg_ok = ($timg_res.exit_code == 0) and (($timg_res.stdout | str trim) == "true")
   $results ++= [{ check: "timg_viewer_in_path", passed: $timg_ok, detail: $"timg in PATH renders plot: ($timg_res.stdout | str trim)" }]
 

@@ -1,0 +1,1 @@
+https://newsapi.org/v2/everything?q=linux&apiKey=demo_newsapi_key_12345

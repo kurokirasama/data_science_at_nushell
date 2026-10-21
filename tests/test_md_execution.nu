@@ -102,13 +102,15 @@ def main [
             mut chunk_failures = []
             for c in $chunks {
                 let workdir = match $c.ch {
-                    "chapter-2-introduction" => "/data/ch02"
-                    "chapter-3-programming-cli-tools" => "/data/ch03"
-                    "chapter-4-obtaining-data" => "/data/ch04"
-                    "chapter-5-scrubbing-data" => "/data/ch05"
-                    "chapter-6-exploring-data" => "/data/ch06"
-                    "chapter-7-parallel-pipelines" => "/data/ch07"
-                    "chapter-8-modeling-data" => "/data/ch08"
+                    "chapter-1-introduction" => "/data"
+                    "chapter-2-installation" => "/data"
+                    "chapter-3-nushell-fundamentals" | "chapter-2-introduction" => "/data/ch03"
+                    "chapter-4-programming-cli-tools" | "chapter-3-programming-cli-tools" => "/data/ch04"
+                    "chapter-5-data-acquisition" | "chapter-4-obtaining-data" => "/data/ch05"
+                    "chapter-6-data-cleaning" | "chapter-5-scrubbing-data" => "/data/ch06"
+                    "chapter-7-data-exploration" | "chapter-6-exploring-data" | "chapter-7-exploring-data" => "/data/ch07"
+                    "chapter-8-parallel-pipelines" | "chapter-7-parallel-pipelines" => "/data/ch08"
+                    "chapter-9-polyglot-modeling" | "chapter-8-modeling-data" | "chapter-9-modeling-data" => "/data/ch09"
                     _ => "/data"
                 }
                 let body = ($c.items | each { |b| $"# --- line ($b.start) ---\n($b.code)\nprint \"\n__BLOCK_OK_($b.start)__\"" } | str join "\n\n")
