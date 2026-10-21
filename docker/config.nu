@@ -71,6 +71,7 @@ $env.PROMPT_INDICATOR = {||
 # COURSE MODULES & PLUGINS
 # =========================================================
 use /home/dsin/.config/nushell/nu_modules/dsin_tools.nu *
+use /home/dsin/.config/nushell/nu_modules/custom_l.nu *
 plugin use polars
 plugin use formats
 plugin use gstat

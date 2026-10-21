@@ -1,3 +1,0 @@
-model,mae,rmse,r2
-Ridge(alpha=1.0),0.5863,0.7544,0.2652
-RandomForest(n=100),0.4185,0.5897,0.551

@@ -1,4 +1,0 @@
-model,k_neighbors,accuracy,precision,recall,f1_score
-Python_KNeighborsClassifier,3,0.974,0.9759,0.7714,0.8617
-Python_KNeighborsClassifier,5,0.979,1.0,0.8,0.8889
-Python_KNeighborsClassifier,7,0.974,1.0,0.7524,0.8587

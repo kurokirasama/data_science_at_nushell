@@ -1,4 +1,0 @@
-cluster,cluster_type,n_samples,avg_weight,avg_length,avg_height,avg_width
--1,Ruido / Outliers,5,1400.0,54.3,9.9,6.6
-0,Cluster 0,142,360.0,24.3,9.1,4.3
-1,Cluster 1,12,434.8,37.6,6.8,4.5

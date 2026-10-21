@@ -1,2 +1,0 @@
-model,hidden_units,accuracy,precision,recall,f1_score
-R_nnet_neural_network,6,0.983,0.9457,0.8788,0.911

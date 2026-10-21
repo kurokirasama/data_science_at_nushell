@@ -1,2 +1,0 @@
-model,accuracy,precision_red,recall_red,f1_red,tp,tn,fp,fn
-R_glm_binomial,0.9922,1,0.9856,0.9928,343,292,0,5

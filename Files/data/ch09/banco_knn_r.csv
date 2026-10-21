@@ -1,4 +1,0 @@
-model,k_neighbors,accuracy,precision,recall,f1_score
-R_knn,3,0.972,1,0.7172,0.8353
-R_knn,5,0.966,1,0.6566,0.7927
-R_knn,7,0.962,1,0.6162,0.7625

@@ -1,2 +1,0 @@
-model,max_depth,accuracy,precision,recall,f1_score
-Python_DecisionTreeClassifier,4,0.978,0.9029,0.8857,0.8942
