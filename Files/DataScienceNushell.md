@@ -194,10 +194,10 @@ Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/home/
 
 ```nu
 pwd
-ls /data | select name type
-version | select version major minor patch
-which nu ttt timg parallel vw tapkee run_experiment Rscript python3 | select command path type
-plugin list | select name version status
+ls /data
+version
+which nu ttt timg parallel vw tapkee run_experiment Rscript python3
+plugin list
 ```
 
 
