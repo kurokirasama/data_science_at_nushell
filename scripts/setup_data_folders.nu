@@ -1042,6 +1042,216 @@ out_df.to_csv("banco_nb_svm_py.csv", index=False)
 out_df.to_csv(sys.stdout, index=False)
 ' | save -f $"($dst_data)/ch08/nb_svm_banco.py"
 
+# Copy Life_Expectancy_Data.csv if available
+let life_exp_src = "/home/kira/Dropbox/Documentos/Clases/UBB/Mineria_de_Datos/material_unab/mine/guias/scripts/Life_Expectancy_Data.csv"
+if ($life_exp_src | path exists) {
+    cp $life_exp_src $"($dst_data)/ch08/Life_Expectancy_Data.csv"
+}
+
+# Multicollinearity (VIF) & Principal Component Regression (PCR) - Python & R
+'#!/usr/bin/env python3
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.decomposition import PCA
+from sklearn.metrics import r2_score, mean_squared_error
+import sys
+
+df = pd.read_csv("Fish.csv")
+pred_cols = ["Length1", "Length2", "Length3", "Height", "Width"]
+X = df[pred_cols]
+y = df["Weight"]
+
+# VIF calculation: VIF_i = 1 / (1 - R^2_i)
+vif_data = []
+for col in pred_cols:
+    X_other = X.drop(columns=[col])
+    y_target = X[col]
+    reg = LinearRegression().fit(X_other, y_target)
+    r2_val = reg.score(X_other, y_target)
+    vif = 1.0 / (1.0 - r2_val) if r2_val < 0.99999 else 9999.0
+    vif_data.append({"feature": col, "vif": round(float(vif), 2)})
+
+vif_df = pd.DataFrame(vif_data)
+vif_df.to_csv("fish_vif_py.csv", index=False)
+
+# OLS Multiple Regression vs PCR (K=2)
+ols = LinearRegression().fit(X, y)
+ols_preds = ols.predict(X)
+ols_r2 = r2_score(y, ols_preds)
+ols_rmse = np.sqrt(mean_squared_error(y, ols_preds))
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+pcr = LinearRegression().fit(X_pca, y)
+pcr_preds = pcr.predict(X_pca)
+pcr_r2 = r2_score(y, pcr_preds)
+pcr_rmse = np.sqrt(mean_squared_error(y, pcr_preds))
+
+comp_df = pd.DataFrame([
+    {"model": "Python_OLS_Multiple_Regression", "components": 5, "r2": round(float(ols_r2), 4), "rmse": round(float(ols_rmse), 2)},
+    {"model": "Python_PCR_Principal_Components", "components": 2, "r2": round(float(pcr_r2), 4), "rmse": round(float(pcr_rmse), 2)}
+])
+comp_df.to_csv("fish_pcr_py.csv", index=False)
+comp_df.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/vif_pcr_fish.py"
+
+'#!/usr/bin/env Rscript
+df <- read.csv("Fish.csv")
+pred_cols <- c("Length1", "Length2", "Length3", "Height", "Width")
+X <- df[, pred_cols]
+y <- df$Weight
+
+fit_ols <- lm(Weight ~ ., data = df[, c(pred_cols, "Weight")])
+r2_ols <- summary(fit_ols)$r.squared
+rmse_ols <- sqrt(mean(residuals(fit_ols)^2))
+
+pca <- prcomp(X, scale. = TRUE)
+fit_pcr <- lm(y ~ pca$x[, 1:2])
+r2_pcr <- summary(fit_pcr)$r.squared
+rmse_pcr <- sqrt(mean(residuals(fit_pcr)^2))
+
+out_comp <- data.frame(
+  model = c("R_OLS_Multiple_Regression", "R_PCR_Principal_Components"),
+  components = c(5, 2),
+  r2 = round(c(r2_ols, r2_pcr), 4),
+  rmse = round(c(rmse_ols, rmse_pcr), 2)
+)
+write.csv(out_comp, "fish_pcr_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out_comp, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/vif_pcr_fish.R"
+
+# Density-Based Spatial Clustering (DBSCAN) - Python
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import DBSCAN
+import sys
+
+df = pd.read_csv("Fish.csv")
+num_cols = ["Weight", "Length1", "Length2", "Length3", "Height", "Width"]
+X = df[num_cols]
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+db = DBSCAN(eps=0.9, min_samples=4)
+df["cluster"] = db.fit_predict(X_scaled)
+
+grouped = df.groupby("cluster").agg(
+    n_samples=("Species", "count"),
+    avg_weight=("Weight", lambda x: round(float(x.mean()), 1)),
+    avg_length=("Length1", lambda x: round(float(x.mean()), 1)),
+    avg_height=("Height", lambda x: round(float(x.mean()), 1)),
+    avg_width=("Width", lambda x: round(float(x.mean()), 1))
+).reset_index()
+
+grouped["cluster_type"] = grouped["cluster"].apply(lambda c: "Ruido / Outliers" if c == -1 else f"Cluster {c}")
+out = grouped[["cluster", "cluster_type", "n_samples", "avg_weight", "avg_length", "avg_height", "avg_width"]]
+out.to_csv("fish_dbscan_py.csv", index=False)
+out.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/dbscan_fish.py"
+
+# K-Medoids Clustering (PAM) - R
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(cluster))
+df <- read.csv("Fish.csv")
+num_cols <- c("Weight", "Length1", "Length2", "Length3", "Height", "Width")
+X <- scale(df[, num_cols])
+
+fit_pam <- pam(X, k = 3, metric = "euclidean")
+sil <- silhouette(fit_pam)
+avg_sil <- mean(sil[, 3])
+
+out <- data.frame(
+  model = "R_cluster_pam_kmedoids",
+  k_clusters = 3,
+  avg_silhouette = round(avg_sil, 4),
+  cluster_1_size = fit_pam$clusinfo[1, 1],
+  cluster_2_size = fit_pam$clusinfo[2, 1],
+  cluster_3_size = fit_pam$clusinfo[3, 1]
+)
+write.csv(out, "fish_pam_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/pam_fish.R"
+
+# Multi-Layer Perceptron (MLP) Artificial Neural Networks - Python & R
+'#!/usr/bin/env python3
+import pandas as pd
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import sys
+
+df = pd.read_csv("banco.csv")
+features = ["edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca"]
+X = df[features]
+y = df["prestamo"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+rows = []
+for hidden in [(8,), (16, 8)]:
+    clf = MLPClassifier(hidden_layer_sizes=hidden, max_iter=500, random_state=42)
+    clf.fit(X_train_s, y_train)
+    preds = clf.predict(X_test_s)
+    rows.append({
+        "model": f"Python_MLP_{hidden}",
+        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+        "precision": round(float(precision_score(y_test, preds, zero_division=0)), 4),
+        "recall": round(float(recall_score(y_test, preds, zero_division=0)), 4),
+        "f1_score": round(float(f1_score(y_test, preds, zero_division=0)), 4),
+        "iterations": int(clf.n_iter_)
+    })
+
+out = pd.DataFrame(rows)
+out.to_csv("banco_mlp_py.csv", index=False)
+out.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/mlp_banco.py"
+
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(nnet))
+set.seed(42)
+df <- read.csv("banco.csv")
+features <- c("edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca")
+df[features] <- scale(df[features])
+
+n <- nrow(df)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train <- df[train_idx, c(features, "prestamo")]
+test  <- df[-train_idx, c(features, "prestamo")]
+
+fit <- nnet(prestamo ~ ., data = train, size = 6, decay = 0.01, maxit = 400, trace = FALSE)
+preds_prob <- predict(fit, newdata = test, type = "raw")
+preds <- ifelse(preds_prob > 0.5, 1, 0)
+
+tbl <- table(test[["prestamo"]], preds)
+acc <- sum(diag(tbl)) / sum(tbl)
+tp <- if ("1" %in% rownames(tbl) && "1" %in% colnames(tbl)) tbl["1", "1"] else 0
+fp <- if ("0" %in% rownames(tbl) && "1" %in% colnames(tbl)) tbl["0", "1"] else 0
+fn <- if ("1" %in% rownames(tbl) && "0" %in% colnames(tbl)) tbl["1", "0"] else 0
+prec <- if (tp + fp > 0) tp / (tp + fp) else 0
+rec <- if (tp + fn > 0) tp / (tp + fn) else 0
+f1 <- if (prec + rec > 0) 2 * prec * rec / (prec + rec) else 0
+
+out <- data.frame(
+  model = "R_nnet_neural_network",
+  hidden_units = 6,
+  accuracy = round(acc, 4),
+  precision = round(prec, 4),
+  recall = round(rec, 4),
+  f1_score = round(f1, 4)
+)
+write.csv(out, "banco_mlp_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/mlp_banco.R"
+
 glob $"($dst_data)/ch08/*.{R,py}" | each { |f| chmod +x $f }
 
 print "Successfully built /data/ch02..ch08 structure!"

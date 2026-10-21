@@ -516,12 +516,12 @@ def get_ch8_content [] {
 
 El quinto y último paso del modelo OSEMN consiste en **modelar los datos** (*Model Data*). Mientras que el análisis exploratorio y la visualización (Capítulo 6) nos permiten describir estructuras e identificar patrones históricos, el modelado estadístico y el aprendizaje automático (*Machine Learning*) nos proporcionan herramientas formales para **sintetizar dimensiones latentes, descubrir grupos naturales, predecir variables continuas y clasificar nuevas observaciones**.
 
-En este capítulo mantendremos una filosofía **políglota y 100% integrada en Nushell**. Cubriremos las cuatro familias principales de algoritmos del aprendizaje estadístico sobre el conjunto de datos fisicoquímicos de vinos (`wine-red.csv`, `wine-white.csv` y `wine-both.csv`), ubicado en `/data/ch08`:
+En este capítulo mantendremos una filosofía **políglota y 100% integrada en Nushell**. Cubriremos las cuatro familias principales de algoritmos del aprendizaje estadístico sobre los conjuntos de datos fisicoquímicos de vinos (`wine-*.csv`), biométricos de peces (`Fish.csv`) y banca minorista (`banco.csv`), ubicados en `/data/ch08`:
 
-1. **Reducción de Dimensionalidad (No Supervisado)**: Análisis de Componentes Principales (**PCA**) y *t-Distributed Stochastic Neighbor Embedding* (**t-SNE**) utilizando la herramienta de línea de comandos `tapkee` (envuelta por `tapkee-reduce`), un script en R (`pca_wine.R`) y un script en Python (`pca_wine.py`).
-2. **Agrupamiento o *Clustering* (No Supervisado)**: algoritmo **K-Means** sobre las variables fisicoquímicas estandarizadas utilizando el comando `kmeans-cluster` en la terminal, un script en R (`cluster_wine.R`) y un script en Python (`cluster_wine.py` con `scikit-learn`).
-3. **Regresión (Supervisado Continuo)**: predicción del puntaje de calidad del vino (`quality`) mediante descenso de gradiente estocástico con **Vowpal Wabbit** (`vw-regress`), regresión lineal múltiple con `lm()` en R (`regress_wine.R`) y regresión Ridge en Python (`regress_wine.py`).
-4. **Clasificación (Supervisado Categórico)**: predicción del tipo de vino (`red` vs `white`) y evaluación mediante validación cruzada con **SKLL** (`run_experiment` + `skll-metrics`), regresión logística binomial con `glm()` en R (`classify_wine.R`) y bosques aleatorios (*Random Forest*) en Python (`classify_wine.py`).
+1. **Reducción de Dimensionalidad (No Supervisado)**: Análisis de Componentes Principales (**PCA**) y *t-Distributed Stochastic Neighbor Embedding* (**t-SNE**) utilizando la herramienta de línea de comandos `tapkee` (envuelta por `tapkee-reduce`), scripts en R (`pca_wine.R`, `vif_pcr_fish.R`) y en Python (`pca_wine.py`, `vif_pcr_fish.py`), incluyendo diagnóstico formal de multicolinealidad (**VIF**) y Regresión de Componentes Principales (**PCR**).
+2. **Agrupamiento o *Clustering* (No Supervisado)**: algoritmo **K-Means** (`kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`), **Clustering Jerárquico Aglomerativo** (`hclust_fish.R`, `hclust_fish.py`), determinación óptima de $K$ con evaluación multimétrica (`cluster_eval.py`), **Clustering Basado en Densidad con DBSCAN** (`dbscan_fish.py`) y **K-Medoides con PAM** (`pam_fish.R`).
+3. **Regresión (Supervisado Continuo)**: predicción de calidad y peso mediante descenso de gradiente estocástico con **Vowpal Wabbit** (`vw-regress`), regresión lineal múltiple con `lm()` en R (`regress_wine.R`), regresión Ridge en Python (`regress_wine.py`) y regresión PCR.
+4. **Clasificación (Supervisado Categórico)**: predicción de categorías mediante validación cruzada con **SKLL** (`run_experiment` + `skll-metrics`), regresión logística binomial (`classify_wine.R`), bosques aleatorios (*Random Forest*, `classify_wine.py`), **Árboles de Decisión** (`dt_banco.R`, `dt_banco.py`), **$k$-NN** (`knn_banco.R`, `knn_banco.py`), **Naïve Bayes y SVM** (`nb_svm_banco.py`) y **Redes Neuronales Artificiales MLP** (`mlp_banco.py`, `mlp_banco.R`).
 
 En **todos** los métodos seguiremos el mismo estándar riguroso:
 
@@ -622,6 +622,39 @@ cd /data/ch08
 open --raw pca_wine.py
 python3 pca_wine.py | from csv
 python3 pca_wine.py | from csv | save -f wine_pca_py.csv
+```
+
+### Diagnóstico de Multicolinealidad (VIF) y Regresión de Componentes Principales (PCR)
+
+En problemas de regresión con múltiples variables predictoras altamente correlacionadas, la estimación por mínimos cuadrados ordinarios (**MCO**) sufre de **multicolinealidad severa**. Esto infla drásticamente la varianza de los coeficientes estimados y torna inestables las predicciones. Una métrica estadística estándar para diagnosticar este fenómeno es el **Factor de Inflación de la Varianza** (**VIF**, *Variance Inflation Factor*):
+
+$$\text{VIF}_j = \frac{1}{1 - R_j^2}$$
+
+donde $R_j^2$ es el coeficiente de determinación obtenido al regresar la variable predictora $X_j$ sobre todas las demás variables predictoras. Un valor de $\text{VIF} > 10$ (y con mayor razón $\text{VIF} > 100$) señala multicolinealidad crítica.
+
+En `/data/ch08`, el archivo `Fish.csv` contiene variables biométricas de peces (`Length1`, `Length2`, `Length3`, `Height`, `Width`) utilizadas para predecir el peso (`Weight`). Al existir tres medidas longitudinales contiguas, la multicolinealidad es extrema.
+
+El método de **Regresión de Componentes Principales** (**PCR**, *Principal Component Regression*) resuelve este problema proyectando las variables explicativas originales sobre sus componentes principales ortogonales (que tienen covarianza exactamente cero) antes de ajustar la regresión lineal.
+
+Ejecutemos el script `vif_pcr_fish.py` para calcular los valores de VIF y comparar el modelo de regresión múltiple tradicional frente al modelo PCR con 2 componentes principales:
+
+```nu
+cd /data/ch08
+open --raw vif_pcr_fish.py
+python3 vif_pcr_fish.py | from csv
+python3 vif_pcr_fish.py | from csv | save -f fish_pcr_py.csv
+open fish_vif_py.csv
+```
+
+Observemos cómo en Python las variables de longitud presentan valores de VIF superiores a 1.000, mientras que el modelo PCR con solo 2 componentes principales retiene más del 99% de la varianza explicada y logra un $R^2$ casi idéntico al modelo MCO completo sin riesgo de colinealidad.
+
+Ejecutemos también la versión equivalente en R (`vif_pcr_fish.R`):
+
+```nu
+cd /data/ch08
+open --raw vif_pcr_fish.R
+Rscript vif_pcr_fish.R | from csv
+Rscript vif_pcr_fish.R | from csv | save -f fish_pcr_r.csv
 ```
 
 ## Agrupamiento o Clustering
@@ -728,6 +761,33 @@ Podemos ordenar en Nushell la tabla por coeficiente de silueta descendente para 
 ```nu
 cd /data/ch08
 open banco_cluster_eval.csv | sort-by silhouette -r
+```
+
+### Clustering Basado en Densidad con DBSCAN y K-Medoides con PAM
+
+Los algoritmos particionales como K-Means asumen que los conglomerados son esféricos, convexos y de tamaño similar. Cuando los datos presentan geometrías complejas o contienen observaciones atípicas extremas (*outliers*), se requieren paradigmas alternativos de agrupamiento:
+
+1. **DBSCAN (*Density-Based Spatial Clustering of Applications with Noise*)**: Define los clústeres como regiones densas de puntos separadas por regiones de baja densidad. Posee dos parámetros fundamentales: el radio de vecindad $\varepsilon$ (`eps`) y el número mínimo de puntos `min_samples` requeridos para formar un núcleo denso. Aquellos puntos que no pertenecen a ninguna vecindad densa son catalogados automáticamente como **ruido o anomalías** (etiqueta `-1`), sin forzarlos artificialmente dentro de ningún clúster.
+2. **K-Medoides con PAM (*Partitioning Around Medoids*)**: A diferencia de K-Means (que utiliza la media aritmética como centroide, haciéndolo vulnerable a valores atípicos), PAM restringe los centros a **observaciones reales del conjunto de datos** (*medoides*), ofreciendo una partición mucho más robusta ante distribuciones asimétricas y contaminación por valores extremos.
+
+Ejecutemos el script `dbscan_fish.py` sobre las medidas biométricas estandarizadas de `Fish.csv` (`Weight`, `Length1`, `Length2`, `Length3`, `Height`, `Width`):
+
+```nu
+cd /data/ch08
+open --raw dbscan_fish.py
+python3 dbscan_fish.py | from csv
+python3 dbscan_fish.py | from csv | save -f fish_dbscan_py.csv
+```
+
+Observemos cómo DBSCAN aísla automáticamente los ejemplares gigantescos como grupo `-1` (`Ruido / Outliers`) con un peso promedio superior a 1.400 gramos, evitando que distorsionen los clústeres homogéneos de peces medianos y pequeños.
+
+Por su parte, el script `pam_fish.R` ejecuta el algoritmo PAM de la librería `cluster` en R para obtener los medoides representativos y la silueta promedio:
+
+```nu
+cd /data/ch08
+open --raw pam_fish.R
+Rscript pam_fish.R | from csv
+Rscript pam_fish.R | from csv | save -f fish_pam_r.csv
 ```
 
 ## Regresión: Predicción de la Calidad del Vino
@@ -902,14 +962,44 @@ cd /data/ch08
 open banco_nb_svm_py.csv | sort-by f1_score -r
 ```
 
+### Redes Neuronales Artificiales: Perceptrón Multicapa (MLP)
+
+Las **Redes Neuronales Artificiales** (*Artificial Neural Networks*, ANN) representan una de las familias más poderosas del aprendizaje automático contemporáneo. El **Perceptrón Multicapa** (**MLP**, *Multi-Layer Perceptron*) está compuesto por una capa de entrada, una o más capas ocultas con funciones de activación no lineales (como $\text{ReLU}(z) = \max(0, z)$ o la función logística sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$), y una capa de salida:
+
+$$\mathbf{h}^{(1)} = \sigma\left(\mathbf{W}^{(1)} \mathbf{x} + \mathbf{b}^{(1)}\right), \quad \hat{y} = \sigma\left(\mathbf{W}^{(2)} \mathbf{h}^{(1)} + \mathbf{b}^{(2)}\right)$$
+
+El aprendizaje se realiza mediante el algoritmo de **retropropagación del error** (*backpropagation*), calculando las derivadas parciales de la función de pérdida respecto a cada peso mediante la regla de la cadena y actualizándolos con optimizadores de gradiente como **Adam** o SGD, junto con regularización L2 ($\alpha$) para mitigar el sobreajuste.
+
+Un principio fundamental en el entrenamiento de redes neuronales es su **extrema sensibilidad al escalado de los atributos**. Si las variables no están estandarizadas a media cero y varianza unitaria, el gradiente oscila violentamente o se desvanece en las dimensiones de gran escala, impidiendo la convergencia.
+
+Ejecutemos el script `mlp_banco.py` sobre `banco.csv` para entrenar y evaluar dos arquitecturas de MLP (una capa con 8 neuronas y dos capas con $(16, 8)$ neuronas):
+
+```nu
+cd /data/ch08
+open --raw mlp_banco.py
+python3 mlp_banco.py | from csv
+python3 mlp_banco.py | from csv | save -f banco_mlp_py.csv
+```
+
+La red con arquitectura profunda $(16, 8)$ alcanza un $F_1$-score cercano a $0.95$ tras unas 400 iteraciones, superando el margen de los clasificadores lineales tradicionales.
+
+De forma complementaria, el script `mlp_banco.R` entrena una red neuronal con la librería `nnet` en R:
+
+```nu
+cd /data/ch08
+open --raw mlp_banco.R
+Rscript mlp_banco.R | from csv
+Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
+```
+
 ## Resumen del Capítulo y Conclusión del Curso
 
 En este capítulo completamos el ciclo OSEMN aplicando técnicas de modelado no supervisado y supervisado desde la línea de comandos:
 
-1. **Reducción de dimensionalidad (PCA y t-SNE)** con `tapkee-reduce`, `pca_wine.R` y `pca_wine.py`.
-2. **Agrupamiento (K-Means y Jerárquico)** con `kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`, `hclust_fish.R`, `hclust_fish.py` y evaluación óptima con `cluster_eval.py`.
-3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R` y `regress_wine.py`.
-4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`) y clasificación alternativa con Naïve Bayes y SVM (`nb_svm_banco.py`).
+1. **Reducción de dimensionalidad (PCA y t-SNE) y diagnóstico de multicolinealidad** con `tapkee-reduce`, `pca_wine.R`, `pca_wine.py`, `vif_pcr_fish.py` y `vif_pcr_fish.R`.
+2. **Agrupamiento (K-Means, Jerárquico, DBSCAN y PAM)** con `kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`, `hclust_fish.R`, `hclust_fish.py`, `cluster_eval.py`, `dbscan_fish.py` y `pam_fish.R`.
+3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R`, `regress_wine.py` y Regresión de Componentes Principales (PCR).
+4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`), Naïve Bayes y SVM (`nb_svm_banco.py`), y Redes Neuronales Artificiales MLP (`mlp_banco.py` y `mlp_banco.R`).
 
 A lo largo de los ocho capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ingeniería Estadística.'#
 }

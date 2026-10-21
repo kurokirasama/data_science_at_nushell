@@ -5,9 +5,16 @@ def main [
     --chapter: string = "" # Optional chapter anchor filter (e.g., chapter-1-installation)
     --all                  # Execute all chapters across the entire book
     --mutate               # Run mutation check to verify failure detection
+    --md-path: string = "" # Optional path to DataScienceNushell.md
 ] {
-    let md_path = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/DataScienceNushell.md"
-    let raw_md = (open --raw $md_path)
+    let resolved_md = if ($md_path | is-not-empty) {
+        $md_path
+    } else if ("/Files/DataScienceNushell.md" | path exists) {
+        "/Files/DataScienceNushell.md"
+    } else {
+        "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/DataScienceNushell.md"
+    }
+    let raw_md = (open --raw $resolved_md)
     let lines = ($raw_md | lines)
 
     # 1. Audit zero references to forbidden legacy dsatcl commands
@@ -66,8 +73,9 @@ def main [
 
     $blocks | save -f /tmp/test_md_blocks.json
 
-    let res = (^sudo -n docker run --rm
+    let res = (^sudo -n /usr/bin/docker run --rm
         -v "/tmp/test_md_blocks.json:/tmp/test_md_blocks.json"
+        -v "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/data:/data"
         dsin:latest -c '
             let blocks = (open /tmp/test_md_blocks.json)
             mut chunks = []
