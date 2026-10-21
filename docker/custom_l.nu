@@ -9,8 +9,7 @@ export def l [
   --du(-d)
   --sort_by_size(-s)
 ] {
-  let target = ($pattern | default "")
-  let res = if ($target | is-empty) {
+  (if ($pattern | is-empty) {
     if $all and $du {
       ls -a --du
     } else if $all {
@@ -30,19 +29,14 @@ export def l [
     } else {
       ls $pattern
     }
-  }
-
-  if ($res | is-empty) {
-    return $res
-  }
-
-  if ($du and $sort_by_size) {
-    $res | sort-by -i type name | sort-by size
-  } else if $sort_by_size {
-    $res | sort-by size
-  } else {
-    $res | sort-by -i type name
-  }
+  })
+  | if ($du and $sort_by_size) {
+      sort-by -i type name | sort-by size
+    } else if $sort_by_size {
+      sort-by size
+    } else {
+      sort-by -i type name
+    }
 }
 
 # List directory contents formatted as a compact grid
