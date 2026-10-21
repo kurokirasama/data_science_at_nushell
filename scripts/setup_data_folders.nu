@@ -26,9 +26,8 @@ mkdir $"($dst_data)/.cache"
 # ch03: Section 3 (Fundamentos y Estructuras de Datos en Nushell)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch02/." $"($dst_data)/ch03/"
-for f in ["edition.json", "edition2.json", "edition2.csv", "edition2.yaml"] {
-    cp $"($src_data)/ch09/($f)" $"($dst_data)/ch03/($f)"
-}
+cp $"($src_data)/ch09/edition.json" $"($dst_data)/ch03/edition.json"
+rm -f $"($dst_data)/ch03/fac.py.bak" $"($dst_data)/ch03/edition2.json" $"($dst_data)/ch03/edition2.csv" $"($dst_data)/ch03/edition2.yaml"
 cp $"($src_data)/ch07/tips.csv" $"($dst_data)/ch03/tips.csv"
 cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch03/stream.py"
 
@@ -276,13 +275,13 @@ mkdir $"($dst_data)/ch05/.secret"
 ^cp -a $"($src_data)/ch05/." $"($dst_data)/ch06/"
 cp $"($dst_data)/ch04/fizzbuzz.py" $"($dst_data)/ch06/fizzbuzz.py"
 cp $"($src_files)/vgsales.csv" $"($dst_data)/ch06/vgsales.csv"
-cp $"($src_data)/my_data/vgsales_filtered.csv" $"($dst_data)/ch06/vgsales_filtered.csv"
-cp $"($src_data)/my_data/data_by_year.csv" $"($dst_data)/ch06/data_by_year.csv"
+rm -f $"($dst_data)/ch06/bills.csv" $"($dst_data)/ch06/customers.csv" $"($dst_data)/ch06/datetime.csv" $"($dst_data)/ch06/data_by_year.csv" $"($dst_data)/ch06/vgsales_filtered.csv" $"($dst_data)/ch06/fb.cnt" $"($dst_data)/ch06/fb.csv" $"($dst_data)/ch06/fb.png" $"($dst_data)/ch06/fb.seq" $"($dst_data)/ch06/Rplots.pdf" $"($dst_data)/ch06/table.html" $"($dst_data)/ch06/table.json"
 
 # -----------------------------------------------------------------------------
 # ch07: Section 7 (Exploración de Datos y Visualización en la Terminal)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch07/." $"($dst_data)/ch07/"
+rm -f $"($dst_data)/ch07/plot-accident.png" $"($dst_data)/ch07/plot-bar.png" $"($dst_data)/ch07/plot-boxplot.png" $"($dst_data)/ch07/plot-density.png" $"($dst_data)/ch07/plot-histogram.png" $"($dst_data)/ch07/plot-labels.png" $"($dst_data)/ch07/plot-scatter.png" $"($dst_data)/ch07/plot-trend.png" $"($dst_data)/ch07/plot-trend-points.png" $"($dst_data)/ch07/tips.png" $"($dst_data)/ch07/tips2.png" $"($dst_data)/ch07/percent.csv" $"($dst_data)/ch07/.Rhistory" $"($dst_data)/ch07/docker_environment.txt"
 
 # Create standalone R and Python scripts for Section 7 (no inline scripts!)
 '#!/usr/bin/env Rscript
@@ -470,6 +469,8 @@ glob $"($dst_data)/ch07/*.{R,py}" | each { |f| chmod +x $f }
 # ch08: Section 8 (Procesamiento en Serie y Tuberías Paralelas)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch08/." $"($dst_data)/ch08/"
+rm -rf $"($dst_data)/ch08/outdir"
+rm -f $"($dst_data)/ch08/hi-1.txt" $"($dst_data)/ch08/hi-2.txt" $"($dst_data)/ch08/hi-3.txt" $"($dst_data)/ch08/hi-4.txt" $"($dst_data)/ch08/hi-5.txt" $"($dst_data)/ch08/one-big-file.txt" $"($dst_data)/ch08/emails" $"($dst_data)/ch08/emails.txt"
 
 # Populate input.csv in ch08 with valid name,email,quantity rows
 "name,email,quantity
@@ -489,9 +490,10 @@ chmod +x $"($dst_data)/ch08/pbc" $"($dst_data)/ch08/slow.sh"
 # ch09: Section 9 (Modelación Políglota de Datos)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch09/." $"($dst_data)/ch09/"
-rm -f $"($dst_data)/ch09/2026-10_hola.txt" $"($dst_data)/ch09/output.nu" $"($dst_data)/ch09/output.txt" $"($dst_data)/ch09/edition.json" $"($dst_data)/ch09/edition2.json" $"($dst_data)/ch09/edition2.csv" $"($dst_data)/ch09/edition2.yaml"
+rm -rf $"($dst_data)/ch09/output"
+rm -f $"($dst_data)/ch09/2026-10_hola.txt" $"($dst_data)/ch09/output.nu" $"($dst_data)/ch09/output.txt" $"($dst_data)/ch09/edition.json" $"($dst_data)/ch09/edition2.json" $"($dst_data)/ch09/edition2.csv" $"($dst_data)/ch09/edition2.yaml" $"($dst_data)/ch09/predictions" $"($dst_data)/ch09/results.csv" $"($dst_data)/ch09/wine.cache" $"($dst_data)/ch09/wine.model" $"($dst_data)/ch09/wine2.model" $"($dst_data)/ch09/wine-pca.txt" $"($dst_data)/ch09/wine-pca.png" $"($dst_data)/ch09/wine-pca.csv" $"($dst_data)/ch09/wine-alcohol-vs-quality.png" $"($dst_data)/ch09/wine-quality.png" $"($dst_data)/ch09/wine-regression.png" $"($dst_data)/ch09/wine-tsne.png" $"($dst_data)/ch09/wine-scaled.csv" $"($dst_data)/ch09/wine-balanced.csv" $"($dst_data)/ch09/wine-test.vw" $"($dst_data)/ch09/wine-train.vw" $"($dst_data)/ch09/wine-white-clean.csv" $"($dst_data)/ch09/wine-red-clean.csv"
 cp $"($dst_data)/ch09/wine.csv" $"($dst_data)/ch09/wine-both.csv"
-open $"($dst_data)/ch09/wine-white-clean.csv" | save -f $"($dst_data)/ch09/wine-white.csv"
+open $"($dst_data)/ch09/wine.csv" | where type == "white" | reject type | save -f $"($dst_data)/ch09/wine-white.csv"
 open $"($dst_data)/ch09/wine.csv" | where type == "red" | reject type | save -f $"($dst_data)/ch09/wine-red.csv"
 
 # Create standalone R and Python modeling scripts in ch09 (no inline scripts!)
@@ -626,7 +628,7 @@ pd.DataFrame(rows).to_csv(sys.stdout, index=False)
 
 '#!/usr/bin/env Rscript
 set.seed(42)
-df <- read.csv("wine-white-clean.csv", stringsAsFactors = FALSE)
+df <- read.csv("wine-white.csv", stringsAsFactors = FALSE)
 n <- nrow(df)
 idx <- sample(seq_len(n), size = floor(0.8 * n))
 train <- df[idx, ]
@@ -667,7 +669,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import sys
 
-df = pd.read_csv("wine-white-clean.csv")
+df = pd.read_csv("wine-white.csv")
 X = df.drop(columns=["quality"])
 y = df["quality"]
 
