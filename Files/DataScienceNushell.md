@@ -1,5 +1,5 @@
 ---
-title: Ciencia de Datos en la Terminal con Nushell
+title: Ciencia de Datos en la Terminal Linux con Nushell
 author: Luis Gómez
 number_sections: true
 output: pdf_document
