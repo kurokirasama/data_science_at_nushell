@@ -66,18 +66,21 @@ RUN mkdir -p /tmp/nu-install && \
 COPY ttt /usr/local/bin/ttt
 COPY ttt_config.7z /tmp/ttt_config.7z
 RUN chmod +x /usr/local/bin/ttt && \
-    mkdir -p /home/dsin/.config /home/dsin/.config/nushell/nu_modules /home/dsin/bin /data && \
+    mkdir -p /usr/local/share/nushell/vendor/autoload /home/dsin/.config /home/dsin/.config/nushell/nu_modules /home/dsin/bin /data && \
     7z x /tmp/ttt_config.7z -o/home/dsin/.config/ -y && \
     rm -f /tmp/ttt_config.7z
 
-# 4. Install custom Nushell configuration, course helper module, extra plugins, and pre-populated /data (ch03..ch09)
+# 4. Install custom Nushell configuration, course helper module, l command, extra plugins, and pre-populated /data (ch03..ch09)
 COPY config.nu /home/dsin/.config/nushell/config.nu
 COPY dsin_tools.nu /home/dsin/.config/nushell/nu_modules/dsin_tools.nu
+COPY custom_l.nu /usr/local/share/nushell/vendor/autoload/custom_l.nu
+COPY custom_l.nu /home/dsin/.config/nushell/nu_modules/custom_l.nu
+COPY bin_l /usr/local/bin/l
 COPY data/ /data/
 COPY plugins/* /usr/local/bin/
 RUN echo '$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dsin/bin", "/usr/local/bin", "/usr/bin/dsutils", "/home/dsin/.local/bin", "/usr/games"] | uniq); $env.PARALLEL_SHELL = "/bin/bash"' > /home/dsin/.config/nushell/env.nu && \
     cp /data/ch08/pbc /usr/local/bin/pbc && \
-    chmod +x /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
+    chmod +x /usr/local/bin/l /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
     chown -R dsin:dsin /home/dsin /data
 
 # 5. Register all Nushell plugins for user dsin
