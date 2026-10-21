@@ -70,8 +70,8 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   let l_ok = ($l_res.exit_code == 0) and (($l_res.stdout | str trim) == "true")
   $results ++= [{ check: "custom_l_command_works", passed: $l_ok, detail: $"l custom type, LS_COLORS, and pipelines execute flawlessly: ($l_res.stdout | str trim)" }]
 
-  # 12. Generated example output files are clean from /data
-  let clean_res = (do -i { ^sudo -n docker run --rm $image -c "['/data/ch03/fac.py.bak' '/data/ch03/edition2.json' '/data/ch06/bills.csv' '/data/ch06/fb.png' '/data/ch06/table.html' '/data/ch07/plot-bar.png' '/data/ch07/tips.png' '/data/ch07/percent.csv' '/data/ch08/hi-1.txt' '/data/ch08/outdir' '/data/ch08/one-big-file.txt' '/data/ch09/output' '/data/ch09/wine.model' '/data/ch09/results.csv'] | all {|f| not ($f | path exists)}" } | complete)
+  # 12. Generated example output files and directories are clean from /data
+  let clean_res = (do -i { ^sudo -n docker run --rm $image -c "['/data/ch03/fac.py.bak' '/data/ch03/edition2.json' '/data/ch03/chapters.txt' '/data/ch03/dates.txt' '/data/ch04/world' '/data/ch05/logs' '/data/ch06/bills.csv' '/data/ch06/customers.csv' '/data/ch06/datetime.csv' '/data/ch06/fb.png' '/data/ch06/table.html' '/data/ch07/plot-bar.png' '/data/ch07/tips.png' '/data/ch07/percent.csv' '/data/ch08/hi-1.txt' '/data/ch08/outdir' '/data/ch08/one-big-file.txt' '/data/ch08/emails' '/data/ch09/output' '/data/ch09/predictions' '/data/ch09/wine.model' '/data/ch09/results.csv'] | all {|f| not ($f | path exists)}" } | complete)
   let clean_ok = ($clean_res.exit_code == 0) and (($clean_res.stdout | str trim) == "true")
   $results ++= [{ check: "generated_files_removed_from_data", passed: $clean_ok, detail: $"No generated files in /data: ($clean_res.stdout | str trim)" }]
 

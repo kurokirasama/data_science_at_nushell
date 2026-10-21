@@ -54,7 +54,7 @@ docker pull ghcr.io/kurokirasama/dsin:latest
 docker run --rm -it ghcr.io/kurokirasama/dsin:latest
 ```
 
-## Actualización de Nushell en la Imagen `dsin`
+agen
 
 Cuando el equipo de Nushell publica una nueva versión oficial, el repositorio incluye el script automatizado `update-dsin-nushell.nu` que consulta la última versión en GitHub Releases, actualiza `docker/Dockerfile`, empaqueta la carpeta `/data` actualizada, reconstruye la imagen `dsin` con la versión correspondiente de `nu` y `nu_plugin_polars`, y opcionalmente la publica en el registro de contenedores:
 
@@ -67,19 +67,6 @@ nu update-dsin-nushell.nu
 
 # Reconstruir fijando una versión específica y publicar en GHCR
 nu update-dsin-nushell.nu --version 0.116.1 --push
-```
-
-## Compilación del Documento a PDF (Pandoc)
-
-Para compilar el libro del curso generando el PDF con resaltado completo de sintaxis Nushell y ajuste automático de bloques de código al ancho de página:
-
-```bash
-cd Files
-pandoc --pdf-engine=xelatex \
-  --syntax-definition=nu.xml \
-  --syntax-definition=nushell.xml \
-  --syntax-highlighting=pandoc_highlight.theme \
-  DataScienceNushell.md -o DataScienceNushell.pdf
 ```
 
 ## Estructura del Repositorio
