@@ -49,19 +49,24 @@ export def main [
   | str replace -r 'ARG NUSHELL_VERSION="[^"]+"' $"ARG NUSHELL_VERSION=\"($target_ver)\""
   | save -f $dockerfile
 
-  # Stage Files/data into docker/data for Docker build context
-  let staged_data = $"($repo_root)/docker/data"
-  rm -rf $staged_data
-  mkdir $staged_data
-  ^cp -a $"($repo_root)/Files/data/." $staged_data
+  # Ensure clean /data folders (ch03..ch09 without generated artifacts)
+  let setup_script = $"($repo_root)/scripts/setup_data_folders.nu"
+  if ($setup_script | path exists) {
+    ^nu $setup_script
+  }
 
   try {
     sudo -n docker build -t dsin:latest -t $"dsin:($target_ver)" -t ghcr.io/kurokirasama/dsin:latest -t $"ghcr.io/kurokirasama/dsin:($target_ver)" -t kurokirasama/dsin:latest -t $"kurokirasama/dsin:($target_ver)" -f $dockerfile $"($repo_root)/docker"
   } catch { |err|
-    rm -rf $staged_data
     error make {msg: $"Failed to build dsin image: ($err.msg)"}
   }
-  rm -rf $staged_data
+
+  # Run automated test suite to ensure all checks pass before pushing
+  let test_script = $"($repo_root)/tests/test_dsin_container.nu"
+  if ($test_script | path exists) {
+    print "Running dsin container verification suite..."
+    ^nu $test_script
+  }
 
   if $push {
     if (which gh | is-not-empty) {
