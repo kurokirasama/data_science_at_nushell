@@ -366,7 +366,7 @@ También podemos generar archivos estructurados directamente desde tuberías de 
 
 ```nu
 cd /data/ch02
-"# Script generado en /data/ch02\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ingeniería Estadística UBB'\n" | save -f ejemplo_ttt.nu
+"# Script generado en /data/ch02\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
 nu ejemplo_ttt.nu
 nu ejemplo_ttt.nu | save -f saludo_salida.txt
 open saludo_salida.txt
