@@ -68,19 +68,22 @@ RUN chmod +x /usr/local/bin/ttt && \
     7z x /tmp/ttt_config.7z -o/home/dst/.config/ -y && \
     rm -f /tmp/ttt_config.7z
 
-# 4. Install custom Nushell configuration, course helper module, and pre-populated /data (ch02..ch08)
+# 4. Install custom Nushell configuration, course helper module, extra plugins, and pre-populated /data (ch02..ch08)
 COPY config.nu /home/dst/.config/nushell/config.nu
 COPY dsin_tools.nu /home/dst/.config/nushell/nu_modules/dsin_tools.nu
 COPY data/ /data/
+COPY plugins/* /usr/local/bin/
 RUN echo '$env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dst/bin", "/usr/local/bin", "/usr/bin/dsutils", "/home/dst/.local/bin", "/usr/games"] | uniq); $env.PARALLEL_SHELL = "/bin/bash"' > /home/dst/.config/nushell/env.nu && \
     cp /data/ch07/pbc /usr/local/bin/pbc && \
-    chmod +x /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg && \
+    chmod +x /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
     chown -R dst:dst /home/dst /data
 
-# 5. Register nu_plugin_polars for user dst
+# 5. Register all Nushell plugins for user dst
 USER dst
 WORKDIR /data
-RUN /usr/local/bin/nu -c "plugin add /usr/local/bin/nu_plugin_polars"
+RUN for p in polars formats gstat inc query file plot port_extension; do \
+      /usr/local/bin/nu -c "plugin add /usr/local/bin/nu_plugin_${p}"; \
+    done
 
 ENV HOSTNAME="dsin"
 ENV SHELL="/usr/local/bin/nu"

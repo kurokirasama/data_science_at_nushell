@@ -1,0 +1,16 @@
+Name,Body Temperature,Skin Cover,Gives Birth,Aquatic Creature,Aerial Creature,Has Legs,Hibernates,Class Label
+human,warm-blooded,hair,yes,no,no,yes,no,Mammals
+python,cold-blooded,scales,no,no,no,no,yes,Reptiles
+salmon,cold-blooded,scales,no,yes,no,no,no,Fishes
+whale,warm-blooded,hair,yes,yes,no,no,no,Mammals
+frog,cold-blooded,none,no,semi,no,yes,yes,Amphibians
+komodo dragon,cold-blooded,scales,no,no,no,yes,no,Reptiles
+bat,warm-blooded,hair,yes,no,yes,yes,yes,Mammals
+pigeon,warm-blooded,feathers,no,no,yes,yes,no,Birds
+cat,warm-blooded,fur,yes,no,no,yes,no,Mammals
+guppy,cold-blooded,scales,yes,yes,no,no,no,Fishes
+alligator,cold-blooded,scales,no,semi,no,yes,no,Reptiles
+penguin,warm-blooded,feathers,no,semi,no,yes,no,Birds
+porcupine,warm-blooded,quills,yes,no,no,yes,yes,Mammals
+eel,cold-blooded,scales,no,yes,no,no,no,Fishes
+salamander,cold-blooded,none,no,semi,no,yes,yes,Amphibians
