@@ -49,6 +49,65 @@ header-includes:
 \listoftables
 \newpage
 
+
+\newpage
+
+# Introducción {-}
+
+## La Terminal como Laboratorio Científico
+
+En la práctica contemporánea de la ciencia de datos, la escala, la heterogeneidad y el dinamismo de los flujos de información demandan herramientas que trasciendan la rigidez de las interfaces gráficas y la sobrecarga de los entornos integrados monolíticos. Durante más de cinco décadas, la consola de comandos de Unix se ha consolidado como el estándar por excelencia de la reproducibilidad científica, la automatización desatendida y la eficiencia computacional. Su filosofía fundacional postula que el software debe construirse a partir de programas compactos y modulares, capaces de resolver una tarea concreta con maestría técnica y de coordinarse fluidamente mediante canales estandarizados de comunicación.
+
+No obstante, las shells tradicionales (entre las que destacan Bash y Zsh) fueron diseñadas en una época en que la información en tránsito se concebía exclusivamente como secuencias no estructuradas de caracteres. Bajo este esquema clásico, operar sobre estructuras tabulares complejas o registros anidados dentro de una terminal demanda intrincadas combinaciones de expresiones regulares y utilidades de corte léxico (como `sed`, `awk` y `cut`). Este enfoque resulta propenso a fallas sutiles provocadas por delimitadores imprevistos, induce ambigüedades en secuencias de escape y despoja a los datos de sus tipos semánticos originales.
+
+## El Paradigma Nushell: Datos Estructurados en la Consola
+
+Nushell (`nu`) rompe de raíz con esta limitación histórica mediante una arquitectura concebida expresamente para la era moderna del análisis de datos. En lugar de transmitir flujos de bytes planos y opacos, las tuberías de Nushell transportan tablas bidimensionales tipadas, registros jerárquicos de clave y valor, listas ordenadas y valores primitivos gobernados por esquemas estrictos.
+
+Al reconocer de forma nativa tipos de datos como enteros, números en coma flotante, marcas temporales con zona horaria, rutas del sistema de archivos y tamaños de memoria, Nushell permite filtrar, ordenar, remodelar y agregar conjuntos de información mediante una sintaxis declarativa, expresiva y limpia. Más aún, su integración profunda con el motor columnar Polars (programado en Rust y edificado sobre el estándar en memoria Apache Arrow) dota a la consola de una potencia analítica masiva. Con ello, resulta viable ejecutar consultas analíticas multihilo sobre millones de registros en fracciones de segundo sin abandonar la comodidad del flujo interactivo en la terminal.
+
+## Una Guía Práctica e Interactiva: El Sentido Pedagógico de Omitir Salidas
+
+Este texto no fue concebido para una lectura pasiva, contemplativa o meramente teórica. Se trata de una guía práctica interactiva (un manual de experimentación computacional paso a paso) proyectada para ser estudiada con una terminal abierta junto al documento en todo momento.
+
+Por esta razón metodológica consciente, la inmensa mayoría de los bloques de código presentados a lo largo de los capítulos no incluyen la salida textual producida por los comandos. Salvo en circunstancias donde se despliegan gráficos generados en la consola, imágenes renderizadas mediante utilidades gráficas o diagramas esquemáticos indispensables para ilustrar la arquitectura de los datos, las respuestas del sistema se han omitido de manera deliberada.
+
+Esta decisión pedagógica responde a tres principios fundamentales del aprendizaje técnico profundo:
+
+1. **Compromiso Activo frente a la Ilusión de Comprensión:** Observar una tabla de resultados previamente renderizada en la página crea la falsa sensación de dominio conceptual, inhibiendo el esfuerzo cognitivo del estudiante. Al escribir, adaptar y despachar cada instrucción en la consola, el lector experimenta en primera persona la dinámica del flujo de datos, desarrolla memoria procedimental y comprende de forma tangible la mecánica interna de las tuberías.
+2. **Exploración en Tiempo Real y Descubrimiento Guiado:** Las capacidades distintivas de Nushell cobran sentido únicamente en la interacción viva con el intérprete. La exploración multidimensional con `explore`, la paginación interactiva de registros extensos, el autocompletado contextual y la inspección dinámica de esquemas exigen una presencia activa frente al teclado.
+3. **Desarrollo de Resiliencia Diagnóstica:** El quehacer cotidiano en la ciencia de datos requiere familiaridad con las discrepancias estructurales, las advertencias de conversión y los mensajes de error. Omitir las respuestas predecibles entrena al estudiante en el hábito analítico de inspeccionar el estado intermedio de los pipelines mediante herramientas como `describe`, verificando tipos y dimensiones de manera autónoma.
+
+Por lo tanto, convocamos al lector a asumir una postura de indagación constante. No reproduzca los ejemplos como recetas mecánicas: altere los parámetros, formule filtros alternativos, combine operadores inesperados e interrogue rigurosamente la salida que su propia terminal le devuelve.
+
+## El Entorno Unificado dsin: Reproducibilidad sin Fricciones
+
+Para garantizar que cada experiencia práctica se ejecute bajo condiciones idénticas y libres de divergencias de configuración, el libro se sustenta en un entorno unificado y reproducible denominado `dsin` (Data Science in Nushell), distribuido como una imagen pública de Docker en `ghcr.io/kurokirasama/dsin:latest`.
+
+Este contenedor provee una estación de trabajo completa que encapsula:
+
+- La versión más reciente de Nushell configurada con parámetros analíticos avanzados y personalizaciones ergonómicas para la consola.
+- El ecosistema integral de plugins oficiales y comunitarios, con soporte de vanguardia para Polars (`nu_plugin_polars`), formatos estructurados (`nu_plugin_formats`), consultas avanzadas (`nu_plugin_query`), estados de repositorios Git (`nu_plugin_gstat`) y representación gráfica (`nu_plugin_plot`).
+- Entornos consolidados y actualizados de Python y R, provistos de sus bibliotecas analíticas, científicas y estadísticas fundamentales.
+- Herramientas analíticas de alto rendimiento para modelado predictivo en terminal, tales como Vowpal Wabbit (`vw`), Tapkee y el kit de aprendizaje supervisado SKLL.
+- Utilidades modernas de visualización y edición en consola, entre las que sobresalen el editor de texto interactivo `ttt` y el visor gráfico de alta fidelidad `timg`.
+- La totalidad de las bases de datos y conjuntos de datos utilizados en los ejercicios del texto, meticulosamente ordenados por capítulo en el directorio `/data`.
+
+## Organización del Contenido y el Ciclo OSEMN
+
+La progresión pedagógica de la obra se estructura con fidelidad en torno a las etapas del ciclo clásico OSEMN (Obtain, Scrub, Explore, Model, iNterpret), formulado originalmente por Hilary Mason y Chris Wiggins, complementado con las bases instrumentales necesarias para dominar la ingeniería de datos en la terminal:
+
+- **Capítulo 1: Instalación del Entorno.** Despliegue de la infraestructura de virtualización, aprovisionamiento del contenedor `dsin` y configuración de la estación de trabajo.
+- **Capítulo 2: Fundamentos de la Terminal y Nushell.** Navegación en el árbol de directorios, tipos estructurados, rutas de celda, edición interactiva en consola y control de versiones con Git.
+- **Capítulo 3: Creación de Herramientas de Línea de Comandos.** Arquitectura de scripts en Nushell, diseño de funciones robustas con tipado estricto, tuberías personalizadas e integración con APIs externas mediante parámetros de geocodificación.
+- **Capítulo 4: Obtención de Datos (Obtain).** Adquisición programática desde fuentes remotas en la web, consumo de servicios RESTful, extracción de archivos comprimidos, lectura de hojas de cálculo y consulta de bases de datos relacionales SQLite.
+- **Capítulo 5: Depuración y Transformación (Scrub).** Normalización de texto, reestructuración tabular, expresiones regulares aplicadas a campos tipados y procesamiento columnar masivo con Polars.
+- **Capítulo 6: Exploración y Visualización (Explore).** Estimación de descriptores estadísticos univariados y multivariados, gramática de gráficos mediante `ggplot2` y `matplotlib`, y renderizado gráfico directo en la celda de la terminal con `timg`.
+- **Capítulo 7: Procesamiento Paralelo.** Concurrencia nativa en pipelines estructurados con `par-each`, gestión de flujos asíncronos y distribución masiva de tareas sobre procesadores multinúcleo mediante GNU Parallel.
+- **Capítulo 8: Modelado Políglota de Datos (Model & Interpret).** Aplicación rigurosa de algoritmos de reducción dimensional (análisis de componentes principales PCA y t-SNE), métodos de agrupamiento (K-Means, jerárquico aglomerativo, DBSCAN y partición alrededor de medoides PAM), regresión lineal regularizada (OLS, Ridge, regresión por componentes principales PCR) y modelos de clasificación supervisada (árboles de decisión, k-NN, Naïve Bayes, máquinas de vectores de soporte SVM y redes neuronales feedforward MLP).
+
+Que este recorrido práctico sirva como fundamento sólido para transformar la terminal en un entorno creativo, riguroso y de alto rendimiento al servicio de la ciencia de datos.
+
 \newpage
 
 # Instalación de software {#chapter-1-installation}
@@ -1916,7 +1975,7 @@ También podemos generar archivos estructurados directamente desde tuberías de 
 
 ```nu
 cd /data/ch02
-"# Script generado en /data/ch02\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ingeniería Estadística UBB'\n" | save -f ejemplo_ttt.nu
+"# Script generado en /data/ch02\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
 nu ejemplo_ttt.nu
 nu ejemplo_ttt.nu | save -f saludo_salida.txt
 open saludo_salida.txt
@@ -5779,7 +5838,7 @@ En este capítulo completamos el ciclo OSEMN aplicando técnicas de modelado no 
 3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R`, `regress_wine.py` y Regresión de Componentes Principales (PCR).
 4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`), Naïve Bayes y SVM (`nb_svm_banco.py`), y Redes Neuronales Artificiales MLP (`mlp_banco.py` y `mlp_banco.R`).
 
-A lo largo de los ocho capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ingeniería Estadística.
+A lo largo de los ocho capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ciencia de Datos.
 
 \newpage
 
