@@ -152,7 +152,7 @@
             "underline": false
         },
         "Variable": {
-            "text-color": null,
+            "text-color": "#e45649",
             "background-color": null,
             "bold": false,
             "italic": false,
