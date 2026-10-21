@@ -20,7 +20,7 @@ Esta obra aborda desde la comparación con shells tradicionales (`bash`, `zsh` y
 
 Este proyecto es una derivación directa, evolución pedagógica y *spin-off* del influyente libro [**Data Science at the Command Line**](https://datascienceatthecommandline.com/2e/) (O'Reilly Media) de [**Jeroen Janssens**](https://jeroenjanssens.com/).
 
-La obra original de Janssens sentó las bases del uso de la consola Unix para flujos integrales de ciencia de datos, apoyándose en utilidades clásicas de procesamiento de texto plano (`sed`, `awk`, `cut`, `grep`), la suite `csvkit` y scripts en Bash. **Data Science at Nushell** adapta y moderniza esa visión reemplazando los flujos tradicionales de caracteres no estructurados por el paradigma interactivo y estructurado de **Nushell** (`nu`), donde cada tubería transporta tipos de datos semánticos, registros jerárquicos y tablas columnares aceleradas con **Polars** y Apache Arrow.
+La obra original de Janssens sentó las bases del uso de la consola Unix para flujos integrales de ciencia de datos, apoyándose en utilidades clásicas de procesamiento de texto plano (`sed`, `awk`, `cut`, `grep`), la suite `csvkit` y scripts en Bash. **Data Science at Nushell** adapta y moderniza esa visión reemplazando los flujos tradicionales de caracteres no estructurados por el paradigma interactivo y estructurado de **Nushell** (`nu`), donde cada pipeline transporta tipos de datos semánticos, registros jerárquicos y tablas columnares aceleradas con **Polars** y Apache Arrow.
 
 - **Libro original en línea (Segunda Edición):** [datascienceatthecommandline.com/2e](https://datascienceatthecommandline.com/2e/)
 - **Repositorio oficial de la obra original en GitHub:** [jeroenjanssens/data-science-at-the-command-line](https://github.com/jeroenjanssens/data-science-at-the-command-line)
@@ -36,7 +36,7 @@ La obra original de Janssens sentó las bases del uso de la consola Unix para fl
 5. **Capítulo 5:** Obtención de Datos (`http get`, descompresión, Excel, SQLite y APIs web)
 6. **Capítulo 6:** Depuración y Transformación de Datos (Nushell nativo + plugin `polars`)
 7. **Capítulo 7:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
-8. **Capítulo 8:** Procesamiento en Serie y Tuberías Paralelas (`each`, `par-each` y GNU `parallel`)
+8. **Capítulo 8:** Procesamiento en Serie y Pipelines Paralelos (`each`, `par-each` y GNU `parallel`)
 9. **Capítulo 9:** Modelado Políglota de Datos (Reducción de Dimensionalidad, Clustering K-Means / Jerárquico / DBSCAN / PAM, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
 
 ## Imagen Docker (`dsin`)
