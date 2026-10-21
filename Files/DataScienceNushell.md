@@ -50,67 +50,22 @@ header-includes:
 \newpage
 
 
-\newpage
+# Introducción {#chapter-1-introduction}
 
-# Introducción {-}
+En la práctica contemporánea de la ciencia de datos, la escala, la heterogeneidad y el dinamismo de los flujos de información exigen herramientas que trasciendan la rigidez de las interfaces gráficas y la sobrecarga computacional de los entornos de desarrollo monolíticos. Durante más de cinco décadas, la consola de comandos de Unix se ha consolidado como el estándar por excelencia de la reproducibilidad científica, la automatización desatendida y la eficiencia algorítmica. Su filosofía fundacional postula que el software debe articularse a partir de programas compactos y modulares, concebidos para resolver una tarea concreta con maestría técnica y coordinarse fluidamente mediante canales estandarizados de comunicación. No obstante, las shells tradicionales (entre las que destacan Bash y Zsh) fueron diseñadas en una época en que la información en tránsito se concebía de forma exclusiva como secuencias no estructuradas de caracteres. Bajo este esquema clásico, operar sobre estructuras tabulares complejas o registros anidados dentro de una terminal demanda intrincadas combinaciones de expresiones regulares y utilidades de corte léxico (tales como `sed`, `awk` y `cut`), un enfoque propenso a fallas sutiles provocadas por delimitadores imprevistos, que introduce fragilidad ante caracteres de escape y despoja a los datos de sus tipos semánticos originales.
 
-## La Terminal como Laboratorio Científico
+Nushell (`nu`) rompe de raíz con esta limitación histórica mediante una arquitectura concebida expresamente para la era moderna del análisis de datos. En lugar de transmitir flujos de bytes planos y opacos, las tuberías de Nushell transportan estructuras de datos enriquecidas: tablas bidimensionales tipadas, registros jerárquicos de clave y valor, listas ordenadas y valores primitivos gobernados por esquemas estrictos. Al reconocer de forma nativa tipos de datos como enteros, números en coma flotante, marcas temporales con huso horario, rutas del sistema de archivos y tamaños de memoria, Nushell permite filtrar, ordenar, remodelar y agregar conjuntos de información mediante una sintaxis declarativa, expresiva y limpia. Más aún, su integración profunda con el motor columnar Polars (programado en Rust y edificado sobre el estándar en memoria Apache Arrow) dota a la consola de una potencia analítica formidable, haciendo viable ejecutar consultas analíticas multihilo sobre millones de registros en fracciones de segundo sin abandonar la comodidad del flujo interactivo en la terminal.
 
-En la práctica contemporánea de la ciencia de datos, la escala, la heterogeneidad y el dinamismo de los flujos de información demandan herramientas que trasciendan la rigidez de las interfaces gráficas y la sobrecarga de los entornos integrados monolíticos. Durante más de cinco décadas, la consola de comandos de Unix se ha consolidado como el estándar por excelencia de la reproducibilidad científica, la automatización desatendida y la eficiencia computacional. Su filosofía fundacional postula que el software debe construirse a partir de programas compactos y modulares, capaces de resolver una tarea concreta con maestría técnica y de coordinarse fluidamente mediante canales estandarizados de comunicación.
+Esta obra no fue concebida para una lectura pasiva, contemplativa o meramente teórica, sino como un manual de experimentación computacional interactiva proyectado para ser estudiado con una terminal abierta junto al texto en todo momento. Por esta razón metodológica consciente, la inmensa mayoría de los bloques de código presentados a lo largo del volumen omiten la salida textual producida por los comandos. Salvo en circunstancias donde se despliegan gráficos generados en la consola, imágenes renderizadas mediante utilidades complementarias o diagramas esquemáticos indispensables para ilustrar la arquitectura de los datos, las respuestas del sistema se han reservado deliberadamente. Esta decisión didáctica responde a tres principios fundamentales del aprendizaje técnico profundo: primero, el compromiso activo frente a la ilusión de comprensión, pues observar una tabla de resultados previamente impresa en la página inhibe el esfuerzo cognitivo, mientras que escribir, adaptar y despachar cada instrucción en la consola sitúa al estudiante en contacto directo con la reactividad del sistema y le permite comprender tangiblemente la mecánica interna de las tuberías; segundo, la exploración en tiempo real y el descubrimiento guiado, ya que las capacidades distintivas de Nushell (tales como la exploración multidimensional con `explore`, la paginación interactiva de registros extensos, el autocompletado contextual y la inspección dinámica de esquemas) cobran verdadero sentido pedagógico en la interacción viva con el intérprete; y tercero, el desarrollo de resiliencia diagnóstica, dado que el ejercicio profesional en ciencia de datos exige familiaridad con las discrepancias estructurales, las advertencias de coerción y los mensajes de error, de modo que omitir las respuestas predecibles fomenta el hábito metódico de inspeccionar el estado intermedio de los flujos mediante herramientas como `describe`, verificando tipos y dimensiones de manera autónoma. Convocamos por ello al lector a asumir una postura de indagación constante: no reproduzca los ejemplos como recetas mecánicas, altere los parámetros, formule filtros alternativos, combine operadores inesperados e interrogue rigurosamente la respuesta que su propia terminal le devuelve.
 
-No obstante, las shells tradicionales (entre las que destacan Bash y Zsh) fueron diseñadas en una época en que la información en tránsito se concebía exclusivamente como secuencias no estructuradas de caracteres. Bajo este esquema clásico, operar sobre estructuras tabulares complejas o registros anidados dentro de una terminal demanda intrincadas combinaciones de expresiones regulares y utilidades de corte léxico (como `sed`, `awk` y `cut`). Este enfoque resulta propenso a fallas sutiles provocadas por delimitadores imprevistos, induce ambigüedades en secuencias de escape y despoja a los datos de sus tipos semánticos originales.
+Para garantizar que cada experiencia práctica se ejecute bajo condiciones idénticas y libres de divergencias de configuración, el libro se sustenta en un entorno unificado y reproducible denominado `dsin` (Data Science in Nushell), distribuido como una imagen pública de Docker en `ghcr.io/kurokirasama/dsin:latest`. Este contenedor provee una estación analítica completa que encapsula la versión más reciente de Nushell con una configuración optimizada para el análisis de datos, su ecosistema integral de plugins (con soporte para Polars, formatos estructurados, consultas avanzadas, control de versiones y representación gráfica), entornos consolidados de Python y R provistos de sus bibliotecas analíticas fundamentales, herramientas de alto rendimiento para modelado predictivo (como Vowpal Wabbit, Tapkee y SKLL), utilidades modernas de consola (como el editor interactivo `ttt` y el visor gráfico de alta fidelidad `timg`), junto con la totalidad de los conjuntos de datos organizados meticulosamente por capítulos en el directorio `/data`.
 
-## El Paradigma Nushell: Datos Estructurados en la Consola
+La progresión pedagógica de la obra se estructura con fidelidad en torno a las etapas del ciclo clásico OSEMN (Obtain, Scrub, Explore, Model, iNterpret), formulado originalmente por Hilary Mason y Chris Wiggins. En el capítulo 2 se abordará la instalación de software y la preparación del entorno de trabajo reproducible mediante Docker y el contenedor dsin, en el capítulo 3 se estudiarán los fundamentos operativos de la terminal y las estructuras de datos de Nushell, en el capítulo 4 se profundizará en la programación estructurada en Nushell y la creación de herramientas modulares de línea de comandos, en el capítulo 5 se examinarán los métodos de obtención e ingesta de datos desde la web, interfaces de programación de aplicaciones, archivos estructurados y bases de datos relacionales, en el capítulo 6 se desarrollarán las técnicas de depuración higiénica y analítica columnar masiva con Polars, en el capítulo 7 se abordarán la exploración estadística multivariante y la visualización gráfica de alta densidad en la terminal, en el capítulo 8 se implementarán el procesamiento en serie y la orquestación de tuberías paralelas, y finalmente en el capítulo 9 se culminará con el modelado políglota de datos para reducción de dimensionalidad, agrupamiento no supervisado, regresión y clasificación supervisada.
 
-Nushell (`nu`) rompe de raíz con esta limitación histórica mediante una arquitectura concebida expresamente para la era moderna del análisis de datos. En lugar de transmitir flujos de bytes planos y opacos, las tuberías de Nushell transportan tablas bidimensionales tipadas, registros jerárquicos de clave y valor, listas ordenadas y valores primitivos gobernados por esquemas estrictos.
-
-Al reconocer de forma nativa tipos de datos como enteros, números en coma flotante, marcas temporales con zona horaria, rutas del sistema de archivos y tamaños de memoria, Nushell permite filtrar, ordenar, remodelar y agregar conjuntos de información mediante una sintaxis declarativa, expresiva y limpia. Más aún, su integración profunda con el motor columnar Polars (programado en Rust y edificado sobre el estándar en memoria Apache Arrow) dota a la consola de una potencia analítica masiva. Con ello, resulta viable ejecutar consultas analíticas multihilo sobre millones de registros en fracciones de segundo sin abandonar la comodidad del flujo interactivo en la terminal.
-
-## Una Guía Práctica e Interactiva: El Sentido Pedagógico de Omitir Salidas
-
-Este texto no fue concebido para una lectura pasiva, contemplativa o meramente teórica. Se trata de una guía práctica interactiva (un manual de experimentación computacional paso a paso) proyectada para ser estudiada con una terminal abierta junto al documento en todo momento.
-
-Por esta razón metodológica consciente, la inmensa mayoría de los bloques de código presentados a lo largo de los capítulos no incluyen la salida textual producida por los comandos. Salvo en circunstancias donde se despliegan gráficos generados en la consola, imágenes renderizadas mediante utilidades gráficas o diagramas esquemáticos indispensables para ilustrar la arquitectura de los datos, las respuestas del sistema se han omitido de manera deliberada.
-
-Esta decisión pedagógica responde a tres principios fundamentales del aprendizaje técnico profundo:
-
-1. **Compromiso Activo frente a la Ilusión de Comprensión:** Observar una tabla de resultados previamente renderizada en la página crea la falsa sensación de dominio conceptual, inhibiendo el esfuerzo cognitivo del estudiante. Al escribir, adaptar y despachar cada instrucción en la consola, el lector experimenta en primera persona la dinámica del flujo de datos, desarrolla memoria procedimental y comprende de forma tangible la mecánica interna de las tuberías.
-2. **Exploración en Tiempo Real y Descubrimiento Guiado:** Las capacidades distintivas de Nushell cobran sentido únicamente en la interacción viva con el intérprete. La exploración multidimensional con `explore`, la paginación interactiva de registros extensos, el autocompletado contextual y la inspección dinámica de esquemas exigen una presencia activa frente al teclado.
-3. **Desarrollo de Resiliencia Diagnóstica:** El quehacer cotidiano en la ciencia de datos requiere familiaridad con las discrepancias estructurales, las advertencias de conversión y los mensajes de error. Omitir las respuestas predecibles entrena al estudiante en el hábito analítico de inspeccionar el estado intermedio de los pipelines mediante herramientas como `describe`, verificando tipos y dimensiones de manera autónoma.
-
-Por lo tanto, convocamos al lector a asumir una postura de indagación constante. No reproduzca los ejemplos como recetas mecánicas: altere los parámetros, formule filtros alternativos, combine operadores inesperados e interrogue rigurosamente la salida que su propia terminal le devuelve.
-
-## El Entorno Unificado dsin: Reproducibilidad sin Fricciones
-
-Para garantizar que cada experiencia práctica se ejecute bajo condiciones idénticas y libres de divergencias de configuración, el libro se sustenta en un entorno unificado y reproducible denominado `dsin` (Data Science in Nushell), distribuido como una imagen pública de Docker en `ghcr.io/kurokirasama/dsin:latest`.
-
-Este contenedor provee una estación de trabajo completa que encapsula:
-
-- La versión más reciente de Nushell configurada con parámetros analíticos avanzados y personalizaciones ergonómicas para la consola.
-- El ecosistema integral de plugins oficiales y comunitarios, con soporte de vanguardia para Polars (`nu_plugin_polars`), formatos estructurados (`nu_plugin_formats`), consultas avanzadas (`nu_plugin_query`), estados de repositorios Git (`nu_plugin_gstat`) y representación gráfica (`nu_plugin_plot`).
-- Entornos consolidados y actualizados de Python y R, provistos de sus bibliotecas analíticas, científicas y estadísticas fundamentales.
-- Herramientas analíticas de alto rendimiento para modelado predictivo en terminal, tales como Vowpal Wabbit (`vw`), Tapkee y el kit de aprendizaje supervisado SKLL.
-- Utilidades modernas de visualización y edición en consola, entre las que sobresalen el editor de texto interactivo `ttt` y el visor gráfico de alta fidelidad `timg`.
-- La totalidad de las bases de datos y conjuntos de datos utilizados en los ejercicios del texto, meticulosamente ordenados por capítulo en el directorio `/data`.
-
-## Organización del Contenido y el Ciclo OSEMN
-
-La progresión pedagógica de la obra se estructura con fidelidad en torno a las etapas del ciclo clásico OSEMN (Obtain, Scrub, Explore, Model, iNterpret), formulado originalmente por Hilary Mason y Chris Wiggins, complementado con las bases instrumentales necesarias para dominar la ingeniería de datos en la terminal:
-
-- **Capítulo 1: Instalación del Entorno.** Despliegue de la infraestructura de virtualización, aprovisionamiento del contenedor `dsin` y configuración de la estación de trabajo.
-- **Capítulo 2: Fundamentos de la Terminal y Nushell.** Navegación en el árbol de directorios, tipos estructurados, rutas de celda, edición interactiva en consola y control de versiones con Git.
-- **Capítulo 3: Creación de Herramientas de Línea de Comandos.** Arquitectura de scripts en Nushell, diseño de funciones robustas con tipado estricto, tuberías personalizadas e integración con APIs externas mediante parámetros de geocodificación.
-- **Capítulo 4: Obtención de Datos (Obtain).** Adquisición programática desde fuentes remotas en la web, consumo de servicios RESTful, extracción de archivos comprimidos, lectura de hojas de cálculo y consulta de bases de datos relacionales SQLite.
-- **Capítulo 5: Depuración y Transformación (Scrub).** Normalización de texto, reestructuración tabular, expresiones regulares aplicadas a campos tipados y procesamiento columnar masivo con Polars.
-- **Capítulo 6: Exploración y Visualización (Explore).** Estimación de descriptores estadísticos univariados y multivariados, gramática de gráficos mediante `ggplot2` y `matplotlib`, y renderizado gráfico directo en la celda de la terminal con `timg`.
-- **Capítulo 7: Procesamiento Paralelo.** Concurrencia nativa en pipelines estructurados con `par-each`, gestión de flujos asíncronos y distribución masiva de tareas sobre procesadores multinúcleo mediante GNU Parallel.
-- **Capítulo 8: Modelado Políglota de Datos (Model & Interpret).** Aplicación rigurosa de algoritmos de reducción dimensional (análisis de componentes principales PCA y t-SNE), métodos de agrupamiento (K-Means, jerárquico aglomerativo, DBSCAN y partición alrededor de medoides PAM), regresión lineal regularizada (OLS, Ridge, regresión por componentes principales PCR) y modelos de clasificación supervisada (árboles de decisión, k-NN, Naïve Bayes, máquinas de vectores de soporte SVM y redes neuronales feedforward MLP).
-
-Que este recorrido práctico sirva como fundamento sólido para transformar la terminal en un entorno creativo, riguroso y de alto rendimiento al servicio de la ciencia de datos.
 
 \newpage
 
-# Instalación de software {#chapter-1-installation}
+# Instalación de Software {#chapter-2-installation}
 
 En esta sección se entregaran las instrucciones para instalar el software necesario para este curso, tanto en Windows 10+ como en Linux, para distribución basada en Debian como Ubuntu.
 
@@ -184,7 +139,7 @@ wsl
 En este curso trabajaremos sobre una imagen Docker integrada llamada **`dsin`** (*Data Science in Nushell*), publicada en `ghcr.io/kurokirasama/dsin:latest`. A diferencia de los entornos tradicionales basados en *shells* de texto plano, el contenedor `dsin` inicia directamente en **Nushell** como *shell* predeterminado en el directorio de trabajo `/data`, e incluye preconfigurados:
 
 - **Nushell (`nu`)** y su suite completa de complementos registrados: **`nu_plugin_polars`** (motor de DataFrames Arrow/Polars), **`nu_plugin_formats`**, **`nu_plugin_gstat`**, **`nu_plugin_inc`**, **`nu_plugin_query`**, **`nu_plugin_file`**, **`nu_plugin_plot`** (gráficos en la terminal) y **`nu_plugin_port_extension`**.
-- **Directorio `/data` integrado por defecto:** Contiene todas las carpetas de datos del curso organizadas exactamente según el número del capítulo en que se utilizan (`/data/ch02`, `/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07` y `/data/ch08`), sin necesidad de descargas ni configuraciones manuales adicionales.
+- **Directorio `/data` integrado por defecto:** Contiene todas las carpetas de datos del curso organizadas exactamente según el número del capítulo en que se utilizan (`/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07`, `/data/ch08` y `/data/ch09`), sin necesidad de descargas ni configuraciones manuales adicionales.
 - **Editor de texto en terminal `ttt`** en `$env.PATH` con resaltado de sintaxis y atajos preconfigurados.
 - **Visor gráfico de terminal `timg`** en `$env.PATH` para inspeccionar imágenes y gráficos estadísticos directamente en la consola.
 - **Ecosistema políglota:** R (`Rscript`, `tidyverse`, `ggplot2`, `rpart`, `class`, `cluster`), Python 3 (`pandas`, `scikit-learn`, `scipy`, `matplotlib`, `seaborn`, `skll`), **GNU Parallel (`parallel`)**, **Tapkee (`tapkee`)** y **Vowpal Wabbit (`vw`)**.
@@ -244,9 +199,10 @@ plugin list | select name version status
 ```
 
 
+
 \newpage
 
-# Introducción y Fundamentos de Nushell {#chapter-2-introduction}
+# Fundamentos y Estructuras de Datos en Nushell {#chapter-3-nushell-fundamentals}
 
 ## Ciencia de Datos
 
@@ -387,31 +343,31 @@ Antes de profundizar en las estructuras de datos de Nushell, revisemos los conce
 
 En la terminal interactuamos mediante un ciclo continuo conocido como **REPL** (*Read-Eval-Print Loop*: Leer, Evaluar, Imprimir y Repetir):
 
-1. La terminal muestra un indicador o *prompt* (por ejemplo, `/data/ch02>`) indicando el directorio actual y que está lista para recibir instrucciones.
+1. La terminal muestra un indicador o *prompt* (por ejemplo, `/data/ch03>`) indicando el directorio actual y que está lista para recibir instrucciones.
 2. El usuario escribe una línea de comando y presiona **`Enter`**.
 3. El *shell* analiza (*parsea*) y evalúa la instrucción, ejecutando los programas o transformaciones correspondientes.
 4. El resultado se imprime en la pantalla y el *prompt* vuelve a aparecer.
 
 ### Ejecutar un Comando y Guardar Resultados en Archivos
 
-Ingresemos al directorio correspondiente a este capítulo (`/data/ch02`) e inspeccionemos los archivos disponibles:
+Ingresemos al directorio correspondiente a este capítulo (`/data/ch03`) e inspeccionemos los archivos disponibles:
 
 ```nu
-cd /data/ch02
+cd /data/ch03
 ls | select name type size
 ```
 
 Si deseamos inspeccionar las primeras 5 líneas del archivo `movies.txt`, abrimos el archivo en el directorio actual (`open movies.txt`), dividimos sus líneas con `lines` y tomamos las primeras 5 con `first 5`:
 
 ```nu
-cd /data/ch02
+cd /data/ch03
 open movies.txt | lines | first 5
 ```
 
 En ciencia de datos reproducible, además de visualizar el resultado en pantalla, frecuentemente necesitamos persistir el resultado procesado en un nuevo archivo utilizando el comando `save -f`:
 
 ```nu
-cd /data/ch02
+cd /data/ch03
 open movies.txt | lines | first 5 | to text | save -f movies_top5.txt
 open movies_top5.txt
 ```
@@ -587,7 +543,7 @@ En esta sección se revisarán los primeros elementos de nushell.
 Nushell funciona bajo la base de que todo son datos estructurados, y por lo tanto se pueden realizar consultas, similares a SQL, directamente en la salida de cada comando. Comenzamos en el siguiente directorio:
 
 ```nu
-# cd /data/ch02
+# cd /data/ch03
 ls
 ```
 
@@ -1956,11 +1912,11 @@ ttt -v
 
 ### Uso Básico de `ttt`
 
-Para crear o editar un script de Nushell, Python, R o un archivo de configuración dentro de nuestro directorio del capítulo (`/data/ch02`), ejecutamos en una sesión interactiva:
+Para crear o editar un script de Nushell, Python, R o un archivo de configuración dentro de nuestro directorio del capítulo (`/data/ch03`), ejecutamos en una sesión interactiva:
 
 ```nu
 # skip-docker-exec
-cd /data/ch02
+cd /data/ch03
 ttt mi_script.nu
 ```
 
@@ -1974,8 +1930,8 @@ Atajos esenciales preconfigurados en `ttt` dentro de `dsin`:
 También podemos generar archivos estructurados directamente desde tuberías de Nushell en el directorio actual usando `save -f` y luego ejecutarlos o inspeccionarlos:
 
 ```nu
-cd /data/ch02
-"# Script generado en /data/ch02\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
+cd /data/ch03
+"# Script generado en /data/ch03\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
 nu ejemplo_ttt.nu
 nu ejemplo_ttt.nu | save -f saludo_salida.txt
 open saludo_salida.txt
@@ -2254,9 +2210,10 @@ Una lista completa de los comandos o herramientas utilizadas en este curso se en
 <!-- capitulo 3 -->
 
 
+
 \newpage
 
-# Programación y Creación de Herramientas de Línea de Comandos {#chapter-3-programming-cli-tools}
+# Programación y Creación de Herramientas de Línea de Comandos {#chapter-4-programming-cli-tools}
 
 ## Programación en Nushell
 
@@ -3546,10 +3503,10 @@ Para utilizar los servicios oficiales de Google Maps Platform se debe crear una 
 
 De acuerdo con la [documentación oficial de Geocoding API](https://developers.google.com/maps/documentation/geocoding), podemos obtener las coordenadas geográficas asociadas a una dirección o viceversa mediante peticiones HTTP GET.
 
-Nos ubicamos primero en el directorio del capítulo 3 (`/data/ch03`) y definimos la clave de API junto con la dirección de prueba correspondiente al campus Concepción de la Universidad del Bío-Bío:
+Nos ubicamos primero en el directorio del capítulo 4 (`/data/ch04`) y definimos la clave de API junto con la dirección de prueba correspondiente al campus Concepción de la Universidad del Bío-Bío:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 let mapsAPIkey = "the_api_key"
 let address = "Avenida Collao 1202, Concepcion, Chile"
 ```
@@ -3572,7 +3529,7 @@ Toda URL (*Uniform Resource Locator*) se compone de las siguientes partes estruc
 En lugar de concatenar cadenas manualmente (lo que es propenso a errores con espacios y caracteres especiales), el comando **`url join`** de Nushell construye y codifica automáticamente una URL válida a partir de un registro estructurado, y podemos guardar esta estructura en un archivo de configuración:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 let mapsAPIkey = "the_api_key"
 let address = "Avenida Collao 1202, Concepcion, Chile"
 let url_record = {
@@ -3591,7 +3548,7 @@ $url_record | save -f consulta_maps.json
 De igual manera, el comando inverso **`url parse`** descompone cualquier URL en sus componentes estructurales como un registro de Nushell:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open consulta_maps.json | url join | url parse
 open consulta_maps.json | url join | url parse | save -f url_descompuesta.json
 ```
@@ -3618,18 +3575,18 @@ $sample_response.results.geometry.location | save -f coordenadas_ubb.json
 
 ### Empaquetando el Módulo `maps.nu` con `ttt`
 
-Podemos compilar estas dos operaciones (geocodificación directa e inversa) en un módulo reutilizable `maps.nu` dentro de `/data/ch03` editándolo con `ttt`:
+Podemos compilar estas dos operaciones (geocodificación directa e inversa) en un módulo reutilizable `maps.nu` dentro de `/data/ch04` editándolo con `ttt`:
 
 ```nu
 # skip-docker-exec
-cd /data/ch03
+cd /data/ch04
 ttt maps.nu
 ```
 
-El archivo `maps.nu` (ya disponible en `/data/ch03/maps.nu`) contiene los dos comandos exportados `loc-from-address` y `address-from-loc`:
+El archivo `maps.nu` (ya disponible en `/data/ch04/maps.nu`) contiene los dos comandos exportados `loc-from-address` y `address-from-loc`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw maps.nu
 ```
 
@@ -3637,7 +3594,7 @@ Cuando se cuenta con una clave válida de Google Maps, se importa el módulo con
 
 ```nu
 # skip-docker-exec
-cd /data/ch03
+cd /data/ch04
 use maps.nu *
 loc-from-address "Avenida Collao 1202, Concepcion, Chile"
 address-from-loc -36.8221967 -73.0120093
@@ -3647,17 +3604,17 @@ address-from-loc -36.8221967 -73.0120093
 
 A lo largo del curso construiremos numerosas tuberías compactas de una sola línea (*one-liners*). Cuando necesitamos reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
 
-En `/data/ch03` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
+En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 ls | select name type size
 ```
 
 Primero, veamos cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw alice.txt
 | str lowercase
 | parse --regex '(?P<word>[a-z]{2,})'
@@ -3671,7 +3628,7 @@ open --raw alice.txt
 Ahora filtramos las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 let sw = (open --raw stopwords | lines | each { str trim | str lowercase })
 let top10 = (
     open --raw alice.txt
@@ -3699,10 +3656,10 @@ Para convertir este *one-liner* en una herramienta de línea de comandos reutili
 
 ### Paso 1: Crear el Archivo
 
-En `/data/ch03` guardamos nuestra tubería inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
+En `/data/ch04` guardamos nuestra tubería inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-1.nu
 nu top-words-1.nu
 nu top-words-1.nu | save -f salida_paso1.csv
@@ -3713,7 +3670,7 @@ nu top-words-1.nu | save -f salida_paso1.csv
 Copiamos `top-words-1.nu` a `top-words-2.nu` y le otorgamos permisos de ejecución para el usuario propietario mediante `chmod u+x`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 cp top-words-1.nu top-words-2.nu
 chmod u+x top-words-2.nu
 ls -l top-words-1.nu top-words-2.nu | select name mode size
@@ -3726,7 +3683,7 @@ En la columna `mode` (por ejemplo, `-rwxr-xr-x`), el primer carácter `-` indica
 El *shebang* (`#!/usr/bin/env nu`) en la primera línea del archivo le indica al sistema operativo que debe utilizar el ejecutable `nu` ubicado en el entorno para interpretar el script cuando se invoca directamente como `./top-words-3.nu`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-3.nu
 ./top-words-3.nu
 ./top-words-3.nu | save -f salida_paso3.json
@@ -3737,7 +3694,7 @@ open --raw top-words-3.nu
 Si reemplazamos `open --raw alice.txt` por la variable especial de entrada de tubería `$in` en `top-words-4.nu`, nuestra herramienta deja de estar atada a un único archivo y puede analizar cualquier texto que le enviemos mediante `|`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
@@ -3748,7 +3705,7 @@ open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
 En Nushell, al definir `def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]` dentro de un script ejecutable (`top-words-5.nu`), Nushell valida automáticamente los tipos de los argumentos, asigna valores por defecto y genera la página de ayuda `--help` sin necesidad de librerías externas:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-5.nu
 open --raw alice.txt | ./top-words-5.nu 8
 open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
@@ -3756,10 +3713,10 @@ open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
 
 ### Paso 6: Extender el `$env.PATH`
 
-Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch03` (o `/home/dst/bin`) a `$env.PATH`:
+Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch04` (o `/home/dst/bin`) a `$env.PATH`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 cp top-words-5.nu /home/dst/bin/top-words-nu
 chmod +x /home/dst/bin/top-words-nu
 open --raw alice.txt | top-words-nu 5
@@ -3772,10 +3729,10 @@ Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scrip
 
 ### Portando la Herramienta a Python (`top-words.py`) y R (`top-words.R`)
 
-En `/data/ch03` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
+En `/data/ch04` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words.py
 open --raw alice.txt | python3 top-words.py 5 | from csv
 open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.csv
@@ -3784,7 +3741,7 @@ open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.
 Ahora inspeccionemos el script en R (`top-words.R`), ejecutémoslo sobre `alice.txt`, transformemos su salida a una tabla de Nushell y guardémosla en `top_words_r.csv`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words.R
 open --raw alice.txt | Rscript top-words.R 5 | from csv
 open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.csv
@@ -3792,10 +3749,10 @@ open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.cs
 
 ### Procesando Datos en Transmisión (*Streaming*) desde `stdin` (`fizzbuzz.py` y `fizzbuzz.R`)
 
-Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch03` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
+Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch04` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw fizzbuzz.py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py | save -f fizzbuzz_py.csv
@@ -3804,7 +3761,7 @@ open --raw fizzbuzz.py
 Y de manera idéntica con el script `fizzbuzz.R`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw fizzbuzz.R
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r | save -f fizzbuzz_r.csv
@@ -3812,25 +3769,26 @@ open --raw fizzbuzz.R
 
 
 
+
 \newpage
 
-# Obtención de Datos {#chapter-4-obtaining-data}
+# Obtención de Datos {#chapter-5-data-acquisition}
 
 Este capítulo aborda el primer paso del modelo OSEMN: la **obtención de datos** (*Obtain*). Los datos pueden provenir de archivos locales, servidores web HTTP/HTTPS, archivos comprimidos (`.tar.gz`, `.zip`), hojas de cálculo de Microsoft Excel (`.xlsx`), bases de datos relacionales SQLite (`.db`) o APIs web REST y de transmisión continua (*streaming*).
 
-Comenzamos ingresando al directorio `/data/ch04` (que corresponde al Capítulo 4 y ya viene incluido por defecto en el contenedor `dsin`) e inspeccionando sus archivos:
+Comenzamos ingresando al directorio `/data/ch05` (que corresponde al Capítulo 5 y ya viene incluido por defecto en el contenedor `dsin`) e inspeccionando sus archivos:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 ls | select name type size | sort-by name
 ```
 
 ## Copiando Archivos Locales en el Contenedor Docker
 
-Aunque la imagen `dsin` ya incluye todos los conjuntos de datos del curso en `/data/ch02` a `/data/ch08`, en proyectos propios es frecuente necesitar transferir archivos adicionales entre el computador anfitrión y el contenedor Docker:
+Aunque la imagen `dsin` ya incluye todos los conjuntos de datos del curso en `/data/ch03` a `/data/ch09`, en proyectos propios es frecuente necesitar transferir archivos adicionales entre el computador anfitrión y el contenedor Docker:
 
 - **Montando una carpeta local al iniciar el contenedor:** Ejecutando `docker run --rm -it -v "$(pwd):/data/mis_datos" ghcr.io/kurokirasama/dsin:latest`.
-- **Copiando archivos hacia o desde un contenedor en ejecución:** Utilizando `docker cp archivo_local.csv <container_id>:/data/ch04/` desde el sistema anfitrión.
+- **Copiando archivos hacia o desde un contenedor en ejecución:** Utilizando `docker cp archivo_local.csv <container_id>:/data/ch05/` desde el sistema anfitrión.
 
 ## Descargando desde Internet con `http get`
 
@@ -3838,30 +3796,30 @@ Nushell incorpora su propio cliente HTTP nativo (`http get`, `http post`, `http 
 
 ### Descargando Archivos JSON y Páginas Web
 
-En `/data/ch04` contamos con el archivo `urls.json` y muestras de publicaciones JSON. Cuando consultamos un *endpoint* REST o abrimos `posts_sample.json`, podemos explorar la tabla devuelta y guardarla inmediatamente en disco con `save -f`:
+En `/data/ch05` contamos con el archivo `urls.json` y muestras de publicaciones JSON. Cuando consultamos un *endpoint* REST o abrimos `posts_sample.json`, podemos explorar la tabla devuelta y guardarla inmediatamente en disco con `save -f`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let response = (open posts_sample.json)
 $response | first 3 | select userId id title
 $response | save -f posts.json
 open posts.json | first 3 | select id title
 ```
 
-Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/data/ch04`), podemos inspeccionar sus primeras líneas con `open --raw` y guardar un extracto procesado:
+Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/data/ch05`), podemos inspeccionar sus primeras líneas con `open --raw` y guardar un extracto procesado:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open --raw MolinosFriesland.html | lines | first 10
 open --raw MolinosFriesland.html | lines | first 10 | to text | save -f molinos_encabezado.txt
 ```
 
 ### Descargando desde Múltiples URLs y Consultas `http post`
 
-En `/data/ch04/urls.json` tenemos una lista de *endpoints* bajo la clave `urls`:
+En `/data/ch05/urls.json` tenemos una lista de *endpoints* bajo la clave `urls`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open urls.json
 open urls.json | get urls
 open urls.json | get urls | to text | save -f lista_urls.txt
@@ -3871,7 +3829,7 @@ Cuando trabajamos con conexión a Internet, podemos recorrer todas las URLs con 
 
 ```nu
 # skip-docker-exec
-cd /data/ch04
+cd /data/ch05
 open urls.json | get urls | each { |u| http get $u } | save -f respuestas_api.json
 
 {
@@ -3896,10 +3854,10 @@ http head https://www.wikipedia.org | first 8
 
 Cuando un conjunto de datos es muy grande o agrupa decenas de archivos pequeños, suele distribuirse comprimido en formatos como `.tar.gz`, `.zip` o `.7z`.
 
-En `/data/ch04` disponemos del archivo comprimido `logs.tar.gz`. Antes de extraerlo a ciegas, inspeccionamos su tabla de contenidos con `tar -tzf`:
+En `/data/ch05` disponemos del archivo comprimido `logs.tar.gz`. Antes de extraerlo a ciegas, inspeccionamos su tabla de contenidos con `tar -tzf`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 tar -tzf logs.tar.gz | lines | first 10
 tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
 ```
@@ -3907,7 +3865,7 @@ tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
 Como los archivos dentro de `logs.tar.gz` no están contenidos en una subcarpeta única, creamos primero el directorio `logs_extraidos` con `mkdir` y descomprimimos allí usando la opción `-C`, consolidando luego el conteo de líneas de cada archivo en una tabla que también guardamos en `resumen_logs.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 rm -rf logs_extraidos
 mkdir logs_extraidos
 tar -xzf logs.tar.gz -C logs_extraidos
@@ -3928,12 +3886,12 @@ $resumen_logs | save -f resumen_logs.csv
 
 ## Conversión de Hojas de Cálculo de Microsoft Excel y Archivos CSV
 
-El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch04` tenemos tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
+El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch05` tenemos tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
 
 En Nushell, `open` detecta automáticamente el encabezado de `tmnt-with-header.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open tmnt-with-header.csv
 open tmnt-with-header.csv | save -f tmnt_con_encabezado.json
 ```
@@ -3941,22 +3899,22 @@ open tmnt-with-header.csv | save -f tmnt_con_encabezado.json
 Si un archivo CSV **no posee fila de encabezado** (como `tmnt-missing-newline.csv`), utilizamos `open --raw` combinado con `from csv --noheaders` y asignamos nombres descriptivos con `rename`, guardando la tabla normalizada en `tmnt_normalizado.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma | save -f tmnt_normalizado.csv
 ```
 
-Por su parte, para trabajar con hojas de cálculo de **Microsoft Excel (`.xlsx` y `.xls`)**, Nushell no necesita herramientas externas: el comando `open` lee directamente el libro Excel y devuelve un registro donde cada clave es el nombre de una hoja de trabajo. Inspeccionemos `cars.xlsx` en `/data/ch04`:
+Por su parte, para trabajar con hojas de cálculo de **Microsoft Excel (`.xlsx` y `.xls`)**, Nushell no necesita herramientas externas: el comando `open` lee directamente el libro Excel y devuelve un registro donde cada clave es el nombre de una hoja de trabajo. Inspeccionemos `cars.xlsx` en `/data/ch05`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open cars.xlsx | columns
 ```
 
 Vemos que `cars.xlsx` contiene la hoja `autos`. Extraemos dicha hoja con `get autos`, mostramos sus primeras filas y la exportamos a un archivo CSV (`cars_exportado.csv`):
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open cars.xlsx | get autos | first 5 | select make "body.style" horsepower "city.mpg" price
 open cars.xlsx | get autos | save -f cars_exportado.csv
 ```
@@ -3964,24 +3922,24 @@ open cars.xlsx | get autos | save -f cars_exportado.csv
 Si deseamos filtrar únicamente los vehículos de la marca `toyota` usando una expresión regular (`^toyota$`), mostramos la tabla resultante y la guardamos en `cars_toyota.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open cars.csv | where make =~ '^toyota$' | select make "body.style" "engine.size" horsepower price | first 8
 open cars.csv | where make =~ '^toyota$' | save -f cars_toyota.csv
 ```
 
 ## Consultando Bases de Datos Relacionales (SQLite)
 
-En `/data/ch04` disponemos de la base de datos relacional SQLite `r-datasets.db`, que almacena conjuntos de datos clásicos de R. En Nushell podemos inspeccionar las tablas contenidas en la base de datos directamente con `open r-datasets.db | columns`:
+En `/data/ch05` disponemos de la base de datos relacional SQLite `r-datasets.db`, que almacena conjuntos de datos clásicos de R. En Nushell podemos inspeccionar las tablas contenidas en la base de datos directamente con `open r-datasets.db | columns`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open r-datasets.db | columns | first 10
 ```
 
 Para ejecutar consultas SQL `SELECT` directamente sobre `r-datasets.db`, utilizamos el comando nativo **`query db`**, mostrando el resultado como tabla Nushell y guardándolo en `mtcars_ordenado.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | first 8
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | save -f mtcars_ordenado.csv
 ```
@@ -3989,7 +3947,7 @@ open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars OR
 También podemos realizar agrupaciones SQL directamente con `query db` y guardar el resumen en `mtcars_por_cilindros.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let resumen_cyl = (
     open r-datasets.db
     | query db "SELECT cyl, COUNT(*) AS n_autos, ROUND(AVG(mpg), 2) AS mpg_promedio, ROUND(AVG(hp), 1) AS hp_promedio FROM mtcars GROUP BY cyl ORDER BY cyl"
@@ -4004,10 +3962,10 @@ Las APIs web (*Application Programming Interfaces*) devuelven datos estructurado
 
 ### Autenticación con Clave API
 
-Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch04`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada con `url join`:
+Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch05`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada con `url join`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let api_key = (open --raw .secret/newsapi.org_apikey | str trim)
 let news_url = ({
     scheme: "https"
@@ -4024,12 +3982,12 @@ $news_url | save -f news_endpoint.txt
 
 ### API de Transmisión (*Streaming*)
 
-Algunas APIs web transmiten eventos en tiempo real de forma continua, como el flujo *EventStreams* de Wikimedia (`https://stream.wikimedia.org/v2/stream/recentchange`). En `/data/ch04` disponemos de una muestra capturada en el archivo `wikimedia-stream-sample`.
+Algunas APIs web transmiten eventos en tiempo real de forma continua, como el flujo *EventStreams* de Wikimedia (`https://stream.wikimedia.org/v2/stream/recentchange`). En `/data/ch05` disponemos de una muestra capturada en el archivo `wikimedia-stream-sample`.
 
 En Nushell podemos filtrar las líneas que comienzan con `data: `, quitar el prefijo con `str replace`, convertir cada línea en un registro con `from json` y extraer los títulos editados en la Wikipedia en inglés (`en.wikipedia.org`), mostrando la tabla en pantalla y guardándola en `wikimedia_edits_en.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let edits_en = (
     open --raw wikimedia-stream-sample
     | lines
@@ -4052,7 +4010,7 @@ Nushell tiene su propia herramienta de descarga, similar a `curl`, llamada `http
 Por ejemplo, para descargar un archivo desde internet, utilizamos:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 http get https://jsonplaceholder.typicode.com/posts | first 5
 ```
 
@@ -4171,25 +4129,26 @@ open urls.json
 
 
 
+
 \newpage
 
-# Depuración y Transformación de Datos {#chapter-5-scrubbing-data}
+# Depuración y Transformación de Datos {#chapter-6-data-cleaning}
 
 Este capítulo aborda el segundo paso del modelo OSEMN: **depurar y transformar los datos** (*Scrub*). Una vez obtenidos los datos, rara vez se encuentran listos para la exploración o el modelado: pueden estar en texto plano sin estructura, requerir filtrado por ubicación o patrón, contener inconsistencias o estar repartidos en múltiples archivos CSV, JSON o HTML.
 
-Comenzamos ingresando al directorio `/data/ch05` e inspeccionando sus archivos:
+Comenzamos ingresando al directorio `/data/ch06` e inspeccionando sus archivos:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 ls | select name type size | sort-by name
 ```
 
 ## Transformaciones en una Tubería de Datos
 
-Con frecuencia, la salida de una herramienta requiere una transformación intermedia antes de poder alimentar la siguiente etapa del análisis. Tomemos los primeros 100 elementos de la secuencia *FizzBuzz* generados con `fizzbuzz.py` en `/data/ch05`, guardémoslos en `fb.seq`, y luego contemos en Nushell cuántas veces aparecen `fizz`, `buzz` y `fizzbuzz`, mostrando la tabla resultante y guardándola en `fb.csv`:
+Con frecuencia, la salida de una herramienta requiere una transformación intermedia antes de poder alimentar la siguiente etapa del análisis. Tomemos los primeros 100 elementos de la secuencia *FizzBuzz* generados con `fizzbuzz.py` en `/data/ch06`, guardémoslos en `fb.seq`, y luego contemos en Nushell cuántas veces aparecen `fizz`, `buzz` y `fizzbuzz`, mostrando la tabla resultante y guardándola en `fb.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 1..100 | to text | python3 fizzbuzz.py | save -f fb.seq
 let conteo_fb = (
     open --raw fb.seq
@@ -4211,17 +4170,17 @@ El texto plano (*plain text*) consiste en secuencias de caracteres legibles por 
 
 #### Basado en la Ubicación
 
-En `/data/ch05` disponemos del archivo `lines` con 10 líneas numeradas (`Line 1` a `Line 10`). Veamos cómo filtrar líneas según su posición con `first`, `last`, `skip`, `drop` y `slice`, mostrando los resultados y guardando los subconjuntos en archivos:
+En `/data/ch06` disponemos del archivo `lines` con 10 líneas numeradas (`Line 1` a `Line 10`). Veamos cómo filtrar líneas según su posición con `first`, `last`, `skip`, `drop` y `slice`, mostrando los resultados y guardando los subconjuntos en archivos:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines
 ```
 
 - **Primeras 3 líneas (`first 3`) y últimas 3 líneas (`last 3`):**
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines | first 3
 open --raw lines | lines | last 3
 open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
@@ -4230,7 +4189,7 @@ open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
 - **Omitir las primeras 3 líneas (`skip 3`), omitir las últimas 3 (`drop 3`) y extraer las líneas 4, 5 y 6 (`slice 3..5`):**
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines | skip 3
 open --raw lines | lines | drop 3
 open --raw lines | lines | slice 3..5
@@ -4240,17 +4199,17 @@ open --raw lines | lines | slice 3..5 | to text | save -f lines_4_a_6.txt
 - **Extraer únicamente las líneas en posiciones impares usando `enumerate` y el operador módulo (`mod`):**
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item | to text | save -f lines_impares.txt
 ```
 
 #### Basado en un Patrón
 
-Para conservar o descartar líneas según una expresión regular, utilizamos `where ($it =~ "patrón")` (o `!~` para invertir la coincidencia). En `/data/ch05/alice.txt`, extraigamos los encabezados de capítulos que comienzan con `CHAPTER` seguidos de `The`, y contemos el total de líneas no vacías del libro:
+Para conservar o descartar líneas según una expresión regular, utilizamos `where ($it =~ "patrón")` (o `!~` para invertir la coincidencia). En `/data/ch06/alice.txt`, extraigamos los encabezados de capítulos que comienzan con `CHAPTER` seguidos de `The`, y contemos el total de líneas no vacías del libro:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw alice.txt | lines | where ($it =~ '(?i)^chapter')
 open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The')
 open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The') | to text | save -f capitulos_the.txt
@@ -4262,7 +4221,7 @@ open --raw alice.txt | lines | where ($it | str trim | is-not-empty) | length
 Cuando formulamos una tubería sobre un archivo muy grande, resulta útil tomar una muestra aleatoria con el comando nativo **`shuffle`** combinado con **`first`**:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10 | to text | save -f muestra_10_lineas.txt
 ```
@@ -4272,7 +4231,7 @@ cd /data/ch05
 Para extraer únicamente el número romano y el título de cada capítulo de `alice.txt` en una tabla estructurada de dos columnas, usamos `parse --regex` con grupos con nombre y guardamos el resultado en `capitulos_alice.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let caps = (
     open --raw alice.txt
     | lines
@@ -4286,7 +4245,7 @@ $caps | save -f capitulos_alice.csv
 Y si deseamos construir un conjunto de datos con todas las palabras únicas de `alice.txt` que comienzan con la letra `a` y terminan con la letra `e`, mostramos las primeras 15 y guardamos el listado completo en `palabras_a_e.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let palabras_ae = (
     open --raw alice.txt
     | str lowercase
@@ -4306,7 +4265,7 @@ $palabras_ae | save -f palabras_a_e.csv
 En Nushell, la familia de comandos `str` (`str replace`, `str uppercase`, `str lowercase`, `str trim`) opera nativamente sobre texto **UTF-8**, por lo que convierte correctamente caracteres acentuados y no ASCII (como `'hallo wêreld!'` o `'helló világ'`) donde la herramienta clásica `tr` fallaba por operar sobre bytes individuales:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 "hello world!" | str replace -a " " "_"
 "hello world!" | str replace -a --regex '[ !]' ''
 "hallo wêreld!" | str uppercase
@@ -4372,10 +4331,10 @@ En las herramientas clásicas de texto (`grep`, `sed`, `tr`, `sort`), filtrar u 
 
 En **Nushell**, al abrir un archivo CSV con `open`, el encabezado se convierte automáticamente en el esquema de nombres de columnas de la tabla, y cualquier operación (`sort-by`, `where`, `update`) actúa exclusivamente sobre las filas o la columna indicada sin corromper jamás el encabezado.
 
-Por ejemplo, en `/data/ch05`, convirtamos a mayúsculas únicamente la columna `day` de `tips.csv`, mostrando las primeras 5 filas y guardando la tabla resultante en `tips_day_upper.csv`:
+Por ejemplo, en `/data/ch06`, convirtamos a mayúsculas únicamente la columna `day` de `tips.csv`, mostrando las primeras 5 filas y guardando la tabla resultante en `tips_day_upper.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open tips.csv | update day { str uppercase } | first 5
 open tips.csv | update day { str uppercase } | save -f tips_day_upper.csv
 ```
@@ -4385,7 +4344,7 @@ open tips.csv | update day { str uppercase } | save -f tips_day_upper.csv
 Cuando deseamos expresar transformaciones complejas utilizando sintaxis **SQL** sobre archivos CSV, Nushell permite volcar cualquier tabla directamente a una base de datos SQLite con `into sqlite` y consultarla con `query db`. Veamos cómo consultar `tips.csv` con SQL y guardar el resultado en `tips_sql_resultado.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 rm -f tips_temp.db
 open tips.csv | into sqlite tips_temp.db
 open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE bill > 40.0 AND day LIKE 'S%'"
@@ -4397,7 +4356,7 @@ open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE 
 Para extraer un subconjunto de columnas en un orden específico utilizamos `select`, y para excluir una o más columnas conservando el resto utilizamos `reject`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open iris.csv | select sepal_length petal_length sepal_width petal_width | first 5
 open iris.csv | reject species | first 5
 open iris.csv | select sepal_length petal_length sepal_width petal_width | save -f iris_columnas_reordenadas.csv
@@ -4408,7 +4367,7 @@ open iris.csv | select sepal_length petal_length sepal_width petal_width | save 
 En Nushell filtramos filas de tablas CSV combinando condiciones numéricas y expresiones regulares legibles mediante `where`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open tips.csv | where size >= 5 | first 6
 open tips.csv | where bill > 40.0 and day =~ '^S'
 open tips.csv | where bill > 40.0 and day =~ '^S' | save -f tips_altos_finde.csv
@@ -4416,10 +4375,10 @@ open tips.csv | where bill > 40.0 and day =~ '^S' | save -f tips_altos_finde.csv
 
 ### Combinar Columnas (y Robustez ante Comas Internas)
 
-Consideremos los archivos `names.csv` y `names-comma.csv` en `/data/ch05`, los cuales contienen compositores cuyos nombres (`first_name`) y apellidos (`last_name`) deseamos combinar en una columna `full_name`:
+Consideremos los archivos `names.csv` y `names-comma.csv` en `/data/ch06`, los cuales contienen compositores cuyos nombres (`first_name`) y apellidos (`last_name`) deseamos combinar en una columna `full_name`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open names.csv
 open names-comma.csv
 ```
@@ -4427,7 +4386,7 @@ open names-comma.csv
 En `names-comma.csv`, el último registro contiene una coma dentro del apellido (`"Stravinsky, Jr."`). Mientras que `sed`, `awk` y `cut` fallaban al partir por esa coma interna, el analizador CSV de Nushell respeta las comillas del estándar RFC 4180 y construye `full_name` de manera impecable:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let nombres_limpios = (
     open names-comma.csv
     | insert full_name { |row| $"($row.first_name) ($row.last_name)" }
@@ -4441,10 +4400,10 @@ $nombres_limpios | save -f names_completos.csv
 
 #### Concatenar Horizontalmente (`merge`)
 
-En `/data/ch05` podemos dividir `tips.csv` en tres archivos CSV con distintas columnas (`bills.csv`, `datetime.csv` y `customers.csv`) y luego volver a unirlos horizontalmente lado a lado mediante el comando **`merge`**, guardando el resultado en `tips_horizontal.csv`:
+En `/data/ch06` podemos dividir `tips.csv` en tres archivos CSV con distintas columnas (`bills.csv`, `datetime.csv` y `customers.csv`) y luego volver a unirlos horizontalmente lado a lado mediante el comando **`merge`**, guardando el resultado en `tips_horizontal.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open tips.csv | select bill tip | save -f bills.csv
 open tips.csv | select day time | save -f datetime.csv
 open tips.csv | select sex smoker size | save -f customers.csv
@@ -4459,7 +4418,7 @@ $unido_horizontal | save -f tips_horizontal.csv
 Cuando dos tablas comparten una columna clave (como `species` en `iris.csv` e `irismeta.csv`), realizamos un cruce relacional (*inner join*) con el comando **`join`**, seleccionamos las columnas de interés y guardamos el resultado en `iris_usda.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open irismeta.csv
 let iris_enriquecido = (
     open iris.csv
@@ -4472,12 +4431,12 @@ $iris_enriquecido | save -f iris_usda.csv
 
 ## Trabajando con XML/HTML y JSON
 
-En `/data/ch05` contamos con el archivo JSON `users.json` y los archivos extraídos de Wikipedia `wiki.html`, `table.html` y `table.json`.
+En `/data/ch06` contamos con el archivo JSON `users.json` y los archivos extraídos de Wikipedia `wiki.html`, `table.html` y `table.json`.
 
 En lugar de modificar `users.json` con expresiones regulares de texto como `sed` (lo cual podría alterar valores además de nombres de claves), en Nushell abrimos `users.json` como estructura de datos, renombramos el campo `gender` a `sex` en la tabla `results` y guardamos el resultado tanto en JSON como en CSV:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let usuarios = (
     open users.json
     | get results
@@ -4491,7 +4450,7 @@ $usuarios | save -f users_sex.csv
 De igual manera, a partir de la tabla HTML convertida a JSON en `table.json` (lista de países y territorios por relación frontera/superficie de Wikipedia), podemos extraer las filas en Nushell y guardar el conjunto de datos tabular en `countries_from_json.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open countries.csv | first 10
 open countries.csv | first 10 | save -f countries_top10.csv
 ```
@@ -4540,7 +4499,7 @@ Para utilizar el plugin `polars`, primero se deben cargar los datos en un `DataF
 Para este ejemplo, se utilizará un conjunto de datos de ventas de videojuegos. Se pueden descargar los datos usando el siguiente comando:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 ls vgsales.csv
 ```
 
@@ -4549,7 +4508,7 @@ ls vgsales.csv
 Ahora, se puede cargar el archivo `vgsales.csv` en un DataFrame de Polars de la siguiente manera:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let df = (open vgsales.csv | polars into-df)
 $df | polars first 5 | polars collect
 $df | describe
@@ -4570,7 +4529,7 @@ $df | polars schema
 Se observa que algunas variables aparecen de tipo `object`, que es el tipo de datos predeterminado para Polars cuando no se especifica un tipo de datos específico. En estos casos, se puede especificar el tipo de datos adecuado usando el comando `polars into-df` con la opción `--schema`.
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let df = (open vgsales.csv)
   | polars into-df --schema {
       number: i64,
@@ -4844,9 +4803,10 @@ $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 El plugin `polars` para Nushell combina la expresividad y conveniencia de la shell con el rendimiento de Polars. Permite construir pipelines de limpieza, transformación, agregación y guardado de datos de manera eficiente. Usando estrategias sencillas; limpieza de cadenas, uso de `polars as` para nombrar columnas, evaluación perezosa (lazyframes) y formatos columnares; se pueden crear flujos reproducibles y escalables directamente desde la terminal.
 
 
+
 \newpage
 
-# Exploración y Visualización de Datos {#chapter-6-exploring-data}
+# Exploración y Visualización de Datos {#chapter-7-data-exploration}
 
 El cuarto paso del flujo de trabajo OSEMN consiste en explorar los datos. Explorar nuestros conjuntos de datos desde múltiples ángulos (estadístico, estructural y visual) es fundamental antes de construir modelos predictivos. Como destacó John W. Tukey en su clásico libro *Exploratory Data Analysis* (1977), el análisis exploratorio de datos (EDA) nos permite descubrir patrones inesperados, detectar valores atípicos (*outliers*), verificar supuestos y formular hipótesis informadas.
 
@@ -4856,10 +4816,10 @@ En este capítulo abordaremos la exploración y visualización de datos desde tr
 2. **Cálculo de estadísticas descriptivas y pruebas diagnósticas mediante scripts en R y Python**, integrando sus salidas directamente en tuberías de Nushell para presentarlas como tablas estructuradas.
 3. **Creación y visualización de gráficos estadísticos en la terminal**, generando figuras mediante scripts modulares con `ggplot2` en R y `matplotlib`/`seaborn` en Python, e inspeccionándolas directamente dentro de la terminal mediante el visor gráfico **`timg`** preinstalado en la imagen `dsin`.
 
-Todos los archivos y scripts de este capítulo se encuentran preinstalados en `/data/ch06`:
+Todos los archivos y scripts de este capítulo se encuentran preinstalados en `/data/ch07`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 ls | select name type size
 ```
 
@@ -4871,17 +4831,17 @@ En Nushell, dado que cualquier archivo tabular cargado con `open` se convierte i
 
 ### ¿Tiene Encabezado, Cuántos Registros y Qué Columnas?
 
-Inspeccionemos el archivo `venture.csv` ubicado en `/data/ch06`:
+Inspeccionemos el archivo `venture.csv` ubicado en `/data/ch07`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw venture.csv | lines | first 5
 ```
 
 Al abrirlo de forma estructurada con `open venture.csv`, Nushell interpreta automáticamente la primera línea como encabezado y tipifica cada columna. Podemos consultar el número total de registros con `length` y listar los nombres de las columnas junto con su índice usando `columns` y `enumerate`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open venture.csv | length
 open venture.csv | columns | enumerate | first 15
 open venture.csv | columns | enumerate | wrap col_info | flatten | save -f venture_columns.csv
@@ -4892,7 +4852,7 @@ open venture.csv | columns | enumerate | wrap col_info | flatten | save -f ventu
 Veamos el archivo `datatypes.csv`, diseñado específicamente para ilustrar distintos tipos de datos (enteros, flotantes, booleanos, fechas y cadenas):
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open datatypes.csv
 open datatypes.csv | save -f datatypes_copy.json
 ```
@@ -4900,7 +4860,7 @@ open datatypes.csv | save -f datatypes_copy.json
 Para conocer el tipo exacto que Nushell o Polars asignó a cada columna, podemos emplear `describe` o convertir la tabla a un DataFrame de Polars y consultar `polars schema`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open datatypes.csv | polars into-df | polars schema | transpose column dtype
 open datatypes.csv | polars into-df | polars schema | transpose column dtype | save -f datatypes_schema.csv
 ```
@@ -4912,7 +4872,7 @@ En muchos conjuntos de datos administrativos o financieros (como `venture.csv`),
 En Nushell podemos detectar el número de valores únicos de cada columna trasponiendo el primer registro o iterando sobre los nombres de las columnas con `get` y `uniq`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 let df = (open venture.csv)
 let non_const_cols = ($df | columns | where {|c| ($df | get $c | uniq | length) > 1 })
 $df | select ...$non_const_cols | first 5
@@ -4923,10 +4883,10 @@ Observa la claridad del flujo: identificamos programáticamente todas las column
 
 ## Calculando Estadísticas Descriptivas
 
-Trabajemos ahora con el clásico conjunto de datos `tips.csv` (propinas en un restaurante según el total de la cuenta, sexo, hábito de fumar, día, horario y tamaño del grupo), ubicado en `/data/ch06/tips.csv`:
+Trabajemos ahora con el clásico conjunto de datos `tips.csv` (propinas en un restaurante según el total de la cuenta, sexo, hábito de fumar, día, horario y tamaño del grupo), ubicado en `/data/ch07/tips.csv`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open tips.csv | first 10
 open tips.csv | first 10 | save -f tips_sample.csv
 ```
@@ -4936,7 +4896,7 @@ open tips.csv | first 10 | save -f tips_sample.csv
 Nushell incluye la familia de comandos `math` (`math sum`, `math avg`, `math median`, `math stddev`, `math variance`, `math min`, `math max`, `math mode`), que operan sobre listas numéricas o sobre todas las columnas numéricas de una tabla:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open tips.csv | select bill tip size | math avg
 open tips.csv | select bill tip size | math stddev
 open tips.csv | select bill tip size | math median | save -f tips_median.json
@@ -4945,7 +4905,7 @@ open tips.csv | select bill tip size | math median | save -f tips_median.json
 Si deseamos obtener simultáneamente el conteo, media, desviación estándar, mínimo, cuartiles (25%, 50%, 75%) y máximo de todas las variables del dataset, `polars summary` genera una tabla resumen completa en un solo paso:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open tips.csv | polars into-df | polars summary | polars collect | polars into-nu
 open tips.csv | polars into-df | polars summary | polars collect | polars into-nu | save -f tips_summary.csv
 ```
@@ -4953,7 +4913,7 @@ open tips.csv | polars into-df | polars summary | polars collect | polars into-n
 Para variables categóricas (como `day` o `time`), el comando nativo `histogram` calcula el conteo absoluto, cuantiles y porcentaje relativo, incluyendo además un gráfico de barras ASCII en la propia tabla:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open tips.csv | histogram day
 open tips.csv | histogram day | save -f tips_day_freq.csv
 ```
@@ -4962,17 +4922,17 @@ open tips.csv | histogram day | save -f tips_day_freq.csv
 
 En un flujo de trabajo políglota, frecuentemente deseamos aplicar funciones estadísticas especializadas de R (`dplyr`) o Python (`pandas` / `scipy`) y capturar el resultado de vuelta en Nushell como una tabla estructurada. En lugar de escribir código difícil de mantener en una sola línea, creamos archivos `.R` y `.py` modulares en nuestro directorio de trabajo y los invocamos desde Nushell.
 
-Por ejemplo, revisemos el script `mutate_tips.R` en `/data/ch06`, que calcula el porcentaje de propina (`percent = tip / bill * 100`) usando `dplyr::mutate` y escribe el CSV resultante en la salida estándar:
+Por ejemplo, revisemos el script `mutate_tips.R` en `/data/ch07`, que calcula el porcentaje de propina (`percent = tip / bill * 100`) usando `dplyr::mutate` y escribe el CSV resultante en la salida estándar:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw mutate_tips.R
 ```
 
 Al ejecutar `Rscript mutate_tips.R` y canalizar su salida hacia `from csv`, Nushell recibe una tabla tipada que podemos filtrar, ordenar y guardar en disco:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 Rscript mutate_tips.R | from csv | first 10
 Rscript mutate_tips.R | from csv | save -f tips_with_percent.csv
 ```
@@ -4980,7 +4940,7 @@ Rscript mutate_tips.R | from csv | save -f tips_with_percent.csv
 Del mismo modo, el script `summary_tips.R` agrupa las propinas por día y horario (`group_by(day, time)`) y calcula el conteo, la cuenta media y la propina media:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw summary_tips.R
 Rscript summary_tips.R | from csv | sort-by mean_tip -r
 Rscript summary_tips.R | from csv | sort-by mean_tip -r | save -f tips_grouped_summary.csv
@@ -4989,7 +4949,7 @@ Rscript summary_tips.R | from csv | sort-by mean_tip -r | save -f tips_grouped_s
 Y con Python (`corr_tips.py`), podemos calcular la matriz de correlación de Pearson entre `bill`, `tip` y `size` usando `pandas` y devolverla como tabla a Nushell:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw corr_tips.py
 python3 corr_tips.py | from csv
 python3 corr_tips.py | from csv | save -f tips_correlations.csv
@@ -5004,7 +4964,7 @@ En nuestro entorno `dsin`, combinamos la potencia gráfica de **`ggplot2`** (en 
 Veamos primero el script `plot_faceted.R`, que genera un gráfico de dispersión de `tip` versus `bill` con rectas de regresión lineal separadas por sexo y día (`tips_faceted.png`):
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_faceted.R
 Rscript plot_faceted.R
 ls tips_faceted.png
@@ -5014,17 +4974,17 @@ ls tips_faceted.png
 
 En el flujo de trabajo tradicional de los contenedores Docker sin servidor gráfico X11, el usuario debía copiar cada imagen generada hacia el sistema anfitrión para poder abrirla. En la imagen `dsin`, incluimos **`timg`** (*Terminal Image and Video Viewer*), una herramienta que renderiza archivos PNG, JPEG, SVG o incluso animaciones directamente dentro de la terminal utilizando bloques Unicode de alta resolución o los protocolos gráficos de Kitty/iTerm2/Sixel.
 
-Para visualizar cualquier gráfico generado en `/data/ch06`, basta con ejecutar:
+Para visualizar cualquier gráfico generado en `/data/ch07`, basta con ejecutar:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 timg -g 80x25 tips_faceted.png
 ```
 
 También podemos mostrar varios gráficos en una cuadrícula comparativa dentro de la terminal usando la bandera `--grid`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 Rscript plot_histogram.R
 Rscript plot_density.R
 timg --grid=2x1 -g 80x25 tips_histogram.png tips_density.png
@@ -5036,7 +4996,7 @@ Si te encuentras conectado por SSH desde una terminal antigua que no soporta col
 
 ```bash
 # skip-docker-exec
-scp usuario@servidor:/data/ch06/tips_faceted.png .
+scp usuario@servidor:/data/ch07/tips_faceted.png .
 ```
 
 ## Catálogo de Gráficos Estadísticos con Scripts en R y Python
@@ -5047,14 +5007,14 @@ La gramática de los gráficos (*Grammar of Graphics*) implementada en `ggplot2`
 2. **Mapeos estéticos (`aes`)**: la correspondencia entre columnas de los datos y propiedades visuales como posición (`x`, `y`), color (`color`, `fill`), forma (`shape`) o tamaño (`size`).
 3. **Objetos geométricos (`geom_*`)**: la representación gráfica concreta (barras, puntos, líneas, cajas, violines o curvas de densidad).
 
-En `/data/ch06` disponemos de una colección completa de scripts listos para usar que ilustran los gráficos fundamentales del análisis exploratorio.
+En `/data/ch07` disponemos de una colección completa de scripts listos para usar que ilustran los gráficos fundamentales del análisis exploratorio.
 
 ### Gráfico de Barras (`geom_bar`)
 
 Para visualizar la distribución de frecuencias de una variable categórica o discreta, como la cantidad de mesas atendidas por día de la semana en `tips.csv`, ejecutamos `plot_bar.R`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_bar.R
 Rscript plot_bar.R
 timg -g 80x25 tips_bar.png
@@ -5067,7 +5027,7 @@ timg -g 80x25 tips_bar.png
 Para inspeccionar la distribución empírica de una variable continua como el monto total de la cuenta (`bill`), ejecutamos `plot_histogram.R`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_histogram.R
 Rscript plot_histogram.R
 timg -g 80x25 tips_histogram.png
@@ -5082,7 +5042,7 @@ Ajustar el número de intervalos (`bins`) es crucial para evitar tanto el sobre-
 Una alternativa suave al histograma es la estimación de densidad por núcleos (*Kernel Density Estimation*, KDE), implementada en `plot_density.R`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_density.R
 Rscript plot_density.R
 timg -g 80x25 tips_density.png
@@ -5095,7 +5055,7 @@ timg -g 80x25 tips_density.png
 Cuando trabajamos con registros indexados en el tiempo, como la serie de fallecimientos mensuales por accidentes de tránsito en el Reino Unido (`Fatalities.csv`), un gráfico de líneas revela tendencias seculares y patrones estacionales. Veamos y ejecutemos `plot_accident.R`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open Fatalities.csv | first 5
 open Fatalities.csv | first 5 | save -f fatalities_head.csv
 open --raw plot_accident.R
@@ -5110,7 +5070,7 @@ timg -g 80x25 fatalities_line.png
 Para estudiar la relación conjunta entre dos variables cuantitativas continuas (`bill` y `tip`), utilizamos `plot_scatter.R` y `plot_trend.R`:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_scatter.R
 Rscript plot_scatter.R
 open --raw plot_trend.R
@@ -5125,7 +5085,7 @@ timg --grid=2x1 -g 80x25 tips_scatter.png tips_trend.png
 Para comparar la distribución de una variable continua (`bill`) a través de varios grupos categóricos (`day`), los diagramas de caja (*boxplots*) resumen la mediana, el rango intercuartílico ($\text{IQR} = Q_3 - Q_1$) y los valores atípicos, mientras que los gráficos de violín muestran además la forma completa de la densidad en cada grupo:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_boxplot.R
 Rscript plot_boxplot.R
 open --raw plot_violin.R
@@ -5140,7 +5100,7 @@ timg --grid=2x1 -g 80x25 tips_boxplot.png tips_violin.png
 También podemos generar visualizaciones multipanel desde Python ejecutando `plot_tips_py.py`, el cual produce el archivo `tips_python.png` y devuelve en formato JSON las estadísticas por día hacia Nushell:
 
 ```nu
-cd /data/ch06
+cd /data/ch07
 open --raw plot_tips_py.py
 python3 plot_tips_py.py | from json
 python3 plot_tips_py.py | from json | save -f tips_py_summary.json
@@ -5153,9 +5113,10 @@ En este capítulo aprendimos a explorar tanto la estructura como la distribució
 
 En el próximo capítulo estudiaremos cómo acelerar drásticamente el procesamiento de datos y la ejecución de comandos externos utilizando las capacidades de paralelismo nativo de Nushell (`par-each`) junto con GNU `parallel`.
 
+
 \newpage
 
-# Tuberías Paralelas {#chapter-7-parallel-pipelines}
+# Procesamiento en Serie y Tuberías Paralelas {#chapter-8-parallel-pipelines}
 
 A medida que el volumen de datos o la complejidad computacional de nuestras tareas crece —por ejemplo, al consultar cientos de páginas de una API, comprimir docenas de archivos, entrenar modelos con múltiples combinaciones de hiperparámetros o transformar grandes volúmenes de texto—, la ejecución secuencial en un único núcleo de CPU puede convertirse en un cuello de botella importante.
 
@@ -5164,10 +5125,10 @@ En este capítulo aprenderemos a escalar nuestros flujos de trabajo desde la lí
 1. **Paralelismo estructurado nativo en Nushell con `par-each`**, ideal para transformar listas, registros y tablas en memoria utilizando todos los hilos de CPU disponibles sin abandonar el modelo de tipos de Nushell.
 2. **Paralelismo de procesos externos con GNU `parallel`**, la herramienta clásica de Unix para orquestar comandos externos, scripts en R/Python, tuberías divididas en bloques (`--pipe`) y ejecución distribuida en múltiples servidores vía SSH.
 
-Todos los archivos de trabajo de este capítulo se encuentran en `/data/ch07`:
+Todos los archivos de trabajo de este capítulo se encuentran en `/data/ch08`:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 ls | select name type size
 ```
 
@@ -5180,24 +5141,24 @@ Antes de paralelizar una tarea, es fundamental asegurarnos de que funciona corre
 Supongamos que queremos calcular el cuadrado de los primeros diez números enteros o evaluar cuáles son divisibles por 3:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 1..10 | each {|x| {n: $x, cuadrado: ($x * $x), es_mult_3: (($x mod 3) == 0)} }
 1..10 | each {|x| {n: $x, cuadrado: ($x * $x), es_mult_3: (($x mod 3) == 0)} } | save -f squares_table.csv
 ```
 
-Para operaciones aritméticas o científicas más complejas, también contamos en `/data/ch07` con el script `pbc` (*parallel bc*), que evalúa expresiones matemáticas con precisión arbitraria:
+Para operaciones aritméticas o científicas más complejas, también contamos en `/data/ch08` con el script `pbc` (*parallel bc*), que evalúa expresiones matemáticas con precisión arbitraria:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 1..5 | to text | pbc "{1}^2" | lines | each {|v| $v | into int }
 ```
 
 ### Iterando sobre Líneas y Filas
 
-En `/data/ch07` tenemos el archivo `movies.txt` y el archivo `input.csv`:
+En `/data/ch08` tenemos el archivo `movies.txt` y el archivo `input.csv`:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie: ($row.item | str trim), chars: ($row.item | str length)} }
 open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie: ($row.item | str trim), chars: ($row.item | str length)} } | save -f movies_summary.csv
 ```
@@ -5207,7 +5168,7 @@ open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie:
 Del mismo modo, podemos recorrer todos los archivos CSV de un directorio, contar sus filas y consolidar el inventario en un nuevo archivo:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 ls *.csv | each {|f| {archivo: $f.name, bytes: $f.size, filas: (open $f.name | length)} }
 ls *.csv | each {|f| {archivo: $f.name, bytes: $f.size, filas: (open $f.name | length)} } | save -f csv_inventory.csv
 ```
@@ -5220,10 +5181,10 @@ Cuando el bloque de código que pasamos a `each` realiza trabajo intensivo de CP
 
 ### Ejecución Concurrente y Control de Hilos (`--threads` y `--keep-order`)
 
-En `/data/ch07` disponemos del script `slow.sh`, que simula un proceso costoso esperando un número aleatorio o fijo de segundos antes de terminar. Comparemos el tiempo de ejecución de 4 tareas usando `each` frente a `par-each` mediante el comando `timeit`:
+En `/data/ch08` disponemos del script `slow.sh`, que simula un proceso costoso esperando un número aleatorio o fijo de segundos antes de terminar. Comparemos el tiempo de ejecución de 4 tareas usando `each` frente a `par-each` mediante el comando `timeit`:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 1..4 | par-each --threads 4 {|i| {job: $i, msg: $"Tarea ($i) completada"} }
 1..4 | par-each --threads 4 --keep-order {|i| {job: $i, cuadrado: ($i * $i)} } | save -f parallel_jobs.csv
 ```
@@ -5253,7 +5214,7 @@ GNU `parallel` lee argumentos desde la entrada estándar (o tras el separador `:
 Veamos cómo invocar `parallel` desde Nushell sobre `input.csv` usando `--colsep ','` y `--header :` para referenciar columnas por nombre o posición, y convertir la salida de nuevo en una tabla de Nushell:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 open input.csv
 open --raw input.csv | parallel --colsep ',' --header : "echo {name}:{quantity}" | lines | where ($it | str contains ":") | split column ":" nombre cantidad | collect | save -f input_parallel.csv
 open input_parallel.csv
@@ -5264,7 +5225,7 @@ open input_parallel.csv
 Por defecto, GNU `parallel` lanza tantos trabajos en paralelo como núcleos lógicos detecte en el sistema. Con la opción `--jobs` (o `-j`), podemos fijar un número exacto (por ejemplo `-j 4`), un porcentaje de núcleos (`-j 50%`) o sumar/restar hilos respecto al total (`-j +2`):
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 1..4 | to text | parallel -j 4 "sh slow.sh {}" | lines
 ```
 
@@ -5280,10 +5241,10 @@ GNU `parallel` ofrece tres mecanismos para mantener el orden y la trazabilidad:
 2. `--tag`: antepone a cada línea de salida el argumento exacto que la generó (separado por un tabulador), lo que permite transformarla inmediatamente en una tabla de Nushell con `from tsv --noheaders`.
 3. `--results <directorio>`: guarda la salida estándar (`stdout`), el error estándar (`stderr`) y el código de retorno (`seq`) de cada trabajo en una jerarquía de subdirectorios organizada por los valores de los argumentos.
 
-Ejecutemos un ejemplo con `--tag` y `-k` en `/data/ch07` y guardemos la tabla resultante:
+Ejecutemos un ejemplo con `--tag` y `-k` en `/data/ch08` y guardemos la tabla resultante:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 1..5 | to text | parallel -k --tag "echo $(( {} * 10 ))" | from tsv --noheaders | rename arg resultado
 1..5 | to text | parallel -k --tag "echo $(( {} * 10 ))" | from tsv --noheaders | rename arg resultado | save -f tagged_output.csv
 ```
@@ -5291,7 +5252,7 @@ cd /data/ch07
 También podemos combinar `parallel` con utilidades clásicas como `cowsay` (incluida en el `PATH` de `dsin`):
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 ["Nushell", "Polars"] | str join "\n" | parallel -k "cowsay {}"
 ```
 
@@ -5300,7 +5261,7 @@ cd /data/ch07
 Cuando tenemos un archivo de texto de varios gigabytes y queremos aplicarle un comando de línea a línea sin crear millones de procesos individuales, la bandera `--pipe` (junto con `--block 10M`) divide la entrada estándar en bloques y envía cada bloque a una instancia paralela del comando:
 
 ```nu
-cd /data/ch07
+cd /data/ch08
 open --raw movies.txt | parallel --pipe -N 3 "wc -l" | lines | each {|x| $x | str trim | into int } | math sum
 ```
 
@@ -5343,16 +5304,17 @@ ls *.csv | parallel --slf hosts.txt --transferfile {} --return {.}_clean.csv "nu
 
 En este capítulo aprendimos a transformar flujos de trabajo secuenciales (`each`) en tuberías paralelas de alto rendimiento utilizando tanto `par-each` de forma nativa en Nushell como GNU `parallel` para orquestar procesos externos, bloques de flujo (`--pipe`) y ejecución distribuida por SSH.
 
-En el Capítulo 8 culminaremos nuestro recorrido por el modelo OSEMN aplicando estas herramientas a la etapa de **Modelado Estadístico y Machine Learning**: reducción de dimensionalidad (PCA y t-SNE), agrupamiento o *clustering* (K-Means), regresión lineal/regularizada y clasificación supervisada.
+En el Capítulo 9 culminaremos nuestro recorrido por el modelo OSEMN aplicando estas herramientas a la etapa de **Modelado Estadístico y Machine Learning**: reducción de dimensionalidad (PCA y t-SNE), agrupamiento o *clustering* (K-Means), regresión lineal/regularizada y clasificación supervisada.
+
 
 
 \newpage
 
-# Modelado de Datos {#chapter-8-modeling-data}
+# Modelado Políglota de Datos {#chapter-9-polyglot-modeling}
 
-El quinto y último paso del modelo OSEMN consiste en **modelar los datos** (*Model Data*). Mientras que el análisis exploratorio y la visualización (Capítulo 6) nos permiten describir estructuras e identificar patrones históricos, el modelado estadístico y el aprendizaje automático (*Machine Learning*) nos proporcionan herramientas formales para **sintetizar dimensiones latentes, descubrir grupos naturales, predecir variables continuas y clasificar nuevas observaciones**.
+El quinto y último paso del modelo OSEMN consiste en **modelar los datos** (*Model Data*). Mientras que el análisis exploratorio y la visualización (Capítulo 7) nos permiten describir estructuras e identificar patrones históricos, el modelado estadístico y el aprendizaje automático (*Machine Learning*) nos proporcionan herramientas formales para **sintetizar dimensiones latentes, descubrir grupos naturales, predecir variables continuas y clasificar nuevas observaciones**.
 
-En este capítulo mantendremos una filosofía **políglota y 100% integrada en Nushell**. Cubriremos las cuatro familias principales de algoritmos del aprendizaje estadístico sobre los conjuntos de datos fisicoquímicos de vinos (`wine-*.csv`), biométricos de peces (`Fish.csv`) y banca minorista (`banco.csv`), ubicados en `/data/ch08`:
+En este capítulo mantendremos una filosofía **políglota y 100% integrada en Nushell**. Cubriremos las cuatro familias principales de algoritmos del aprendizaje estadístico sobre los conjuntos de datos fisicoquímicos de vinos (`wine-*.csv`), biométricos de peces (`Fish.csv`) y banca minorista (`banco.csv`), ubicados en `/data/ch09`:
 
 1. **Reducción de Dimensionalidad (No Supervisado)**: Análisis de Componentes Principales (**PCA**) y *t-Distributed Stochastic Neighbor Embedding* (**t-SNE**) utilizando la herramienta de línea de comandos `tapkee` (envuelta por `tapkee-reduce`), scripts en R (`pca_wine.R`, `vif_pcr_fish.R`) y en Python (`pca_wine.py`, `vif_pcr_fish.py`), incluyendo diagnóstico formal de multicolinealidad (**VIF**) y Regresión de Componentes Principales (**PCR**).
 2. **Agrupamiento o *Clustering* (No Supervisado)**: algoritmo **K-Means** (`kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`), **Clustering Jerárquico Aglomerativo** (`hclust_fish.R`, `hclust_fish.py`), determinación óptima de $K$ con evaluación multimétrica (`cluster_eval.py`), **Clustering Basado en Densidad con DBSCAN** (`dbscan_fish.py`) y **K-Medoides con PAM** (`pam_fish.R`).
@@ -5361,16 +5323,16 @@ En este capítulo mantendremos una filosofía **políglota y 100% integrada en N
 
 En **todos** los métodos seguiremos el mismo estándar riguroso:
 
-- Nos ubicamos primero en el directorio del capítulo (`cd /data/ch08`) y abrimos los archivos por su nombre local.
+- Nos ubicamos primero en el directorio del capítulo (`cd /data/ch09`) y abrimos los archivos por su nombre local.
 - Ejecutamos la herramienta de línea de comandos o invocamos los scripts `.R` / `.py` independientes (nunca código en línea difícil de depurar).
 - Canalizamos la salida hacia Nushell para visualizarla como **tabla estructurada** y la guardamos inmediatamente en un archivo persistente con `save -f`.
 
 ## Preparación y Exploración del Conjunto de Datos de Vinos
 
-Inspeccionemos primero los archivos preinstalados en `/data/ch08`:
+Inspeccionemos primero los archivos preinstalados en `/data/ch09`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 ls | select name type size
 ```
 
@@ -5379,7 +5341,7 @@ Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos
 Veamos cómo podemos construir el conjunto combinado `wine-both.csv` directamente en Nushell añadiendo la columna `type` (`red` o `white`) y guardándolo en disco:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let red = (open wine-red.csv | insert type "red")
 let white = (open wine-white.csv | insert type "white")
 let both = ($red | append $white)
@@ -5390,7 +5352,7 @@ $both | save -f wine-both-generated.csv
 Verifiquemos la distribución de clases (`red` vs `white`) y las estadísticas descriptivas por tipo de vino usando Polars:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open wine-both.csv | histogram type
 open wine-both.csv | histogram type | save -f wine_type_distribution.csv
 ```
@@ -5398,7 +5360,7 @@ open wine-both.csv | histogram type | save -f wine_type_distribution.csv
 Y generemos una visualización exploratoria de las distribuciones de alcohol, acidez volátil y sulfatos entre vinos tintos y blancos ejecutando el script `plot_wine_eda.R` y visualizándola en la terminal con `timg`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw plot_wine_eda.R
 Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
@@ -5420,7 +5382,7 @@ La imagen `dsin` incluye la herramienta C++ `tapkee` junto con el comando de Nus
 Apliquemos primero **PCA** sobre una muestra de 200 vinos de `wine-both.csv`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
 open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | select type quality dim_1 dim_2 | first 10
 open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | select type quality dim_1 dim_2 | save -f wine_pca_tapkee.csv
@@ -5429,7 +5391,7 @@ open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | s
 Del mismo modo, cambiando únicamente `--method pca` por `--method t-sne`, obtenemos la proyección no lineal **t-SNE** con `tapkee`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
 open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features | select type quality dim_1 dim_2 | first 10
 open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features | select type quality dim_1 dim_2 | save -f wine_tsne_tapkee.csv
@@ -5439,10 +5401,10 @@ open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features |
 
 ### Reducción de Dimensionalidad con `Rscript` (`pca_wine.R`)
 
-Veamos el script `pca_wine.R` ubicado en `/data/ch08`, el cual utiliza la función nativa `prcomp(..., center = TRUE, scale. = TRUE)` de R para calcular todas las componentes principales y reportar la proporción de varianza explicada y acumulada de cada componente:
+Veamos el script `pca_wine.R` ubicado en `/data/ch09`, el cual utiliza la función nativa `prcomp(..., center = TRUE, scale. = TRUE)` de R para calcular todas las componentes principales y reportar la proporción de varianza explicada y acumulada de cada componente:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw pca_wine.R
 Rscript pca_wine.R | from csv
 Rscript pca_wine.R | from csv | save -f wine_pca_r.csv
@@ -5455,7 +5417,7 @@ Observa cómo las primeras 4 componentes principales resumen más del 64% de la 
 Revisemos y ejecutemos ahora el script `pca_wine.py`, que utiliza `StandardScaler` y `PCA` de `scikit-learn`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw pca_wine.py
 python3 pca_wine.py | from csv
 python3 pca_wine.py | from csv | save -f wine_pca_py.csv
@@ -5469,14 +5431,14 @@ $$\text{VIF}_j = \frac{1}{1 - R_j^2}$$
 
 donde $R_j^2$ es el coeficiente de determinación obtenido al regresar la variable predictora $X_j$ sobre todas las demás variables predictoras. Un valor de $\text{VIF} > 10$ (y con mayor razón $\text{VIF} > 100$) señala multicolinealidad crítica.
 
-En `/data/ch08`, el archivo `Fish.csv` contiene variables biométricas de peces (`Length1`, `Length2`, `Length3`, `Height`, `Width`) utilizadas para predecir el peso (`Weight`). Al existir tres medidas longitudinales contiguas, la multicolinealidad es extrema.
+En `/data/ch09`, el archivo `Fish.csv` contiene variables biométricas de peces (`Length1`, `Length2`, `Length3`, `Height`, `Width`) utilizadas para predecir el peso (`Weight`). Al existir tres medidas longitudinales contiguas, la multicolinealidad es extrema.
 
 El método de **Regresión de Componentes Principales** (**PCR**, *Principal Component Regression*) resuelve este problema proyectando las variables explicativas originales sobre sus componentes principales ortogonales (que tienen covarianza exactamente cero) antes de ajustar la regresión lineal.
 
 Ejecutemos el script `vif_pcr_fish.py` para calcular los valores de VIF y comparar el modelo de regresión múltiple tradicional frente al modelo PCR con 2 componentes principales:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw vif_pcr_fish.py
 python3 vif_pcr_fish.py | from csv
 python3 vif_pcr_fish.py | from csv | save -f fish_pcr_py.csv
@@ -5488,7 +5450,7 @@ Observemos cómo en Python las variables de longitud presentan valores de VIF su
 Ejecutemos también la versión equivalente en R (`vif_pcr_fish.R`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw vif_pcr_fish.R
 Rscript vif_pcr_fish.R | from csv
 Rscript vif_pcr_fish.R | from csv | save -f fish_pcr_r.csv
@@ -5511,7 +5473,7 @@ En el módulo `dsin_tools.nu` de la imagen `dsin` disponemos del comando `kmeans
 Apliquemos `kmeans-cluster --k 2` sobre las 11 variables químicas de `wine-both.csv` (sin revelar la columna `type` al algoritmo) y comparemos los clústeres descubiertos contra el tipo real de vino (`red` vs `white`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
 let clustered = (open wine-both.csv | kmeans-cluster --k 2 --cols $features)
 $clustered | select type quality alcohol volatile_acidity cluster | first 10
@@ -5521,7 +5483,7 @@ $clustered | select type quality alcohol volatile_acidity cluster | save -f wine
 Podemos evaluar en Nushell la correspondencia entre los 2 clústeres no supervisados y la clase real `type` agrupando por `cluster` y `type`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
 open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | polars group-by cluster type | polars agg [(polars col quality | polars count | polars as n_vinos) (polars col alcohol | polars mean | polars as mean_alcohol)] | polars collect | polars into-nu | sort-by cluster type
 open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | polars group-by cluster type | polars agg [(polars col quality | polars count | polars as n_vinos) (polars col alcohol | polars mean | polars as mean_alcohol)] | polars collect | polars into-nu | sort-by cluster type | save -f wine_kmeans_contingency.csv
@@ -5531,10 +5493,10 @@ open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | po
 
 ### Clustering K-Means con `Rscript` (`cluster_wine.R`)
 
-Veamos el script `cluster_wine.R` en `/data/ch08`, que ejecuta `kmeans(..., centers = 3, nstart = 20)` en R y resume el tamaño y el perfil químico promedio de cada clúster:
+Veamos el script `cluster_wine.R` en `/data/ch09`, que ejecuta `kmeans(..., centers = 3, nstart = 20)` en R y resume el tamaño y el perfil químico promedio de cada clúster:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw cluster_wine.R
 Rscript cluster_wine.R | from csv
 Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
@@ -5545,7 +5507,7 @@ Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
 Revisemos y ejecutemos ahora el script `cluster_wine.py` con `scikit-learn` (`KMeans(n_clusters=3, random_state=42, n_init=10)`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw cluster_wine.py
 python3 cluster_wine.py | from csv
 python3 cluster_wine.py | from csv | save -f wine_clusters_py.csv
@@ -5557,10 +5519,10 @@ A diferencia de K-Means, que requiere especificar *a priori* el número de congl
 
 El enfoque **aglomerativo** (*bottom-up*) inicia con cada observación individual como un clúster unitario y, en cada paso, fusiona el par de clústeres más cercanos de acuerdo a un criterio de enlace (*linkage criterion*). Entre los criterios más robustos en minería de datos destaca el método de **Ward (`ward.D2`)**, que une en cada iteración el par de clústeres que minimiza el incremento en la varianza total dentro de los grupos.
 
-En `/data/ch08`, disponemos del conjunto `Fish.csv` (159 observaciones de especies de peces comerciales con medidas biométricas: peso, 3 longitudes, altura y ancho). Ejecutemos el script `hclust_fish.R`, que escala las medidas, calcula la matriz de distancias euclidianas, aplica `hclust(d, method = "ward.D2")`, corta el árbol en $K = 3$ grupos mediante `cutree(hc, k = 3)` y resume la correspondencia con las especies dominantes:
+En `/data/ch09`, disponemos del conjunto `Fish.csv` (159 observaciones de especies de peces comerciales con medidas biométricas: peso, 3 longitudes, altura y ancho). Ejecutemos el script `hclust_fish.R`, que escala las medidas, calcula la matriz de distancias euclidianas, aplica `hclust(d, method = "ward.D2")`, corta el árbol en $K = 3$ grupos mediante `cutree(hc, k = 3)` y resume la correspondencia con las especies dominantes:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw hclust_fish.R
 Rscript hclust_fish.R | from csv
 Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
@@ -5569,7 +5531,7 @@ Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
 De igual modo, el script `hclust_fish.py` evalúa el clustering jerárquico aglomerativo con `scikit-learn` (`AgglomerativeClustering(linkage="ward")`) para distintos números de clústeres ($K = 2, 3, 4, 5$) calculando el coeficiente de silueta (*Silhouette Score*):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw hclust_fish.py
 python3 hclust_fish.py | from csv
 python3 hclust_fish.py | from csv | save -f fish_hclust_py.csv
@@ -5587,7 +5549,7 @@ Uno de los desafíos centrales en minería de datos consiste en seleccionar el n
 El script `cluster_eval.py` evalúa automáticamente estos 4 criterios sobre el conjunto bancario `banco.csv` (segmentación de clientes en variables estandarizadas de edad, ingreso, gasto en tarjeta e hipoteca) para $K \in [2, 6]$:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw cluster_eval.py
 python3 cluster_eval.py | from csv
 python3 cluster_eval.py | from csv | save -f banco_cluster_eval.csv
@@ -5596,7 +5558,7 @@ python3 cluster_eval.py | from csv | save -f banco_cluster_eval.csv
 Podemos ordenar en Nushell la tabla por coeficiente de silueta descendente para identificar inmediatamente la partición más compacta:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open banco_cluster_eval.csv | sort-by silhouette -r
 ```
 
@@ -5610,7 +5572,7 @@ Los algoritmos particionales como K-Means asumen que los conglomerados son esfé
 Ejecutemos el script `dbscan_fish.py` sobre las medidas biométricas estandarizadas de `Fish.csv` (`Weight`, `Length1`, `Length2`, `Length3`, `Height`, `Width`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw dbscan_fish.py
 python3 dbscan_fish.py | from csv
 python3 dbscan_fish.py | from csv | save -f fish_dbscan_py.csv
@@ -5621,7 +5583,7 @@ Observemos cómo DBSCAN aísla automáticamente los ejemplares gigantescos como 
 Por su parte, el script `pam_fish.R` ejecuta el algoritmo PAM de la librería `cluster` en R para obtener los medoides representativos y la silueta promedio:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw pam_fish.R
 Rscript pam_fish.R | from csv
 Rscript pam_fish.R | from csv | save -f fish_pam_r.csv
@@ -5641,7 +5603,7 @@ Para evaluar rigurosamente la capacidad de generalización del modelo sobre dato
 **Vowpal Wabbit (`vw`)** es un motor ultrarrápido de aprendizaje en línea por descenso de gradiente estocástico capaz de entrenar modelos sobre millones de registros sin cargar el dataset completo en RAM. El comando `vw-regress` incluido en `dsin_tools.nu` convierte automáticamente tablas de Nushell al formato nativo de Vowpal Wabbit (`target |features feat1:val1 feat2:val2 ...`), entrena el modelo y devuelve una tabla con `actual`, `predicted`, `error` y `abs_error`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let data = (open wine-white.csv)
 let train = ($data | first 3500)
 let test = ($data | skip 3500)
@@ -5653,7 +5615,7 @@ $preds | save -f wine_vw_predictions.csv
 Calculemos el MAE y el error medio directamente en Nushell a partir de las predicciones de `vw-regress` y guardémoslos en un archivo resumen:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 let preds = (open wine_vw_predictions.csv)
 let metrics = {model: "Vowpal Wabbit (SGD)", n_test: ($preds | length), mae: ($preds.abs_error | math avg | math round --precision 4), bias: ($preds.error | math avg | math round --precision 4)}
 $metrics
@@ -5665,7 +5627,7 @@ $metrics
 Veamos el script `regress_wine.R`, que ajusta un modelo lineal clásico por mínimos cuadrados ordinarios (`lm(quality ~ ., data = train)`) sobre los primeros 3.500 registros, evalúa el RMSE y MAE en el conjunto de prueba y devuelve los coeficientes estimados ($\hat{\beta}_j$, error estándar, estadístico $t$ y valor $p$):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw regress_wine.R
 Rscript regress_wine.R | from csv
 Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
@@ -5674,7 +5636,7 @@ Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
 Podemos filtrar en Nushell únicamente los predictores estadísticamente significativos al nivel $\alpha = 0.01$:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r
 open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r | save -f wine_significant_predictors.csv
 ```
@@ -5684,7 +5646,7 @@ open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r | save -f 
 Ejecutemos ahora el script `regress_wine.py`, que estandariza los predictores y ajusta una regresión Ridge ($\ell_2$) con `scikit-learn`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw regress_wine.py
 python3 regress_wine.py | from csv
 python3 regress_wine.py | from csv | save -f wine_regression_py.csv
@@ -5696,12 +5658,12 @@ Finalmente, abordemos el problema de **clasificación supervisada**: predecir un
 
 ### Experimentos de Clasificación con SKLL (`run_experiment` + `skll-metrics`)
 
-La imagen `dsin` incluye **SKLL (*SciKit-Learn Laboratory*)**, que permite definir experimentos declarativos de evaluación y validación cruzada mediante archivos de configuración `.cfg` (como `classify.cfg` en `/data/ch08`, que evalúa clasificadores sobre `train/features.csv` y `test/features.csv`).
+La imagen `dsin` incluye **SKLL (*SciKit-Learn Laboratory*)**, que permite definir experimentos declarativos de evaluación y validación cruzada mediante archivos de configuración `.cfg` (como `classify.cfg` en `/data/ch09`, que evalúa clasificadores sobre `train/features.csv` y `test/features.csv`).
 
 Inspeccionemos `classify.cfg` y ejecutemos `run_experiment` junto con el comando `skll-metrics` para obtener la tabla comparativa de exactitud (*accuracy*) y guardarla en `wine_skll_summary.csv`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw classify.cfg
 run_experiment -l classify.cfg
 skll-metrics output/wine_summary.tsv
@@ -5710,10 +5672,10 @@ skll-metrics output/wine_summary.tsv | save -f wine_skll_summary.csv
 
 ### Clasificación con Regresión Logística en `Rscript` (`classify_wine.R`)
 
-Veamos y ejecutemos el script `classify_wine.R` en `/data/ch08`, que entrena un modelo lineal generalizado binomial (`glm(is_red ~ ., family = binomial())`) sobre una muestra estratificada de entrenamiento y evalúa su exactitud, sensibilidad y especificidad sobre el conjunto de prueba:
+Veamos y ejecutemos el script `classify_wine.R` en `/data/ch09`, que entrena un modelo lineal generalizado binomial (`glm(is_red ~ ., family = binomial())`) sobre una muestra estratificada de entrenamiento y evalúa su exactitud, sensibilidad y especificidad sobre el conjunto de prueba:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw classify_wine.R
 Rscript classify_wine.R | from csv
 Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
@@ -5724,7 +5686,7 @@ Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
 Revisemos y ejecutemos `classify_wine.py`, que entrena un clasificador de Bosques Aleatorios (*Random Forest*) con 100 árboles en `scikit-learn` y devuelve la tabla de importancia de variables (*feature importances*) junto con la exactitud en prueba (`test_accuracy`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw classify_wine.py
 python3 classify_wine.py | from csv
 python3 classify_wine.py | from csv | save -f wine_classification_py.csv
@@ -5739,7 +5701,7 @@ Los **árboles de decisión** (*Decision Trees*) representan una familia fundame
 Evaluemos la predicción de aceptación de préstamos sobre `banco.csv` (5.000 clientes) utilizando `rpart` en R (`dt_banco.R` con profundidad máxima de 4 niveles):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw dt_banco.R
 Rscript dt_banco.R | from csv
 Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
@@ -5748,7 +5710,7 @@ Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
 Ejecutemos ahora el clasificador equivalente en Python con `DecisionTreeClassifier` de `scikit-learn` (`dt_banco.py`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw dt_banco.py
 python3 dt_banco.py | from csv
 python3 dt_banco.py | from csv | save -f banco_dt_py.csv
@@ -5761,7 +5723,7 @@ El clasificador **$k$-Vecinos Más Cercanos ($k$-NN, *k-Nearest Neighbors*)** es
 Ejecutemos `knn_banco.R` para evaluar el clasificador en R (`class::knn`) sobre `banco.csv` con $k \in \{3, 5, 7\}$:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw knn_banco.R
 Rscript knn_banco.R | from csv
 Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
@@ -5770,7 +5732,7 @@ Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
 Y ejecutemos la contraparte en Python utilizando `KNeighborsClassifier` (`knn_banco.py`):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw knn_banco.py
 python3 knn_banco.py | from csv
 python3 knn_banco.py | from csv | save -f banco_knn_py.csv
@@ -5786,7 +5748,7 @@ Como complemento a los árboles y vecinos cercanos, la minería de datos contemp
 Ejecutemos `nb_svm_banco.py` para comparar el desempeño de ambos clasificadores sobre `banco.csv`:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw nb_svm_banco.py
 python3 nb_svm_banco.py | from csv
 python3 nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
@@ -5795,7 +5757,7 @@ python3 nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
 La tabla comparativa resultante permite a Nushell ordenar los modelos según su métrica $F_1$-score:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open banco_nb_svm_py.csv | sort-by f1_score -r
 ```
 
@@ -5812,7 +5774,7 @@ Un principio fundamental en el entrenamiento de redes neuronales es su **extrema
 Ejecutemos el script `mlp_banco.py` sobre `banco.csv` para entrenar y evaluar dos arquitecturas de MLP (una capa con 8 neuronas y dos capas con $(16, 8)$ neuronas):
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw mlp_banco.py
 python3 mlp_banco.py | from csv
 python3 mlp_banco.py | from csv | save -f banco_mlp_py.csv
@@ -5823,7 +5785,7 @@ La red con arquitectura profunda $(16, 8)$ alcanza un $F_1$-score cercano a $0.9
 De forma complementaria, el script `mlp_banco.R` entrena una red neuronal con la librería `nnet` en R:
 
 ```nu
-cd /data/ch08
+cd /data/ch09
 open --raw mlp_banco.R
 Rscript mlp_banco.R | from csv
 Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
@@ -5838,7 +5800,8 @@ En este capítulo completamos el ciclo OSEMN aplicando técnicas de modelado no 
 3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R`, `regress_wine.py` y Regresión de Componentes Principales (PCR).
 4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`), Naïve Bayes y SVM (`nb_svm_banco.py`), y Redes Neuronales Artificiales MLP (`mlp_banco.py` y `mlp_banco.R`).
 
-A lo largo de los ocho capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ciencia de Datos.
+A lo largo de los nueve capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ciencia de Datos.
+
 
 \newpage
 
@@ -5879,9 +5842,10 @@ Como este curso trata sobre la intersección de la línea de comandos y la cienc
 - _Pattern Recognition and Machine Learning_ por Christopher M. Bishop (Springer, 2006)
 
 
+
 \newpage
 
-# Referencias {#references}
+# Referencias {#chapter-references}
 
 ## Ecosistema Nushell
 

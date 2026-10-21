@@ -1,0 +1,3 @@
+model,components,r2,rmse
+R_OLS_Multiple_Regression,5,0.8853,120.86
+R_PCR_Principal_Components,2,0.8807,123.27

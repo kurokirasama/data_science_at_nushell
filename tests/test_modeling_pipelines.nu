@@ -1,11 +1,11 @@
 #!/usr/bin/env nu
-# Test Suite for Chapter 8: 4-Family Polyglot Modeling Pipelines (CLI, Rscript .R, Python .py -> Nushell Tables)
+# Test Suite for Chapter 9: 4-Family Polyglot Modeling Pipelines (CLI, Rscript .R, Python .py -> Nushell Tables)
 use ~/.config/nushell/nu_modules/dsin_tools.nu *
 
 def main [
     --mutate # Run mutation test by corrupting input column names
 ] {
-    cd /data/ch08
+    cd /data/ch09
     let raw_wine = (open wine-both.csv | first 300)
     let wine = if $mutate {
         $raw_wine | reject quality type

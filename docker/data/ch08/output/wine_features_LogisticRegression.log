@@ -1,5 +1,0 @@
-2026-09-10 18:26:16,001 - INFO - Task: evaluate
-2026-09-10 18:26:16,001 - INFO - Training on train, Test on test, feature set ['features'] ...
-2026-09-10 18:26:16,147 - INFO - Featurizing and training new LogisticRegression model
-2026-09-10 18:26:16,179 - INFO - Hyperparameters: C: 1.0, class_weight: None, dual: False, fit_intercept: True, intercept_scaling: 1, l1_ratio: None, max_iter: 1000, multi_class: auto, n_jobs: None, penalty: l2, random_state: 123456789, solver: liblinear, tol: 0.0001, verbose: 0, warm_start: False
-2026-09-10 18:26:16,179 - INFO - Evaluating predictions
