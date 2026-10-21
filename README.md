@@ -1,14 +1,14 @@
 # Ciencia de Datos en Nushell (Data Science at Nushell)
 
-**Guía práctica y curso** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
+**Guía práctica y libro** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
 
 **Instructor:** Dr. Luis Gómez (`lgomez@ubiobio.cl`)
 
 ## Descripción
 
-Curso integrado de **Ciencia de Datos en la Línea de Comandos** construido íntegramente sobre **Nushell** como shell interactivo, lenguaje de programación funcional/estructurado y motor de pipelines de datos, utilizando el contenedor Docker propio **`dsin`** (*Data Science in Nushell*).
+Libro y manual integral de **Ciencia de Datos en la Línea de Comandos** construido íntegramente sobre **Nushell** como shell interactivo, lenguaje de programación funcional/estructurado y motor de pipelines de datos, utilizando el contenedor Docker propio **`dsin`** (*Data Science in Nushell*).
 
-El curso aborda desde la comparación con shells tradicionales (`bash`, `zsh` y la filosofía POSIX) y los conceptos fundamentales de bajo nivel en Nushell (strings, listas, registros, tablas, rutas de celda, tipado y creación de comandos personalizados) hasta el flujo completo OSEMN:
+Esta obra aborda desde la comparación con shells tradicionales (`bash`, `zsh` y la filosofía POSIX) y los conceptos fundamentales de bajo nivel en Nushell (strings, listas, registros, tablas, rutas de celda, tipado y creación de comandos personalizados) hasta el flujo completo OSEMN:
 
 - **Obtención de Datos:** `http get`, `http post`, `url join`, descompresión, hojas Excel `.xlsx`, bases SQLite (`query db`), Parquet y APIs web (REST, autenticación, geocodificación con Google Maps / OpenStreetMap y streaming SSE).
 - **Depuración y Transformación:** Nushell nativo + plugin `polars` (`nu_plugin_polars`).
@@ -41,7 +41,7 @@ La obra original de Janssens sentó las bases del uso de la consola Unix para fl
 
 ## Imagen Docker (`dsin`)
 
-La imagen oficial del curso (`ghcr.io/kurokirasama/dsin:latest`) incluye:
+La imagen oficial del entorno (`ghcr.io/kurokirasama/dsin:latest`) incluye:
 
 - **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) y plugins oficiales (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`) pre-registrados.
 - **Directorio `/data` integrado por defecto:** Contiene las carpetas por capítulo (`/data/ch03` a `/data/ch09`) listas para usar sin necesidad de descargas adicionales.
@@ -54,7 +54,7 @@ docker pull ghcr.io/kurokirasama/dsin:latest
 docker run --rm -it ghcr.io/kurokirasama/dsin:latest
 ```
 
-agen
+## Actualización de Nushell en la Imagen `dsin`
 
 Cuando el equipo de Nushell publica una nueva versión oficial, el repositorio incluye el script automatizado `update-dsin-nushell.nu` que consulta la última versión en GitHub Releases, actualiza `docker/Dockerfile`, empaqueta la carpeta `/data` actualizada, reconstruye la imagen `dsin` con la versión correspondiente de `nu` y `nu_plugin_polars`, y opcionalmente la publica en el registro de contenedores:
 
@@ -73,9 +73,9 @@ nu update-dsin-nushell.nu --version 0.116.1 --push
 
 ```text
 ├── Files/
-│   ├── DataScienceNushell.md   # Libro principal del curso (Pandoc Markdown)
+│   ├── DataScienceNushell.md   # Texto principal del libro (Pandoc Markdown)
 │   ├── DataScienceNushell.pdf  # Versión compilada en PDF (XeLaTeX)
-│   ├── *.png / *.jpg           # Figuras y diagramas del curso
+│   ├── *.png / *.jpg           # Figuras y diagramas de la obra
 │   └── data/                   # Datos por capítulo (ch03..ch09) integrados en /data
 ├── docker/
 │   ├── Dockerfile              # Definición de la imagen independiente dsin
