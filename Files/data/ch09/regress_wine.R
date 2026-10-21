@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 set.seed(42)
-df <- read.csv("wine-white-clean.csv", stringsAsFactors = FALSE)
+df <- read.csv("wine-white.csv", stringsAsFactors = FALSE)
 n <- nrow(df)
 idx <- sample(seq_len(n), size = floor(0.8 * n))
 train <- df[idx, ]

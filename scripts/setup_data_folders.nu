@@ -27,7 +27,7 @@ mkdir $"($dst_data)/.cache"
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch02/." $"($dst_data)/ch03/"
 '{"edition": 2024}' | from json | to json --indent 2 | save -f $"($dst_data)/ch03/edition.json"
-rm -f $"($dst_data)/ch03/fac.py.bak" $"($dst_data)/ch03/edition2.json" $"($dst_data)/ch03/edition2.csv" $"($dst_data)/ch03/edition2.yaml"
+rm -f $"($dst_data)/ch03/chapters.txt" $"($dst_data)/ch03/dates.txt" $"($dst_data)/ch03/dates-nl.txt" $"($dst_data)/ch03/even.txt" $"($dst_data)/ch03/greeting.txt" $"($dst_data)/ch03/fac.py.bak" $"($dst_data)/ch03/edition2.json" $"($dst_data)/ch03/edition2.csv" $"($dst_data)/ch03/edition2.yaml"
 cp $"($src_data)/ch07/tips.csv" $"($dst_data)/ch03/tips.csv"
 cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch03/stream.py"
 
@@ -35,6 +35,7 @@ cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch03/stream.py"
 # ch04: Section 4 (Programación y Creación de Herramientas de Línea de Comandos)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch04/." $"($dst_data)/ch04/"
+rm -f $"($dst_data)/ch04/world" $"($dst_data)/ch04/htmlq"
 
 # Fix top-words.py and top-words.R to use python3 and local stopwords file
 '#!/usr/bin/env python3
@@ -248,6 +249,7 @@ chmod +x $"($dst_data)/ch04/top-words.py" $"($dst_data)/ch04/top-words.R" $"($ds
 # ch05: Section 5 (Obtención de Datos)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch03/." $"($dst_data)/ch05/"
+rm -rf $"($dst_data)/ch05/logs"
 rm -f $"($dst_data)/ch05/wikimedia-stream-samplecd"
 
 {
@@ -275,13 +277,13 @@ mkdir $"($dst_data)/ch05/.secret"
 ^cp -a $"($src_data)/ch05/." $"($dst_data)/ch06/"
 cp $"($dst_data)/ch04/fizzbuzz.py" $"($dst_data)/ch06/fizzbuzz.py"
 cp $"($src_files)/vgsales.csv" $"($dst_data)/ch06/vgsales.csv"
-rm -f $"($dst_data)/ch06/bills.csv" $"($dst_data)/ch06/customers.csv" $"($dst_data)/ch06/datetime.csv" $"($dst_data)/ch06/data_by_year.csv" $"($dst_data)/ch06/vgsales_filtered.csv" $"($dst_data)/ch06/fb.cnt" $"($dst_data)/ch06/fb.csv" $"($dst_data)/ch06/fb.png" $"($dst_data)/ch06/fb.seq" $"($dst_data)/ch06/Rplots.pdf" $"($dst_data)/ch06/table.html" $"($dst_data)/ch06/table.json"
+rm -f $"($dst_data)/ch06/bills.csv" $"($dst_data)/ch06/customers.csv" $"($dst_data)/ch06/datetime.csv" $"($dst_data)/ch06/data_by_year.csv" $"($dst_data)/ch06/vgsales_filtered.csv" $"($dst_data)/ch06/vgsales_filtered.parquet" $"($dst_data)/ch06/fb.cnt" $"($dst_data)/ch06/fb.csv" $"($dst_data)/ch06/fb.png" $"($dst_data)/ch06/fb.seq" $"($dst_data)/ch06/Rplots.pdf" $"($dst_data)/ch06/table.html" $"($dst_data)/ch06/table.json" $"($dst_data)/ch06/capitulos_alice.csv" $"($dst_data)/ch06/palabras_a_e.csv"
 
 # -----------------------------------------------------------------------------
 # ch07: Section 7 (Exploración de Datos y Visualización en la Terminal)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch07/." $"($dst_data)/ch07/"
-rm -f $"($dst_data)/ch07/plot-accident.png" $"($dst_data)/ch07/plot-bar.png" $"($dst_data)/ch07/plot-boxplot.png" $"($dst_data)/ch07/plot-density.png" $"($dst_data)/ch07/plot-histogram.png" $"($dst_data)/ch07/plot-labels.png" $"($dst_data)/ch07/plot-scatter.png" $"($dst_data)/ch07/plot-trend.png" $"($dst_data)/ch07/plot-trend-points.png" $"($dst_data)/ch07/tips.png" $"($dst_data)/ch07/tips2.png" $"($dst_data)/ch07/percent.csv" $"($dst_data)/ch07/.Rhistory" $"($dst_data)/ch07/docker_environment.txt"
+rm -f $"($dst_data)/ch07/plot-*.png" $"($dst_data)/ch07/tips*.png" $"($dst_data)/ch07/fatalities_line.png" $"($dst_data)/ch07/percent.csv" $"($dst_data)/ch07/.Rhistory" $"($dst_data)/ch07/docker_environment.txt"
 
 # Create standalone R and Python scripts for Section 7 (no inline scripts!)
 '#!/usr/bin/env Rscript
@@ -470,7 +472,7 @@ glob $"($dst_data)/ch07/*.{R,py}" | each { |f| chmod +x $f }
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch08/." $"($dst_data)/ch08/"
 rm -rf $"($dst_data)/ch08/outdir"
-rm -f $"($dst_data)/ch08/hi-1.txt" $"($dst_data)/ch08/hi-2.txt" $"($dst_data)/ch08/hi-3.txt" $"($dst_data)/ch08/hi-4.txt" $"($dst_data)/ch08/hi-5.txt" $"($dst_data)/ch08/one-big-file.txt" $"($dst_data)/ch08/emails" $"($dst_data)/ch08/emails.txt"
+rm -f $"($dst_data)/ch08/hi-*.txt" $"($dst_data)/ch08/one-big-file.txt" $"($dst_data)/ch08/emails" $"($dst_data)/ch08/emails.txt"
 
 # Populate input.csv in ch08 with valid name,email,quantity rows
 "name,email,quantity
@@ -491,7 +493,7 @@ chmod +x $"($dst_data)/ch08/pbc" $"($dst_data)/ch08/slow.sh"
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch09/." $"($dst_data)/ch09/"
 rm -rf $"($dst_data)/ch09/output"
-rm -f $"($dst_data)/ch09/2026-10_hola.txt" $"($dst_data)/ch09/output.nu" $"($dst_data)/ch09/output.txt" $"($dst_data)/ch09/edition.json" $"($dst_data)/ch09/edition2.json" $"($dst_data)/ch09/edition2.csv" $"($dst_data)/ch09/edition2.yaml" $"($dst_data)/ch09/predictions" $"($dst_data)/ch09/results.csv" $"($dst_data)/ch09/wine.cache" $"($dst_data)/ch09/wine.model" $"($dst_data)/ch09/wine2.model" $"($dst_data)/ch09/wine-pca.txt" $"($dst_data)/ch09/wine-pca.png" $"($dst_data)/ch09/wine-pca.csv" $"($dst_data)/ch09/wine-alcohol-vs-quality.png" $"($dst_data)/ch09/wine-quality.png" $"($dst_data)/ch09/wine-regression.png" $"($dst_data)/ch09/wine-tsne.png" $"($dst_data)/ch09/wine-scaled.csv" $"($dst_data)/ch09/wine-balanced.csv" $"($dst_data)/ch09/wine-test.vw" $"($dst_data)/ch09/wine-train.vw" $"($dst_data)/ch09/wine-white-clean.csv" $"($dst_data)/ch09/wine-red-clean.csv"
+rm -f $"($dst_data)/ch09/2026-10_hola.txt" $"($dst_data)/ch09/output.nu" $"($dst_data)/ch09/output.txt" $"($dst_data)/ch09/edition.json" $"($dst_data)/ch09/edition2.*" $"($dst_data)/ch09/predictions" $"($dst_data)/ch09/results.csv" $"($dst_data)/ch09/wine.cache" $"($dst_data)/ch09/wine*.model" $"($dst_data)/ch09/wine*.png" $"($dst_data)/ch09/wine-pca.*" $"($dst_data)/ch09/wine-scaled.csv" $"($dst_data)/ch09/wine-balanced.csv" $"($dst_data)/ch09/wine-test.vw" $"($dst_data)/ch09/wine-train.vw" $"($dst_data)/ch09/wine-*-clean.csv" $"($dst_data)/ch09/*_py.csv" $"($dst_data)/ch09/*_r.csv"
 cp $"($dst_data)/ch09/wine.csv" $"($dst_data)/ch09/wine-both.csv"
 open $"($dst_data)/ch09/wine.csv" | where type == "white" | reject type | save -f $"($dst_data)/ch09/wine-white.csv"
 open $"($dst_data)/ch09/wine.csv" | where type == "red" | reject type | save -f $"($dst_data)/ch09/wine-red.csv"
