@@ -16,6 +16,17 @@ El curso aborda desde la comparación con shells tradicionales (`bash`, `zsh` y 
 - **Paralelización:** Ejecución concurrente nativa con **`par-each`** y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
 - **Modelación Políglota:** Reducción de Dimensionalidad (PCA y t-SNE), Clustering (K-Means), Regresión y Clasificación integrando herramientas CLI (**`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) junto con **`Rscript`** y **`python3`** hacia tablas estructuradas de Nushell.
 
+## Origen y Relación con la Obra Original de Jeroen Janssens
+
+Este proyecto es una derivación directa, evolución pedagógica y *spin-off* del influyente libro [**Data Science at the Command Line**](https://datascienceatthecommandline.com/2e/) (O'Reilly Media) de [**Jeroen Janssens**](https://jeroenjanssens.com/).
+
+La obra original de Janssens sentó las bases del uso de la consola Unix para flujos integrales de ciencia de datos, apoyándose en utilidades clásicas de procesamiento de texto plano (`sed`, `awk`, `cut`, `grep`), la suite `csvkit` y scripts en Bash. **Data Science at Nushell** adapta y moderniza esa visión reemplazando los flujos tradicionales de caracteres no estructurados por el paradigma interactivo y estructurado de **Nushell** (`nu`), donde cada tubería transporta tipos de datos semánticos, registros jerárquicos y tablas columnares aceleradas con **Polars** y Apache Arrow.
+
+- **Libro original en línea (Segunda Edición):** [datascienceatthecommandline.com/2e](https://datascienceatthecommandline.com/2e/)
+- **Repositorio oficial de la obra original en GitHub:** [jeroenjanssens/data-science-at-the-command-line](https://github.com/jeroenjanssens/data-science-at-the-command-line)
+- **Data Science Toolbox (Docker upstream original):** [jeroenjanssens/datasciencetoolbox](https://github.com/jeroenjanssens/datasciencetoolbox)
+- **Data Science Toolbox en Docker Hub:** [hub.docker.com/u/datasciencetoolbox](https://hub.docker.com/u/datasciencetoolbox)
+
 ## Contenidos (`Files/DataScienceNushell.md`)
 
 1. **Capítulo 1:** Introducción (La terminal como laboratorio científico, el paradigma Nushell de datos estructurados, sentido pedagógico de la omisión de salidas y entorno reproducible)
