@@ -69,6 +69,19 @@ nu update-dsin-nushell.nu
 nu update-dsin-nushell.nu --version 0.116.1 --push
 ```
 
+## Compilación del Documento a PDF (Pandoc)
+
+Para compilar el libro del curso generando el PDF con resaltado completo de sintaxis Nushell y ajuste automático de bloques de código al ancho de página:
+
+```bash
+cd Files
+pandoc --pdf-engine=xelatex \
+  --syntax-definition=nu.xml \
+  --syntax-definition=nushell.xml \
+  --syntax-highlighting=pandoc_highlight.theme \
+  DataScienceNushell.md -o DataScienceNushell.pdf
+```
+
 ## Estructura del Repositorio
 
 ```text
