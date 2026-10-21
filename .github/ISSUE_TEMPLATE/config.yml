@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussions & Questions
+    url: https://github.com/kurokirasama/data_science_at_nushell/discussions
+    about: Ask conceptual questions about Nushell, data science pipelines, or get assistance with Linux commands.
+  - name: 📖 Online Course Syllabus (UBB)
+    url: https://github.com/kurokirasama/data_science_at_nushell
+    about: Read more about Universidad del Bío-Bío Statistics Engineering program context.
