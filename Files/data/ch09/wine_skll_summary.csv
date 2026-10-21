@@ -1,0 +1,5 @@
+learner_name,accuracy
+KNeighborsClassifier,0.9890625
+LogisticRegression,0.9921875
+DecisionTreeClassifier,0.9703125
+RandomForestClassifier,0.9890625

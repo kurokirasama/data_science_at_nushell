@@ -1,0 +1,2 @@
+model,k_clusters,avg_silhouette,cluster_1_size,cluster_2_size,cluster_3_size
+R_cluster_pam_kmedoids,3,0.3697,43,60,56

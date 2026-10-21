@@ -1,0 +1,5 @@
+2026-10-21 12:51:11,579 - INFO - Task: evaluate
+2026-10-21 12:51:11,579 - INFO - Training on train, Test on test, feature set ['features'] ...
+2026-10-21 12:51:11,628 - INFO - Featurizing and training new RandomForestClassifier model
+2026-10-21 12:51:12,841 - INFO - Hyperparameters: bootstrap: True, ccp_alpha: 0.0, class_weight: None, criterion: gini, max_depth: None, max_features: auto, max_leaf_nodes: None, max_samples: None, min_impurity_decrease: 0.0, min_impurity_split: None, min_samples_leaf: 1, min_samples_split: 2, min_weight_fraction_leaf: 0.0, n_estimators: 500, n_jobs: None, oob_score: False, random_state: 123456789, verbose: 0, warm_start: False
+2026-10-21 12:51:12,841 - INFO - Evaluating predictions

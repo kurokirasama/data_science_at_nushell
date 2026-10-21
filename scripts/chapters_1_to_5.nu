@@ -8,8 +8,8 @@ export def get_slice [lines: list<string>, start_line: int, end_line: int]: noth
 
 export def patch_part2 [text: string]: nothing -> string {
     $text
-    | str replace -a "cd path/to/DSITCL/\ncd ch09" "cd /data/ch02"
-    | str replace -a "cd ch09" "cd /data/ch02"
+    | str replace -a "cd path/to/DSITCL/\ncd ch09" "cd /data/ch03"
+    | str replace -a "cd ch09" "cd /data/ch03"
     | str replace -a "cat wine.csv\n^ps\n^ps -X" "open tips.csv | first 5\nuname"
     | str replace -a "open edition.json\n```" "open edition.json\nopen edition.json | save -f edition_copia.json\n```"
     | str replace -a "open edition2.json | get edition" "open edition2.json | get edition\nopen edition2.json | get edition | save -f edition2_filtrado.json"
@@ -19,7 +19,7 @@ export def patch_part2 [text: string]: nothing -> string {
     | str replace -a "```nu\nconst my_path = ([$nu.home-path nushell] | path join)" "```nu\n# skip-docker-exec (ejemplo ilustrativo de ruta constante)\nconst my_path = ([$nu.home-dir nushell] | path join)"
     | str replace -a "```nu\n> ls | each { |row|" "```nu\n# skip-docker-exec\nls | where type == dir | each { |row|"
     | str replace -a "cargo search shells --limit 10\n\ncargo search shells --limit 10 | lines | parse \"{crate_name} = {version} #{description}\" | str trim" "'nu = \"0.116.1\" # A new type of shell\nttt = \"1.8.0\" # Terminal text editor' | lines | parse '{crate_name} = \"{version}\" #{description}' | update description { str trim }"
-    | str replace -a "curl https://jsonplaceholder.typicode.com/posts\nhttp get https://jsonplaceholder.typicode.com/posts" "cd /data/ch04\nhttp get https://jsonplaceholder.typicode.com/posts | first 5"
+    | str replace -a "curl https://jsonplaceholder.typicode.com/posts\nhttp get https://jsonplaceholder.typicode.com/posts" "cd /data/ch05\nhttp get https://jsonplaceholder.typicode.com/posts | first 5"
     | str replace -a "$response | explore" "$response | first 5 # En sesión interactiva puedes usar: $response | explore"
     | str replace -a "upsert id {|item| $item.id | inc}" "upsert id {|item| $item.id + 1}"
     | str replace -a "upsert id {|item|\n   $item.id | inc\n  }" "upsert id {|item|\n   $item.id + 1\n  }"
@@ -27,9 +27,9 @@ export def patch_part2 [text: string]: nothing -> string {
     | str replace -a "trueX | describe" "\"trueX\" | describe"
     | str replace -a "```nu\n# Ejecutar el binario ls externo que se encuentra en la ruta\n`ls`\n\n# Subir un directorio\n`..`\n```" "```nu\n# skip-docker-exec\n# Ejecutar el binario ls externo o cambiar de directorio interactivamente\n^ls\n```"
     | str replace -a "```nu\nls `./my dir/*`\n```" "```nu\n# skip-docker-exec\nls `./my dir/*`\n```"
-    | str replace -a "http get https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv\n| save vgsales.csv" "cd /data/ch05\nls vgsales.csv"
-    | str replace -a "let df = polars open vgsales.csv" "cd /data/ch05\nlet df = (open vgsales.csv | polars into-df)"
-    | str replace -a "let df = open vgsales.csv" "cd /data/ch05\nlet df = (open vgsales.csv)"
+    | str replace -a "http get https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv\n| save vgsales.csv" "cd /data/ch06\nls vgsales.csv"
+    | str replace -a "let df = polars open vgsales.csv" "cd /data/ch06\nlet df = (open vgsales.csv | polars into-df)"
+    | str replace -a "let df = open vgsales.csv" "cd /data/ch06\nlet df = (open vgsales.csv)"
     | str replace -a "$df | explore" "$df | polars first 5 | polars collect"
     | str replace -a "$df | polars collect | explore" "$df | polars first 5 | polars collect"
     | str replace -a "$df_filtered | polars save /path/to/vgsales_filtered.csv\n$df_filtered | polars save ($env.PWD | path join vgsales_filtered.csv)" "$df_filtered | polars collect | polars save ($env.PWD | path join vgsales_filtered.csv)"
@@ -85,14 +85,15 @@ r#'
 
 ## Contenidos{-}
 
-1. **Capítulo 1 — Instalación de Software:** Configuración de WSL2, Docker e imagen contenedorizada `dsin` con Nushell y `/data` integrados por defecto.
-2. **Capítulo 2 — Introducción y Fundamentos de Nushell:** El modelo OSEMN, la terminal, comparación entre shells tradicionales (`bash`, `zsh`) y Nushell, navegación del sistema, tipos de datos estructurados (*Strings*, *Listas*, *Registros* y *Tablas*), rutas de celda, edición en terminal con `ttt` y control de versiones con Git.
-3. **Capítulo 3 — Programación y Creación de Herramientas de Línea de Comandos:** Operadores, variables, comandos personalizados (`def`, subcomandos, tipos, *flags*, *docstrings*, `$in`), control de flujo, desarrollo de comandos para la API de Google Maps y creación de herramientas CLI reutilizables en Nushell, Python y R.
-4. **Capítulo 4 — Obtención de Datos:** Descarga nativa con `http get` y `http post`, inspección de cabeceras HTTP, descompresión de archivos, hojas de cálculo Microsoft Excel (`.xlsx`), consultas sobre bases de datos relacionales SQLite (`query db`) y consumo de APIs REST / flujos de transmisión (*streaming*).
-5. **Capítulo 5 — Depuración y Transformación de Datos:** Filtrado y transformación de texto plano (`lines`, `parse`, `split column`, `shuffle`, `detect columns`), manipulación nativa de tablas y CSV (`where`, `select`, `upsert`, `merge`, `join`, `group-by`), procesamiento de XML/HTML/JSON y analítica columnar de alto rendimiento con el plugin **Polars** (`nu_plugin_polars`).
-6. **Capítulo 6 — Exploración de Datos y Visualización en la Terminal:** Inspección de propiedades y tipos (`describe`, `explore`), estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript` y `python3`), creación de gráficos estadísticos (`ggplot2` y `matplotlib`), visualización directa en consola con `timg` y transferencia segura con `scp`.
-7. **Capítulo 7 — Procesamiento en Serie y Tuberías Paralelas:** Iteración serial con `each`, paralelismo nativo multihilo con `par-each --threads`, medición de tiempos con `timeit`, manejo resiliente de errores y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
-8. **Capítulo 8 — Modelación Políglota de Datos:** Preparación del conjunto de datos e implementación triple (herramienta CLI externa + `Rscript` + `python3` integrados en tablas Nushell) para Reducción de Dimensionalidad (`tapkee` / PCA / t-SNE), Clustering (`kmeans-cluster` / K-Means / Clustering Jerárquico), Regresión (`vw` / `lm` / `scikit-learn`) y Clasificación (`SKLL` / `glm` / `RandomForest` / Árboles de Decisión / k-NN / Naïve Bayes / SVM).
+1. **Capítulo 1 — Introducción:** La terminal como laboratorio científico, el paradigma Nushell de datos estructurados, sentido pedagógico de la omisión reflexiva de salidas y arquitectura del entorno reproducible `dsin`.
+2. **Capítulo 2 — Instalación de Software:** Configuración de WSL2, Docker e imagen contenedorizada `dsin` con Nushell y `/data` integrados por defecto.
+3. **Capítulo 3 — Fundamentos y Estructuras de Datos en Nushell:** El modelo OSEMN, la terminal, comparación entre shells tradicionales (`bash`, `zsh`) y Nushell, navegación del sistema, tipos de datos estructurados (*Strings*, *Listas*, *Registros* y *Tablas*), rutas de celda, edición en terminal con `ttt` y control de versiones con Git.
+4. **Capítulo 4 — Programación y Creación de Herramientas de Línea de Comandos:** Operadores, variables, comandos personalizados (`def`, subcomandos, tipos, *flags*, *docstrings*, `$in`), control de flujo, desarrollo de comandos para la API de Google Maps y creación de herramientas CLI reutilizables en Nushell, Python y R.
+5. **Capítulo 5 — Obtención de Datos:** Descarga nativa con `http get` y `http post`, inspección de cabeceras HTTP, descompresión de archivos, hojas de cálculo Microsoft Excel (`.xlsx`), consultas sobre bases de datos relacionales SQLite (`query db`) y consumo de APIs REST / flujos de transmisión (*streaming*).
+6. **Capítulo 6 — Depuración y Transformación de Datos:** Filtrado y transformación de texto plano (`lines`, `parse`, `split column`, `shuffle`, `detect columns`), manipulación nativa de tablas y CSV (`where`, `select`, `upsert`, `merge`, `join`, `group-by`), procesamiento de XML/HTML/JSON y analítica columnar de alto rendimiento con el plugin **Polars** (`nu_plugin_polars`).
+7. **Capítulo 7 — Exploración de Datos y Visualización en la Terminal:** Inspección de propiedades y tipos (`describe`, `explore`), estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript` y `python3`), creación de gráficos estadísticos (`ggplot2` y `matplotlib`), visualización directa en consola con `timg` y transferencia segura con `scp`.
+8. **Capítulo 8 — Procesamiento en Serie y Tuberías Paralelas:** Iteración serial con `each`, paralelismo nativo multihilo con `par-each --threads`, medición de tiempos con `timeit`, manejo resiliente de errores y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
+9. **Capítulo 9 — Modelado Políglota de Datos:** Preparación del conjunto de datos e implementación triple (herramienta CLI externa + `Rscript` + `python3` integrados en tablas Nushell) para Reducción de Dimensionalidad (`tapkee` / PCA / t-SNE), Clustering (`kmeans-cluster` / K-Means / Clustering Jerárquico), Regresión (`vw` / `lm` / `scikit-learn`) y Clasificación (`SKLL` / `glm` / `RandomForest` / Árboles de Decisión / k-NN / Naïve Bayes / SVM).
 
 \newpage
 '#
@@ -162,7 +163,7 @@ export def get_ch1_tail []: nothing -> string {
 En este curso trabajaremos sobre una imagen Docker integrada llamada **`dsin`** (*Data Science in Nushell*), publicada en `ghcr.io/kurokirasama/dsin:latest`. A diferencia de los entornos tradicionales basados en *shells* de texto plano, el contenedor `dsin` inicia directamente en **Nushell** como *shell* predeterminado en el directorio de trabajo `/data`, e incluye preconfigurados:
 
 - **Nushell (`nu`)** y su suite completa de complementos registrados: **`nu_plugin_polars`** (motor de DataFrames Arrow/Polars), **`nu_plugin_formats`**, **`nu_plugin_gstat`**, **`nu_plugin_inc`**, **`nu_plugin_query`**, **`nu_plugin_file`**, **`nu_plugin_plot`** (gráficos en la terminal) y **`nu_plugin_port_extension`**.
-- **Directorio `/data` integrado por defecto:** Contiene todas las carpetas de datos del curso organizadas exactamente según el número del capítulo en que se utilizan (`/data/ch02`, `/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07` y `/data/ch08`), sin necesidad de descargas ni configuraciones manuales adicionales.
+- **Directorio `/data` integrado por defecto:** Contiene todas las carpetas de datos del curso organizadas exactamente según el número del capítulo en que se utilizan (`/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07`, `/data/ch08` y `/data/ch09`), sin necesidad de descargas ni configuraciones manuales adicionales.
 - **Editor de texto en terminal `ttt`** en `$env.PATH` con resaltado de sintaxis y atajos preconfigurados.
 - **Visor gráfico de terminal `timg`** en `$env.PATH` para inspeccionar imágenes y gráficos estadísticos directamente en la consola.
 - **Ecosistema políglota:** R (`Rscript`, `tidyverse`, `ggplot2`, `rpart`, `class`, `cluster`), Python 3 (`pandas`, `scikit-learn`, `scipy`, `matplotlib`, `seaborn`, `skll`), **GNU Parallel (`parallel`)**, **Tapkee (`tapkee`)** y **Vowpal Wabbit (`vw`)**.
@@ -233,31 +234,31 @@ Antes de profundizar en las estructuras de datos de Nushell, revisemos los conce
 
 En la terminal interactuamos mediante un ciclo continuo conocido como **REPL** (*Read-Eval-Print Loop*: Leer, Evaluar, Imprimir y Repetir):
 
-1. La terminal muestra un indicador o *prompt* (por ejemplo, `/data/ch02>`) indicando el directorio actual y que está lista para recibir instrucciones.
+1. La terminal muestra un indicador o *prompt* (por ejemplo, `/data/ch03>`) indicando el directorio actual y que está lista para recibir instrucciones.
 2. El usuario escribe una línea de comando y presiona **`Enter`**.
 3. El *shell* analiza (*parsea*) y evalúa la instrucción, ejecutando los programas o transformaciones correspondientes.
 4. El resultado se imprime en la pantalla y el *prompt* vuelve a aparecer.
 
 ### Ejecutar un Comando y Guardar Resultados en Archivos
 
-Ingresemos al directorio correspondiente a este capítulo (`/data/ch02`) e inspeccionemos los archivos disponibles:
+Ingresemos al directorio correspondiente a este capítulo (`/data/ch03`) e inspeccionemos los archivos disponibles:
 
 ```nu
-cd /data/ch02
+cd /data/ch03
 ls | select name type size
 ```
 
 Si deseamos inspeccionar las primeras 5 líneas del archivo `movies.txt`, abrimos el archivo en el directorio actual (`open movies.txt`), dividimos sus líneas con `lines` y tomamos las primeras 5 con `first 5`:
 
 ```nu
-cd /data/ch02
+cd /data/ch03
 open movies.txt | lines | first 5
 ```
 
 En ciencia de datos reproducible, además de visualizar el resultado en pantalla, frecuentemente necesitamos persistir el resultado procesado en un nuevo archivo utilizando el comando `save -f`:
 
 ```nu
-cd /data/ch02
+cd /data/ch03
 open movies.txt | lines | first 5 | to text | save -f movies_top5.txt
 open movies_top5.txt
 ```
@@ -347,11 +348,11 @@ ttt -v
 
 ### Uso Básico de `ttt`
 
-Para crear o editar un script de Nushell, Python, R o un archivo de configuración dentro de nuestro directorio del capítulo (`/data/ch02`), ejecutamos en una sesión interactiva:
+Para crear o editar un script de Nushell, Python, R o un archivo de configuración dentro de nuestro directorio del capítulo (`/data/ch03`), ejecutamos en una sesión interactiva:
 
 ```nu
 # skip-docker-exec
-cd /data/ch02
+cd /data/ch03
 ttt mi_script.nu
 ```
 
@@ -365,8 +366,8 @@ Atajos esenciales preconfigurados en `ttt` dentro de `dsin`:
 También podemos generar archivos estructurados directamente desde tuberías de Nushell en el directorio actual usando `save -f` y luego ejecutarlos o inspeccionarlos:
 
 ```nu
-cd /data/ch02
-"# Script generado en /data/ch02\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
+cd /data/ch03
+"# Script generado en /data/ch03\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
 nu ejemplo_ttt.nu
 nu ejemplo_ttt.nu | save -f saludo_salida.txt
 open saludo_salida.txt
@@ -396,10 +397,10 @@ Para utilizar los servicios oficiales de Google Maps Platform se debe crear una 
 
 De acuerdo con la [documentación oficial de Geocoding API](https://developers.google.com/maps/documentation/geocoding), podemos obtener las coordenadas geográficas asociadas a una dirección o viceversa mediante peticiones HTTP GET.
 
-Nos ubicamos primero en el directorio del capítulo 3 (`/data/ch03`) y definimos la clave de API junto con la dirección de prueba correspondiente al campus Concepción de la Universidad del Bío-Bío:
+Nos ubicamos primero en el directorio del capítulo 4 (`/data/ch04`) y definimos la clave de API junto con la dirección de prueba correspondiente al campus Concepción de la Universidad del Bío-Bío:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 let mapsAPIkey = "the_api_key"
 let address = "Avenida Collao 1202, Concepcion, Chile"
 ```
@@ -422,7 +423,7 @@ Toda URL (*Uniform Resource Locator*) se compone de las siguientes partes estruc
 En lugar de concatenar cadenas manualmente (lo que es propenso a errores con espacios y caracteres especiales), el comando **`url join`** de Nushell construye y codifica automáticamente una URL válida a partir de un registro estructurado, y podemos guardar esta estructura en un archivo de configuración:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 let mapsAPIkey = "the_api_key"
 let address = "Avenida Collao 1202, Concepcion, Chile"
 let url_record = {
@@ -441,7 +442,7 @@ $url_record | save -f consulta_maps.json
 De igual manera, el comando inverso **`url parse`** descompone cualquier URL en sus componentes estructurales como un registro de Nushell:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open consulta_maps.json | url join | url parse
 open consulta_maps.json | url join | url parse | save -f url_descompuesta.json
 ```
@@ -468,18 +469,18 @@ $sample_response.results.geometry.location | save -f coordenadas_ubb.json
 
 ### Empaquetando el Módulo `maps.nu` con `ttt`
 
-Podemos compilar estas dos operaciones (geocodificación directa e inversa) en un módulo reutilizable `maps.nu` dentro de `/data/ch03` editándolo con `ttt`:
+Podemos compilar estas dos operaciones (geocodificación directa e inversa) en un módulo reutilizable `maps.nu` dentro de `/data/ch04` editándolo con `ttt`:
 
 ```nu
 # skip-docker-exec
-cd /data/ch03
+cd /data/ch04
 ttt maps.nu
 ```
 
-El archivo `maps.nu` (ya disponible en `/data/ch03/maps.nu`) contiene los dos comandos exportados `loc-from-address` y `address-from-loc`:
+El archivo `maps.nu` (ya disponible en `/data/ch04/maps.nu`) contiene los dos comandos exportados `loc-from-address` y `address-from-loc`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw maps.nu
 ```
 
@@ -487,7 +488,7 @@ Cuando se cuenta con una clave válida de Google Maps, se importa el módulo con
 
 ```nu
 # skip-docker-exec
-cd /data/ch03
+cd /data/ch04
 use maps.nu *
 loc-from-address "Avenida Collao 1202, Concepcion, Chile"
 address-from-loc -36.8221967 -73.0120093
@@ -497,17 +498,17 @@ address-from-loc -36.8221967 -73.0120093
 
 A lo largo del curso construiremos numerosas tuberías compactas de una sola línea (*one-liners*). Cuando necesitamos reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
 
-En `/data/ch03` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
+En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 ls | select name type size
 ```
 
 Primero, veamos cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw alice.txt
 | str lowercase
 | parse --regex '(?P<word>[a-z]{2,})'
@@ -521,7 +522,7 @@ open --raw alice.txt
 Ahora filtramos las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 let sw = (open --raw stopwords | lines | each { str trim | str lowercase })
 let top10 = (
     open --raw alice.txt
@@ -549,10 +550,10 @@ Para convertir este *one-liner* en una herramienta de línea de comandos reutili
 
 ### Paso 1: Crear el Archivo
 
-En `/data/ch03` guardamos nuestra tubería inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
+En `/data/ch04` guardamos nuestra tubería inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-1.nu
 nu top-words-1.nu
 nu top-words-1.nu | save -f salida_paso1.csv
@@ -563,7 +564,7 @@ nu top-words-1.nu | save -f salida_paso1.csv
 Copiamos `top-words-1.nu` a `top-words-2.nu` y le otorgamos permisos de ejecución para el usuario propietario mediante `chmod u+x`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 cp top-words-1.nu top-words-2.nu
 chmod u+x top-words-2.nu
 ls -l top-words-1.nu top-words-2.nu | select name mode size
@@ -576,7 +577,7 @@ En la columna `mode` (por ejemplo, `-rwxr-xr-x`), el primer carácter `-` indica
 El *shebang* (`#!/usr/bin/env nu`) en la primera línea del archivo le indica al sistema operativo que debe utilizar el ejecutable `nu` ubicado en el entorno para interpretar el script cuando se invoca directamente como `./top-words-3.nu`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-3.nu
 ./top-words-3.nu
 ./top-words-3.nu | save -f salida_paso3.json
@@ -587,7 +588,7 @@ open --raw top-words-3.nu
 Si reemplazamos `open --raw alice.txt` por la variable especial de entrada de tubería `$in` en `top-words-4.nu`, nuestra herramienta deja de estar atada a un único archivo y puede analizar cualquier texto que le enviemos mediante `|`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
@@ -598,7 +599,7 @@ open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
 En Nushell, al definir `def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]` dentro de un script ejecutable (`top-words-5.nu`), Nushell valida automáticamente los tipos de los argumentos, asigna valores por defecto y genera la página de ayuda `--help` sin necesidad de librerías externas:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words-5.nu
 open --raw alice.txt | ./top-words-5.nu 8
 open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
@@ -606,10 +607,10 @@ open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
 
 ### Paso 6: Extender el `$env.PATH`
 
-Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch03` (o `/home/dst/bin`) a `$env.PATH`:
+Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch04` (o `/home/dst/bin`) a `$env.PATH`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 cp top-words-5.nu /home/dst/bin/top-words-nu
 chmod +x /home/dst/bin/top-words-nu
 open --raw alice.txt | top-words-nu 5
@@ -622,10 +623,10 @@ Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scrip
 
 ### Portando la Herramienta a Python (`top-words.py`) y R (`top-words.R`)
 
-En `/data/ch03` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
+En `/data/ch04` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words.py
 open --raw alice.txt | python3 top-words.py 5 | from csv
 open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.csv
@@ -634,7 +635,7 @@ open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.
 Ahora inspeccionemos el script en R (`top-words.R`), ejecutémoslo sobre `alice.txt`, transformemos su salida a una tabla de Nushell y guardémosla en `top_words_r.csv`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw top-words.R
 open --raw alice.txt | Rscript top-words.R 5 | from csv
 open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.csv
@@ -642,10 +643,10 @@ open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.cs
 
 ### Procesando Datos en Transmisión (*Streaming*) desde `stdin` (`fizzbuzz.py` y `fizzbuzz.R`)
 
-Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch03` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
+Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch04` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw fizzbuzz.py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py | save -f fizzbuzz_py.csv
@@ -654,7 +655,7 @@ open --raw fizzbuzz.py
 Y de manera idéntica con el script `fizzbuzz.R`:
 
 ```nu
-cd /data/ch03
+cd /data/ch04
 open --raw fizzbuzz.R
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r | save -f fizzbuzz_r.csv
@@ -664,23 +665,23 @@ open --raw fizzbuzz.R
 
 export def get_ch4_content []: nothing -> string {
     r#'
-# Obtención de Datos {#chapter-4-obtaining-data}
+# Obtención de Datos {#chapter-5-data-acquisition}
 
 Este capítulo aborda el primer paso del modelo OSEMN: la **obtención de datos** (*Obtain*). Los datos pueden provenir de archivos locales, servidores web HTTP/HTTPS, archivos comprimidos (`.tar.gz`, `.zip`), hojas de cálculo de Microsoft Excel (`.xlsx`), bases de datos relacionales SQLite (`.db`) o APIs web REST y de transmisión continua (*streaming*).
 
-Comenzamos ingresando al directorio `/data/ch04` (que corresponde al Capítulo 4 y ya viene incluido por defecto en el contenedor `dsin`) e inspeccionando sus archivos:
+Comenzamos ingresando al directorio `/data/ch05` (que corresponde al Capítulo 5 y ya viene incluido por defecto en el contenedor `dsin`) e inspeccionando sus archivos:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 ls | select name type size | sort-by name
 ```
 
 ## Copiando Archivos Locales en el Contenedor Docker
 
-Aunque la imagen `dsin` ya incluye todos los conjuntos de datos del curso en `/data/ch02` a `/data/ch08`, en proyectos propios es frecuente necesitar transferir archivos adicionales entre el computador anfitrión y el contenedor Docker:
+Aunque la imagen `dsin` ya incluye todos los conjuntos de datos del curso en `/data/ch03` a `/data/ch09`, en proyectos propios es frecuente necesitar transferir archivos adicionales entre el computador anfitrión y el contenedor Docker:
 
 - **Montando una carpeta local al iniciar el contenedor:** Ejecutando `docker run --rm -it -v "$(pwd):/data/mis_datos" ghcr.io/kurokirasama/dsin:latest`.
-- **Copiando archivos hacia o desde un contenedor en ejecución:** Utilizando `docker cp archivo_local.csv <container_id>:/data/ch04/` desde el sistema anfitrión.
+- **Copiando archivos hacia o desde un contenedor en ejecución:** Utilizando `docker cp archivo_local.csv <container_id>:/data/ch05/` desde el sistema anfitrión.
 
 ## Descargando desde Internet con `http get`
 
@@ -688,30 +689,30 @@ Nushell incorpora su propio cliente HTTP nativo (`http get`, `http post`, `http 
 
 ### Descargando Archivos JSON y Páginas Web
 
-En `/data/ch04` contamos con el archivo `urls.json` y muestras de publicaciones JSON. Cuando consultamos un *endpoint* REST o abrimos `posts_sample.json`, podemos explorar la tabla devuelta y guardarla inmediatamente en disco con `save -f`:
+En `/data/ch05` contamos con el archivo `urls.json` y muestras de publicaciones JSON. Cuando consultamos un *endpoint* REST o abrimos `posts_sample.json`, podemos explorar la tabla devuelta y guardarla inmediatamente en disco con `save -f`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let response = (open posts_sample.json)
 $response | first 3 | select userId id title
 $response | save -f posts.json
 open posts.json | first 3 | select id title
 ```
 
-Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/data/ch04`), podemos inspeccionar sus primeras líneas con `open --raw` y guardar un extracto procesado:
+Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/data/ch05`), podemos inspeccionar sus primeras líneas con `open --raw` y guardar un extracto procesado:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open --raw MolinosFriesland.html | lines | first 10
 open --raw MolinosFriesland.html | lines | first 10 | to text | save -f molinos_encabezado.txt
 ```
 
 ### Descargando desde Múltiples URLs y Consultas `http post`
 
-En `/data/ch04/urls.json` tenemos una lista de *endpoints* bajo la clave `urls`:
+En `/data/ch05/urls.json` tenemos una lista de *endpoints* bajo la clave `urls`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open urls.json
 open urls.json | get urls
 open urls.json | get urls | to text | save -f lista_urls.txt
@@ -721,7 +722,7 @@ Cuando trabajamos con conexión a Internet, podemos recorrer todas las URLs con 
 
 ```nu
 # skip-docker-exec
-cd /data/ch04
+cd /data/ch05
 open urls.json | get urls | each { |u| http get $u } | save -f respuestas_api.json
 
 {
@@ -746,10 +747,10 @@ http head https://www.wikipedia.org | first 8
 
 Cuando un conjunto de datos es muy grande o agrupa decenas de archivos pequeños, suele distribuirse comprimido en formatos como `.tar.gz`, `.zip` o `.7z`.
 
-En `/data/ch04` disponemos del archivo comprimido `logs.tar.gz`. Antes de extraerlo a ciegas, inspeccionamos su tabla de contenidos con `tar -tzf`:
+En `/data/ch05` disponemos del archivo comprimido `logs.tar.gz`. Antes de extraerlo a ciegas, inspeccionamos su tabla de contenidos con `tar -tzf`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 tar -tzf logs.tar.gz | lines | first 10
 tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
 ```
@@ -757,7 +758,7 @@ tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
 Como los archivos dentro de `logs.tar.gz` no están contenidos en una subcarpeta única, creamos primero el directorio `logs_extraidos` con `mkdir` y descomprimimos allí usando la opción `-C`, consolidando luego el conteo de líneas de cada archivo en una tabla que también guardamos en `resumen_logs.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 rm -rf logs_extraidos
 mkdir logs_extraidos
 tar -xzf logs.tar.gz -C logs_extraidos
@@ -778,12 +779,12 @@ $resumen_logs | save -f resumen_logs.csv
 
 ## Conversión de Hojas de Cálculo de Microsoft Excel y Archivos CSV
 
-El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch04` tenemos tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
+El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch05` tenemos tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
 
 En Nushell, `open` detecta automáticamente el encabezado de `tmnt-with-header.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open tmnt-with-header.csv
 open tmnt-with-header.csv | save -f tmnt_con_encabezado.json
 ```
@@ -791,22 +792,22 @@ open tmnt-with-header.csv | save -f tmnt_con_encabezado.json
 Si un archivo CSV **no posee fila de encabezado** (como `tmnt-missing-newline.csv`), utilizamos `open --raw` combinado con `from csv --noheaders` y asignamos nombres descriptivos con `rename`, guardando la tabla normalizada en `tmnt_normalizado.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma | save -f tmnt_normalizado.csv
 ```
 
-Por su parte, para trabajar con hojas de cálculo de **Microsoft Excel (`.xlsx` y `.xls`)**, Nushell no necesita herramientas externas: el comando `open` lee directamente el libro Excel y devuelve un registro donde cada clave es el nombre de una hoja de trabajo. Inspeccionemos `cars.xlsx` en `/data/ch04`:
+Por su parte, para trabajar con hojas de cálculo de **Microsoft Excel (`.xlsx` y `.xls`)**, Nushell no necesita herramientas externas: el comando `open` lee directamente el libro Excel y devuelve un registro donde cada clave es el nombre de una hoja de trabajo. Inspeccionemos `cars.xlsx` en `/data/ch05`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open cars.xlsx | columns
 ```
 
 Vemos que `cars.xlsx` contiene la hoja `autos`. Extraemos dicha hoja con `get autos`, mostramos sus primeras filas y la exportamos a un archivo CSV (`cars_exportado.csv`):
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open cars.xlsx | get autos | first 5 | select make "body.style" horsepower "city.mpg" price
 open cars.xlsx | get autos | save -f cars_exportado.csv
 ```
@@ -814,24 +815,24 @@ open cars.xlsx | get autos | save -f cars_exportado.csv
 Si deseamos filtrar únicamente los vehículos de la marca `toyota` usando una expresión regular (`^toyota$`), mostramos la tabla resultante y la guardamos en `cars_toyota.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open cars.csv | where make =~ '^toyota$' | select make "body.style" "engine.size" horsepower price | first 8
 open cars.csv | where make =~ '^toyota$' | save -f cars_toyota.csv
 ```
 
 ## Consultando Bases de Datos Relacionales (SQLite)
 
-En `/data/ch04` disponemos de la base de datos relacional SQLite `r-datasets.db`, que almacena conjuntos de datos clásicos de R. En Nushell podemos inspeccionar las tablas contenidas en la base de datos directamente con `open r-datasets.db | columns`:
+En `/data/ch05` disponemos de la base de datos relacional SQLite `r-datasets.db`, que almacena conjuntos de datos clásicos de R. En Nushell podemos inspeccionar las tablas contenidas en la base de datos directamente con `open r-datasets.db | columns`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open r-datasets.db | columns | first 10
 ```
 
 Para ejecutar consultas SQL `SELECT` directamente sobre `r-datasets.db`, utilizamos el comando nativo **`query db`**, mostrando el resultado como tabla Nushell y guardándolo en `mtcars_ordenado.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | first 8
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | save -f mtcars_ordenado.csv
 ```
@@ -839,7 +840,7 @@ open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars OR
 También podemos realizar agrupaciones SQL directamente con `query db` y guardar el resumen en `mtcars_por_cilindros.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let resumen_cyl = (
     open r-datasets.db
     | query db "SELECT cyl, COUNT(*) AS n_autos, ROUND(AVG(mpg), 2) AS mpg_promedio, ROUND(AVG(hp), 1) AS hp_promedio FROM mtcars GROUP BY cyl ORDER BY cyl"
@@ -854,10 +855,10 @@ Las APIs web (*Application Programming Interfaces*) devuelven datos estructurado
 
 ### Autenticación con Clave API
 
-Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch04`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada con `url join`:
+Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch05`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada con `url join`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let api_key = (open --raw .secret/newsapi.org_apikey | str trim)
 let news_url = ({
     scheme: "https"
@@ -874,12 +875,12 @@ $news_url | save -f news_endpoint.txt
 
 ### API de Transmisión (*Streaming*)
 
-Algunas APIs web transmiten eventos en tiempo real de forma continua, como el flujo *EventStreams* de Wikimedia (`https://stream.wikimedia.org/v2/stream/recentchange`). En `/data/ch04` disponemos de una muestra capturada en el archivo `wikimedia-stream-sample`.
+Algunas APIs web transmiten eventos en tiempo real de forma continua, como el flujo *EventStreams* de Wikimedia (`https://stream.wikimedia.org/v2/stream/recentchange`). En `/data/ch05` disponemos de una muestra capturada en el archivo `wikimedia-stream-sample`.
 
 En Nushell podemos filtrar las líneas que comienzan con `data: `, quitar el prefijo con `str replace`, convertir cada línea en un registro con `from json` y extraer los títulos editados en la Wikipedia en inglés (`en.wikipedia.org`), mostrando la tabla en pantalla y guardándola en `wikimedia_edits_en.csv`:
 
 ```nu
-cd /data/ch04
+cd /data/ch05
 let edits_en = (
     open --raw wikimedia-stream-sample
     | lines
@@ -896,23 +897,23 @@ $edits_en | save -f wikimedia_edits_en.csv
 
 export def get_ch5_content [nu_parsing: string, nu_polars: string]: nothing -> string {
     let sec_head = r#'
-# Depuración y Transformación de Datos {#chapter-5-scrubbing-data}
+# Depuración y Transformación de Datos {#chapter-6-data-cleaning}
 
 Este capítulo aborda el segundo paso del modelo OSEMN: **depurar y transformar los datos** (*Scrub*). Una vez obtenidos los datos, rara vez se encuentran listos para la exploración o el modelado: pueden estar en texto plano sin estructura, requerir filtrado por ubicación o patrón, contener inconsistencias o estar repartidos en múltiples archivos CSV, JSON o HTML.
 
-Comenzamos ingresando al directorio `/data/ch05` e inspeccionando sus archivos:
+Comenzamos ingresando al directorio `/data/ch06` e inspeccionando sus archivos:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 ls | select name type size | sort-by name
 ```
 
 ## Transformaciones en una Tubería de Datos
 
-Con frecuencia, la salida de una herramienta requiere una transformación intermedia antes de poder alimentar la siguiente etapa del análisis. Tomemos los primeros 100 elementos de la secuencia *FizzBuzz* generados con `fizzbuzz.py` en `/data/ch05`, guardémoslos en `fb.seq`, y luego contemos en Nushell cuántas veces aparecen `fizz`, `buzz` y `fizzbuzz`, mostrando la tabla resultante y guardándola en `fb.csv`:
+Con frecuencia, la salida de una herramienta requiere una transformación intermedia antes de poder alimentar la siguiente etapa del análisis. Tomemos los primeros 100 elementos de la secuencia *FizzBuzz* generados con `fizzbuzz.py` en `/data/ch06`, guardémoslos en `fb.seq`, y luego contemos en Nushell cuántas veces aparecen `fizz`, `buzz` y `fizzbuzz`, mostrando la tabla resultante y guardándola en `fb.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 1..100 | to text | python3 fizzbuzz.py | save -f fb.seq
 let conteo_fb = (
     open --raw fb.seq
@@ -934,17 +935,17 @@ El texto plano (*plain text*) consiste en secuencias de caracteres legibles por 
 
 #### Basado en la Ubicación
 
-En `/data/ch05` disponemos del archivo `lines` con 10 líneas numeradas (`Line 1` a `Line 10`). Veamos cómo filtrar líneas según su posición con `first`, `last`, `skip`, `drop` y `slice`, mostrando los resultados y guardando los subconjuntos en archivos:
+En `/data/ch06` disponemos del archivo `lines` con 10 líneas numeradas (`Line 1` a `Line 10`). Veamos cómo filtrar líneas según su posición con `first`, `last`, `skip`, `drop` y `slice`, mostrando los resultados y guardando los subconjuntos en archivos:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines
 ```
 
 - **Primeras 3 líneas (`first 3`) y últimas 3 líneas (`last 3`):**
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines | first 3
 open --raw lines | lines | last 3
 open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
@@ -953,7 +954,7 @@ open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
 - **Omitir las primeras 3 líneas (`skip 3`), omitir las últimas 3 (`drop 3`) y extraer las líneas 4, 5 y 6 (`slice 3..5`):**
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines | skip 3
 open --raw lines | lines | drop 3
 open --raw lines | lines | slice 3..5
@@ -963,17 +964,17 @@ open --raw lines | lines | slice 3..5 | to text | save -f lines_4_a_6.txt
 - **Extraer únicamente las líneas en posiciones impares usando `enumerate` y el operador módulo (`mod`):**
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item | to text | save -f lines_impares.txt
 ```
 
 #### Basado en un Patrón
 
-Para conservar o descartar líneas según una expresión regular, utilizamos `where ($it =~ "patrón")` (o `!~` para invertir la coincidencia). En `/data/ch05/alice.txt`, extraigamos los encabezados de capítulos que comienzan con `CHAPTER` seguidos de `The`, y contemos el total de líneas no vacías del libro:
+Para conservar o descartar líneas según una expresión regular, utilizamos `where ($it =~ "patrón")` (o `!~` para invertir la coincidencia). En `/data/ch06/alice.txt`, extraigamos los encabezados de capítulos que comienzan con `CHAPTER` seguidos de `The`, y contemos el total de líneas no vacías del libro:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open --raw alice.txt | lines | where ($it =~ '(?i)^chapter')
 open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The')
 open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The') | to text | save -f capitulos_the.txt
@@ -985,7 +986,7 @@ open --raw alice.txt | lines | where ($it | str trim | is-not-empty) | length
 Cuando formulamos una tubería sobre un archivo muy grande, resulta útil tomar una muestra aleatoria con el comando nativo **`shuffle`** combinado con **`first`**:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10 | to text | save -f muestra_10_lineas.txt
 ```
@@ -995,7 +996,7 @@ cd /data/ch05
 Para extraer únicamente el número romano y el título de cada capítulo de `alice.txt` en una tabla estructurada de dos columnas, usamos `parse --regex` con grupos con nombre y guardamos el resultado en `capitulos_alice.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let caps = (
     open --raw alice.txt
     | lines
@@ -1009,7 +1010,7 @@ $caps | save -f capitulos_alice.csv
 Y si deseamos construir un conjunto de datos con todas las palabras únicas de `alice.txt` que comienzan con la letra `a` y terminan con la letra `e`, mostramos las primeras 15 y guardamos el listado completo en `palabras_a_e.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let palabras_ae = (
     open --raw alice.txt
     | str lowercase
@@ -1029,7 +1030,7 @@ $palabras_ae | save -f palabras_a_e.csv
 En Nushell, la familia de comandos `str` (`str replace`, `str uppercase`, `str lowercase`, `str trim`) opera nativamente sobre texto **UTF-8**, por lo que convierte correctamente caracteres acentuados y no ASCII (como `'hallo wêreld!'` o `'helló világ'`) donde la herramienta clásica `tr` fallaba por operar sobre bytes individuales:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 "hello world!" | str replace -a " " "_"
 "hello world!" | str replace -a --regex '[ !]' ''
 "hallo wêreld!" | str uppercase
@@ -1048,10 +1049,10 @@ En las herramientas clásicas de texto (`grep`, `sed`, `tr`, `sort`), filtrar u 
 
 En **Nushell**, al abrir un archivo CSV con `open`, el encabezado se convierte automáticamente en el esquema de nombres de columnas de la tabla, y cualquier operación (`sort-by`, `where`, `update`) actúa exclusivamente sobre las filas o la columna indicada sin corromper jamás el encabezado.
 
-Por ejemplo, en `/data/ch05`, convirtamos a mayúsculas únicamente la columna `day` de `tips.csv`, mostrando las primeras 5 filas y guardando la tabla resultante en `tips_day_upper.csv`:
+Por ejemplo, en `/data/ch06`, convirtamos a mayúsculas únicamente la columna `day` de `tips.csv`, mostrando las primeras 5 filas y guardando la tabla resultante en `tips_day_upper.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open tips.csv | update day { str uppercase } | first 5
 open tips.csv | update day { str uppercase } | save -f tips_day_upper.csv
 ```
@@ -1061,7 +1062,7 @@ open tips.csv | update day { str uppercase } | save -f tips_day_upper.csv
 Cuando deseamos expresar transformaciones complejas utilizando sintaxis **SQL** sobre archivos CSV, Nushell permite volcar cualquier tabla directamente a una base de datos SQLite con `into sqlite` y consultarla con `query db`. Veamos cómo consultar `tips.csv` con SQL y guardar el resultado en `tips_sql_resultado.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 rm -f tips_temp.db
 open tips.csv | into sqlite tips_temp.db
 open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE bill > 40.0 AND day LIKE 'S%'"
@@ -1073,7 +1074,7 @@ open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE 
 Para extraer un subconjunto de columnas en un orden específico utilizamos `select`, y para excluir una o más columnas conservando el resto utilizamos `reject`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open iris.csv | select sepal_length petal_length sepal_width petal_width | first 5
 open iris.csv | reject species | first 5
 open iris.csv | select sepal_length petal_length sepal_width petal_width | save -f iris_columnas_reordenadas.csv
@@ -1084,7 +1085,7 @@ open iris.csv | select sepal_length petal_length sepal_width petal_width | save 
 En Nushell filtramos filas de tablas CSV combinando condiciones numéricas y expresiones regulares legibles mediante `where`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open tips.csv | where size >= 5 | first 6
 open tips.csv | where bill > 40.0 and day =~ '^S'
 open tips.csv | where bill > 40.0 and day =~ '^S' | save -f tips_altos_finde.csv
@@ -1092,10 +1093,10 @@ open tips.csv | where bill > 40.0 and day =~ '^S' | save -f tips_altos_finde.csv
 
 ### Combinar Columnas (y Robustez ante Comas Internas)
 
-Consideremos los archivos `names.csv` y `names-comma.csv` en `/data/ch05`, los cuales contienen compositores cuyos nombres (`first_name`) y apellidos (`last_name`) deseamos combinar en una columna `full_name`:
+Consideremos los archivos `names.csv` y `names-comma.csv` en `/data/ch06`, los cuales contienen compositores cuyos nombres (`first_name`) y apellidos (`last_name`) deseamos combinar en una columna `full_name`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open names.csv
 open names-comma.csv
 ```
@@ -1103,7 +1104,7 @@ open names-comma.csv
 En `names-comma.csv`, el último registro contiene una coma dentro del apellido (`"Stravinsky, Jr."`). Mientras que `sed`, `awk` y `cut` fallaban al partir por esa coma interna, el analizador CSV de Nushell respeta las comillas del estándar RFC 4180 y construye `full_name` de manera impecable:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let nombres_limpios = (
     open names-comma.csv
     | insert full_name { |row| $"($row.first_name) ($row.last_name)" }
@@ -1117,10 +1118,10 @@ $nombres_limpios | save -f names_completos.csv
 
 #### Concatenar Horizontalmente (`merge`)
 
-En `/data/ch05` podemos dividir `tips.csv` en tres archivos CSV con distintas columnas (`bills.csv`, `datetime.csv` y `customers.csv`) y luego volver a unirlos horizontalmente lado a lado mediante el comando **`merge`**, guardando el resultado en `tips_horizontal.csv`:
+En `/data/ch06` podemos dividir `tips.csv` en tres archivos CSV con distintas columnas (`bills.csv`, `datetime.csv` y `customers.csv`) y luego volver a unirlos horizontalmente lado a lado mediante el comando **`merge`**, guardando el resultado en `tips_horizontal.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open tips.csv | select bill tip | save -f bills.csv
 open tips.csv | select day time | save -f datetime.csv
 open tips.csv | select sex smoker size | save -f customers.csv
@@ -1135,7 +1136,7 @@ $unido_horizontal | save -f tips_horizontal.csv
 Cuando dos tablas comparten una columna clave (como `species` en `iris.csv` e `irismeta.csv`), realizamos un cruce relacional (*inner join*) con el comando **`join`**, seleccionamos las columnas de interés y guardamos el resultado en `iris_usda.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open irismeta.csv
 let iris_enriquecido = (
     open iris.csv
@@ -1148,12 +1149,12 @@ $iris_enriquecido | save -f iris_usda.csv
 
 ## Trabajando con XML/HTML y JSON
 
-En `/data/ch05` contamos con el archivo JSON `users.json` y los archivos extraídos de Wikipedia `wiki.html`, `table.html` y `table.json`.
+En `/data/ch06` contamos con el archivo JSON `users.json` y los archivos extraídos de Wikipedia `wiki.html`, `table.html` y `table.json`.
 
 En lugar de modificar `users.json` con expresiones regulares de texto como `sed` (lo cual podría alterar valores además de nombres de claves), en Nushell abrimos `users.json` como estructura de datos, renombramos el campo `gender` a `sex` en la tabla `results` y guardamos el resultado tanto en JSON como en CSV:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 let usuarios = (
     open users.json
     | get results
@@ -1167,7 +1168,7 @@ $usuarios | save -f users_sex.csv
 De igual manera, a partir de la tabla HTML convertida a JSON en `table.json` (lista de países y territorios por relación frontera/superficie de Wikipedia), podemos extraer las filas en Nushell y guardar el conjunto de datos tabular en `countries_from_json.csv`:
 
 ```nu
-cd /data/ch05
+cd /data/ch06
 open countries.csv | first 10
 open countries.csv | first 10 | save -f countries_top10.csv
 ```

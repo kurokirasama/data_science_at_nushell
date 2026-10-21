@@ -1,0 +1,5 @@
+2026-10-21 12:51:11,338 - INFO - Task: evaluate
+2026-10-21 12:51:11,338 - INFO - Training on train, Test on test, feature set ['features'] ...
+2026-10-21 12:51:11,393 - INFO - Featurizing and training new KNeighborsClassifier model
+2026-10-21 12:51:11,412 - INFO - Hyperparameters: algorithm: auto, leaf_size: 30, metric: minkowski, metric_params: None, n_jobs: None, n_neighbors: 5, p: 2, weights: uniform
+2026-10-21 12:51:11,412 - INFO - Evaluating predictions

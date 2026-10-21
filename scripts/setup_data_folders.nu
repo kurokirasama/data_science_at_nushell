@@ -1,40 +1,41 @@
 #!/usr/bin/env nu
 # =============================================================================
-# setup_data_folders.nu — Builds clean /data/ch02..ch08 matching section numbers
+# setup_data_folders.nu — Builds clean /data/ch03..ch09 matching section numbers
 # =============================================================================
 
 let src_files = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtTheCommandLine/Files"
 let src_data = $"($src_files)/data"
 let dst_data = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/data"
+let docker_data = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/docker/data"
 
 rm -rf $dst_data
 mkdir $dst_data
-mkdir $"($dst_data)/ch02"
 mkdir $"($dst_data)/ch03"
 mkdir $"($dst_data)/ch04"
 mkdir $"($dst_data)/ch05"
 mkdir $"($dst_data)/ch06"
 mkdir $"($dst_data)/ch07"
 mkdir $"($dst_data)/ch08"
+mkdir $"($dst_data)/ch09"
 mkdir $"($dst_data)/.cache"
 
 # Extract .cache from cache.7z
 ^7z x $"($src_data)/cache.7z" $"-o($dst_data)" -y | ignore
 
 # -----------------------------------------------------------------------------
-# ch02: Section 2 (Introducción y Fundamentos de Nushell)
+# ch03: Section 3 (Fundamentos y Estructuras de Datos en Nushell)
 # -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch02/." $"($dst_data)/ch02/"
+^cp -a $"($src_data)/ch02/." $"($dst_data)/ch03/"
 for f in ["edition.json", "edition2.json", "edition2.csv", "edition2.yaml"] {
-    cp $"($src_data)/ch09/($f)" $"($dst_data)/ch02/($f)"
+    cp $"($src_data)/ch09/($f)" $"($dst_data)/ch03/($f)"
 }
-cp $"($src_data)/ch07/tips.csv" $"($dst_data)/ch02/tips.csv"
-cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch02/stream.py"
+cp $"($src_data)/ch07/tips.csv" $"($dst_data)/ch03/tips.csv"
+cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch03/stream.py"
 
 # -----------------------------------------------------------------------------
-# ch03: Section 3 (Programación y Creación de Herramientas de Línea de Comandos)
+# ch04: Section 4 (Programación y Creación de Herramientas de Línea de Comandos)
 # -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch04/." $"($dst_data)/ch03/"
+^cp -a $"($src_data)/ch04/." $"($dst_data)/ch04/"
 
 # Fix top-words.py and top-words.R to use python3 and local stopwords file
 '#!/usr/bin/env python3
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 10
     print("count,word")
     top_words(text, n)
-' | save -f $"($dst_data)/ch03/top-words.py"
+' | save -f $"($dst_data)/ch04/top-words.py"
 
 '#!/usr/bin/env Rscript
 args <- commandArgs(trailingOnly = TRUE)
@@ -80,7 +81,7 @@ counts <- sort(table(words), decreasing = TRUE)
 top_n <- head(counts, n)
 cat("count,word\n")
 cat(sprintf("%d,%s\n", as.integer(top_n), names(top_n)), sep = "")
-' | save -f $"($dst_data)/ch03/top-words.R"
+' | save -f $"($dst_data)/ch04/top-words.R"
 
 '#!/usr/bin/env python3
 import sys
@@ -97,7 +98,7 @@ if __name__ == "__main__":
         line = line.strip()
         if line:
             print(fizz_buzz(int(line)))
-' | save -f $"($dst_data)/ch03/fizzbuzz.py"
+' | save -f $"($dst_data)/ch04/fizzbuzz.py"
 
 '#!/usr/bin/env Rscript
 cycle_of_15 <- c("fizzbuzz", NA, NA, "fizz", NA,
@@ -114,19 +115,19 @@ lines <- lines[nzchar(trimws(lines))]
 for (n in lines) {
   cat(fizz_buzz(n), "\n", sep = "")
 }
-' | save -f $"($dst_data)/ch03/fizzbuzz.R"
+' | save -f $"($dst_data)/ch04/fizzbuzz.R"
 
-# Create Nushell top-words progression files in ch03
+# Create Nushell top-words progression files in ch04
 'open --raw alice.txt
-| str downcase
+| str lowercase
 | parse --regex "(?P<word>[a-z]{2,})"
 | get word
 | uniq -c
 | sort-by count --reverse
 | first 10
-' | str replace "downcase" "lowercase" | save -f $"($dst_data)/ch03/top-words-1.nu"
+' | save -f $"($dst_data)/ch04/top-words-1.nu"
 
-cp $"($dst_data)/ch03/top-words-1.nu" $"($dst_data)/ch03/top-words-2.nu"
+cp $"($dst_data)/ch04/top-words-1.nu" $"($dst_data)/ch04/top-words-2.nu"
 
 '#!/usr/bin/env nu
 open --raw alice.txt
@@ -136,7 +137,7 @@ open --raw alice.txt
 | uniq -c
 | sort-by count --reverse
 | first 10
-' | save -f $"($dst_data)/ch03/top-words-3.nu"
+' | save -f $"($dst_data)/ch04/top-words-3.nu"
 
 '#!/usr/bin/env -S nu --stdin
 def main [] {
@@ -148,7 +149,7 @@ def main [] {
     | sort-by count --reverse
     | first 10
 }
-' | save -f $"($dst_data)/ch03/top-words-4.nu"
+' | save -f $"($dst_data)/ch04/top-words-4.nu"
 
 '#!/usr/bin/env -S nu --stdin
 
@@ -173,10 +174,10 @@ def main [
     | sort-by count --reverse
     | first $num_words
 }
-' | save -f $"($dst_data)/ch03/top-words-5.nu"
-cp $"($dst_data)/ch03/top-words-5.nu" $"($dst_data)/ch03/top-words.nu"
+' | save -f $"($dst_data)/ch04/top-words-5.nu"
+cp $"($dst_data)/ch04/top-words-5.nu" $"($dst_data)/ch04/top-words.nu"
 
-# stats_utils.nu, maps.nu, osm_maps.nu in ch03
+# stats_utils.nu, maps.nu, osm_maps.nu in ch04
 '# Módulo de utilidades estadísticas para Ciencia de Datos en Nushell
 
 export def resumen-columna [col: string]: table -> record {
@@ -198,7 +199,7 @@ export def filtrar-outliers [col: string, --z-max: float = 2.5]: table -> table 
     let sd = ($tbl | get $col | math stddev)
     $tbl | where { |row| ((($row | get $col) - $mu) | math abs) <= ($z_max * $sd) }
 }
-' | save -f $"($dst_data)/ch03/stats_utils.nu"
+' | save -f $"($dst_data)/ch04/stats_utils.nu"
 
 '# Módulo de geocodificación con la API de Google Maps
 
@@ -240,15 +241,15 @@ export def address-from-loc [
     }
     $response.results.0.formatted_address
 }
-' | save -f $"($dst_data)/ch03/maps.nu"
+' | save -f $"($dst_data)/ch04/maps.nu"
 
-chmod +x $"($dst_data)/ch03/top-words.py" $"($dst_data)/ch03/top-words.R" $"($dst_data)/ch03/fizzbuzz.py" $"($dst_data)/ch03/fizzbuzz.R" $"($dst_data)/ch03/top-words-2.nu" $"($dst_data)/ch03/top-words-3.nu" $"($dst_data)/ch03/top-words-4.nu" $"($dst_data)/ch03/top-words-5.nu" $"($dst_data)/ch03/top-words.nu"
+chmod +x $"($dst_data)/ch04/top-words.py" $"($dst_data)/ch04/top-words.R" $"($dst_data)/ch04/fizzbuzz.py" $"($dst_data)/ch04/fizzbuzz.R" $"($dst_data)/ch04/top-words-2.nu" $"($dst_data)/ch04/top-words-3.nu" $"($dst_data)/ch04/top-words-4.nu" $"($dst_data)/ch04/top-words-5.nu" $"($dst_data)/ch04/top-words.nu"
 
 # -----------------------------------------------------------------------------
-# ch04: Section 4 (Obtención de Datos)
+# ch05: Section 5 (Obtención de Datos)
 # -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch03/." $"($dst_data)/ch04/"
-rm -f $"($dst_data)/ch04/wikimedia-stream-samplecd"
+^cp -a $"($src_data)/ch03/." $"($dst_data)/ch05/"
+rm -f $"($dst_data)/ch05/wikimedia-stream-samplecd"
 
 {
     urls: [
@@ -256,7 +257,7 @@ rm -f $"($dst_data)/ch04/wikimedia-stream-samplecd"
         "https://jsonplaceholder.typicode.com/posts/2"
         "https://jsonplaceholder.typicode.com/posts/3"
     ]
-} | to json | save -f $"($dst_data)/ch04/urls.json"
+} | to json | save -f $"($dst_data)/ch05/urls.json"
 
 [
     {userId: 1, id: 1, title: "sunt aut facere repellat provident", body: "quia et suscipit\nsuscipit recusandae consequuntur"}
@@ -264,32 +265,32 @@ rm -f $"($dst_data)/ch04/wikimedia-stream-samplecd"
     {userId: 1, id: 3, title: "ea molestias quasi exercitationem", body: "et iusto sed quo iure\nvoluptatem occaecati"}
     {userId: 1, id: 4, title: "eum et est occaecati", body: "ullam et saepe reiciendis voluptatem"}
     {userId: 1, id: 5, title: "nesciunt quas odio", body: "repudiandae veniam quaerat sunt sed"}
-] | to json | save -f $"($dst_data)/ch04/posts_sample.json"
+] | to json | save -f $"($dst_data)/ch05/posts_sample.json"
 
-mkdir $"($dst_data)/ch04/.secret"
-"demo_newsapi_key_12345" | save -f $"($dst_data)/ch04/.secret/newsapi.org_apikey"
-
-# -----------------------------------------------------------------------------
-# ch05: Section 5 (Depuración y Transformación de Datos)
-# -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch05/." $"($dst_data)/ch05/"
-cp $"($dst_data)/ch03/fizzbuzz.py" $"($dst_data)/ch05/fizzbuzz.py"
-cp $"($src_files)/vgsales.csv" $"($dst_data)/ch05/vgsales.csv"
-cp $"($src_data)/my_data/vgsales_filtered.csv" $"($dst_data)/ch05/vgsales_filtered.csv"
-cp $"($src_data)/my_data/data_by_year.csv" $"($dst_data)/ch05/data_by_year.csv"
+mkdir $"($dst_data)/ch05/.secret"
+"demo_newsapi_key_12345" | save -f $"($dst_data)/ch05/.secret/newsapi.org_apikey"
 
 # -----------------------------------------------------------------------------
-# ch06: Section 6 (Exploración de Datos y Visualización en la Terminal)
+# ch06: Section 6 (Depuración y Transformación de Datos)
 # -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch07/." $"($dst_data)/ch06/"
+^cp -a $"($src_data)/ch05/." $"($dst_data)/ch06/"
+cp $"($dst_data)/ch04/fizzbuzz.py" $"($dst_data)/ch06/fizzbuzz.py"
+cp $"($src_files)/vgsales.csv" $"($dst_data)/ch06/vgsales.csv"
+cp $"($src_data)/my_data/vgsales_filtered.csv" $"($dst_data)/ch06/vgsales_filtered.csv"
+cp $"($src_data)/my_data/data_by_year.csv" $"($dst_data)/ch06/data_by_year.csv"
 
-# Create standalone R and Python scripts for Section 6 (no inline scripts!)
+# -----------------------------------------------------------------------------
+# ch07: Section 7 (Exploración de Datos y Visualización en la Terminal)
+# -----------------------------------------------------------------------------
+^cp -a $"($src_data)/ch07/." $"($dst_data)/ch07/"
+
+# Create standalone R and Python scripts for Section 7 (no inline scripts!)
 '#!/usr/bin/env Rscript
 df <- read.csv("tips.csv", stringsAsFactors = FALSE)
 df$percent <- round(df$tip / df$bill * 100, 2)
 write.csv(df, "percent.csv", row.names = FALSE, quote = FALSE)
 tryCatch(write.csv(df, stdout(), row.names = FALSE, quote = FALSE), error = function(e) invisible(NULL))
-' | save -f $"($dst_data)/ch06/mutate_tips.R"
+' | save -f $"($dst_data)/ch07/mutate_tips.R"
 
 '#!/usr/bin/env Rscript
 df <- read.csv("tips.csv", stringsAsFactors = FALSE)
@@ -307,7 +308,7 @@ out <- data.frame(
   pct_tip_iqr = round(agg$pct_tip[, "iqr"], 2)
 )
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch06/summary_tips.R"
+' | save -f $"($dst_data)/ch07/summary_tips.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -318,7 +319,7 @@ df["pct_tip"] = df["tip"] / df["bill"] * 100.0
 corr = df[["bill", "tip", "size", "pct_tip"]].corr().round(4)
 corr.index.name = "variable"
 corr.reset_index().to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch06/corr_tips.py"
+' | save -f $"($dst_data)/ch07/corr_tips.py"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -329,7 +330,7 @@ p <- ggplot(df, aes(x = bill, y = tip, color = size)) +
   theme_minimal()
 ggsave("tips.png", plot = p, width = 7, height = 4.5, dpi = 120)
 ggsave("tips_faceted.png", plot = p, width = 7, height = 4.5, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_faceted.R"
+' | save -f $"($dst_data)/ch07/plot_faceted.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -340,7 +341,7 @@ p <- ggplot(df, aes(x = time, fill = time)) +
   theme_minimal()
 ggsave("plot-bar.png", plot = p, width = 6, height = 4, dpi = 120)
 ggsave("tips_bar.png", plot = p, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_bar.R"
+' | save -f $"($dst_data)/ch07/plot_bar.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -351,7 +352,7 @@ p <- ggplot(df, aes(x = tip, fill = time)) +
   theme_minimal()
 ggsave("plot-histogram.png", plot = p, width = 6, height = 4, dpi = 120)
 ggsave("tips_histogram.png", plot = p, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_histogram.R"
+' | save -f $"($dst_data)/ch07/plot_histogram.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -362,7 +363,7 @@ p <- ggplot(df, aes(x = tip, fill = time)) +
   theme_minimal()
 ggsave("plot-density.png", plot = p, width = 6, height = 4, dpi = 120)
 ggsave("tips_density.png", plot = p, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_density.R"
+' | save -f $"($dst_data)/ch07/plot_density.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -373,7 +374,7 @@ p <- ggplot(df, aes(x = tip, y = bill, color = size)) +
   theme_minimal()
 ggsave("plot-accident.png", plot = p, width = 6, height = 4, dpi = 120)
 ggsave("fatalities_line.png", plot = p, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_accident.R"
+' | save -f $"($dst_data)/ch07/plot_accident.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -384,7 +385,7 @@ p <- ggplot(df, aes(x = bill, y = tip, color = time)) +
   theme_minimal()
 ggsave("plot-scatter.png", plot = p, width = 6, height = 4, dpi = 120)
 ggsave("tips_scatter.png", plot = p, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_scatter.R"
+' | save -f $"($dst_data)/ch07/plot_scatter.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -400,7 +401,7 @@ p2 <- ggplot(df, aes(x = bill, y = tip, color = time)) +
   theme_minimal()
 ggsave("plot-trend-points.png", plot = p2, width = 6, height = 4, dpi = 120)
 ggsave("tips_trend.png", plot = p2, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_trend.R"
+' | save -f $"($dst_data)/ch07/plot_trend.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -411,7 +412,7 @@ p <- ggplot(df, aes(x = factor(size), y = bill, fill = factor(size))) +
   theme_minimal()
 ggsave("plot-boxplot.png", plot = p, width = 6, height = 4, dpi = 120)
 ggsave("tips_boxplot.png", plot = p, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_boxplot.R"
+' | save -f $"($dst_data)/ch07/plot_boxplot.R"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
@@ -426,7 +427,7 @@ p <- ggplot(df, aes(x = factor(size), y = bill, fill = factor(size))) +
   theme_minimal()
 ggsave("plot-labels.png", plot = p, width = 6.5, height = 4.2, dpi = 120)
 ggsave("tips_violin.png", plot = p, width = 6.5, height = 4.2, dpi = 120)
-' | save -f $"($dst_data)/ch06/plot_violin.R"
+' | save -f $"($dst_data)/ch07/plot_violin.R"
 
 '#!/usr/bin/env python3
 import json
@@ -457,43 +458,43 @@ plt.savefig("tips_python.png")
 
 summary = df.groupby("day")[["bill", "tip"]].mean().round(2).reset_index().to_dict(orient="records")
 print(json.dumps(summary))
-' | save -f $"($dst_data)/ch06/plot_tips_py.py"
+' | save -f $"($dst_data)/ch07/plot_tips_py.py"
 
-if not ($"($dst_data)/ch06/Fatalities.csv" | path exists) {
-    cp $"($dst_data)/ch06/tips.csv" $"($dst_data)/ch06/Fatalities.csv"
+if not ($"($dst_data)/ch07/Fatalities.csv" | path exists) {
+    cp $"($dst_data)/ch07/tips.csv" $"($dst_data)/ch07/Fatalities.csv"
 }
 
-glob $"($dst_data)/ch06/*.{R,py}" | each { |f| chmod +x $f }
+glob $"($dst_data)/ch07/*.{R,py}" | each { |f| chmod +x $f }
 
 # -----------------------------------------------------------------------------
-# ch07: Section 7 (Procesamiento en Serie y Tuberías Paralelas)
+# ch08: Section 8 (Procesamiento en Serie y Tuberías Paralelas)
 # -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch08/." $"($dst_data)/ch07/"
+^cp -a $"($src_data)/ch08/." $"($dst_data)/ch08/"
 
-# Populate input.csv in ch07 with valid name,email,quantity rows
+# Populate input.csv in ch08 with valid name,email,quantity rows
 "name,email,quantity
 Alicia Rivera,alicia.rivera@example.com,12
 Bruno Soto,bruno.soto@example.com,25
 Carla Mendez,carla.mendez@example.com,18
 Diego Fuentes,diego.fuentes@example.com,30
 Elena Vargas,elena.vargas@example.com,15
-" | save -f $"($dst_data)/ch07/input.csv"
+" | save -f $"($dst_data)/ch08/input.csv"
 
 '#!/usr/bin/env bash
 parallel --colsep "," "echo \"$1\" | bc -l"
-' | save -f $"($dst_data)/ch07/pbc"
-chmod +x $"($dst_data)/ch07/pbc" $"($dst_data)/ch07/slow.sh"
+' | save -f $"($dst_data)/ch08/pbc"
+chmod +x $"($dst_data)/ch08/pbc" $"($dst_data)/ch08/slow.sh"
 
 # -----------------------------------------------------------------------------
-# ch08: Section 8 (Modelación Políglota de Datos)
+# ch09: Section 9 (Modelación Políglota de Datos)
 # -----------------------------------------------------------------------------
-^cp -a $"($src_data)/ch09/." $"($dst_data)/ch08/"
-rm -f $"($dst_data)/ch08/2026-10_hola.txt" $"($dst_data)/ch08/output.nu" $"($dst_data)/ch08/output.txt" $"($dst_data)/ch08/edition.json" $"($dst_data)/ch08/edition2.json" $"($dst_data)/ch08/edition2.csv" $"($dst_data)/ch08/edition2.yaml"
-cp $"($dst_data)/ch08/wine.csv" $"($dst_data)/ch08/wine-both.csv"
-open $"($dst_data)/ch08/wine-white-clean.csv" | save -f $"($dst_data)/ch08/wine-white.csv"
-open $"($dst_data)/ch08/wine.csv" | where type == "red" | reject type | save -f $"($dst_data)/ch08/wine-red.csv"
+^cp -a $"($src_data)/ch09/." $"($dst_data)/ch09/"
+rm -f $"($dst_data)/ch09/2026-10_hola.txt" $"($dst_data)/ch09/output.nu" $"($dst_data)/ch09/output.txt" $"($dst_data)/ch09/edition.json" $"($dst_data)/ch09/edition2.json" $"($dst_data)/ch09/edition2.csv" $"($dst_data)/ch09/edition2.yaml"
+cp $"($dst_data)/ch09/wine.csv" $"($dst_data)/ch09/wine-both.csv"
+open $"($dst_data)/ch09/wine-white-clean.csv" | save -f $"($dst_data)/ch09/wine-white.csv"
+open $"($dst_data)/ch09/wine.csv" | where type == "red" | reject type | save -f $"($dst_data)/ch09/wine-red.csv"
 
-# Create standalone R and Python modeling scripts in ch08 (no inline scripts!)
+# Create standalone R and Python modeling scripts in ch09 (no inline scripts!)
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(ggplot2))
 df <- read.csv("wine.csv")
@@ -509,7 +510,7 @@ p2 <- ggplot(df, aes(x = alcohol, y = quality, color = type)) +
   labs(title = "Relacion entre Alcohol y Calidad por Tipo de Vino", x = "Alcohol (%)", y = "Calidad") +
   theme_minimal()
 ggsave("wine-alcohol-vs-quality.png", plot = p2, width = 6, height = 4, dpi = 120)
-' | save -f $"($dst_data)/ch08/plot_wine_eda.R"
+' | save -f $"($dst_data)/ch09/plot_wine_eda.R"
 
 '#!/usr/bin/env Rscript
 df <- read.csv("wine.csv", stringsAsFactors = FALSE)
@@ -534,7 +535,7 @@ coords <- data.frame(
   quality = df$quality
 )
 write.csv(coords, "wine_pca_r.csv", row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/pca_wine.R"
+' | save -f $"($dst_data)/ch09/pca_wine.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -566,7 +567,7 @@ summary = pd.DataFrame({
     "cum_variance": (pca.explained_variance_ratio_.cumsum() * 100).round(2)
 })
 summary.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/pca_wine.py"
+' | save -f $"($dst_data)/ch09/pca_wine.py"
 
 '#!/usr/bin/env Rscript
 set.seed(42)
@@ -591,7 +592,7 @@ out <- data.frame(
   dominant_type = ifelse(tab$red > tab$white, "red", "white")
 )
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/cluster_wine.R"
+' | save -f $"($dst_data)/ch09/cluster_wine.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -621,7 +622,7 @@ for k in [2, 3, 4, 5]:
     })
 
 pd.DataFrame(rows).to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/cluster_wine.py"
+' | save -f $"($dst_data)/ch09/cluster_wine.py"
 
 '#!/usr/bin/env Rscript
 set.seed(42)
@@ -653,7 +654,7 @@ out <- data.frame(
   p_value = signif(coefs[, "Pr(>|t|)"], 4)
 )
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/regress_wine.R"
+' | save -f $"($dst_data)/ch09/regress_wine.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -691,7 +692,7 @@ for name, model in models.items():
 out_df = pd.DataFrame(rows)
 out_df.to_csv("wine_reg_metrics_py.csv", index=False)
 out_df.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/regress_wine.py"
+' | save -f $"($dst_data)/ch09/regress_wine.py"
 
 '#!/usr/bin/env Rscript
 train <- read.csv("train/features.csv", stringsAsFactors = FALSE)
@@ -727,7 +728,7 @@ out <- data.frame(
 )
 write.csv(out, "wine_clf_r.csv", row.names = FALSE, quote = FALSE)
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/classify_wine.R"
+' | save -f $"($dst_data)/ch09/classify_wine.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -765,15 +766,15 @@ for name, clf in models.items():
 out_df = pd.DataFrame(rows)
 out_df.to_csv("wine_clf_py.csv", index=False)
 out_df.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/classify_wine.py"
+' | save -f $"($dst_data)/ch09/classify_wine.py"
 
-# Copy Minería de Datos & UNAB datasets into ch08
+# Copy Minería de Datos & UNAB datasets into ch09
 let mineria_base = "/home/kira/Dropbox/Documentos/Clases/UBB/Mineria_de_Datos"
-cp $"($mineria_base)/material_unab/mine/guias/scripts/banco.csv" $"($dst_data)/ch08/banco.csv"
-cp $"($mineria_base)/material_unab/mine/guias/scripts/Fish.csv" $"($dst_data)/ch08/Fish.csv"
-cp $"($mineria_base)/Files/vertebrate.csv" $"($dst_data)/ch08/vertebrate.csv"
-cp $"($mineria_base)/Files/python_snippets/zoo.csv" $"($dst_data)/ch08/zoo.csv"
-cp $"($mineria_base)/Files/python_snippets/pima-indians-diabetes.data.csv" $"($dst_data)/ch08/pima-indians-diabetes.data.csv"
+cp $"($mineria_base)/material_unab/mine/guias/scripts/banco.csv" $"($dst_data)/ch09/banco.csv"
+cp $"($mineria_base)/material_unab/mine/guias/scripts/Fish.csv" $"($dst_data)/ch09/Fish.csv"
+cp $"($mineria_base)/Files/vertebrate.csv" $"($dst_data)/ch09/vertebrate.csv"
+cp $"($mineria_base)/Files/python_snippets/zoo.csv" $"($dst_data)/ch09/zoo.csv"
+cp $"($mineria_base)/Files/python_snippets/pima-indians-diabetes.data.csv" $"($dst_data)/ch09/pima-indians-diabetes.data.csv"
 
 # Hierarchical clustering (hclust) scripts on Fish.csv
 '#!/usr/bin/env Rscript
@@ -796,7 +797,7 @@ out <- data.frame(
   dominant_count = apply(tab, 1, max)
 )
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/hclust_fish.R"
+' | save -f $"($dst_data)/ch09/hclust_fish.R"
 
 '#!/usr/bin/env python3
 # Clustering Jerárquico con Scikit-Learn
@@ -826,7 +827,7 @@ for k in [2, 3, 4, 5]:
     })
 
 pd.DataFrame(rows).to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/hclust_fish.py"
+' | save -f $"($dst_data)/ch09/hclust_fish.py"
 
 # Optimal K evaluation script (Inertia, Silhouette, Calinski-Harabasz, Davies-Bouldin)
 '#!/usr/bin/env python3
@@ -853,7 +854,7 @@ for k in range(2, 7):
     })
 
 pd.DataFrame(rows).to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/cluster_eval.py"
+' | save -f $"($dst_data)/ch09/cluster_eval.py"
 
 # Decision Tree classification (R and Python)
 '#!/usr/bin/env Rscript
@@ -890,7 +891,7 @@ out <- data.frame(
 )
 write.csv(out, "banco_dt_r.csv", row.names = FALSE, quote = FALSE)
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/dt_banco.R"
+' | save -f $"($dst_data)/ch09/dt_banco.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -920,7 +921,7 @@ out = pd.DataFrame([{
 }])
 out.to_csv("banco_dt_py.csv", index=False)
 out.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/dt_banco.py"
+' | save -f $"($dst_data)/ch09/dt_banco.py"
 
 # k-NN classification (R and Python)
 '#!/usr/bin/env Rscript
@@ -961,7 +962,7 @@ for (k in c(3, 5, 7)) {
 out <- do.call(rbind, rows)
 write.csv(out, "banco_knn_r.csv", row.names = FALSE, quote = FALSE)
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/knn_banco.R"
+' | save -f $"($dst_data)/ch09/knn_banco.R"
 
 '#!/usr/bin/env python3
 import pandas as pd
@@ -998,7 +999,7 @@ for k in [3, 5, 7]:
 out_df = pd.DataFrame(rows)
 out_df.to_csv("banco_knn_py.csv", index=False)
 out_df.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/knn_banco.py"
+' | save -f $"($dst_data)/ch09/knn_banco.py"
 
 # Naïve Bayes & SVM (Python)
 '#!/usr/bin/env python3
@@ -1040,12 +1041,12 @@ for name, clf in models.items():
 out_df = pd.DataFrame(rows)
 out_df.to_csv("banco_nb_svm_py.csv", index=False)
 out_df.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/nb_svm_banco.py"
+' | save -f $"($dst_data)/ch09/nb_svm_banco.py"
 
 # Copy Life_Expectancy_Data.csv if available
 let life_exp_src = "/home/kira/Dropbox/Documentos/Clases/UBB/Mineria_de_Datos/material_unab/mine/guias/scripts/Life_Expectancy_Data.csv"
 if ($life_exp_src | path exists) {
-    cp $life_exp_src $"($dst_data)/ch08/Life_Expectancy_Data.csv"
+    cp $life_exp_src $"($dst_data)/ch09/Life_Expectancy_Data.csv"
 }
 
 # Multicollinearity (VIF) & Principal Component Regression (PCR) - Python & R
@@ -1094,7 +1095,7 @@ comp_df = pd.DataFrame([
 ])
 comp_df.to_csv("fish_pcr_py.csv", index=False)
 comp_df.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/vif_pcr_fish.py"
+' | save -f $"($dst_data)/ch09/vif_pcr_fish.py"
 
 '#!/usr/bin/env Rscript
 df <- read.csv("Fish.csv")
@@ -1119,7 +1120,7 @@ out_comp <- data.frame(
 )
 write.csv(out_comp, "fish_pcr_r.csv", row.names = FALSE, quote = FALSE)
 write.csv(out_comp, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/vif_pcr_fish.R"
+' | save -f $"($dst_data)/ch09/vif_pcr_fish.R"
 
 # Density-Based Spatial Clustering (DBSCAN) - Python
 '#!/usr/bin/env python3
@@ -1149,7 +1150,7 @@ grouped["cluster_type"] = grouped["cluster"].apply(lambda c: "Ruido / Outliers" 
 out = grouped[["cluster", "cluster_type", "n_samples", "avg_weight", "avg_length", "avg_height", "avg_width"]]
 out.to_csv("fish_dbscan_py.csv", index=False)
 out.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/dbscan_fish.py"
+' | save -f $"($dst_data)/ch09/dbscan_fish.py"
 
 # K-Medoids Clustering (PAM) - R
 '#!/usr/bin/env Rscript
@@ -1172,7 +1173,7 @@ out <- data.frame(
 )
 write.csv(out, "fish_pam_r.csv", row.names = FALSE, quote = FALSE)
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/pam_fish.R"
+' | save -f $"($dst_data)/ch09/pam_fish.R"
 
 # Multi-Layer Perceptron (MLP) Artificial Neural Networks - Python & R
 '#!/usr/bin/env python3
@@ -1213,7 +1214,7 @@ for hidden in [(8,), (16, 8)]:
 out = pd.DataFrame(rows)
 out.to_csv("banco_mlp_py.csv", index=False)
 out.to_csv(sys.stdout, index=False)
-' | save -f $"($dst_data)/ch08/mlp_banco.py"
+' | save -f $"($dst_data)/ch09/mlp_banco.py"
 
 '#!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(nnet))
@@ -1250,9 +1251,14 @@ out <- data.frame(
 )
 write.csv(out, "banco_mlp_r.csv", row.names = FALSE, quote = FALSE)
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
-' | save -f $"($dst_data)/ch08/mlp_banco.R"
+' | save -f $"($dst_data)/ch09/mlp_banco.R"
 
-glob $"($dst_data)/ch08/*.{R,py}" | each { |f| chmod +x $f }
+glob $"($dst_data)/ch09/*.{R,py}" | each { |f| chmod +x $f }
 
-print "Successfully built /data/ch02..ch08 structure!"
+# Sync to docker/data
+rm -rf $docker_data
+mkdir $docker_data
+^cp -a $"($dst_data)/." $docker_data
+
+print "Successfully built /data/ch03..ch09 structure and synced to docker/data!"
 ls $dst_data | select name type
