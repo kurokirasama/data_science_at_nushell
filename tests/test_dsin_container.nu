@@ -65,10 +65,10 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   let tools_ok = ($tools_res.exit_code == 0) and (($tools_res.stdout | str trim) == "true")
   $results ++= [{ check: "external_tools_in_path", passed: $tools_ok, detail: $"All required CLI/modeling tools in PATH: ($tools_res.stdout | str trim)" }]
 
-  # 11. Custom l nushell command works flawlessly (both standalone, with path, with -s, with -d)
-  let l_res = (do -i { ^sudo -n docker run --rm $image --config /home/dsin/.config/nushell/config.nu -c "(l /data | length) > 0 and (l -s | length) >= 0 and (l /data/ch03 -d | length) > 0" } | complete)
+  # 11. Custom l nushell command works flawlessly (custom type, LS_COLORS defined, both standalone, with path, with -s, with -d)
+  let l_res = (do -i { ^sudo -n docker run --rm $image --config /home/dsin/.config/nushell/config.nu -c "(l /data | length) > 0 and (l -s | length) >= 0 and (l /data/ch03 -d | length) > 0 and ((which l | get 0.type) == 'custom') and ($env.LS_COLORS? | default '' | str contains 'di=01;34') and ($env.config.ls.use_ls_colors == true)" } | complete)
   let l_ok = ($l_res.exit_code == 0) and (($l_res.stdout | str trim) == "true")
-  $results ++= [{ check: "custom_l_command_works", passed: $l_ok, detail: $"l /data, l -s, l -d execute flawlessly: ($l_res.stdout | str trim)" }]
+  $results ++= [{ check: "custom_l_command_works", passed: $l_ok, detail: $"l custom type, LS_COLORS, and pipelines execute flawlessly: ($l_res.stdout | str trim)" }]
 
   # 12. Generated example output files are clean from /data
   let clean_res = (do -i { ^sudo -n docker run --rm $image -c "['/data/ch03/fac.py.bak' '/data/ch03/edition2.json' '/data/ch06/bills.csv' '/data/ch06/fb.png' '/data/ch06/table.html' '/data/ch07/plot-bar.png' '/data/ch07/tips.png' '/data/ch07/percent.csv' '/data/ch08/hi-1.txt' '/data/ch08/outdir' '/data/ch08/one-big-file.txt' '/data/ch09/output' '/data/ch09/wine.model' '/data/ch09/results.csv'] | all {|f| not ($f | path exists)}" } | complete)

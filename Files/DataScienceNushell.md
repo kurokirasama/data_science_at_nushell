@@ -356,7 +356,7 @@ Ingresemos al directorio correspondiente a este capítulo (`/data/ch03`) e inspe
 
 ```nu
 cd /data/ch03
-ls | select name type size
+ls
 ```
 
 Si deseamos inspeccionar las primeras 5 líneas del archivo `movies.txt`, abrimos el archivo en el directorio actual (`open movies.txt`), dividimos sus líneas con `lines` y tomamos las primeras 5 con `first 5`:
@@ -3610,7 +3610,7 @@ En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el
 
 ```nu
 cd /data/ch04
-ls | select name type size
+ls
 ```
 
 Primero, veamos cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
@@ -3782,7 +3782,7 @@ Comenzamos ingresando al directorio `/data/ch05` (que corresponde al Capítulo 5
 
 ```nu
 cd /data/ch05
-ls | select name type size | sort-by name
+ls | sort-by name
 ```
 
 ## Copiando Archivos Locales en el Contenedor Docker
@@ -4142,7 +4142,7 @@ Comenzamos ingresando al directorio `/data/ch06` e inspeccionando sus archivos:
 
 ```nu
 cd /data/ch06
-ls | select name type size | sort-by name
+ls | sort-by name
 ```
 
 ## Transformaciones en una Tubería de Datos
@@ -4822,7 +4822,7 @@ Todos los archivos y scripts de este capítulo se encuentran preinstalados en `/
 
 ```nu
 cd /data/ch07
-ls | select name type size
+ls
 ```
 
 ## Inspeccionando Datos y sus Propiedades
@@ -5131,7 +5131,7 @@ Todos los archivos de trabajo de este capítulo se encuentran en `/data/ch08`:
 
 ```nu
 cd /data/ch08
-ls | select name type size
+ls
 ```
 
 ## Procesamiento en Serie: Recorriendo Datos con `each`
@@ -5335,7 +5335,7 @@ Inspeccionemos primero los archivos preinstalados en `/data/ch09`:
 
 ```nu
 cd /data/ch09
-ls | select name type size
+ls
 ```
 
 Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos blancos) contienen 11 variables fisicoquímicas continuas (`fixed_acidity`, `volatile_acidity`, `citric_acid`, `residual_sugar`, `chlorides`, `free_sulfur_dioxide`, `total_sulfur_dioxide`, `density`, `pH`, `sulphates`, `alcohol`) y la calificación sensorial `quality` (escala de 0 a 10).
