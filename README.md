@@ -1,6 +1,6 @@
 # Ciencia de Datos en Nushell (Data Science at Nushell)
 
-**Curso electivo** del programa de **Ingeniería Estadística** — **Universidad del Bío-Bío (UBB)**
+**Guía práctica y curso** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
 
 **Instructor:** Dr. Luis Gómez (`lgomez@ubiobio.cl`)
 
