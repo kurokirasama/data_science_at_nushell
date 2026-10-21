@@ -1,0 +1,32 @@
+Experiment Name: wine
+SKLL Version: 2.5.0
+Training Set: train
+Training Set Size: 2558
+Test Set: test
+Test Set Size: 640
+Shuffle: True
+Feature Set: ["features"]
+Learner: KNeighborsClassifier
+Task: evaluate
+Feature Scaling: both
+Grid Search: False
+Scikit-learn Version: 0.24.2
+Start Timestamp: 10 Sep 2026 18:26:15.820753
+End Timestamp: 10 Sep 2026 18:26:15.997939
+Total Time: 0:00:00.177186
+
+
+Fold: 
+Model Parameters: {"algorithm": "auto", "leaf_size": 30, "metric": "minkowski", "metric_params": null, "n_jobs": null, "n_neighbors": 5, "p": 2, "weights": "uniform"}
+Grid Objective Score (Train) = 0.0
++-------+-------+---------+-------------+----------+-------------+
+|       |   red |   white |   Precision |   Recall |   F-measure |
++=======+=======+=========+=============+==========+=============+
+|   red | [343] |       5 |       0.994 |    0.986 |       0.990 |
++-------+-------+---------+-------------+----------+-------------+
+| white |     2 |   [290] |       0.983 |    0.993 |       0.988 |
++-------+-------+---------+-------------+----------+-------------+
+(row = reference; column = predicted)
+Accuracy = 0.9890625
+Objective Function Score (Test) = 
+

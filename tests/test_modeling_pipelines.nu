@@ -159,6 +159,34 @@ def main [
     } catch { false })
     $results = ($results | append { test: "5e_mineria_nb_svm", passed: $c5e })
 
+    # 6a. UNAB / Guías: Multicollinearity (VIF) & Principal Component Regression (PCR)
+    let c6a = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res_py = (python3 vif_pcr_fish.py | from csv)
+        let res_r = (Rscript vif_pcr_fish.R | from csv)
+        let vif_res = (open fish_vif_py.csv)
+        (($res_py | length) == 2) and (($res_r | length) == 2) and (($vif_res | length) == 5) and (($res_py | get r2 | math max) > 0.8)
+    } catch { false })
+    $results = ($results | append { test: "6a_mineria_unab_vif_pcr", passed: $c6a })
+
+    # 6b. UNAB / Guías: Density Clustering (DBSCAN) & K-Medoids (PAM)
+    let c6b = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res_db = (python3 dbscan_fish.py | from csv)
+        let res_pam = (Rscript pam_fish.R | from csv)
+        (($res_db | length) >= 2) and ("cluster_type" in ($res_db | columns)) and (($res_pam | length) == 1) and (($res_pam | first | get avg_silhouette) > 0.3)
+    } catch { false })
+    $results = ($results | append { test: "6b_mineria_unab_dbscan_pam", passed: $c6b })
+
+    # 6c. UNAB / Guías: Multi-Layer Perceptron Neural Networks (MLP)
+    let c6c = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res_py = (python3 mlp_banco.py | from csv)
+        let res_r = (Rscript mlp_banco.R | from csv)
+        (($res_py | length) == 2) and (($res_py | get accuracy | math max) > 0.95) and (($res_r | first | get accuracy) > 0.9)
+    } catch { false })
+    $results = ($results | append { test: "6c_mineria_unab_mlp_neuralnet", passed: $c6c })
+
     print ($results | to md)
     let failed = ($results | where passed == false | length)
     if $mutate {
