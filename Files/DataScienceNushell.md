@@ -772,7 +772,7 @@ Como con la mayoría de los lenguajes, los strings son una colección de 0 o má
 | [Interpolación con comillas simples](#string-interpolation) | `$'Captain ($name)'`    | Ninguno                             | No puede contener ningún `'` o `()` no coincidentes                                       |
 | [Interpolación con comillas dobles](#string-interpolation)  | `$"Captain ($name)"`    | Escapes de barra invertida estilo C | Todas las barras invertidas literales y `()` deben tener escape                           |
 
-### Strings con Comillas Simples
+### Strings con Comillas Simples {#single-quoted-strings}
 
 El string más simple en Nushell es el string con comillas simples. Este string usa el carácter `'` para rodear algún texto. Por ejemplo:
 
@@ -785,7 +785,7 @@ end'
 
 Los strings con comillas simples no le hacen nada al texto que se les da, lo que las hace ideales para contener una amplia gama de datos de texto.
 
-### Strings con Comillas Dobles
+### Strings con Comillas Dobles {#double-quoted-strings}
 
 Para strings más complejas, Nushell también ofrece strings con comillas dobles. Estas strings usan el carácter `"` para rodear el texto. También admiten la capacidad de escapar caracteres dentro del texto usando el carácter `\`.
 
@@ -810,7 +810,7 @@ Nushell actualmente admite los siguientes caracteres de escape:
 - `\t` - tabulación
 - `\u{X...}` - un solo carácter unicode, donde X... son 1-6 dígitos hexadecimales (0-9, A-F)
 
-### Strings Raw
+### Strings Raw {#raw-strings}
 
 Los strings raw se comportan igual que las strings con comillas simples, excepto que las strings raw también pueden contener comillas simples. Esto es posible porque las strings raw están encerradas por un `r#'` inicial y un `'#` final.
 
@@ -825,7 +825,7 @@ uno menos que la misma cantidad de símbolos `#` junto a un símbolo `'` en el s
 r###'r##'This is an example of a raw string.'##'###
 ```
 
-### Strings de Palabra Simple
+### Strings de Palabra Simple {#bare-word-strings}
 
 Al igual que otros lenguajes de shell (pero a diferencia de la mayoría de los otros lenguajes de programación), las strings que constan de una sola 'palabra' también se pueden escribir sin comillas:
 
@@ -865,7 +865,7 @@ true | describe
 
 Entonces, si bien los strings simples son útiles para el uso informal de la línea de comandos, al programar más formalmente en nu, se recomienda usar comillas.
 
-### Strings con Comillas Invertidas
+### Strings con Comillas Invertidas {#backtick-quoted-strings}
 
 Las strings de palabras simples, por su naturaleza, no pueden incluir espacios ni comillas. Como alternativa, Nushell también incluye strings con comillas invertidas
 usando el carácter <code>`</code>. En la mayoría de los casos, estos deberían funcionar igual que una string de palabra simple.
@@ -935,7 +935,7 @@ Aunque en el caso de los strings, especialmente si no se tiene que operar en las
 
 Finalmente, también se puede usar la interpolación de strings.
 
-### Interpolación de strings
+### Interpolación de strings {#string-interpolation}
 
 Los casos de uso de strings más complejos también necesitan una nueva forma de string: interpolación de strings. Esta es una forma de construir texto a partir de texto sin formato y el resultado de ejecutar expresiones. La interpolación de strings combina los resultados, dándo una nueva string.
 
@@ -2722,7 +2722,7 @@ greet nushell
 
 ### Nombres de Comandos
 
-En Nushell, un nombre de comando es una cadena de caracteres. Aquí hay algunos ejemplos de nombres de comandos válidos: `greet`, `get-size`, `mycommand123`, `my command`, y `😊`.
+En Nushell, un nombre de comando es una cadena de caracteres. Aquí hay algunos ejemplos de nombres de comandos válidos: `greet`, `get-size`, `mycommand123`, `my command`, y `emoji_cmd` (o cualquier símbolo unicode admitido).
 
 > Es una práctica común en Nushell separar las palabras del comando con `-` para una mejor legibilidad.\_ Por ejemplo `get-size` en lugar de `getsize` o `get_size`.
 

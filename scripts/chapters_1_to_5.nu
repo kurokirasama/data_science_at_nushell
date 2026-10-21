@@ -62,6 +62,13 @@ export def patch_part2 [text: string]: nothing -> string {
     | str replace -a "```nu\nif $x > 0 { 'positivo' }\n```" "```nu\nlet x = 5\nif $x > 0 { 'positivo' }\n```"
     | str replace -a "Hilary Mason and Chris H. Wiggins [^1]" "Hilary Mason y Chris H. Wiggins (2010)"
     | str replace -a "[^1]: [A Taxonomy of Data Science, 2010](http://www.dataists.com/2010/09/a-taxonomy-of-data-science)." ""
+    | str replace -a "### Strings con Comillas Simples" "### Strings con Comillas Simples {#single-quoted-strings}"
+    | str replace -a "### Strings con Comillas Dobles" "### Strings con Comillas Dobles {#double-quoted-strings}"
+    | str replace -a "### Strings Raw" "### Strings Raw {#raw-strings}"
+    | str replace -a "### Strings de Palabra Simple" "### Strings de Palabra Simple {#bare-word-strings}"
+    | str replace -a "### Strings con Comillas Invertidas" "### Strings con Comillas Invertidas {#backtick-quoted-strings}"
+    | str replace -a "### Interpolación de strings" "### Interpolación de strings {#string-interpolation}"
+    | str replace -a "y `😊`." "y `emoji_cmd` (o cualquier símbolo unicode admitido)."
 }
 
 export def get_frontmatter [with_course_info: bool = false]: nothing -> string {
