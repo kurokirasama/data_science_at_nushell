@@ -58,15 +58,15 @@ header-includes:
 
 En la práctica contemporánea de la ciencia de datos, la escala, la heterogeneidad y el dinamismo de los flujos de información exigen herramientas que trasciendan la rigidez de las interfaces gráficas y la sobrecarga computacional de los entornos de desarrollo monolíticos. Durante más de cinco décadas, la consola de comandos de Unix se ha consolidado como el estándar por excelencia de la reproducibilidad científica, la automatización desatendida y la eficiencia algorítmica. Su filosofía fundacional postula que el software debe articularse a partir de programas compactos y modulares, concebidos para resolver una tarea concreta con maestría técnica y coordinarse fluidamente mediante canales estandarizados de comunicación. No obstante, las shells tradicionales (entre las que destacan Bash y Zsh) fueron diseñadas en una época en que la información en tránsito se concebía de forma exclusiva como secuencias no estructuradas de caracteres. Bajo este esquema clásico, operar sobre estructuras tabulares complejas o registros anidados dentro de una terminal demanda intrincadas combinaciones de expresiones regulares y utilidades de corte léxico (tales como `sed`, `awk` y `cut`), un enfoque propenso a fallas sutiles provocadas por delimitadores imprevistos, que introduce fragilidad ante caracteres de escape y despoja a los datos de sus tipos semánticos originales.
 
-Nushell (`nu`) rompe de raíz con esta limitación histórica mediante una arquitectura concebida expresamente para la era moderna del análisis de datos. En lugar de transmitir flujos de bytes planos y opacos, las tuberías de Nushell transportan estructuras de datos enriquecidas: tablas bidimensionales tipadas, registros jerárquicos de clave y valor, listas ordenadas y valores primitivos gobernados por esquemas estrictos. Al reconocer de forma nativa tipos de datos como enteros, números en coma flotante, marcas temporales con huso horario, rutas del sistema de archivos y tamaños de memoria, Nushell permite filtrar, ordenar, remodelar y agregar conjuntos de información mediante una sintaxis declarativa, expresiva y limpia. Más aún, su integración profunda con el motor columnar Polars (programado en Rust y edificado sobre el estándar en memoria Apache Arrow) dota a la consola de una potencia analítica formidable, haciendo viable ejecutar consultas analíticas multihilo sobre millones de registros en fracciones de segundo sin abandonar la comodidad del flujo interactivo en la terminal.
+Nushell (`nu`) rompe de raíz con esta limitación histórica mediante una arquitectura concebida expresamente para la era moderna del análisis de datos. En lugar de transmitir flujos de bytes planos y opacos, los pipelines de Nushell transportan estructuras de datos enriquecidas: tablas bidimensionales tipadas, registros jerárquicos de clave y valor, listas ordenadas y valores primitivos gobernados por esquemas estrictos. Al reconocer de forma nativa tipos de datos como enteros, números en coma flotante, marcas temporales con huso horario, rutas del sistema de archivos y tamaños de memoria, Nushell permite filtrar, ordenar, remodelar y agregar conjuntos de información mediante una sintaxis declarativa, expresiva y limpia. Más aún, su integración profunda con el motor columnar Polars (programado en Rust y edificado sobre el estándar en memoria Apache Arrow) dota a la consola de una potencia analítica formidable, haciendo viable ejecutar consultas analíticas multihilo sobre millones de registros en fracciones de segundo sin abandonar la comodidad del flujo interactivo en la terminal.
 
 Esta obra constituye una derivación directa y un desarrollo evolutivo del trabajo pionero de Jeroen Janssens en su célebre libro *Data Science at the Command Line*, publicado por O'Reilly Media. Aquella contribución seminal demostró de manera concluyente que la línea de comandos de Unix no es un mero vestigio del pasado, sino un ecosistema formidable, ágil y versátil para todas las fases del análisis cuantitativo. Sin embargo, el panorama de la computación interactiva ha experimentado transformaciones sustanciales desde entonces. Mientras que la obra original de Janssens cimentaba sus flujos sobre utilidades clásicas de filtrado textual y el ecosistema de herramientas como csvkit, este texto refundamenta la totalidad de la experiencia analítica sobre el paradigma moderno de Nushell. Al adoptar este intérprete de última generación, los principios de modularidad, reproducibilidad y composición que inspiraron a Janssens alcanzan un nivel inédito de seguridad tipada, elegancia expresiva y rendimiento computacional, sustituyendo la manipulación fragmentaria de texto plano por un diálogo continuo con estructuras de datos vivas y gobernadas por esquemas rigurosos.
 
-Esta obra no fue concebida para una lectura pasiva, contemplativa o meramente teórica, sino como un manual de experimentación computacional interactiva proyectado para ser estudiado con una terminal abierta junto al texto en todo momento. Por esta razón metodológica consciente, la inmensa mayoría de los bloques de código presentados a lo largo del volumen omiten la salida textual producida por los comandos. Salvo en circunstancias donde se despliegan gráficos generados en la consola, imágenes renderizadas mediante utilidades complementarias o diagramas esquemáticos indispensables para ilustrar la arquitectura de los datos, las respuestas del sistema se han reservado deliberadamente. Esta decisión didáctica responde a tres principios fundamentales del aprendizaje técnico profundo: primero, el compromiso activo frente a la ilusión de comprensión, pues observar una tabla de resultados previamente impresa en la página inhibe el esfuerzo cognitivo, mientras que escribir, adaptar y despachar cada instrucción en la consola sitúa al estudiante en contacto directo con la reactividad del sistema y le permite comprender tangiblemente la mecánica interna de las tuberías; segundo, la exploración en tiempo real y el descubrimiento guiado, ya que las capacidades distintivas de Nushell (tales como la exploración multidimensional con `explore`, la paginación interactiva de registros extensos, el autocompletado contextual y la inspección dinámica de esquemas) cobran verdadero sentido pedagógico en la interacción viva con el intérprete; y tercero, el desarrollo de resiliencia diagnóstica, dado que el ejercicio profesional en ciencia de datos exige familiaridad con las discrepancias estructurales, las advertencias de coerción y los mensajes de error, de modo que omitir las respuestas predecibles fomenta el hábito metódico de inspeccionar el estado intermedio de los flujos mediante herramientas como `describe`, verificando tipos y dimensiones de manera autónoma. Convocamos por ello al lector a asumir una postura de indagación constante: no reproduzca los ejemplos como recetas mecánicas, altere los parámetros, formule filtros alternativos, combine operadores inesperados e interrogue rigurosamente la respuesta que su propia terminal le devuelve.
+Esta obra no fue concebida para una lectura pasiva, contemplativa o meramente teórica, sino como un manual de experimentación computacional interactiva proyectado para ser estudiado con una terminal abierta junto al texto en todo momento. Por esta razón metodológica consciente, la inmensa mayoría de los bloques de código presentados a lo largo del volumen omiten la salida textual producida por los comandos. Salvo en circunstancias donde se despliegan gráficos generados en la consola, imágenes renderizadas mediante utilidades complementarias o diagramas esquemáticos indispensables para ilustrar la arquitectura de los datos, las respuestas del sistema se han reservado deliberadamente. Esta decisión didáctica responde a tres principios fundamentales del aprendizaje técnico profundo: primero, el compromiso activo frente a la ilusión de comprensión, pues observar una tabla de resultados previamente impresa en la página inhibe el esfuerzo cognitivo, mientras que escribir, adaptar y despachar cada instrucción en la consola sitúa al estudiante en contacto directo con la reactividad del sistema y le permite comprender tangiblemente la mecánica interna de los pipelines; segundo, la exploración en tiempo real y el descubrimiento guiado, ya que las capacidades distintivas de Nushell (tales como la exploración multidimensional con `explore`, la paginación interactiva de registros extensos, el autocompletado contextual y la inspección dinámica de esquemas) cobran verdadero sentido pedagógico en la interacción viva con el intérprete; y tercero, el desarrollo de resiliencia diagnóstica, dado que el ejercicio profesional en ciencia de datos exige familiaridad con las discrepancias estructurales, las advertencias de coerción y los mensajes de error, de modo que omitir las respuestas predecibles fomenta el hábito metódico de inspeccionar el estado intermedio de los flujos mediante herramientas como `describe`, verificando tipos y dimensiones de manera autónoma. Convocamos por ello al lector a asumir una postura de indagación constante: no reproduzca los ejemplos como recetas mecánicas, altere los parámetros, formule filtros alternativos, combine operadores inesperados e interrogue rigurosamente la respuesta que su propia terminal le devuelve.
 
 Para garantizar que cada experiencia práctica se ejecute bajo condiciones idénticas y libres de divergencias de configuración, el libro se sustenta en un entorno unificado y reproducible denominado `dsin` (Data Science in Nushell), distribuido como una imagen pública de Docker en `ghcr.io/kurokirasama/dsin:latest`. Este contenedor provee una estación analítica completa que encapsula la versión más reciente de Nushell con una configuración optimizada para el análisis de datos, su ecosistema integral de plugins (con soporte para Polars, formatos estructurados, consultas avanzadas, control de versiones y representación gráfica), entornos consolidados de Python y R provistos de sus bibliotecas analíticas fundamentales, herramientas de alto rendimiento para modelado predictivo (como Vowpal Wabbit, Tapkee y SKLL), utilidades modernas de consola (como el editor interactivo `ttt` y el visor gráfico de alta fidelidad `timg`), junto con la totalidad de los conjuntos de datos organizados meticulosamente por capítulos en el directorio `/data`.
 
-La progresión pedagógica de la obra se estructura con fidelidad en torno a las etapas del ciclo clásico OSEMN (Obtain, Scrub, Explore, Model, iNterpret), formulado originalmente por Hilary Mason y Chris Wiggins. En el capítulo 2 se abordará la instalación de software y la preparación del entorno de trabajo reproducible mediante Docker y el contenedor dsin, en el capítulo 3 se estudiarán los fundamentos operativos de la terminal y las estructuras de datos de Nushell, en el capítulo 4 se profundizará en la programación estructurada en Nushell y la creación de herramientas modulares de línea de comandos, en el capítulo 5 se examinarán los métodos de obtención e ingesta de datos desde la web, interfaces de programación de aplicaciones, archivos estructurados y bases de datos relacionales, en el capítulo 6 se desarrollarán las técnicas de depuración higiénica y analítica columnar masiva con Polars, en el capítulo 7 se abordarán la exploración estadística multivariante y la visualización gráfica de alta densidad en la terminal, en el capítulo 8 se implementarán el procesamiento en serie y la orquestación de tuberías paralelas, y finalmente en el capítulo 9 se culminará con el modelado políglota de datos para reducción de dimensionalidad, agrupamiento no supervisado, regresión y clasificación supervisada.
+La progresión pedagógica de la obra se estructura con fidelidad en torno a las etapas del ciclo clásico OSEMN (Obtain, Scrub, Explore, Model, iNterpret), formulado originalmente por Hilary Mason y Chris Wiggins. En el capítulo 2 se abordará la instalación de software y la preparación del entorno de trabajo reproducible mediante Docker y el contenedor dsin, en el capítulo 3 se estudiarán los fundamentos operativos de la terminal y las estructuras de datos de Nushell, en el capítulo 4 se profundizará en la programación estructurada en Nushell y la creación de herramientas modulares de línea de comandos, en el capítulo 5 se examinarán los métodos de obtención e ingesta de datos desde la web, interfaces de programación de aplicaciones, archivos estructurados y bases de datos relacionales, en el capítulo 6 se desarrollarán las técnicas de depuración higiénica y analítica columnar masiva con Polars, en el capítulo 7 se abordarán la exploración estadística multivariante y la visualización gráfica de alta densidad en la terminal, en el capítulo 8 se implementarán el procesamiento en serie y la orquestación de pipelines paralelos, y finalmente en el capítulo 9 se culminará con el modelado políglota de datos para reducción de dimensionalidad, agrupamiento no supervisado, regresión y clasificación supervisada.
 
 
 \newpage
@@ -448,7 +448,7 @@ Aunque el flujo de texto plano fue revolucionario hace cincuenta años, cuando h
 3. **Pérdida de encabezados:** Si aplicas `sort` o `grep` a un archivo CSV en `bash`, la primera línea (que contiene los nombres de las columnas) es tratada como una fila de datos cualquiera, mezclándose con los registros o desapareciendo tras el filtro.
 4. **Incompatibilidad con datos jerárquicos (JSON, XML, Excel, SQLite, Parquet):** El texto línea por línea no puede representar directamente objetos anidados ni tablas tipadas sin recurrir a múltiples conversores externos (`jq`, `xmllint`, `sqlite3`) con sintaxis inconexas entre sí.
 
-**Nushell conserva lo mejor de la filosofía Unix** (la composición modular mediante tuberías `|`), pero reemplaza los flujos de texto crudo por **flujos de datos estructurados y tipados (tablas, registros y listas)**. Comprender esta diferencia hace que la siguiente sección resulte completamente natural.
+**Nushell conserva lo mejor de la filosofía Unix** (la composición modular mediante pipes `|`), pero reemplaza los flujos de texto crudo por **flujos de datos estructurados y tipados (tablas, registros y listas)**. Comprender esta diferencia hace que la siguiente sección resulte completamente natural.
 
 
 ## Como entender nu
@@ -1934,7 +1934,7 @@ Atajos esenciales preconfigurados en `ttt` dentro de `dsin`:
 - **`Ctrl + F`:** Buscar texto dentro del archivo.
 - **`Ctrl + Z` / `Ctrl + Y`:** Deshacer / Rehacer cambios.
 
-También podemos generar archivos estructurados directamente desde tuberías de Nushell en el directorio actual usando `save -f` y luego ejecutarlos o inspeccionarlos:
+También podemos generar archivos estructurados directamente desde pipelines de Nushell en el directorio actual usando `save -f` y luego ejecutarlos o inspeccionarlos:
 
 ```nu
 "# Script generado en /data/ch03\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
@@ -2671,7 +2671,7 @@ timeit {
 
 Resultado: 4sec 233ms 865µs 238ns
 
-Como con muchos filtros, la sentencia `each` también transmite sus resultados, lo que significa que la siguiente etapa de la tubería puede continuar procesando sin esperar a que los resultados se recopilen en una variable.
+Como con muchos filtros, la sentencia `each` también transmite sus resultados, lo que significa que la siguiente etapa del pipeline puede continuar procesando sin esperar a que los resultados se recopilen en una variable.
 
 Para tareas que pueden ser optimizadas por paralelización, como se mencionó anteriormente, `par-each` puede tener ganancias de rendimiento aún más drásticas.
 
@@ -3114,7 +3114,7 @@ Se puede usar la salida de este comando tal como se haría con `ls`.
 my-ls | get name
 ```
 
-Esto nos permite construir fácilmente comandos personalizados y procesar su salida. Tenga en cuenta que no usamos sentencias de retorno como otros lenguajes. En cambio, construimos tuberías que generan flujos de datos que se pueden conectar a otras tuberías.
+Esto nos permite construir fácilmente comandos personalizados y procesar su salida. Tenga en cuenta que no usamos sentencias de retorno como otros lenguajes. En cambio, construimos pipelines que generan flujos de datos que se pueden conectar a otros pipelines.
 
 ### Entrada de la _pipeline_
 
@@ -3608,7 +3608,7 @@ address-from-loc -36.8221967 -73.0120093
 
 ## Conversión de One-Liners en Herramientas de Línea de Comandos
 
-A lo largo de este libro construiremos numerosas tuberías compactas de una sola línea (*one-liners*). Cuando necesitamos reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
+A lo largo de este libro construiremos numerosos pipelines compactos de una sola línea (*one-liners*). Cuando necesitamos reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
 
 En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
 
@@ -3653,13 +3653,13 @@ Para convertir este *one-liner* en una herramienta de línea de comandos reutili
 1. Crear el archivo de script (`top-words-1.nu`).
 2. Otorgar permisos de ejecución (`chmod u+x`).
 3. Definir la línea *shebang* (`#!/usr/bin/env nu`).
-4. Remover la entrada fija para leer desde la tubería (`$in`).
+4. Remover la entrada fija para leer desde el pipe (`$in`).
 5. Añadir argumentos y opciones tipadas con `def main [...]`.
 6. Extender la variable de entorno `$env.PATH`.
 
 ### Paso 1: Crear el Archivo
 
-En `/data/ch04` guardamos nuestra tubería inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
+En `/data/ch04` guardamos nuestro pipeline inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
 
 ```nu
 open --raw top-words-1.nu
@@ -3691,7 +3691,7 @@ open --raw top-words-3.nu
 
 ### Paso 4: Remover la Entrada Fija
 
-Si reemplazamos `open --raw alice.txt` por la variable especial de entrada de tubería `$in` en `top-words-4.nu`, nuestra herramienta deja de estar atada a un único archivo y puede analizar cualquier texto que le enviemos mediante `|`:
+Si reemplazamos `open --raw alice.txt` por la variable especial de entrada de pipe `$in` en `top-words-4.nu`, nuestra herramienta deja de estar atada a un único archivo y puede analizar cualquier texto que le enviemos mediante `|`:
 
 ```nu
 open --raw top-words-4.nu
@@ -3722,7 +3722,7 @@ open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 
 ## Creando Herramientas de Línea de Comandos con Python y R
 
-Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scripts escritos en **Python** (`#!/usr/bin/env python3`) y **R** (`#!/usr/bin/env Rscript`) dentro de nuestras tuberías de Nushell. Siguiendo las buenas prácticas de este libro, siempre creamos o inspeccionamos primero el archivo `.py` o `.R` en el directorio del capítulo y luego lo invocamos desde Nushell, convirtiendo su salida en una tabla estructurada con `from csv` y guardando los resultados.
+Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scripts escritos en **Python** (`#!/usr/bin/env python3`) y **R** (`#!/usr/bin/env Rscript`) dentro de nuestros pipelines de Nushell. Siguiendo las buenas prácticas de este libro, siempre creamos o inspeccionamos primero el archivo `.py` o `.R` en el directorio del capítulo y luego lo invocamos desde Nushell, convirtiendo su salida en una tabla estructurada con `from csv` y guardando los resultados.
 
 ### Portando la Herramienta a Python (`top-words.py`) y R (`top-words.R`)
 
@@ -3942,7 +3942,7 @@ $resumen_cyl | save -f mtcars_por_cilindros.csv
 
 ## Llamando a las API Web
 
-Las APIs web (*Application Programming Interfaces*) devuelven datos estructurados (generalmente en formato JSON) listos para ser procesados en una tubería de Nushell.
+Las APIs web (*Application Programming Interfaces*) devuelven datos estructurados (generalmente en formato JSON) listos para ser procesados en un pipeline de Nushell.
 
 ### Autenticación con Clave API
 
@@ -4129,7 +4129,7 @@ A partir de este punto, todos los ejemplos de este capítulo se desarrollan dent
 ls | sort-by name
 ```
 
-## Transformaciones en una Tubería de Datos
+## Transformaciones en un Pipeline de Datos
 
 Con frecuencia, la salida de una herramienta requiere una transformación intermedia antes de poder alimentar la siguiente etapa del análisis. Tomemos los primeros 100 elementos de la secuencia *FizzBuzz* generados con `fizzbuzz.py` en `/data/ch06`, guardémoslos en `fb.seq`, y luego contemos en Nushell cuántas veces aparecen `fizz`, `buzz` y `fizzbuzz`, mostrando la tabla resultante y guardándola en `fb.csv`:
 
@@ -4198,7 +4198,7 @@ open --raw alice.txt | lines | where ($it | str trim | is-not-empty) | length
 
 #### Basado en Aleatoriedad (Muestreo)
 
-Cuando formulamos una tubería sobre un archivo muy grande, resulta útil tomar una muestra aleatoria con el comando nativo **`shuffle`** combinado con **`first`**:
+Cuando formulamos un pipeline sobre un archivo muy grande, resulta útil tomar una muestra aleatoria con el comando nativo **`shuffle`** combinado con **`first`**:
 
 ```nu
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10
@@ -4780,7 +4780,7 @@ El cuarto paso del flujo de trabajo OSEMN consiste en explorar los datos. Explor
 En este capítulo abordaremos la exploración y visualización de datos desde tres perspectivas complementarias dentro de la imagen Docker `dsin`:
 
 1. **Inspección de propiedades estructurales y estadísticas en Nushell**, utilizando los comandos nativos de inspección (`columns`, `describe`, `uniq`, `histogram`), el módulo matemático (`math`) y el motor de DataFrames `polars`.
-2. **Cálculo de estadísticas descriptivas y pruebas diagnósticas mediante scripts en R y Python**, integrando sus salidas directamente en tuberías de Nushell para presentarlas como tablas estructuradas.
+2. **Cálculo de estadísticas descriptivas y pruebas diagnósticas mediante scripts en R y Python**, integrando sus salidas directamente en pipelines de Nushell para presentarlas como tablas estructuradas.
 3. **Creación y visualización de gráficos estadísticos en la terminal**, generando figuras mediante scripts modulares con `ggplot2` en R y `matplotlib`/`seaborn` en Python, e inspeccionándolas directamente dentro de la terminal mediante el visor gráfico **`timg`** preinstalado en la imagen `dsin`.
 
 Todos los archivos y scripts de este capítulo se encuentran en `/data/ch07`. Para comenzar, nos posicionamos en este directorio:
@@ -5065,14 +5065,14 @@ En el próximo capítulo estudiaremos cómo acelerar drásticamente el procesami
 
 \newpage
 
-# Procesamiento en Serie y Tuberías Paralelas {#chapter-8-parallel-pipelines}
+# Procesamiento en Serie y Pipelines Paralelos {#chapter-8-parallel-pipelines}
 
 A medida que el volumen de datos o la complejidad computacional de nuestras tareas crece —por ejemplo, al consultar cientos de páginas de una API, comprimir docenas de archivos, entrenar modelos con múltiples combinaciones de hiperparámetros o transformar grandes volúmenes de texto—, la ejecución secuencial en un único núcleo de CPU puede convertirse en un cuello de botella importante.
 
 En este capítulo aprenderemos a escalar nuestros flujos de trabajo desde la línea de comandos mediante dos enfoques complementarios que conviven en la imagen `dsin`:
 
 1. **Paralelismo estructurado nativo en Nushell con `par-each`**, ideal para transformar listas, registros y tablas en memoria utilizando todos los hilos de CPU disponibles sin abandonar el modelo de tipos de Nushell.
-2. **Paralelismo de procesos externos con GNU `parallel`**, la herramienta clásica de Unix para orquestar comandos externos, scripts en R/Python, tuberías divididas en bloques (`--pipe`) y ejecución distribuida en múltiples servidores vía SSH.
+2. **Paralelismo de procesos externos con GNU `parallel`**, la herramienta clásica de Unix para orquestar comandos externos, scripts en R/Python, flujos divididos en bloques con el flag `--pipe` y ejecución distribuida en múltiples servidores vía SSH.
 
 Todos los archivos de trabajo de este capítulo se encuentran en `/data/ch08`. Nos posicionamos en este directorio:
 
@@ -5246,7 +5246,7 @@ ls *.csv | parallel --slf hosts.txt --transferfile {} --return {.}_clean.csv "nu
 
 ## Resumen
 
-En este capítulo aprendimos a transformar flujos de trabajo secuenciales (`each`) en tuberías paralelas de alto rendimiento utilizando tanto `par-each` de forma nativa en Nushell como GNU `parallel` para orquestar procesos externos, bloques de flujo (`--pipe`) y ejecución distribuida por SSH.
+En este capítulo aprendimos a transformar flujos de trabajo secuenciales (`each`) en pipelines paralelos de alto rendimiento utilizando tanto `par-each` de forma nativa en Nushell como GNU `parallel` para orquestar procesos externos, bloques de flujo (`--pipe`) y ejecución distribuida por SSH.
 
 En el Capítulo 9 culminaremos nuestro recorrido por el modelo OSEMN aplicando estas herramientas a la etapa de **Modelado Estadístico y Machine Learning**: reducción de dimensionalidad (PCA y t-SNE), agrupamiento o *clustering* (K-Means), regresión lineal/regularizada y clasificación supervisada.
 
