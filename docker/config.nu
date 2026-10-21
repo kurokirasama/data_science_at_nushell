@@ -40,7 +40,7 @@ $env.PATH = ($env.PATH | split row (char esep) | prepend ["/home/dst/bin", "/usr
 $env.PROMPT_COMMAND = {||
   [
     (ansi -e { fg: '#00ff00' })
-    (char -u f059d)
+    (char -u f525)
     (char -u e621)
     ($env.PWD | path split | last)
     (ansi reset)
