@@ -60,10 +60,48 @@ export def patch_part2 [text: string]: nothing -> string {
     | str replace -a "```nu\nA greeting command that can greet the caller\n\nUsage:" "```text\nA greeting command that can greet the caller\n\nUsage:"
     | str replace -a "```nu\n> 'foo' | if $in == 'foo' { 1 } else { 0 } | $in + 2\n3\n```" "```nu\n'foo' | if $in == 'foo' { 1 } else { 0 } | $in + 2\n```"
     | str replace -a "```nu\nif $x > 0 { 'positivo' }\n```" "```nu\nlet x = 5\nif $x > 0 { 'positivo' }\n```"
+    | str replace -a "Hilary Mason and Chris H. Wiggins [^1]" "Hilary Mason y Chris H. Wiggins (2010)"
+    | str replace -a "[^1]: [A Taxonomy of Data Science, 2010](http://www.dataists.com/2010/09/a-taxonomy-of-data-science)." ""
 }
 
-export def get_frontmatter []: nothing -> string {
-    r#'---
+export def get_frontmatter [with_course_info: bool = false]: nothing -> string {
+    let course_info_section = if $with_course_info {
+r#'
+# Información del curso{-}
+
+## Requisitos computacionales{-}
+
+- Computador con sistema operativo Linux, macOS o Windows 10/11 (con WSL2).
+- Docker instalado y configurado con la imagen oficial del curso `ghcr.io/kurokirasama/dsin:latest` (**Data Science in Nushell**).
+- Al menos 4 GB de memoria RAM disponibles y 10 GB de espacio libre en disco.
+
+## Evaluaciones{-}
+
+- **Trabajo Individual:** 30% (1 semana)
+- **Trabajo Grupal:** 25% (1 mes)
+- **Presentación:** 45%
+
+> Todas las entregas mediante repositorio de GitHub o GitLab.
+
+## Contenidos{-}
+
+1. **Capítulo 1 — Instalación de Software:** Configuración de WSL2, Docker e imagen contenedorizada `dsin` con Nushell y `/data` integrados por defecto.
+2. **Capítulo 2 — Introducción y Fundamentos de Nushell:** El modelo OSEMN, la terminal, comparación entre shells tradicionales (`bash`, `zsh`) y Nushell, navegación del sistema, tipos de datos estructurados (*Strings*, *Listas*, *Registros* y *Tablas*), rutas de celda, edición en terminal con `ttt` y control de versiones con Git.
+3. **Capítulo 3 — Programación y Creación de Herramientas de Línea de Comandos:** Operadores, variables, comandos personalizados (`def`, subcomandos, tipos, *flags*, *docstrings*, `$in`), control de flujo, desarrollo de comandos para la API de Google Maps y creación de herramientas CLI reutilizables en Nushell, Python y R.
+4. **Capítulo 4 — Obtención de Datos:** Descarga nativa con `http get` y `http post`, inspección de cabeceras HTTP, descompresión de archivos, hojas de cálculo Microsoft Excel (`.xlsx`), consultas sobre bases de datos relacionales SQLite (`query db`) y consumo de APIs REST / flujos de transmisión (*streaming*).
+5. **Capítulo 5 — Depuración y Transformación de Datos:** Filtrado y transformación de texto plano (`lines`, `parse`, `split column`, `shuffle`, `detect columns`), manipulación nativa de tablas y CSV (`where`, `select`, `upsert`, `merge`, `join`, `group-by`), procesamiento de XML/HTML/JSON y analítica columnar de alto rendimiento con el plugin **Polars** (`nu_plugin_polars`).
+6. **Capítulo 6 — Exploración de Datos y Visualización en la Terminal:** Inspección de propiedades y tipos (`describe`, `explore`), estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript` y `python3`), creación de gráficos estadísticos (`ggplot2` y `matplotlib`), visualización directa en consola con `timg` y transferencia segura con `scp`.
+7. **Capítulo 7 — Procesamiento en Serie y Tuberías Paralelas:** Iteración serial con `each`, paralelismo nativo multihilo con `par-each --threads`, medición de tiempos con `timeit`, manejo resiliente de errores y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
+8. **Capítulo 8 — Modelación Políglota de Datos:** Preparación del conjunto de datos e implementación triple (herramienta CLI externa + `Rscript` + `python3` integrados en tablas Nushell) para Reducción de Dimensionalidad (`tapkee` / PCA / t-SNE), Clustering (`kmeans-cluster` / K-Means / Clustering Jerárquico), Regresión (`vw` / `lm` / `scikit-learn`) y Clasificación (`SKLL` / `glm` / `RandomForest` / Árboles de Decisión / k-NN / Naïve Bayes / SVM).
+
+\newpage
+'#
+    } else {
+        ""
+    }
+
+    (
+r#'---
 title: Ciencia de Datos en la Terminal con Nushell
 author: Luis Gómez
 number_sections: true
@@ -113,36 +151,8 @@ header-includes:
 \renewcommand{\listtablename}{Índice de tablas}
 \listoftables
 \newpage
-
-# Información del curso{-}
-
-## Requisitos computacionales{-}
-
-- Computador con sistema operativo Linux, macOS o Windows 10/11 (con WSL2).
-- Docker instalado y configurado con la imagen oficial del curso `ghcr.io/kurokirasama/dsin:latest` (**Data Science in Nushell**).
-- Al menos 4 GB de memoria RAM disponibles y 10 GB de espacio libre en disco.
-
-## Evaluaciones{-}
-
-- **Trabajo Individual:** 30% (1 semana)
-- **Trabajo Grupal:** 25% (1 mes)
-- **Presentación:** 45%
-
-> Todas las entregas mediante repositorio de GitHub o GitLab.
-
-## Contenidos{-}
-
-1. **Capítulo 1 — Instalación de Software:** Configuración de WSL2, Docker e imagen contenedorizada `dsin` con Nushell y `/data` integrados por defecto.
-2. **Capítulo 2 — Introducción y Fundamentos de Nushell:** El modelo OSEMN, la terminal, comparación entre shells tradicionales (`bash`, `zsh`) y Nushell, navegación del sistema, tipos de datos estructurados (*Strings*, *Listas*, *Registros* y *Tablas*), rutas de celda, edición en terminal con `ttt` y control de versiones con Git.
-3. **Capítulo 3 — Programación y Creación de Herramientas de Línea de Comandos:** Operadores, variables, comandos personalizados (`def`, subcomandos, tipos, *flags*, *docstrings*, `$in`), control de flujo, desarrollo de comandos para la API de Google Maps y creación de herramientas CLI reutilizables en Nushell, Python y R.
-4. **Capítulo 4 — Obtención de Datos:** Descarga nativa con `http get` y `http post`, inspección de cabeceras HTTP, descompresión de archivos, hojas de cálculo Microsoft Excel (`.xlsx`), consultas sobre bases de datos relacionales SQLite (`query db`) y consumo de APIs REST / flujos de transmisión (*streaming*).
-5. **Capítulo 5 — Depuración y Transformación de Datos:** Filtrado y transformación de texto plano (`lines`, `parse`, `split column`, `shuffle`, `detect columns`), manipulación nativa de tablas y CSV (`where`, `select`, `upsert`, `merge`, `join`, `group-by`), procesamiento de XML/HTML/JSON y analítica columnar de alto rendimiento con el plugin **Polars** (`nu_plugin_polars`).
-6. **Capítulo 6 — Exploración de Datos y Visualización en la Terminal:** Inspección de propiedades y tipos (`describe`, `explore`), estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript` y `python3`), creación de gráficos estadísticos (`ggplot2` y `matplotlib`), visualización directa en consola con `timg` y transferencia segura con `scp`.
-7. **Capítulo 7 — Procesamiento en Serie y Tuberías Paralelas:** Iteración serial con `each`, paralelismo nativo multihilo con `par-each --threads`, medición de tiempos con `timeit`, manejo resiliente de errores y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
-8. **Capítulo 8 — Modelación Políglota de Datos:** Preparación del conjunto de datos de vinos e implementación triple (herramienta CLI externa + `Rscript` + `python3` integrados en tablas Nushell) para Reducción de Dimensionalidad (`tapkee` / PCA / t-SNE), Clustering (`kmeans-cluster` / K-Means), Regresión (`vw` / `lm` / `scikit-learn`) y Clasificación (`SKLL` / `glm` / `RandomForest`).
-
-\newpage
-'#
+'# + $course_info_section
+    )
 }
 
 export def get_ch1_tail []: nothing -> string {
@@ -151,11 +161,11 @@ export def get_ch1_tail []: nothing -> string {
 
 En este curso trabajaremos sobre una imagen Docker integrada llamada **`dsin`** (*Data Science in Nushell*), publicada en `ghcr.io/kurokirasama/dsin:latest`. A diferencia de los entornos tradicionales basados en *shells* de texto plano, el contenedor `dsin` inicia directamente en **Nushell** como *shell* predeterminado en el directorio de trabajo `/data`, e incluye preconfigurados:
 
-- **Nushell (`nu`)** y el motor columnar **`nu_plugin_polars`** registrados y listos para usar.
+- **Nushell (`nu`)** y su suite completa de complementos registrados: **`nu_plugin_polars`** (motor de DataFrames Arrow/Polars), **`nu_plugin_formats`**, **`nu_plugin_gstat`**, **`nu_plugin_inc`**, **`nu_plugin_query`**, **`nu_plugin_file`**, **`nu_plugin_plot`** (gráficos en la terminal) y **`nu_plugin_port_extension`**.
 - **Directorio `/data` integrado por defecto:** Contiene todas las carpetas de datos del curso organizadas exactamente según el número del capítulo en que se utilizan (`/data/ch02`, `/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07` y `/data/ch08`), sin necesidad de descargas ni configuraciones manuales adicionales.
 - **Editor de texto en terminal `ttt`** en `$env.PATH` con resaltado de sintaxis y atajos preconfigurados.
 - **Visor gráfico de terminal `timg`** en `$env.PATH` para inspeccionar imágenes y gráficos estadísticos directamente en la consola.
-- **Ecosistema políglota:** R (`Rscript`, `tidyverse`, `ggplot2`), Python 3 (`pandas`, `scikit-learn`, `scipy`, `matplotlib`, `skll`), **GNU Parallel (`parallel`)**, **Tapkee (`tapkee`)** y **Vowpal Wabbit (`vw`)**.
+- **Ecosistema políglota:** R (`Rscript`, `tidyverse`, `ggplot2`, `rpart`, `class`, `cluster`), Python 3 (`pandas`, `scikit-learn`, `scipy`, `matplotlib`, `seaborn`, `skll`), **GNU Parallel (`parallel`)**, **Tapkee (`tapkee`)** y **Vowpal Wabbit (`vw`)**.
 - **Módulo de herramientas del curso (`dsin_tools.nu`):** Comandos personalizados (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) cargados automáticamente al iniciar.
 
 ### Instalación de Docker en Linux / WSL (basado en Debian/Ubuntu)
@@ -164,6 +174,15 @@ En este curso trabajaremos sobre una imagen Docker integrada llamada **`dsin`** 
 # skip-docker-exec
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y ca-certificates curl gnupg lsb-release git
+sudo usermod -aG docker $USER
+```
+
+### Instalación de Docker en Linux (basado en Arch / CachyOS / Manjaro)
+
+```bash
+# skip-docker-exec
+sudo pacman -Syu --needed docker docker-buildx docker-compose git
+sudo systemctl enable --now docker.service
 sudo usermod -aG docker $USER
 ```
 
@@ -176,7 +195,7 @@ Para descargar la imagen oficial del curso desde GitHub Container Registry:
 docker pull ghcr.io/kurokirasama/dsin:latest
 ```
 
-Dado que la imagen `dsin` ya contiene la carpeta `/data` con todos los conjuntos de datos de los capítulos (`ch02` a `ch08`), para iniciar el contenedor basta con ejecutar:
+Para iniciar una sesión interactiva en el contenedor con el entorno listo para usar, ejecute:
 
 ```bash
 # skip-docker-exec
@@ -185,21 +204,21 @@ docker run --rm -it ghcr.io/kurokirasama/dsin:latest
 
 ### Crear alias para llamado simple (opcional)
 
-Si deseas iniciar el contenedor escribiendo únicamente `dsin` en tu terminal anfitriona, puedes definir un alias:
+Si deseas iniciar el contenedor escribiendo únicamente `dsin` en tu terminal anfitriona, puedes definir un alias en tu archivo de configuración del shell anfitrión (`~/.bashrc` o `~/.config/nushell/config.nu`):
 
 ```bash
 # skip-docker-exec
 alias dsin='docker run --rm -it ghcr.io/kurokirasama/dsin:latest'
 ```
 
-Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/data`, inspeccionamos las carpetas de los capítulos y comprobamos que todas las herramientas están disponibles directamente en `$env.PATH`:
+Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/data`, inspeccionamos las carpetas de los capítulos y comprobamos que todas las herramientas y complementos están disponibles:
 
 ```nu
 pwd
 ls /data | select name type
 version | select version major minor patch
 which nu ttt timg parallel vw tapkee run_experiment Rscript python3 | select command path type
-plugin list | where name == polars | select name status
+plugin list | select name version status
 ```
 '#
 }

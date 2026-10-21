@@ -511,7 +511,8 @@ En el Capítulo 8 culminaremos nuestro recorrido por el modelo OSEMN aplicando e
 }
 
 def get_ch8_content [] {
-'# Modelado de Datos {#chapter-8-modeling-data}
+    r#'
+# Modelado de Datos {#chapter-8-modeling-data}
 
 El quinto y último paso del modelo OSEMN consiste en **modelar los datos** (*Model Data*). Mientras que el análisis exploratorio y la visualización (Capítulo 6) nos permiten describir estructuras e identificar patrones históricos, el modelado estadístico y el aprendizaje automático (*Machine Learning*) nos proporcionan herramientas formales para **sintetizar dimensiones latentes, descubrir grupos naturales, predecir variables continuas y clasificar nuevas observaciones**.
 
@@ -567,7 +568,7 @@ Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
 ```
 
-## 1. Reducción de Dimensionalidad (PCA y t-SNE)
+## Reducción de Dimensionalidad (PCA y t-SNE)
 
 Cuando trabajamos con un espacio de $p = 11$ variables fisicoquímicas correlacionadas, resulta imposible visualizar directamente la nube de puntos en dos dimensiones. Los algoritmos de reducción de dimensionalidad proyectan una matriz de datos $\mathbf{X} \in \mathbb{R}^{n \times p}$ hacia un subespacio de baja dimensión $\mathbf{Z} \in \mathbb{R}^{n \times d}$ (con $d = 2 \ll p$) preservando la mayor cantidad posible de estructura:
 
@@ -575,7 +576,7 @@ Cuando trabajamos con un espacio de $p = 11$ variables fisicoquímicas correlaci
   $$\mathbf{z}_k = \mathbf{X}\mathbf{w}_k \quad \text{sujeto a} \quad \|\mathbf{w}_k\|_2 = 1, \quad \mathbf{w}_k^\top \mathbf{w}_j = 0 \;\; (\forall j < k)$$
 - **t-SNE (*t-Distributed Stochastic Neighbor Embedding*)**: técnica no lineal que convierte las distancias euclidianas entre pares de observaciones en probabilidades condicionales de vecindad y minimiza la divergencia de Kullback-Leibler respecto a una distribución $t$ de Student de un grado de libertad en el espacio bidimensional.
 
-### 1.1 Reducción de Dimensionalidad con CLI (`tapkee-reduce`: PCA y t-SNE)
+### Reducción de Dimensionalidad con Herramientas CLI (`tapkee-reduce`: PCA y t-SNE)
 
 La imagen `dsin` incluye la herramienta C++ `tapkee` junto con el comando de Nushell `tapkee-reduce`, que estandariza automáticamente las columnas numéricas seleccionadas ($z = (x - \mu)/\sigma$), invoca `tapkee` y devuelve las coordenadas proyectadas `dim_1` y `dim_2` como tabla de Nushell.
 
@@ -599,7 +600,7 @@ open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features |
 
 ![Proyecciones bidimensionales obtenidas mediante reducción de dimensionalidad](Files/dscl_0902.png)
 
-### 1.2 Reducción de Dimensionalidad con `Rscript` (`pca_wine.R`)
+### Reducción de Dimensionalidad con `Rscript` (`pca_wine.R`)
 
 Veamos el script `pca_wine.R` ubicado en `/data/ch08`, el cual utiliza la función nativa `prcomp(..., center = TRUE, scale. = TRUE)` de R para calcular todas las componentes principales y reportar la proporción de varianza explicada y acumulada de cada componente:
 
@@ -612,7 +613,7 @@ Rscript pca_wine.R | from csv | save -f wine_pca_r.csv
 
 Observa cómo las primeras 4 componentes principales resumen más del 64% de la varianza total de las 11 variables químicas originales.
 
-### 1.3 Reducción de Dimensionalidad con Python (`pca_wine.py`)
+### Reducción de Dimensionalidad con Python (`pca_wine.py`)
 
 Revisemos y ejecutemos ahora el script `pca_wine.py`, que utiliza `StandardScaler` y `PCA` de `scikit-learn`:
 
@@ -623,7 +624,7 @@ python3 pca_wine.py | from csv
 python3 pca_wine.py | from csv | save -f wine_pca_py.csv
 ```
 
-## 2. Agrupamiento o Clustering (K-Means)
+## Agrupamiento o Clustering
 
 El **agrupamiento (*clustering*)** es una tarea de aprendizaje no supervisado cuyo objetivo es particionar un conjunto de $n$ observaciones en $K$ grupos o clústeres disjuntos $C_1, C_2, \dots, C_K$ de modo que las observaciones dentro de un mismo clúster sean lo más similares posible entre sí, y lo más distintas posible a las de otros clústeres.
 
@@ -633,7 +634,7 @@ $$\underset{C_1, \dots, C_K}{\arg\min} \sum_{k=1}^{K} \sum_{\mathbf{x}_i \in C_k
 
 Un requisito estadístico indispensable antes de aplicar K-Means sobre variables con distintas unidades físicas (como `total_sulfur_dioxide` en mg/L frente a `density` en g/cm$^3$) es **estandarizar las variables** a media cero y desviación estándar unitaria, para evitar que la variable de mayor escala numérica domine la distancia euclidiana.
 
-### 2.1 Clustering K-Means con CLI (`kmeans-cluster`)
+### Clustering K-Means con Herramientas CLI (`kmeans-cluster`)
 
 En el módulo `dsin_tools.nu` de la imagen `dsin` disponemos del comando `kmeans-cluster`, que estandariza las columnas numéricas indicadas, ejecuta K-Means con $K$ clústeres e inserta la columna `cluster` en la tabla de Nushell.
 
@@ -658,7 +659,7 @@ open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | po
 
 ¡Incluso sin etiquetas supervisadas, K-Means en el espacio químico estandarizado separa con altísima pureza los vinos tintos de los vinos blancos!
 
-### 2.2 Clustering K-Means con `Rscript` (`cluster_wine.R`)
+### Clustering K-Means con `Rscript` (`cluster_wine.R`)
 
 Veamos el script `cluster_wine.R` en `/data/ch08`, que ejecuta `kmeans(..., centers = 3, nstart = 20)` en R y resume el tamaño y el perfil químico promedio de cada clúster:
 
@@ -669,7 +670,7 @@ Rscript cluster_wine.R | from csv
 Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
 ```
 
-### 2.3 Clustering K-Means con Python (`cluster_wine.py`)
+### Clustering K-Means con Python (`cluster_wine.py`)
 
 Revisemos y ejecutemos ahora el script `cluster_wine.py` con `scikit-learn` (`KMeans(n_clusters=3, random_state=42, n_init=10)`):
 
@@ -680,7 +681,56 @@ python3 cluster_wine.py | from csv
 python3 cluster_wine.py | from csv | save -f wine_clusters_py.csv
 ```
 
-## 3. Regresión: Predicción de la Calidad del Vino
+### Clustering Jerárquico Aglomerativo (hclust_fish.R y hclust_fish.py)
+
+A diferencia de K-Means, que requiere especificar *a priori* el número de conglomerados $K$ y converge a particiones rígidas, el **clustering jerárquico** (*Hierarchical Clustering*) construye una jerarquía anidada de agrupamientos mediante una matriz de distancias disimilares $\mathbf{D} \in \mathbb{R}^{n \times n}$.
+
+El enfoque **aglomerativo** (*bottom-up*) inicia con cada observación individual como un clúster unitario y, en cada paso, fusiona el par de clústeres más cercanos de acuerdo a un criterio de enlace (*linkage criterion*). Entre los criterios más robustos en minería de datos destaca el método de **Ward (`ward.D2`)**, que une en cada iteración el par de clústeres que minimiza el incremento en la varianza total dentro de los grupos.
+
+En `/data/ch08`, disponemos del conjunto `Fish.csv` (159 observaciones de especies de peces comerciales con medidas biométricas: peso, 3 longitudes, altura y ancho). Ejecutemos el script `hclust_fish.R`, que escala las medidas, calcula la matriz de distancias euclidianas, aplica `hclust(d, method = "ward.D2")`, corta el árbol en $K = 3$ grupos mediante `cutree(hc, k = 3)` y resume la correspondencia con las especies dominantes:
+
+```nu
+cd /data/ch08
+open --raw hclust_fish.R
+Rscript hclust_fish.R | from csv
+Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
+```
+
+De igual modo, el script `hclust_fish.py` evalúa el clustering jerárquico aglomerativo con `scikit-learn` (`AgglomerativeClustering(linkage="ward")`) para distintos números de clústeres ($K = 2, 3, 4, 5$) calculando el coeficiente de silueta (*Silhouette Score*):
+
+```nu
+cd /data/ch08
+open --raw hclust_fish.py
+python3 hclust_fish.py | from csv
+python3 hclust_fish.py | from csv | save -f fish_hclust_py.csv
+```
+
+### Determinación Óptima de K con Evaluación Multimétrica (cluster_eval.py)
+
+Uno de los desafíos centrales en minería de datos consiste en seleccionar el número óptimo de clústeres $K$. En lugar de confiar únicamente en una inspección visual subjetiva del método del codo (*Elbow Method*), la práctica rigurosa evalúa simultáneamente múltiples métricas de validación interna:
+
+1. **Inercia (WCSS)**: Suma de distancias al cuadrado al centroide más cercano (monótonamente decreciente con $K$).
+2. **Coeficiente de Silueta (*Silhouette*)**: Mide cuán similar es un punto a su propio clúster en comparación con el clúster vecino más cercano (rango $[-1, 1]$, valores cercanos a 1 indican conglomerados densos y bien separados).
+3. **Índice Calinski-Harabasz**: Razón entre la dispersión entre clústeres y la dispersión intra-clúster (valores mayores indican mejor separación).
+4. **Índice Davies-Bouldin**: Promedio de similitud máxima de cada clúster con su clúster más semejante (valores menores indican mejor partición).
+
+El script `cluster_eval.py` evalúa automáticamente estos 4 criterios sobre el conjunto bancario `banco.csv` (segmentación de clientes en variables estandarizadas de edad, ingreso, gasto en tarjeta e hipoteca) para $K \in [2, 6]$:
+
+```nu
+cd /data/ch08
+open --raw cluster_eval.py
+python3 cluster_eval.py | from csv
+python3 cluster_eval.py | from csv | save -f banco_cluster_eval.csv
+```
+
+Podemos ordenar en Nushell la tabla por coeficiente de silueta descendente para identificar inmediatamente la partición más compacta:
+
+```nu
+cd /data/ch08
+open banco_cluster_eval.csv | sort-by silhouette -r
+```
+
+## Regresión: Predicción de la Calidad del Vino
 
 En el problema de **regresión supervisada**, deseamos aprender una función $f(\mathbf{x}) \approx y$ que prediga una variable respuesta cuantitativa ($y = \text{quality}$) a partir del vector de predictores fisicoquímicos $\mathbf{x} \in \mathbb{R}^{11}$.
 
@@ -689,7 +739,7 @@ Para evaluar rigurosamente la capacidad de generalización del modelo sobre dato
 - **Error Absoluto Medio (MAE)**: $\text{MAE} = \frac{1}{n}\sum_{i=1}^n |y_i - \hat{y}_i|$
 - **Raíz del Error Cuadrático Medio (RMSE)**: $\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2}$
 
-### 3.1 Regresión en Línea con Vowpal Wabbit (`vw-regress`)
+### Regresión en Línea con Vowpal Wabbit (`vw-regress`)
 
 **Vowpal Wabbit (`vw`)** es un motor ultrarrápido de aprendizaje en línea por descenso de gradiente estocástico capaz de entrenar modelos sobre millones de registros sin cargar el dataset completo en RAM. El comando `vw-regress` incluido en `dsin_tools.nu` convierte automáticamente tablas de Nushell al formato nativo de Vowpal Wabbit (`target |features feat1:val1 feat2:val2 ...`), entrena el modelo y devuelve una tabla con `actual`, `predicted`, `error` y `abs_error`:
 
@@ -713,7 +763,7 @@ $metrics
 [$metrics] | save -f wine_vw_metrics.csv
 ```
 
-### 3.2 Regresión Lineal Múltiple con `Rscript` (`regress_wine.R`)
+### Regresión Lineal Múltiple con `Rscript` (`regress_wine.R`)
 
 Veamos el script `regress_wine.R`, que ajusta un modelo lineal clásico por mínimos cuadrados ordinarios (`lm(quality ~ ., data = train)`) sobre los primeros 3.500 registros, evalúa el RMSE y MAE en el conjunto de prueba y devuelve los coeficientes estimados ($\hat{\beta}_j$, error estándar, estadístico $t$ y valor $p$):
 
@@ -732,7 +782,7 @@ open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r
 open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r | save -f wine_significant_predictors.csv
 ```
 
-### 3.3 Regresión Regularizada (Ridge) con Python (`regress_wine.py`)
+### Regresión Regularizada (Ridge) con Python (`regress_wine.py`)
 
 Ejecutemos ahora el script `regress_wine.py`, que estandariza los predictores y ajusta una regresión Ridge ($\ell_2$) con `scikit-learn`:
 
@@ -743,11 +793,11 @@ python3 regress_wine.py | from csv
 python3 regress_wine.py | from csv | save -f wine_regression_py.csv
 ```
 
-## 4. Clasificación Supervisada
+## Clasificación Supervisada
 
-Finalmente, abordemos el problema de **clasificación supervisada**: predecir una etiqueta categórica discreta (por ejemplo, si un vino es tinto o blanco en `wine-both.csv`, o si un vino es de alta calidad `good = 1` cuando $\text{quality} \ge 6$) a partir de sus propiedades químicas.
+Finalmente, abordemos el problema de **clasificación supervisada**: predecir una etiqueta categórica discreta (por ejemplo, si un vino es tinto o blanco en `wine-both.csv`, o si un cliente bancario aceptará un préstamo en `banco.csv`) a partir de sus atributos.
 
-### 4.1 Experimentos de Clasificación con SKLL (`run_experiment` + `skll-metrics`)
+### Experimentos de Clasificación con SKLL (`run_experiment` + `skll-metrics`)
 
 La imagen `dsin` incluye **SKLL (*SciKit-Learn Laboratory*)**, que permite definir experimentos declarativos de evaluación y validación cruzada mediante archivos de configuración `.cfg` (como `classify.cfg` en `/data/ch08`, que evalúa clasificadores sobre `train/features.csv` y `test/features.csv`).
 
@@ -761,7 +811,7 @@ skll-metrics output/wine_summary.tsv
 skll-metrics output/wine_summary.tsv | save -f wine_skll_summary.csv
 ```
 
-### 4.2 Clasificación con Regresión Logística en `Rscript` (`classify_wine.R`)
+### Clasificación con Regresión Logística en `Rscript` (`classify_wine.R`)
 
 Veamos y ejecutemos el script `classify_wine.R` en `/data/ch08`, que entrena un modelo lineal generalizado binomial (`glm(is_red ~ ., family = binomial())`) sobre una muestra estratificada de entrenamiento y evalúa su exactitud, sensibilidad y especificidad sobre el conjunto de prueba:
 
@@ -772,9 +822,9 @@ Rscript classify_wine.R | from csv
 Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
 ```
 
-### 4.3 Clasificación con Random Forest en Python (`classify_wine.py`)
+### Clasificación con Random Forest en Python (`classify_wine.py`)
 
-Por último, revisemos y ejecutemos `classify_wine.py`, que entrena un clasificador de Bosques Aleatorios (*Random Forest*) con 100 árboles en `scikit-learn` y devuelve la tabla de importancia de variables (*feature importances*) junto con la exactitud en prueba (`test_accuracy`):
+Revisemos y ejecutemos `classify_wine.py`, que entrena un clasificador de Bosques Aleatorios (*Random Forest*) con 100 árboles en `scikit-learn` y devuelve la tabla de importancia de variables (*feature importances*) junto con la exactitud en prueba (`test_accuracy`):
 
 ```nushell
 cd /data/ch08
@@ -785,16 +835,124 @@ python3 classify_wine.py | from csv | save -f wine_classification_py.csv
 
 Observa cómo `total_sulfur_dioxide`, `chlorides` y `volatile_acidity` emergen consistentemente como las variables más discriminantes para distinguir entre vinos tintos y blancos.
 
+### Árboles de Decisión con R y Python (dt_banco.R y dt_banco.py)
+
+Los **árboles de decisión** (*Decision Trees*) representan una familia fundamental de modelos supervisados no paramétricos ampliamente utilizados en minería de datos por su alta interpretabilidad y capacidad para modelar relaciones no lineales sin requerir escalado previo de atributos.
+
+Evaluemos la predicción de aceptación de préstamos sobre `banco.csv` (5.000 clientes) utilizando `rpart` en R (`dt_banco.R` con profundidad máxima de 4 niveles):
+
+```nu
+cd /data/ch08
+open --raw dt_banco.R
+Rscript dt_banco.R | from csv
+Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
+```
+
+Ejecutemos ahora el clasificador equivalente en Python con `DecisionTreeClassifier` de `scikit-learn` (`dt_banco.py`):
+
+```nu
+cd /data/ch08
+open --raw dt_banco.py
+python3 dt_banco.py | from csv
+python3 dt_banco.py | from csv | save -f banco_dt_py.csv
+```
+
+### Clasificación con Vecinos Más Cercanos k-NN (knn_banco.R y knn_banco.py)
+
+El clasificador **$k$-Vecinos Más Cercanos ($k$-NN, *k-Nearest Neighbors*)** es un método de aprendizaje basado en instancias que clasifica una nueva observación asignándole la clase mayoritaria entre sus $k$ vecinos más próximos en el espacio de características estandarizado.
+
+Ejecutemos `knn_banco.R` para evaluar el clasificador en R (`class::knn`) sobre `banco.csv` con $k \in \{3, 5, 7\}$:
+
+```nu
+cd /data/ch08
+open --raw knn_banco.R
+Rscript knn_banco.R | from csv
+Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
+```
+
+Y ejecutemos la contraparte en Python utilizando `KNeighborsClassifier` (`knn_banco.py`):
+
+```nu
+cd /data/ch08
+open --raw knn_banco.py
+python3 knn_banco.py | from csv
+python3 knn_banco.py | from csv | save -f banco_knn_py.csv
+```
+
+### Clasificación Alternativa: Naïve Bayes y Máquinas de Vectores de Soporte (nb_svm_banco.py)
+
+Como complemento a los árboles y vecinos cercanos, la minería de datos contemporánea emplea con frecuencia dos paradigmas adicionales:
+
+1. **Clasificador Bayesiano Ingenuo Gaussiano (*Gaussian Naïve Bayes*)**: Aplica el teorema de Bayes asumiendo independencia condicional entre los predictores dada la clase, modelando cada atributo continuo mediante una distribución normal.
+2. **Máquinas de Vectores de Soporte (SVM, *Support Vector Machines*)**: Encuentran el hiperplano óptimo que maximiza el margen de separación entre clases en un espacio inducido por un núcleo de base radial (RBF).
+
+Ejecutemos `nb_svm_banco.py` para comparar el desempeño de ambos clasificadores sobre `banco.csv`:
+
+```nu
+cd /data/ch08
+open --raw nb_svm_banco.py
+python3 nb_svm_banco.py | from csv
+python3 nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
+```
+
+La tabla comparativa resultante permite a Nushell ordenar los modelos según su métrica $F_1$-score:
+
+```nu
+cd /data/ch08
+open banco_nb_svm_py.csv | sort-by f1_score -r
+```
+
 ## Resumen del Capítulo y Conclusión del Curso
 
 En este capítulo completamos el ciclo OSEMN aplicando técnicas de modelado no supervisado y supervisado desde la línea de comandos:
 
 1. **Reducción de dimensionalidad (PCA y t-SNE)** con `tapkee-reduce`, `pca_wine.R` y `pca_wine.py`.
-2. **Agrupamiento (K-Means)** con `kmeans-cluster`, `cluster_wine.R` y `cluster_wine.py`.
+2. **Agrupamiento (K-Means y Jerárquico)** con `kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`, `hclust_fish.R`, `hclust_fish.py` y evaluación óptima con `cluster_eval.py`.
 3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R` y `regress_wine.py`.
-4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R` y `classify_wine.py`.
+4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`) y clasificación alternativa con Naïve Bayes y SVM (`nb_svm_banco.py`).
 
-A lo largo de los ocho capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ingeniería Estadística.'
+A lo largo de los ocho capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ingeniería Estadística.'#
+}
+
+def get_references_content [] {
+    r#'
+# Referencias {#references}
+
+## Ecosistema Nushell
+
+- **Sitio web oficial de Nushell**: <https://www.nushell.sh>
+- **The Nu Book (Documentación oficial)**: <https://www.nushell.sh/book/>
+- **Referencia de Comandos de Nushell**: <https://www.nushell.sh/commands/>
+- **Repositorio de Nushell en GitHub**: <https://github.com/nushell/nushell>
+- **Repositorio del plugin Apache Arrow / Polars**: <https://github.com/nushell/nushell/tree/main/crates/nu_plugin_polars>
+- **Plugins oficiales de formatos y consultas**: <https://github.com/nushell/nushell/tree/main/crates/nu_plugin_formats>, `nu_plugin_query`, `nu_plugin_gstat`, `nu_plugin_inc`
+- **Comunidad y Discord de Nushell**: <https://discord.gg/NtAbbGn>
+
+## Data Science at the Command Line (DSitCL)
+
+- **Libro oficial en línea (Segunda edición)**: Janssens, Jeroen (2021). *Data Science at the Command Line: Facing the Future with Time-Tested Tools* (2nd ed.). O'Reilly Media. <https://datascienceatthecommandline.com/2e/>
+- **Repositorio GitHub del libro original**: <https://github.com/jeroenjanssens/data-science-at-the-command-line>
+- **Data Science Toolbox (Contenedores Docker base)**: <https://github.com/jeroenjanssens/datasciencetoolbox>
+- **Repositorio de imágenes en Docker Hub**: `datasciencetoolbox` en <https://hub.docker.com/u/datasciencetoolbox>
+
+## Herramientas de Línea de Comandos Integradas en `dsin`
+
+- **ttt (Terminal Text Tree / Text Editor)**: Liam Galvin. Editor ligero de consola con soporte para mouse y resaltado de sintaxis. <https://github.com/liamg/ttt>
+- **timg (Terminal Image and Video Viewer)**: Henner Zeller. Visor gráfico en alta resolución para terminales con soporte Sixel, Kitty y bloques Unicode. <https://github.com/hzeller/timg>
+- **GNU Parallel**: Tange, Ole (2018). *GNU Parallel 2018*. Ole Tange. <https://www.gnu.org/software/parallel/>
+- **Tapkee**: Lisitsyn, S., Widmer, C., & Rath, F. J. (2014). *Tapkee: An Efficient Dimension Reduction Library*. Journal of Machine Learning Research, 15(1), 3955-3959. <https://tapkee.lisitsyn.me/>
+- **Vowpal Wabbit**: Langford, J., Li, L., & Strehl, A. (2007). *Vowpal Wabbit Online Learning Project*. Microsoft Research. <https://vowpalwabbit.org/>
+- **SKLL (SciKit-Learn Laboratory)**: Educational Testing Service (ETS). Framework declarativo para experimentación con modelos de Scikit-Learn. <https://skll.readthedocs.io/>
+- **Polars**: Ritchie Vink. Motor columnar de DataFrames multihilo de ultra-alto rendimiento en Rust. <https://pola.rs/>
+
+## Bibliografía y Literatura Académica
+
+- **Mason, H., & Wiggins, C. H. (2010)**. *A Taxonomy of Data Science*. Dataists. <http://www.dataists.com/2010/09/a-taxonomy-of-data-science>
+- **Tukey, J. W. (1977)**. *Exploratory Data Analysis*. Reading, Mass.: Addison-Wesley Publishing Company.
+- **Wickham, H., & Grolemund, G. (2017)**. *R for Data Science: Import, Tidy, Transform, Visualize, and Model Data*. O'Reilly Media.
+- **Pedregosa, F., et al. (2011)**. *Scikit-learn: Machine Learning in Python*. Journal of Machine Learning Research, 12, 2825-2830.
+- **Breiman, L. (2001)**. *Random Forests*. Machine Learning, 45(1), 5-32.
+- **Hastie, T., Tibshirani, R., & Friedman, J. (2009)**. *The Elements of Statistical Learning: Data Mining, Inference, and Prediction* (2nd ed.). Springer New York.'#
 }
 
 def format_for_pandoc [doc: string] {
@@ -838,7 +996,16 @@ def format_for_pandoc [doc: string] {
         }
 
         if (not $in_code) {
-            let is_list_item = (($trimmed =~ '^[-*+] ') or ($trimmed =~ '^[0-9]+\. '))
+            # Ensure a \newpage before each new level-1 section heading (# )
+            let is_h1 = ($trimmed =~ '^[#] [^ ]')
+            if $is_h1 and (($prev_line | str trim) != "\\newpage") {
+                if (($prev_line | str trim) != "") {
+                    $out_body = ($out_body | append "")
+                }
+                $out_body = ($out_body | append "\\newpage" | append "")
+            }
+
+            let is_list_item = (($trimmed =~ '^[-*+] ') or ($trimmed =~ '^[0-9]+[.] '))
             if $is_list_item and (not $in_list) and (($prev_line | str trim) != "") {
                 $out_body = ($out_body | append "")
             }
@@ -855,15 +1022,14 @@ def format_for_pandoc [doc: string] {
 def main [] {
     let src_md = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtTheCommandLine/Files/DataScienceCLI.md"
     let dst_md = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/DataScienceNushell.md"
+    let dst_ubb_md = "/home/kira/Dropbox/Documentos/Clases/UBB/DataScienceAtNushell/Files/DataScienceNushell_ubb.md"
 
     let lines = (open --raw $src_md | lines)
 
     # 1. Frontmatter + Ch1 (Windows 10+ & Linux/WSL2/dsin container)
-    let ch1 = (
-        (get_frontmatter) + "\n" +
-        (get_slice $lines 81 147) + "\n\n" +
-        (get_ch1_tail)
-    )
+    let ch1_body = ((get_slice $lines 81 147) + "\n\n" + (get_ch1_tail))
+    let ch1_public = ((get_frontmatter false) + "\n" + $ch1_body)
+    let ch1_ubb = ((get_frontmatter true) + "\n" + $ch1_body)
 
     # 2. Chapter 2: Introducción y Fundamentos de Nushell
     #    - Ciencia de Datos (OSEMN) + Historia de la terminal (240..372)
@@ -917,9 +1083,12 @@ def main [] {
     # Epilogue: Para seguir explorando
     let epilogue = (get_slice $lines 7602 7636)
 
-    let raw_book = (
+    # References section
+    let references = (get_references_content)
+
+    let raw_book_public = (
         [
-            $ch1
+            $ch1_public
             $ch2
             $ch3
             $ch4
@@ -928,12 +1097,33 @@ def main [] {
             $ch7
             $ch8
             $epilogue
+            $references
         ] | str join "\n\n"
     )
 
-    let formatted_book = (format_for_pandoc $raw_book)
-    $formatted_book | save -f $dst_md
+    let raw_book_ubb = (
+        [
+            $ch1_ubb
+            $ch2
+            $ch3
+            $ch4
+            $ch5
+            $ch6
+            $ch7
+            $ch8
+            $epilogue
+            $references
+        ] | str join "\n\n"
+    )
+
+    let formatted_book_public = (format_for_pandoc $raw_book_public)
+    $formatted_book_public | save -f $dst_md
+
+    let formatted_book_ubb = (format_for_pandoc $raw_book_ubb)
+    $formatted_book_ubb | save -f $dst_ubb_md
 
     let out_lines = (open --raw $dst_md | lines)
-    print $"Successfully built ($dst_md) with ($out_lines | length) lines."
+    let ubb_lines = (open --raw $dst_ubb_md | lines)
+    print $"Successfully built public ($dst_md) with ($out_lines | length) lines."
+    print $"Successfully built UBB ($dst_ubb_md) with ($ubb_lines | length) lines."
 }

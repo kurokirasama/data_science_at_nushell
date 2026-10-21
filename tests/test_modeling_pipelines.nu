@@ -116,6 +116,49 @@ def main [
     } catch { false })
     $results = ($results | append { test: "4c_classification_python_classify_wine", passed: $c4c })
 
+    # 5a. Minería de Datos: Hierarchical Clustering (hclust_fish.R & hclust_fish.py)
+    let c5a = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res_r = (Rscript hclust_fish.R | from csv)
+        let res_py = (python3 hclust_fish.py | from csv)
+        (("dominant_species" in ($res_r | columns)) and ("silhouette" in ($res_py | columns)))
+    } catch { false })
+    $results = ($results | append { test: "5a_mineria_hierarchical_clustering", passed: $c5a })
+
+    # 5b. Minería de Datos: Multi-metric Optimal K Evaluation (cluster_eval.py)
+    let c5b = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res = (python3 cluster_eval.py | from csv)
+        (($res | length) == 5) and ("calinski_harabasz" in ($res | columns))
+    } catch { false })
+    $results = ($results | append { test: "5b_mineria_optimal_k_eval", passed: $c5b })
+
+    # 5c. Minería de Datos: Decision Trees (dt_banco.R & dt_banco.py)
+    let c5c = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res_r = (Rscript dt_banco.R | from csv)
+        let res_py = (python3 dt_banco.py | from csv)
+        (($res_r | first | get accuracy) > 0.85) and (($res_py | first | get accuracy) > 0.85)
+    } catch { false })
+    $results = ($results | append { test: "5c_mineria_decision_trees", passed: $c5c })
+
+    # 5d. Minería de Datos: k-NN (knn_banco.R & knn_banco.py)
+    let c5d = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res_r = (Rscript knn_banco.R | from csv)
+        let res_py = (python3 knn_banco.py | from csv)
+        (($res_r | length) == 3) and (($res_py | length) == 3)
+    } catch { false })
+    $results = ($results | append { test: "5d_mineria_knn", passed: $c5d })
+
+    # 5e. Minería de Datos: Naïve Bayes & SVM (nb_svm_banco.py)
+    let c5e = (try {
+        if $mutate { error make { msg: "Mutated" } }
+        let res = (python3 nb_svm_banco.py | from csv)
+        (($res | length) == 2) and (($res | first | get accuracy) > 0.85)
+    } catch { false })
+    $results = ($results | append { test: "5e_mineria_nb_svm", passed: $c5e })
+
     print ($results | to md)
     let failed = ($results | where passed == false | length)
     if $mutate {

@@ -71,3 +71,11 @@ $env.PROMPT_INDICATOR = {||
 # COURSE MODULES & PLUGINS
 # =========================================================
 use /home/dst/.config/nushell/nu_modules/dsin_tools.nu *
+plugin use polars
+plugin use formats
+plugin use gstat
+plugin use inc
+plugin use query
+plugin use file
+plugin use plot
+plugin use port_extension

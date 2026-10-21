@@ -767,6 +767,281 @@ out_df.to_csv("wine_clf_py.csv", index=False)
 out_df.to_csv(sys.stdout, index=False)
 ' | save -f $"($dst_data)/ch08/classify_wine.py"
 
+# Copy Minería de Datos & UNAB datasets into ch08
+let mineria_base = "/home/kira/Dropbox/Documentos/Clases/UBB/Mineria_de_Datos"
+cp $"($mineria_base)/material_unab/mine/guias/scripts/banco.csv" $"($dst_data)/ch08/banco.csv"
+cp $"($mineria_base)/material_unab/mine/guias/scripts/Fish.csv" $"($dst_data)/ch08/Fish.csv"
+cp $"($mineria_base)/Files/vertebrate.csv" $"($dst_data)/ch08/vertebrate.csv"
+cp $"($mineria_base)/Files/python_snippets/zoo.csv" $"($dst_data)/ch08/zoo.csv"
+cp $"($mineria_base)/Files/python_snippets/pima-indians-diabetes.data.csv" $"($dst_data)/ch08/pima-indians-diabetes.data.csv"
+
+# Hierarchical clustering (hclust) scripts on Fish.csv
+'#!/usr/bin/env Rscript
+# Clustering Jerárquico Aglomerativo (Ward.D2)
+df <- read.csv("Fish.csv", stringsAsFactors = FALSE)
+num_cols <- c("Weight", "Length1", "Length2", "Length3", "Height", "Width")
+X <- scale(df[, num_cols])
+
+d <- dist(X, method = "euclidean")
+hc <- hclust(d, method = "ward.D2")
+df$cluster <- paste0("cluster_", cutree(hc, k = 3))
+
+write.csv(df[, c("Species", "Weight", "Height", "Width", "cluster")], "fish_hclust_r.csv", row.names = FALSE, quote = FALSE)
+
+tab <- as.data.frame.matrix(table(df$cluster, df$Species))
+out <- data.frame(
+  cluster = rownames(tab),
+  total_samples = as.integer(rowSums(tab)),
+  dominant_species = colnames(tab)[max.col(tab, ties.method = "first")],
+  dominant_count = apply(tab, 1, max)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/hclust_fish.R"
+
+'#!/usr/bin/env python3
+# Clustering Jerárquico con Scikit-Learn
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+import sys
+
+df = pd.read_csv("Fish.csv")
+num_cols = ["Weight", "Length1", "Length2", "Length3", "Height", "Width"]
+X = StandardScaler().fit_transform(df[num_cols])
+
+rows = []
+for k in [2, 3, 4, 5]:
+    model = AgglomerativeClustering(n_clusters=k, linkage="ward")
+    labels = model.fit_predict(X)
+    sil = silhouette_score(X, labels)
+    if k == 3:
+        df_out = df[["Species", "Weight", "Height", "Width"]].copy()
+        df_out["cluster"] = [f"cluster_{l+1}" for l in labels]
+        df_out.to_csv("fish_hclust_py.csv", index=False)
+    rows.append({
+        "linkage": "ward",
+        "n_clusters": k,
+        "silhouette": round(float(sil), 4)
+    })
+
+pd.DataFrame(rows).to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/hclust_fish.py"
+
+# Optimal K evaluation script (Inertia, Silhouette, Calinski-Harabasz, Davies-Bouldin)
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+import sys
+
+df = pd.read_csv("banco.csv")
+features = ["edad", "ingreso", "gasto_tarjeta", "hipoteca"]
+X = StandardScaler().fit_transform(df[features])
+
+rows = []
+for k in range(2, 7):
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    labels = km.fit_predict(X)
+    rows.append({
+        "k": k,
+        "inertia": round(float(km.inertia_), 2),
+        "silhouette": round(float(silhouette_score(X, labels, sample_size=1000, random_state=42)), 4),
+        "calinski_harabasz": round(float(calinski_harabasz_score(X, labels)), 2),
+        "davies_bouldin": round(float(davies_bouldin_score(X, labels)), 4)
+    })
+
+pd.DataFrame(rows).to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/cluster_eval.py"
+
+# Decision Tree classification (R and Python)
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(rpart))
+set.seed(42)
+df <- read.csv("banco.csv")
+features <- c("edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca", "prestamo")
+df_sub <- df[, features]
+
+n <- nrow(df_sub)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train <- df_sub[train_idx, ]
+test  <- df_sub[-train_idx, ]
+
+fit <- rpart(prestamo ~ ., data = train, method = "class", control = rpart.control(maxdepth = 4))
+preds <- predict(fit, newdata = test, type = "class")
+
+tbl <- table(test$prestamo, preds)
+acc <- sum(diag(tbl)) / sum(tbl)
+tp <- if ("1" %in% rownames(tbl) && "1" %in% colnames(tbl)) tbl["1", "1"] else 0
+fp <- if ("0" %in% rownames(tbl) && "1" %in% colnames(tbl)) tbl["0", "1"] else 0
+fn <- if ("1" %in% rownames(tbl) && "0" %in% colnames(tbl)) tbl["1", "0"] else 0
+prec <- if (tp + fp > 0) tp / (tp + fp) else 0
+rec <- if (tp + fn > 0) tp / (tp + fn) else 0
+f1 <- if (prec + rec > 0) 2 * prec * rec / (prec + rec) else 0
+
+out <- data.frame(
+  model = "R_rpart_decision_tree",
+  max_depth = 4,
+  accuracy = round(acc, 4),
+  precision = round(prec, 4),
+  recall = round(rec, 4),
+  f1_score = round(f1, 4)
+)
+write.csv(out, "banco_dt_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/dt_banco.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import sys
+
+df = pd.read_csv("banco.csv")
+features = ["edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca"]
+X = df[features]
+y = df["prestamo"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+clf = DecisionTreeClassifier(max_depth=4, random_state=42)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)
+
+out = pd.DataFrame([{
+    "model": "Python_DecisionTreeClassifier",
+    "max_depth": 4,
+    "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+    "precision": round(float(precision_score(y_test, preds, zero_division=0)), 4),
+    "recall": round(float(recall_score(y_test, preds, zero_division=0)), 4),
+    "f1_score": round(float(f1_score(y_test, preds, zero_division=0)), 4)
+}])
+out.to_csv("banco_dt_py.csv", index=False)
+out.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/dt_banco.py"
+
+# k-NN classification (R and Python)
+'#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(class))
+set.seed(42)
+df <- read.csv("banco.csv")
+features <- c("edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca")
+X <- scale(df[, features])
+y <- df$prestamo
+
+n <- nrow(X)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train_x <- X[train_idx, ]
+test_x  <- X[-train_idx, ]
+train_y <- y[train_idx]
+test_y  <- y[-train_idx]
+
+rows <- list()
+for (k in c(3, 5, 7)) {
+  preds <- knn(train = train_x, test = test_x, cl = train_y, k = k)
+  tbl <- table(test_y, preds)
+  acc <- sum(diag(tbl)) / sum(tbl)
+  tp <- if ("1" %in% rownames(tbl) && "1" %in% colnames(tbl)) tbl["1", "1"] else 0
+  fp <- if ("0" %in% rownames(tbl) && "1" %in% colnames(tbl)) tbl["0", "1"] else 0
+  fn <- if ("1" %in% rownames(tbl) && "0" %in% colnames(tbl)) tbl["1", "0"] else 0
+  prec <- if (tp + fp > 0) tp / (tp + fp) else 0
+  rec <- if (tp + fn > 0) tp / (tp + fn) else 0
+  f1 <- if (prec + rec > 0) 2 * prec * rec / (prec + rec) else 0
+  rows[[length(rows) + 1]] <- data.frame(
+    model = "R_knn",
+    k_neighbors = k,
+    accuracy = round(acc, 4),
+    precision = round(prec, 4),
+    recall = round(rec, 4),
+    f1_score = round(f1, 4)
+  )
+}
+out <- do.call(rbind, rows)
+write.csv(out, "banco_knn_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+' | save -f $"($dst_data)/ch08/knn_banco.R"
+
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import sys
+
+df = pd.read_csv("banco.csv")
+features = ["edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca"]
+X = df[features]
+y = df["prestamo"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+rows = []
+for k in [3, 5, 7]:
+    clf = KNeighborsClassifier(n_neighbors=k)
+    clf.fit(X_train_s, y_train)
+    preds = clf.predict(X_test_s)
+    rows.append({
+        "model": "Python_KNeighborsClassifier",
+        "k_neighbors": k,
+        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+        "precision": round(float(precision_score(y_test, preds, zero_division=0)), 4),
+        "recall": round(float(recall_score(y_test, preds, zero_division=0)), 4),
+        "f1_score": round(float(f1_score(y_test, preds, zero_division=0)), 4)
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("banco_knn_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/knn_banco.py"
+
+# Naïve Bayes & SVM (Python)
+'#!/usr/bin/env python3
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import sys
+
+df = pd.read_csv("banco.csv")
+features = ["edad", "ingreso", "familia", "gasto_tarjeta", "educacion", "hipoteca"]
+X = df[features]
+y = df["prestamo"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+models = {
+    "GaussianNB": GaussianNB(),
+    "SVC(kernel=rbf)": SVC(kernel="rbf", C=1.0, random_state=42)
+}
+
+rows = []
+for name, clf in models.items():
+    clf.fit(X_train_s, y_train)
+    preds = clf.predict(X_test_s)
+    rows.append({
+        "model": name,
+        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+        "precision": round(float(precision_score(y_test, preds, zero_division=0)), 4),
+        "recall": round(float(recall_score(y_test, preds, zero_division=0)), 4),
+        "f1_score": round(float(f1_score(y_test, preds, zero_division=0)), 4)
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("banco_nb_svm_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+' | save -f $"($dst_data)/ch08/nb_svm_banco.py"
+
 glob $"($dst_data)/ch08/*.{R,py}" | each { |f| chmod +x $f }
 
 print "Successfully built /data/ch02..ch08 structure!"
