@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language>
+<language name="nu" version="1" kateversion="5.0" section="Scripts" extensions="*.nu" mimetype="application/x-nushell">
+  <highlighting>
+    <contexts>
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <DetectSpaces/>
+        <DetectChar char="#" attribute="Comment" context="Comment"/>
+        <!-- Keywords -->
+        <RegExpr String="\b(def|def-env|export|export-env|let|mut|const|if|else|match|for|while|loop|try|catch|return|break|continue|use|source|source-env|plugin|alias|overlay|hide|module|error|make)\b" attribute="Keyword" context="#stay"/>
+        <!-- Built-in Commands & Modifiers -->
+        <RegExpr String="\b(ls|l|lc|lo|le|cd|cp|mv|rm|mkdir|open|save|touch|du|pwd|lines|split|first|last|take|skip|select|reject|where|sort-by|group-by|uniq|each|par-each|filter|reduce|get|insert|upsert|update|merge|join|append|prepend|flatten|wrap|headers|columns|values|rename|find|compact|shuffle|reverse|drop|describe|table|grid|print|echo|format|explore|view|math|str|path|bytes|bits|date|char|ansi|http|polars|to|from|into|which|version|history|help|do|ignore|complete|metadata|input|kill|ps|sys)\b" attribute="BuiltIn" context="#stay"/>
+        <!-- Common CLI Tools in Course -->
+        <RegExpr String="\b(pbc|ttt|timg|vw|tapkee|parallel|Rscript|python3|sqlite3|git|7z|jq)\b" attribute="BuiltIn" context="#stay"/>
+        <!-- Constants & Literals -->
+        <RegExpr String="\b(true|false|null|nothing|in|out|err)\b" attribute="Constant" context="#stay"/>
+        <!-- Core Types -->
+        <RegExpr String="\b(string|int|float|bool|date|duration|filesize|range|table|record|list|block|closure|glob|cell-path|binary|any)\b" attribute="DataType" context="#stay"/>
+        <!-- Strings -->
+        <DetectChar char="&quot;" attribute="String" context="StringDQ"/>
+        <DetectChar char="'" attribute="String" context="StringSQ"/>
+        <DetectChar char="`" attribute="String" context="StringBQ"/>
+        <!-- Variables -->
+        <RegExpr String="\$(\(nu\)|nu|env|in|it|[a-zA-Z_][a-zA-Z0-9_]*)" attribute="Variable" context="#stay"/>
+        <!-- Flags & Options -->
+        <RegExpr String="--?[a-zA-Z_][a-zA-Z0-9_-]*" attribute="Attribute" context="#stay"/>
+        <!-- Numbers & Units -->
+        <RegExpr String="\b0x[0-9a-fA-F_]+\b" attribute="BaseN" context="#stay"/>
+        <RegExpr String="\b0b[01_]+\b" attribute="BaseN" context="#stay"/>
+        <RegExpr String="\b0o[0-7_]+\b" attribute="BaseN" context="#stay"/>
+        <Float attribute="Float" context="#stay"/>
+        <Int attribute="DecVal" context="#stay"/>
+        <RegExpr String="\b[0-9]+(\.[0-9]+)?(ns|us|ms|sec|min|hr|day|wk|b|kb|mb|gb|tb|kib|mib|gib|tib)\b" attribute="DecVal" context="#stay"/>
+        <!-- Operators -->
+        <AnyChar String="|=+-*/%!&lt;&gt;&amp;^~" attribute="Operator" context="#stay"/>
+      </context>
+      <context name="Comment" attribute="Comment" lineEndContext="#pop">
+        <DetectSpaces/>
+      </context>
+      <context name="StringDQ" attribute="String" lineEndContext="#stay">
+        <DetectChar char="&quot;" attribute="String" context="#pop"/>
+        <Detect2Chars char="\" char1="&quot;" attribute="SpecialChar" context="#stay"/>
+        <Detect2Chars char="\" char1="\" attribute="SpecialChar" context="#stay"/>
+      </context>
+      <context name="StringSQ" attribute="String" lineEndContext="#stay">
+        <DetectChar char="'" attribute="String" context="#pop"/>
+        <Detect2Chars char="\" char1="'" attribute="SpecialChar" context="#stay"/>
+      </context>
+      <context name="StringBQ" attribute="String" lineEndContext="#stay">
+        <DetectChar char="`" attribute="String" context="#pop"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Keyword" defStyleNum="dsKeyword"/>
+      <itemData name="BuiltIn" defStyleNum="dsBuiltIn"/>
+      <itemData name="Constant" defStyleNum="dsConstant"/>
+      <itemData name="DataType" defStyleNum="dsDataType"/>
+      <itemData name="DecVal" defStyleNum="dsDecVal"/>
+      <itemData name="BaseN" defStyleNum="dsBaseN"/>
+      <itemData name="Float" defStyleNum="dsFloat"/>
+      <itemData name="String" defStyleNum="dsString"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+      <itemData name="Operator" defStyleNum="dsOperator"/>
+      <itemData name="Variable" defStyleNum="dsVariable"/>
+      <itemData name="Attribute" defStyleNum="dsAttribute"/>
+      <itemData name="SpecialChar" defStyleNum="dsSpecialChar"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="singleLine" value="#"/>
+    </comments>
+  </general>
+</language>
