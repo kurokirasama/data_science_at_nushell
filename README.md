@@ -2,8 +2,6 @@
 
 **Guía práctica y libro** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
 
-**Instructor:** Dr. Luis Gómez Guzmán (`lgomez@ubiobio.cl`)
-
 ## Descripción
 
 Libro y manual integral de **Ciencia de Datos en la Línea de Comandos** construido íntegramente sobre **Nushell** como shell interactivo, lenguaje de programación funcional/estructurado y motor de pipelines de datos, utilizando el contenedor Docker propio **`dsin`** (*Data Science in Nushell*).
