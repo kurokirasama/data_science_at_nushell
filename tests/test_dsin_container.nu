@@ -22,10 +22,18 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
     return $results
   }
 
-  # 4. Default entrypoint is Nushell and returns version >= 0.116
+  # 4. Default entrypoint is Nushell and returns version >= 0.116, default user is dsin, workdir is /home/dsin
   let nu_ver_res = (do -i { ^sudo -n docker run --rm $image -c "version | get version" } | complete)
   let nu_ok = ($nu_ver_res.exit_code == 0) and (($nu_ver_res.stdout | str trim) | is-not-empty)
   $results ++= [{ check: "default_shell_is_nushell", passed: $nu_ok, detail: $"Nushell version: ($nu_ver_res.stdout | str trim)" }]
+
+  let user_res = (do -i { ^sudo -n docker run --rm $image -c "whoami" } | complete)
+  let user_ok = ($user_res.exit_code == 0) and (($user_res.stdout | str trim) == "dsin")
+  $results ++= [{ check: "default_user_is_dsin", passed: $user_ok, detail: $"Default user: ($user_res.stdout | str trim)" }]
+
+  let pwd_res = (do -i { ^sudo -n docker run --rm $image -c "pwd" } | complete)
+  let pwd_ok = ($pwd_res.exit_code == 0) and (($pwd_res.stdout | str trim) == "/home/dsin")
+  $results ++= [{ check: "default_workdir_is_home", passed: $pwd_ok, detail: $"Default workdir: ($pwd_res.stdout | str trim)" }]
 
   # 5. Built-in /data folder with ch03..ch09 by default (no volume mount needed)
   let data_res = (do -i { ^sudo -n docker run --rm $image -c "[ch03 ch04 ch05 ch06 ch07 ch08 ch09] | all {|d| ($'/data/($d)' | path exists)}" } | complete)
@@ -33,7 +41,7 @@ export def run-dsin-checks [image: string = "dsin:latest"]: nothing -> table {
   $results ++= [{ check: "builtin_data_ch03_to_ch09", passed: $data_ok, detail: $"Built-in /data/ch03..ch09 present: ($data_res.stdout | str trim)" }]
 
   # 6. Custom config.nu is loaded ($env.config.float_precision == 4)
-  let cfg_res = (do -i { ^sudo -n docker run --rm $image --config /home/dst/.config/nushell/config.nu -c "$env.config.float_precision" } | complete)
+  let cfg_res = (do -i { ^sudo -n docker run --rm $image --config /home/dsin/.config/nushell/config.nu -c "$env.config.float_precision" } | complete)
   let custom_cfg_ok = ($cfg_res.exit_code == 0) and (($cfg_res.stdout | str trim) == "4")
   $results ++= [{ check: "custom_config_loaded", passed: $custom_cfg_ok, detail: $"float_precision == ($cfg_res.stdout | str trim)" }]
 
