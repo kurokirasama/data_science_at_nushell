@@ -26,7 +26,7 @@ mkdir $"($dst_data)/.cache"
 # ch03: Section 3 (Fundamentos y Estructuras de Datos en Nushell)
 # -----------------------------------------------------------------------------
 ^cp -a $"($src_data)/ch02/." $"($dst_data)/ch03/"
-cp $"($src_data)/ch09/edition.json" $"($dst_data)/ch03/edition.json"
+'{"edition": 2024}' | from json | to json --indent 2 | save -f $"($dst_data)/ch03/edition.json"
 rm -f $"($dst_data)/ch03/fac.py.bak" $"($dst_data)/ch03/edition2.json" $"($dst_data)/ch03/edition2.csv" $"($dst_data)/ch03/edition2.yaml"
 cp $"($src_data)/ch07/tips.csv" $"($dst_data)/ch03/tips.csv"
 cp $"($src_data)/ch04/stream.py" $"($dst_data)/ch03/stream.py"

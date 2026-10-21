@@ -252,7 +252,7 @@ Ingresemos al directorio correspondiente a este capítulo (`/data/ch03`) e inspe
 
 ```nu
 cd /data/ch03
-ls | select name type size
+ls
 ```
 
 Si deseamos inspeccionar las primeras 5 líneas del archivo `movies.txt`, abrimos el archivo en el directorio actual (`open movies.txt`), dividimos sus líneas con `lines` y tomamos las primeras 5 con `first 5`:
@@ -509,7 +509,7 @@ En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el
 
 ```nu
 cd /data/ch04
-ls | select name type size
+ls
 ```
 
 Primero, veamos cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
@@ -680,7 +680,7 @@ Comenzamos ingresando al directorio `/data/ch05` (que corresponde al Capítulo 5
 
 ```nu
 cd /data/ch05
-ls | select name type size | sort-by name
+ls | sort-by name
 ```
 
 ## Copiando Archivos Locales en el Contenedor Docker
@@ -912,7 +912,7 @@ Comenzamos ingresando al directorio `/data/ch06` e inspeccionando sus archivos:
 
 ```nu
 cd /data/ch06
-ls | select name type size | sort-by name
+ls | sort-by name
 ```
 
 ## Transformaciones en una Tubería de Datos
