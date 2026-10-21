@@ -49,8 +49,6 @@ header-includes:
 \tableofcontents
 \renewcommand{\listfigurename}{Índice de figuras}
 \listoffigures
-\renewcommand{\listtablename}{Índice de tablas}
-\listoftables
 \newpage
 
 
