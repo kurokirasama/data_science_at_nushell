@@ -1,0 +1,30 @@
+name: "💡 Propuesta de Mejora (Español)"
+description: Proponer una nueva herramienta CLI, ejercicio práctico, dataset o capacidad en Docker
+title: "[Propuesta]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¿Tiene una idea para mejorar el libro, incorporar una nueva herramienta de terminal o enriquecer los ejercicios prácticos? Compártala a continuación.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Resumen de la Propuesta
+      description: Describa la adición, nueva herramienta o ejercicio propuesto.
+    validations:
+      required: true
+  - type: textarea
+    id: problem_solved
+    attributes:
+      label: Motivación Didáctica o Técnica
+      description: ¿Qué necesidad resuelve o cómo mejora la experiencia de aprendizaje en ciencia de datos?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: ¿Existen herramientas o enfoques alternativos que haya evaluado?
+    validations:
+      required: false

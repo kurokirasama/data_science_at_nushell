@@ -1,0 +1,31 @@
+name: "💡 Feature Request / Proposal (English)"
+description: Suggest a new CLI tool, exercise, dataset, or Docker environment capability
+title: "[Proposal]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to improve the book, add a modern terminal tool, or enrich practical exercises? Tell us below!
+        *Para proponer esta mejora en español, utilice el formulario correspondiente.*
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposal Summary
+      description: Describe your proposed addition, new tool, or exercise.
+    validations:
+      required: true
+  - type: textarea
+    id: problem_solved
+    attributes:
+      label: Educational or Technical Motivation
+      description: What challenge does this address or how does it enhance the learning experience?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Are there alternative tools or pedagogical workflows that were considered?
+    validations:
+      required: false

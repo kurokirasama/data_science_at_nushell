@@ -1,0 +1,38 @@
+name: "📖 Errata y Sugerencias de Contenido (Español)"
+description: Reportar una errata, error tipográfico o mejora conceptual en el texto del libro
+title: "[Errata]: "
+labels: ["documentation", "errata"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¿Encontró un error tipográfico, una explicación confusa o una oportunidad de mejora en *Ciencia de Datos en la Terminal Linux con Nushell*? Por favor indíquelo a continuación.
+  - type: input
+    id: location
+    attributes:
+      label: Ubicación en el Libro
+      description: Indique el capítulo, sección o número de página aproximado en el PDF.
+      placeholder: "Capítulo 3: Obtener Datos, Sección 3.2, página PDF 45"
+    validations:
+      required: true
+  - type: textarea
+    id: current_text
+    attributes:
+      label: Texto Actual
+      description: Copie el fragmento exacto que contiene el error o redacción a mejorar.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_text
+    attributes:
+      label: Corrección Propuesta
+      description: ¿Cómo debería redactarse el texto corregido?
+    validations:
+      required: true
+  - type: textarea
+    id: explanation
+    attributes:
+      label: Explicación / Justificación
+      description: Explique brevemente por qué esta modificación mejora la precisión técnica o claridad didáctica.
+    validations:
+      required: false
