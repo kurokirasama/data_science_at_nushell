@@ -2,7 +2,7 @@
 
 **Guía práctica y libro** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
 
-**Instructor:** Dr. Luis Gómez (`lgomez@ubiobio.cl`)
+**Instructor:** Dr. Luis Gómez Guzmán (`lgomez@ubiobio.cl`)
 
 ## Descripción
 
@@ -18,7 +18,7 @@ Esta obra aborda desde la comparación con shells tradicionales (`bash`, `zsh` y
 
 ## Origen y Relación con la Obra Original de Jeroen Janssens
 
-Este proyecto es una derivación directa, evolución pedagógica y *spin-off* del influyente libro [**Data Science at the Command Line**](https://datascienceatthecommandline.com/2e/) (O'Reilly Media) de [**Jeroen Janssens**](https://jeroenjanssens.com/).
+Este proyecto es una derivación directa, evolución metodológica y *spin-off* del influyente libro [**Data Science at the Command Line**](https://datascienceatthecommandline.com/2e/) (O'Reilly Media) de [**Jeroen Janssens**](https://jeroenjanssens.com/).
 
 La obra original de Janssens sentó las bases del uso de la consola Unix para flujos integrales de ciencia de datos, apoyándose en utilidades clásicas de procesamiento de texto plano (`sed`, `awk`, `cut`, `grep`), la suite `csvkit` y scripts en Bash. **Data Science at Nushell** adapta y moderniza esa visión reemplazando los flujos tradicionales de caracteres no estructurados por el paradigma interactivo y estructurado de **Nushell** (`nu`), donde cada pipeline transporta tipos de datos semánticos, registros jerárquicos y tablas columnares aceleradas con **Polars** y Apache Arrow.
 
@@ -29,7 +29,7 @@ La obra original de Janssens sentó las bases del uso de la consola Unix para fl
 
 ## Contenidos (`Files/DataScienceNushell.md`)
 
-1. **Capítulo 1:** Introducción (La terminal como laboratorio científico, el paradigma Nushell de datos estructurados, sentido pedagógico de la omisión de salidas y entorno reproducible)
+1. **Capítulo 1:** Introducción (La terminal como laboratorio científico, el paradigma Nushell de datos estructurados, fundamento formativo de la omisión reflexiva de salidas y entorno reproducible)
 2. **Capítulo 2:** Instalación de Software (`dsin` Docker + Nushell)
 3. **Capítulo 3:** Fundamentos y Estructuras de Datos en Nushell (Introducción a la Terminal, Shells Tradicionales vs. Nushell, Strings, Listas, Registros, Tablas, Editor `ttt` y Git)
 4. **Capítulo 4:** Programación en Nushell y Creación de Herramientas de Línea de Comandos (`def`, `export def`, flags, tipos, módulos, API de Google Maps e integración con R/Python)
@@ -67,6 +67,20 @@ nu update-dsin-nushell.nu
 
 # Reconstruir fijando una versión específica y publicar en GHCR
 nu update-dsin-nushell.nu --version 0.116.1 --push
+```
+
+## Compilación del Libro a PDF
+
+Para generar el documento PDF oficial con XeLaTeX, resaltado de sintaxis nativo para Nushell y ocultamiento transparente de directivas de prueba mediante el filtro Lua:
+
+```bash
+cd Files
+pandoc --pdf-engine=xelatex \
+  --lua-filter=hide_skip.lua \
+  --syntax-definition=nu.xml \
+  --syntax-definition=nushell.xml \
+  --syntax-highlighting=pandoc_highlight.theme \
+  DataScienceNushell.md -o DataScienceNushell.pdf
 ```
 
 ## Estructura del Repositorio
