@@ -7,3 +7,4 @@ Files/GEMINI.md
 todos.md
 .ruff_cache/
 Files/*ubb.*
+tests/
