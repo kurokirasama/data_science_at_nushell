@@ -3488,123 +3488,6 @@ do $positive_check (-3)
 
 
 
-## Ejemplo de Desarrollo de Comando: API de Google Maps y Geocodificación
-
-En esta sección desarrollaremos un módulo reutilizable de Nushell (`maps.nu`) que interactúa con la **API de Google Maps** (y su equivalente abierto en **OpenStreetMap Nominatim**) para realizar geocodificación directa (obtener latitud y longitud a partir de una dirección postal) y geocodificación inversa (obtener la dirección formateada a partir de coordenadas geográficas).
-
-### Obtener API Key
-
-Para utilizar los servicios oficiales de Google Maps Platform se debe crear una clave de acceso (*API Key*) en el sitio web de [Google Cloud Console](https://console.cloud.google.com/cloud-resource-manager):
-
-1. Ingrese al sitio web de Google Cloud Console.
-2. Cree un nuevo proyecto.
-3. Diríjase al *Dashboard* y seleccione el proyecto recién creado.
-4. Diríjase a *APIs & Services* $\rightarrow$ *Library*.
-5. Busque y active **Geocoding API** y **Directions API**.
-6. Diríjase a *APIs & Services* $\rightarrow$ *Credentials*.
-7. Haga clic en *Create Credentials* $\rightarrow$ *API Key* y guarde la clave obtenida en un lugar seguro.
-
-### Exploración de la API y Anatomía de una URL
-
-De acuerdo con la [documentación oficial de Geocoding API](https://developers.google.com/maps/documentation/geocoding), podemos obtener las coordenadas geográficas asociadas a una dirección o viceversa mediante peticiones HTTP GET.
-
-Nos ubicamos primero en el directorio de trabajo del capítulo 4 (`/data/ch04`):
-
-```nu
-cd /data/ch04
-```
-
-A partir de este punto, todos los ejemplos y herramientas de este capítulo se ejecutan dentro de `/data/ch04`. Definimos la clave de API junto con la dirección de prueba correspondiente al campus Concepción de la Universidad del Bío-Bío:
-
-```nu
-let mapsAPIkey = "the_api_key"
-let address = "Avenida Collao 1202, Concepcion, Chile"
-```
-
-Para consultar la API, debemos construir una URL con la siguiente estructura:
-
-`https://maps.googleapis.com/maps/api/geocode/json?address=Avenida+Collao+1202%2C+Concepcion%2C+Chile&key=the_api_key`
-
-Toda URL (*Uniform Resource Locator*) se compone de las siguientes partes estructurales:
-
-- **Scheme (Esquema):** Indica el *protocolo* utilizado para acceder al recurso:
-  - `http://` (*Hypertext Transfer Protocol*): Protocolo estándar sin cifrar.
-  - `https://` (*HTTP Secure*): Versión cifrada mediante TLS/SSL para comunicación segura.
-  - `ftp://` (*File Transfer Protocol*): Transferencia de archivos.
-  - `file://`: Acceso a archivos en el sistema local.
-- **Host (Servidor):** Especifica el nombre de dominio (por ejemplo, `maps.googleapis.com`) o dirección IP donde reside el servicio, opcionalmente seguido de un puerto (`:8080`).
-- **Path (Ruta):** Identifica el recurso o *endpoint* específico dentro del servidor, comenzando con `/` (por ejemplo, `/maps/api/geocode/json`).
-- **Parámetros (*Query Parameters*):** Pares `clave=valor` opcionales que siguen al signo de interrogación `?` y se separan mediante `&` (por ejemplo, `address=...&key=...`).
-
-En lugar de concatenar cadenas manualmente (lo que es propenso a errores con espacios y caracteres especiales), el comando **`url join`** de Nushell construye y codifica automáticamente una URL válida a partir de un registro estructurado, y podemos guardar esta estructura en un archivo de configuración:
-
-```nu
-let mapsAPIkey = "the_api_key"
-let address = "Avenida Collao 1202, Concepcion, Chile"
-let url_record = {
-    scheme: "https"
-    host: "maps.googleapis.com"
-    path: "/maps/api/geocode/json"
-    params: {
-        address: $address
-        key: $mapsAPIkey
-    }
-}
-$url_record | url join
-$url_record | save -f consulta_maps.json
-```
-
-De igual manera, el comando inverso **`url parse`** descompone cualquier URL en sus componentes estructurales como un registro de Nushell:
-
-```nu
-open consulta_maps.json | url join | url parse
-open consulta_maps.json | url join | url parse | save -f url_descompuesta.json
-```
-
-Cuando se realiza la petición con una clave activa mediante `let response = (http get $url)`, la respuesta JSON de Google Maps contiene la tabla `results`, dentro de la cual se ubica el registro `geometry.location` con los campos numéricos `lat` y `lng`:
-
-```nu
-# Estructura de respuesta devuelta por Google Geocoding API
-let sample_response = {
-    status: "OK"
-    results: [
-        {
-            formatted_address: "Collao 1202, Concepción, Bío Bío, Chile"
-            geometry: {
-                location: { lat: -36.8221967, lng: -73.0120093 }
-            }
-        }
-    ]
-}
-$sample_response.results | select formatted_address
-$sample_response.results.geometry.location
-$sample_response.results.geometry.location | save -f coordenadas_ubb.json
-```
-
-### Empaquetando el Módulo `maps.nu` con `ttt`
-
-Podemos compilar estas dos operaciones (geocodificación directa e inversa) en un módulo reutilizable `maps.nu` dentro de `/data/ch04` editándolo con `ttt`:
-
-```nu
-# skip-docker-exec
-ttt maps.nu
-```
-
-El archivo `maps.nu` (ya disponible en `/data/ch04/maps.nu`) contiene los dos comandos exportados `loc-from-address` y `address-from-loc`:
-
-```nu
-open --raw maps.nu
-```
-
-Cuando se cuenta con una clave válida de Google Maps, se importa el módulo con `use maps.nu *` y se invocan ambos comandos:
-
-```nu
-# skip-docker-exec
-use maps.nu *
-loc-from-address "Avenida Collao 1202, Concepcion, Chile"
-address-from-loc -36.8221967 -73.0120093
-```
-
 ## Conversión de One-Liners en Herramientas de Línea de Comandos
 
 A lo largo de este libro construiremos numerosos pipelines compactos de una sola línea (*one-liners*). Cuando necesitamos reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
@@ -3718,6 +3601,302 @@ chmod +x /home/dsin/bin/top-words-nu
 open --raw alice.txt | top-words-nu 5
 open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 ```
+
+## Desarrollo de Comandos para APIs Web: Casos de Estudio
+
+Una vez dominados los pasos para transformar pipelines en scripts ejecutables con argumentos tipados, podemos extender el alcance analítico de la terminal interactuando con **APIs web** (*Application Programming Interfaces*). En la práctica analítica contemporánea, gran parte de los datos no reside en archivos locales, sino en plataformas remotas accesibles mediante peticiones HTTP.
+
+A continuación, examinaremos tres casos de estudio prácticos en Nushell, estructurados como módulos reutilizables y listos para integrarse en pipelines de datos:
+
+1. **Geocodificación con la API de Google Maps:** Conversión bidireccional entre direcciones postales y coordenadas geográficas (latitud y longitud).
+2. **Traducción Automatizada con Google Translate:** Traducción ágil de flujos textuales integrados en el procesamiento lingüístico.
+3. **Búsqueda Web Estructurada con Ollama Search:** Consulta en vivo e ingesta de resultados web formateados como tablas de Nushell.
+
+Todos los módulos y ejemplos de esta sección se ubican en el directorio `/data/ch04`:
+
+```nu
+cd /data/ch04
+```
+
+### Geocodificación con la API de Google Maps
+
+De acuerdo con la [documentación oficial de Geocoding API de Google Maps](https://developers.google.com/maps/documentation/geocoding/overview), el servicio permite convertir direcciones postales en coordenadas geográficas (geocodificación directa) o transformar pares de latitud y longitud en una dirección formateada legible (geocodificación inversa) mediante peticiones HTTP GET.
+
+#### Obtención de la Clave de Acceso (API Key)
+
+Para utilizar los servicios de Google Maps Platform se requiere una clave de acceso (*API Key*) generada en [Google Cloud Console](https://console.cloud.google.com/):
+
+1. Ingrese a Google Cloud Console con su cuenta de Google.
+2. Cree un nuevo proyecto o seleccione uno existente desde la barra superior.
+3. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
+4. Busque **Geocoding API** y haga clic en **Enable**.
+5. Diríjase a **APIs & Services** $\rightarrow$ **Credentials**.
+6. Haga clic en **Create Credentials** $\rightarrow$ **API Key**. Copie la clave generada y consérvela en un entorno seguro.
+
+#### Anatomía de la Petición y url join
+
+Para consultar la API, debemos construir una URL con esquema `https`, servidor `maps.googleapis.com`, ruta `/maps/api/geocode/json` y parámetros de consulta (`address` o `latlng`, junto con la clave `key`).
+
+En lugar de concatenar cadenas manualmente (lo cual induce errores con espacios y caracteres especiales), Nushell provee el comando **`url join`**, que compone y codifica de manera automática una URL válida a partir de un registro estructurado:
+
+```nu
+let mapsAPIkey = "the_api_key"
+let address = "Avenida Collao 1202, Concepcion, Chile"
+let url_record = {
+    scheme: "https"
+    host: "maps.googleapis.com"
+    path: "/maps/api/geocode/json"
+    params: {
+        address: $address
+        key: $mapsAPIkey
+    }
+}
+$url_record | url join
+$url_record | save -f consulta_maps.json
+```
+
+De igual forma, el comando inverso **`url parse`** descompone cualquier URL en sus elementos constitutivos como un registro de Nushell:
+
+```nu
+open consulta_maps.json | url join | url parse
+```
+
+Al despachar la petición mediante `http get $url`, la respuesta JSON de Google Maps entrega una tabla `results`, dentro de la cual se encuentra el registro `geometry.location` con los campos `lat` y `lng`:
+
+```nu
+# Estructura de respuesta devuelta por Google Geocoding API
+let sample_response = {
+    status: "OK"
+    results: [
+        {
+            formatted_address: "Collao 1202, Concepción, Bío Bío, Chile"
+            geometry: {
+                location: { lat: -36.8221967, lng: -73.0120093 }
+            }
+        }
+    ]
+}
+$sample_response.results | select formatted_address
+$sample_response.results.geometry.location
+$sample_response.results.geometry.location | save -f coordenadas_ubb.json
+```
+
+#### Implementación del Módulo maps.nu
+
+Empaquetamos estas operaciones en el módulo `/data/ch04/maps.nu`. Su código fuente completo es el siguiente:
+
+```nu
+# Módulo de geocodificación con la API de Google Maps
+
+export def loc-from-address [
+    address: string
+    --api-key (-k): string = "the_api_key"
+] {
+    let url = {
+        scheme: "https"
+        host: "maps.googleapis.com"
+        path: "/maps/api/geocode/json"
+        params: {
+            address: $address
+            key: $api_key
+        }
+    } | url join
+
+    http get $url | get results.geometry.location
+}
+
+export def address-from-loc [
+    latitude: number
+    longitude: number
+    --api-key (-k): string = "the_api_key"
+] {
+    let url = {
+        scheme: "https"
+        host: "maps.googleapis.com"
+        path: "/maps/api/geocode/json"
+        params: {
+            latlng: $"($latitude),($longitude)"
+            key: $api_key
+        }
+    } | url join
+
+    let response = (http get $url)
+    if $response.status != "OK" {
+        error make -u {msg: "address not found!"}
+    }
+    $response.results.0.formatted_address
+}
+```
+
+Para utilizar el módulo, lo importamos en nuestra sesión interactiva con `use maps.nu *`:
+
+```nu
+# skip-docker-exec
+use maps.nu *
+loc-from-address "Avenida Collao 1202, Concepcion, Chile"
+address-from-loc -36.8221967 -73.0120093
+```
+
+### Traducción Automatizada con Google Translate
+
+El segundo caso aborda la traducción de textos y etiquetas dentro de pipelines de datos. De acuerdo con la [documentación de Google Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text), el servicio traduce texto de forma dinámica entre decenas de idiomas mediante peticiones HTTP.
+
+#### Obtención de la Clave de Acceso (API Key)
+
+1. En la misma consola de [Google Cloud Console](https://console.cloud.google.com/), ingrese a su proyecto.
+2. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
+3. Busque **Cloud Translation API** y presione **Enable**.
+4. Puede reutilizar la API Key creada para Google Maps o generar una nueva en **APIs & Services** $\rightarrow$ **Credentials** $\rightarrow$ **Create Credentials** $\rightarrow$ **API Key**.
+
+#### Implementación del Módulo translate.nu
+
+El módulo `/data/ch04/translate.nu` permite recibir texto tanto a través del pipeline (`$in`) como por argumento posicional (`text`), con parámetros opcionales para idioma de origen (`--source`, con auto-detección por defecto) e idioma de destino (`--destination`, con español por defecto). Si no se proporciona una clave comercial, el script utiliza de forma alternativa el endpoint web directo de Google Translate, permitiendo pruebas inmediatas:
+
+```nu
+# Módulo de traducción con Google Translate
+
+export def trans [
+    text?: string                      # Texto a traducir (o desde el pipeline $in)
+    --source (-s): string = "auto"     # Idioma de origen (por defecto auto-detección)
+    --destination (-d): string = "es"  # Idioma de destino (por defecto español)
+    --api-key (-k): string = ""        # Clave opcional de Google Cloud Translation API
+] {
+    let input_text = if ($text | is-empty) { $in } else { $text }
+    if ($input_text | is-empty) {
+        error make -u { msg: "Debe proporcionar un texto para traducir (como argumento o mediante tubería)." }
+    }
+
+    if ($api_key | is-not-empty) {
+        let url = {
+            scheme: "https"
+            host: "translation.googleapis.com"
+            path: "/language/translate/v2"
+            params: {
+                key: $api_key
+                q: $input_text
+                source: (if $source == "auto" { "" } else { $source })
+                target: $destination
+                format: "text"
+            }
+        } | url join
+
+        let response = (http post $url {})
+        $response.data.translations.0.translatedText
+    } else {
+        let url = {
+            scheme: "https"
+            host: "translate.googleapis.com"
+            path: "/translate_a/single"
+            params: {
+                client: "gtx"
+                sl: $source
+                tl: $destination
+                dt: "t"
+                q: $input_text
+            }
+        } | url join
+
+        http get $url | get 0.0.0
+    }
+}
+```
+
+Importamos el comando `trans` y lo aplicamos en nuestras tuberías:
+
+```nu
+# skip-docker-exec
+use translate.nu *
+"Data science workflows at the command line" | trans
+trans "Structured data pipelines in Nushell" --destination "fr"
+```
+
+### Búsqueda Web e Ingesta con Ollama Search API
+
+El tercer caso de estudio integra búsquedas en la web en vivo directamente hacia tablas tipadas de Nushell utilizando la API de búsqueda web de [Ollama](https://ollama.com). Esto permite a los pipelines de datos enriquecer datasets con información actualizada en internet sin recurrir a navegadores gráficos ni volcados de HTML desestructurados.
+
+#### Obtención del Token de Acceso (API Key)
+
+1. Regístrese o inicie sesión en [ollama.com](https://ollama.com).
+2. Diríjase a la sección de configuración de claves de su cuenta en [ollama.com/settings/keys](https://ollama.com/settings/keys).
+3. Genere y copie su clave personal de API (*Ollama API Key*).
+4. En Nushell, puede exportar la variable de entorno `$env.OLLAMA_API_KEY = "su_clave"` en su configuración o pasarla explícitamente con el parámetro `--api-key` (`-k`).
+
+#### Implementación del Módulo ollama_search.nu
+
+El módulo `/data/ch04/ollama_search.nu` realiza una petición HTTP POST con el encabezado de autenticación `Authorization: Bearer <token>`, recibe la respuesta estructurada en formato JSON y devuelve directamente los resultados como una tabla de Nushell (o como texto Markdown si se activa la bandera `--md`):
+
+```nu
+# Módulo de búsqueda web estructurada mediante Ollama Search API
+
+export def ollama-search [
+    query: string                      # Consulta de búsqueda web
+    --max-results (-n): int = 5        # Cantidad máxima de resultados a devolver
+    --api-key (-k): string = ""        # Token de autenticación de Ollama
+    --md (-m)                          # Formatear la salida como texto Markdown
+    --verbose (-v)                     # Mostrar mensajes informativos
+] {
+    let token = if ($api_key | is-not-empty) {
+        $api_key
+    } else {
+        try { $env.OLLAMA_API_KEY } catch { "" }
+    }
+
+    if ($token | is-empty) {
+        error make -u { msg: "Se requiere un token de Ollama. Use --api-key (-k) o defina $env.OLLAMA_API_KEY." }
+    }
+
+    let url = "https://ollama.com/api/web_search"
+    let body = { query: $query, max_results: $max_results }
+    let headers = {
+        Authorization: $"Bearer ($token)"
+        "Content-Type": "application/json"
+    }
+
+    if $verbose { print $"Consultando la web mediante Ollama Search API: ($query)" }
+
+    let response = try {
+        http post -t application/json $url -H $headers $body -e
+    } catch { |e|
+        error make -u { msg: $"Error de conexión con Ollama Search API: ($e.msg)" }
+    }
+
+    let data = if ($response | describe) == "string" {
+        $response | from json
+    } else {
+        $response
+    }
+
+    if ($data | get -o error | is-not-empty) {
+        error make -u { msg: $"Ollama API Error: ($data.error)" }
+    }
+
+    if $md {
+        mut md_output = ""
+        for item in ($data.results | default []) {
+            $md_output = $md_output + $"# ($item.title)
+link: ($item.url)
+
+($item.content)
+
+"
+        }
+        return $md_output
+    }
+
+    $data.results | default []
+}
+```
+
+Podemos utilizar la herramienta para alimentar pipelines posteriores con comandos como `select`, `where` o `save`:
+
+```nu
+# skip-docker-exec
+use ollama_search.nu *
+ollama-search "nushell data science pipelines" -n 3 | select title url
+ollama-search "command line data science" --md | save -f resultados_busqueda.md
+```
+
+
 
 ## Creando Herramientas de Línea de Comandos con Python y R
 
