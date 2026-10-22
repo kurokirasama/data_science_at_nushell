@@ -1,3 +1,0 @@
-model,accuracy,precision,recall,f1_score
-GaussianNB,0.918,0.5983,0.6667,0.6306
-SVC(kernel=rbf),0.987,0.9894,0.8857,0.9347

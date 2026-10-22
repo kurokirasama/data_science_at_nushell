@@ -1,7 +1,0 @@
-day,time,bill_mean,bill_sd,tip_mean,mean_tip,tip_median,pct_tip_mean,pct_tip_iqr
-Sun,Dinner,21.41,8.83,3.26,3.26,3.15,16.69,6.79
-Thur,Dinner,18.78,NA,3,3,3,15.97,0
-Sat,Dinner,20.44,9.48,2.99,2.99,2.75,15.32,6.44
-Fri,Dinner,19.66,9.47,2.94,2.94,3,15.89,5.56
-Thur,Lunch,17.66,7.95,2.77,2.77,2.3,16.13,5.57
-Fri,Lunch,12.85,2.84,2.38,2.38,2.2,18.88,4.37

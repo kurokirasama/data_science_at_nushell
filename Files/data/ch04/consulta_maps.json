@@ -1,9 +1,0 @@
-{
-  "scheme": "https",
-  "host": "maps.googleapis.com",
-  "path": "/maps/api/geocode/json",
-  "params": {
-    "address": "Avenida Collao 1202, Concepcion, Chile",
-    "key": "the_api_key"
-  }
-}

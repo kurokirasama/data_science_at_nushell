@@ -49,6 +49,8 @@ header-includes:
 \tableofcontents
 \renewcommand{\listfigurename}{Índice de figuras}
 \listoffigures
+\renewcommand{\listtablename}{Índice de tablas}
+\listoftables
 \newpage
 
 
@@ -481,7 +483,50 @@ En Nushell, se usa `>` como el operador "mayor que". Esto encaja mejor con el as
 "hello" | save -f output.txt
 ```
 
-La forma en que Nushell ve los datos es que los datos fluyen a través de la _pipeline_ hasta que llegan al usuario o son manejados por un comando final. Se puede simplemente escribir datos, desde cadenas hasta listas y registros de estilo JSON, y seguirlos con `|` para enviarlos a través de la _pipeline_. Nushell usa comandos para hacer el trabajo y producir más datos. Aprender estos comandos y cuándo usarlos ayuda a componer muchos tipos de _pipelines_.
+La forma en que Nushell concibe los datos es que estos fluyen a través del pipeline hasta llegar al usuario o ser procesados por un comando terminal. Es posible escribir directamente cualquier estructura, desde cadenas elementales hasta listas y registros jerárquicos de estilo JSON, encadenándolos con el operador pipe (`|`) para transmitirlos a lo largo del procesamiento. Aprender los comandos idiomáticos de Nushell y comprender sus tipos de retorno permite componer pipelines de notable sofisticación analítica.
+
+### Sistema de Tipos de Datos en Nushell
+
+Una de las transformaciones conceptuales más profundas que introduce Nushell frente a las shells tradicionales de Unix radica en su sistema de tipos fuertemente estructurado. En entornos convencionales como Bash o Zsh, toda información en tránsito consiste en secuencias arbitrarias de bytes o cadenas de texto sin formato. Dicha arquitectura fuerza al usuario a recurrir de manera constante a utilidades externas como `awk`, `cut` o expresiones regulares complejas para extraer significado numérico, categórico o temporal. Por el contrario, en Nushell cada elemento que fluye a través de un pipeline conserva íntegra su identidad de tipo, lo cual posibilita operaciones semánticas directas, validaciones rigurosas en tiempo de ejecución y notables optimizaciones al manipular datos estructurados.
+
+Para inspeccionar dinámicamente el tipo de cualquier dato o el resultado intermedio transmitido a través de un pipe, se emplea el comando `describe`:
+
+```nu
+[
+  (42 | describe),
+  (3.14 | describe),
+  ("ciencia de datos" | describe),
+  (true | describe),
+  (2026-10-21 | describe),
+  (15min | describe),
+  (2.5gb | describe)
+]
+```
+
+Nushell clasifica sus tipos en escalares primitivos, tipos con unidades dimensionales (tamaños de archivo y duraciones temporales), estructuras compuestas y tipos del sistema de ejecución. La Tabla 1 sintetiza este catálogo fundamental:
+
+| Categoría | Tipo de Dato | Sintaxis y Literales de Ejemplo | Descripción Operativa |
+| :--- | :--- | :--- | :--- |
+| **Escalares** | `int` | `42`, `-10`, `0x2A` | Entero de 64 bits con signo para conteos y operaciones discretas. |
+| **Escalares** | `float` | `3.14159`, `-0.001`, `Infinity` | Número decimal de precisión doble IEEE 754 de 64 bits. |
+| **Escalares** | `string` | `"texto"`, `'simple'`, `r#'crudo'#` | Cadena de texto codificada en UTF-8 con soporte para interpolación `$"..."`. |
+| **Escalares** | `bool` | `true`, `false` | Valor lógico para bifurcaciones condicionales y filtros relacionales. |
+| **Escalares** | `nothing` | `null` | Representa la ausencia explícita de valor o resultado vacío. |
+| **Dimensionales** | `filesize` | `512b`, `10kb`, `4mb`, `2gb`, `1tb` | Magnitud binaria/decimal con soporte aritmético (`2gb - 500mb`). |
+| **Dimensionales** | `duration` | `100ms`, `5sec`, `2min`, `3hr`, `7day` | Intervalo temporal con conversión y suma automática (`1hr + 30min`). |
+| **Dimensionales** | `datetime` | `2026-10-21`, `2026-10-21T15:30:00Z` | Marca temporal absoluta en formato ISO 8601 con zona horaria. |
+| **Estructuras** | `list<T>` | `[1 2 3]`, `["a" "b" "c"]` | Colección ordenada de valores indexables secuencialmente. |
+| **Estructuras** | `record<...>` | `{nombre: "Luis", edad: 30}` | Conjunto de pares clave-valor heterogéneos análogos a un objeto JSON. |
+| **Estructuras** | `table<...>` | `[[id valor]; [1 100] [2 200]]` | Estructura bidimensional equivalente a una lista homogénea de registros. |
+| **Estructuras** | `range` | `1..10`, `0..<5`, `1..` | Intervalo numérico continuo o semiabierto eficiente en memoria. |
+| **Avanzados** | `binary` | `0x[deadbeef]`, `0x[48 65 6c 6c 6f]` | Secuencia cruda de bytes binarios para flujos de red o archivos binarios. |
+| **Avanzados** | `closure` | `{|x| $x * 2 }`, `{ $in > 10 }` | Bloque ejecutable anónimo con argumentos o captura del flujo de entrada `$in`. |
+| **Avanzados** | `glob` | `*.csv`, `**/*.parquet` | Patrón de concordancia de rutas del sistema de archivos. |
+| **Avanzados** | `cell-path` | `$.nombre`, `$.columna.0` | Ruta de direccionamiento declarativa a columnas o celdas internas. |
+
+Table: Sistema de tipos de datos fundamentales en Nushell.
+
+Los tipos dimensionales representan una de las ventajas analíticas más potentes del entorno: Nushell comprende intrínsecamente las magnitudes físicas y normaliza de forma automática las comparaciones sin exigir conversiones algebraicas manuales. Por ejemplo, al filtrar registros por tamaño de archivo (`where size > 50mb`) o por umbrales de latencia (`where latency < 200ms`), el motor de evaluación ejecuta el cálculo dimensional exacto entre unidades compatibles.
 
 ### Nushell como un lenguaje compilado
 
@@ -519,11 +564,82 @@ source $"($my_path)/common.nu" # sources /home/user/nushell/common.nu
 
 Nushell está diseñado para usar un solo paso de compilación para todo el código fuente, y esto es independiente de la evaluación. Esto permitirá un fuerte soporte IDE, mensajes de error precisos, un lenguaje más fácil de usar para herramientas de terceros y, en el futuro, incluso una salida más sofisticada, como la posibilidad de compilar Nushell directamente a un archivo binario.
 
-### Las variables son inmutables por defecto
+### Declaración y Ciclo de Vida de Variables: let, mut y const
 
-Otra sorpresa común para las personas que vienen de otros lenguajes es que las variables de Nushell son inmutables por defecto. Al llegar a Nushell, se querrá dedicar algún tiempo a familiarizarte con el trabajo en un estilo más funcional, ya que esto tiende a ayudar a escribir código que funciona mejor con variables inmutables.
+La asignación y vinculación de valores en Nushell se articula en torno a tres palabras clave fundamentales: `let`, `mut` y `const`. Cada una de ellas define un comportamiento específico en relación con el instante de evaluación (tiempo de compilación frente a tiempo de ejecución), las garantías de inmutabilidad en memoria y la capacidad de captura dentro de cierres (*closures*).
 
-Si se está acostumbrado a usar variables mutables para diferentes tareas, llevará algún tiempo aprender a hacer cada tarea en un estilo más funcional. Nushell tiene un conjunto de capacidades integradas para ayudar con muchos de estos patrones, y aprenderlos ayudará a escribir código en un estilo más Nushell. El beneficio adicional de acelerar scripts ejecutando partes del código en paralelo es una buena ventaja.
+#### Inmutabilidad en tiempo de ejecución: let
+
+Fiel a los principios de la programación funcional moderna, Nushell promueve el uso sistemático de la inmutabilidad. Toda variable declarada mediante `let` se evalúa dinámicamente en tiempo de ejecución, permaneciendo estrictamente inalterable durante toda su existencia en el entorno:
+
+```nu
+# skip-docker-exec (demostración de inmutabilidad)
+let tasa = 0.15
+$tasa = 0.20 # Error: nu::shell::assignment_requires_mutable_variable
+```
+
+Aunque una variable inmutable no admite reasignación directa mediante el operador `=`, Nushell implementa de manera nativa el **sombreado de variables** (*variable shadowing*). Este mecanismo permite declarar un nuevo enlace con idéntico identificador dentro del mismo alcance o en un bloque anidado, sustituyendo la referencia previa sin comprometer la transparencia referencial ni alterar el valor original en los ámbitos circundantes:
+
+```nu
+let conteo = 10
+do {
+  let conteo = 50
+  $conteo # En el bloque interno vale 50
+}
+$conteo # En el ámbito exterior continúa valiendo 10
+# Sombreado explícito en el ámbito exterior: ahora vale 11
+let conteo = $conteo + 1
+```
+
+Las variables inmutables gestionadas con `let` son seguras ante concurrencia y pueden capturarse sin restricciones dentro de bloques y cierres funcionales tales como `each` o `par-each`.
+
+#### Mutabilidad imperativa controlada: mut
+
+En escenarios computacionales donde un algoritmo demanda acumulación explícita de estado dentro de estructuras iterativas imperativas (como `loop` o `while`), Nushell proporciona la palabra clave `mut`. Una variable mutable autoriza la reasignación mediante operadores de modificación en sitio:
+
+```nu
+mut total = 0
+$total += 15
+$total *= 2
+$total # Resultado: 30
+```
+
+El lenguaje admite operadores de asignación compuesta como `=`, `+=`, `-=`, `*=`, `/=` y `++=` (diseñado este último para concatenar listas). Sin embargo, la mutabilidad impone una restricción de diseño fundamental: **los cierres (*closures*) no pueden capturar variables mutables**. La siguiente instrucción desencadenará un error gramatical inmediato:
+
+```nu
+# skip-docker-exec (demostración de restricción en cierres)
+mut contador = 0
+[1 2 3] | each { $contador += 1 } # Error: nu::shell::capture_of_mutable_var
+```
+
+Esta directriz garantiza la robustez del sistema: los comandos integrados en pipelines procesan datos mediante flujos continuos (*streaming*) y con frecuencia se ejecutan de manera concurrente o paralela (mediante primitivas como `par-each`). Permitir la captura y mutación concurrente de variables externas introduciría condiciones de carrera (*race conditions*) y comprometería el determinismo del motor. Para transformaciones iterativas sobre colecciones, Nushell promueve reemplazar la mutación manual por pipelines declarativos construidos con `reduce`, `enumerate` o `generate`.
+
+#### Constantes de tiempo de análisis: const
+
+La arquitectura interna de Nushell opera bajo una estricta separación en dos fases: una fase preliminar de análisis sintáctico y compilación estática (*parse-time*), seguida por la etapa de evaluación dinámica (*runtime*). Determinados comandos estructurales de la shell (entre ellos `source`, `use`, `plugin use` o la especificación de valores por defecto en firmas de funciones) requieren conocer sus argumentos durante el análisis inicial, antes de que comience cualquier ejecución efectiva en el procesador.
+
+Para cubrir este requisito arquitectónico se diseñó `const`. Una constante declarada con `const` se resuelve de forma determinista y estática en la fase de análisis. En consecuencia, solo puede asociarse a valores literales o expresiones puras, desprovistas de efectos colaterales, que el compilador logre computar íntegramente de manera anticipada:
+
+```nu
+# skip-docker-exec (definición de constante en tiempo de compilación)
+const ruta_modulos = ([$nu.home-dir mis_scripts] | path join)
+use $"($ruta_modulos)/utilidades.nu" *
+```
+
+Si intentásemos suministrar una variable declarada con `let` al comando `use` del ejemplo previo, la compilación fallaría de inmediato, dado que el contenido de una vinculación `let` aún no existe en memoria durante el análisis gramatical del script.
+
+La Tabla 2 sintetiza las diferencias operativas y técnicas entre las tres modalidades de vinculación:
+
+| Criterio | `let` (Inmutable) | `mut` (Mutable) | `const` (Constante de compilación) |
+| :--- | :--- | :--- | :--- |
+| **Fase de evaluación** | Tiempo de ejecución (*runtime*) | Tiempo de ejecución (*runtime*) | Tiempo de análisis (*parse-time*) |
+| **Reasignación directa (`=`)** | No permitida | Permitida (`$var = ...`, `+=`) | No permitida |
+| **Sombreado (*Shadowing*)** | Sí (`let x = $x + 1`) | No (se emplea asignación) | Sí (en nuevos ámbitos) |
+| **Captura en cierres (*Closures*)** | Sí (segura en streaming y paralelo) | No (rechazada por el compilador) | Sí |
+| **Válida en `source` / `use`** | No (desconocida al compilar) | No | Sí (resuelta estáticamente) |
+| **Uso canónico en Nushell** | Por defecto en el 90%+ del código | Bucles clásicos (`while`, `loop`) | Rutas de módulos, plugins, esquemas fijos |
+
+Table: Comparativa de vinculación de variables en Nushell: `let`, `mut` y `const`.
 
 <!--
 ### El entorno de Nushell es *scoped*
@@ -1965,8 +2081,6 @@ Este sistema es esencial para la ciencia de datos debido a:
 - **Restauración de versiones anteriores:** Permite volver a puntos específicos en el desarrollo, lo cual es útil si se introducen errores o se desea revertir un cambio.
 - **Reproducibilidad:** Garantiza la consistencia del código y los resultados a lo largo del tiempo, lo que es fundamental en la investigación científica.
 
-> Notar que en esta sección, trabajaremos fuera del contenedor docker.
-
 ### Git: La herramienta esencial
 
 **Git** es un sistema de control de versiones distribuido, ampliamente utilizado en la actualidad. A diferencia de sistemas centralizados, cada usuario posee una copia completa del historial del proyecto, lo que permite trabajar sin conexión y facilita la colaboración.
@@ -2000,6 +2114,39 @@ Este sistema es esencial para la ciencia de datos debido a:
 
 - **Flujo de trabajo centralizado:** Todos los desarrolladores trabajan en una sola rama principal. Es un flujo de trabajo simple, adecuado para proyectos pequeños.
 - **Flujo de trabajo con ramas (feature branching):** Se crea una rama separada para cada nueva característica o corrección de errores. Permite un desarrollo más organizado y facilita la colaboración en proyectos grandes.
+
+### Ejemplo Práctico: Clonar, Compilar e Integrar una Herramienta CLI con ddgr
+
+Para comprender de manera aplicada el ciclo integral de adquisición, compilación e integración de utilidades externas de línea de comandos en el entorno `dsin`, examinaremos la instalación de `ddgr`. Esta herramienta, desarrollada en Python, permite ejecutar consultas web directamente desde la terminal mediante el motor de búsqueda DuckDuckGo.
+
+En primer lugar, creamos un directorio dedicado para alojar el código fuente y nos posicionamos en él:
+
+```nu
+# skip-docker-exec (requiere conexión a internet para clonar)
+mkdir ~/software
+cd ~/software
+git clone --depth 1 https://github.com/jarun/ddgr.git
+cd ddgr
+```
+
+A continuación, ejecutamos el proceso de instalación mediante la utilidad `make`. Dado que el directorio `~/bin` ya forma parte de la variable de entorno `$env.PATH` preconfigurada en el contenedor `dsin`, indicamos `/home/dsin` como prefijo de instalación:
+
+```nu
+# skip-docker-exec (instalación local en ~/bin)
+make install PREFIX=/home/dsin
+which ddgr
+```
+
+Nushell detectará de inmediato el nuevo comando disponible en el sistema. Una de las virtudes cardinales de las herramientas CLI contemporáneas consiste en su capacidad de emitir datos estructurados. Al invocar `ddgr` con el modificador `--json`, podemos canalizar su salida directamente hacia los pipelines de Nushell mediante el comando `from json`:
+
+```nu
+# skip-docker-exec (consulta web que requiere acceso a red en vivo)
+ddgr --json -n 3 "nushell data science" |
+  from json |
+  select title url
+```
+
+De este modo, los resultados de búsqueda web se integran instantáneamente como una tabla estructurada de Nushell, permitiendo aplicar filtros posteriores con `where`, proyecciones de variables con `select` o exportaciones hacia otros formatos con absoluta transparencia operativa.
 
 ### GitHub/GitLab
 
