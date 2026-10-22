@@ -3641,7 +3641,7 @@ En lugar de concatenar cadenas manualmente (lo cual induce errores con espacios 
 
 ```nu
 let mapsAPIkey = "the_api_key"
-let address = "Avenida Collao 1202, Concepcion, Chile"
+let address = "Paseo Yugoslavo 176, Valparaiso, Chile"
 let url_record = {
     scheme: "https"
     host: "maps.googleapis.com"
@@ -3669,16 +3669,16 @@ let sample_response = {
     status: "OK"
     results: [
         {
-            formatted_address: "Collao 1202, Concepción, Bío Bío, Chile"
+            formatted_address: "Paseo Yugoslavo 176, Valparaíso, Región de Valparaíso, Chile"
             geometry: {
-                location: { lat: -36.8221967, lng: -73.0120093 }
+                location: { lat: -33.0400281, lng: -71.6289843 }
             }
         }
     ]
 }
 $sample_response.results | select formatted_address
 $sample_response.results.geometry.location
-$sample_response.results.geometry.location | save -f coordenadas_ubb.json
+$sample_response.results.geometry.location | save -f coordenadas.json
 ```
 
 #### Implementación del Módulo maps.nu
@@ -3733,8 +3733,8 @@ Para utilizar el módulo, lo importamos en nuestra sesión interactiva con `use 
 ```nu
 # skip-docker-exec
 use maps.nu *
-loc-from-address "Avenida Collao 1202, Concepcion, Chile"
-address-from-loc -36.8221967 -73.0120093
+loc-from-address "Paseo Yugoslavo 176, Valparaiso, Chile"
+address-from-loc -33.0400281 -71.6289843
 ```
 
 ### Traducción Automatizada con Google Translate
