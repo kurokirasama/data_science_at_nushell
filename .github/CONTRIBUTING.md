@@ -1,8 +1,8 @@
-# Contributing to Ciencia de Datos en la Terminal Linux con Nushell
+# Contributing to Data Science at the Linux Terminal with Nushell
 
-Thank you for your interest in contributing to *Ciencia de Datos en la Terminal Linux con Nushell*! This repository hosts an open-access book and an accompanying reproducible Docker environment (`dsin`) designed to teach modern, structured data science workflows in the Linux terminal using [Nushell](https://www.nushell.sh/).
+Thank you for your interest in contributing to *Data Science at the Linux Terminal with Nushell* (*Ciencia de Datos en la Terminal Linux con Nushell*)! This repository hosts an open-access book and an accompanying reproducible Docker environment (`dsin`) designed to teach modern, structured data science workflows in the Linux terminal using [Nushell](https://www.nushell.sh/).
 
-> *Para consultar esta guía de contribución en español, revise [CONTRIBUTING.es.md](CONTRIBUTING.es.md).*
+> *Para consultar esta guía de contribución en español, revise [translations/CONTRIBUTING.es.md](translations/CONTRIBUTING.es.md).*
 
 ---
 
