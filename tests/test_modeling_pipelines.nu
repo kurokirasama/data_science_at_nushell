@@ -94,6 +94,17 @@ def main [
     # 4a. Classification — External CLI (SKLL run_experiment + skll-metrics) -> Nushell table
     let c4a = (try {
         if $mutate { error make { msg: "Mutated" } }
+        if not ("train/features.csv" | path exists) {
+            mkdir train test
+            let red = (open wine-red.csv | insert type 'red')
+            let num_red = ($red | length)
+            let white_sample = (open wine-white.csv | insert type 'white' | shuffle | first $num_red)
+            let balanced = ($red | append $white_sample | shuffle | enumerate | each { |r| $r.item | insert id $r.index })
+            let n = ($balanced | length)
+            let n_test = ($n * 0.2 | into int)
+            $balanced | first $n_test | save -f test/features.csv
+            $balanced | skip $n_test | save -f train/features.csv
+        }
         run_experiment -l classify.cfg out+err> /dev/null
         let res = (skll-metrics output/wine_summary.tsv)
         (($res | length) >= 4) and (($res | get accuracy | math max) > 0.8)
@@ -186,6 +197,14 @@ def main [
         (($res_py | length) == 2) and (($res_py | get accuracy | math max) > 0.95) and (($res_r | first | get accuracy) > 0.9)
     } catch { false })
     $results = ($results | append { test: "6c_mineria_unab_mlp_neuralnet", passed: $c6c })
+
+    # Cleanup generated test artifacts
+    for f in [train test output] {
+        if ($f | path exists) { rm -rf $f }
+    }
+    for f in (glob "*_{py,r}.csv" | append (glob "wine_{clf,kmeans,lm,pca,reg}*.csv")) {
+        if ($f | path exists) { rm -f $f }
+    }
 
     print ($results | to md)
     let failed = ($results | where passed == false | length)

@@ -1,7 +1,7 @@
 # =========================================================
 # GENERAL CONFIG (Data Science at Nushell — dsin)
 # =========================================================
-$env.config.show_banner = false
+$env.config.show_banner = true
 $env.config.ls.use_ls_colors = true
 $env.config.ls.clickable_links = false
 $env.config.completions.use_ls_colors = true
