@@ -1,7 +1,0 @@
-column,dtype
-a,i64
-b,object
-c,str
-d,str
-e,str
-f,str

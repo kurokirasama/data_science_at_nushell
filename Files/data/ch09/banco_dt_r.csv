@@ -1,2 +1,0 @@
-model,max_depth,accuracy,precision,recall,f1_score
-R_rpart_decision_tree,4,0.981,0.9348,0.8687,0.9005

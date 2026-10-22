@@ -1,5 +1,0 @@
-2026-10-21 12:51:11,507 - INFO - Task: evaluate
-2026-10-21 12:51:11,507 - INFO - Training on train, Test on test, feature set ['features'] ...
-2026-10-21 12:51:11,556 - INFO - Featurizing and training new DecisionTreeClassifier model
-2026-10-21 12:51:11,575 - INFO - Hyperparameters: ccp_alpha: 0.0, class_weight: None, criterion: gini, max_depth: None, max_features: None, max_leaf_nodes: None, min_impurity_decrease: 0.0, min_impurity_split: None, min_samples_leaf: 1, min_samples_split: 2, min_weight_fraction_leaf: 0.0, random_state: 123456789, splitter: best
-2026-10-21 12:51:11,575 - INFO - Evaluating predictions

@@ -1,3 +1,0 @@
-model,accuracy,precision,recall,f1_score,iterations
-"Python_MLP_(8,)",0.983,0.949,0.8857,0.9163,308
-"Python_MLP_(16, 8)",0.99,0.9798,0.9238,0.951,500
