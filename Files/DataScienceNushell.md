@@ -485,6 +485,152 @@ En Nushell, se usa `>` como el operador "mayor que". Esto encaja mejor con el as
 
 La forma en que Nushell concibe los datos es que estos fluyen a través del pipeline hasta llegar al usuario o ser procesados por un comando terminal. Es posible escribir directamente cualquier estructura, desde cadenas elementales hasta listas y registros jerárquicos de estilo JSON, encadenándolos con el operador pipe (`|`) para transmitirlos a lo largo del procesamiento. Aprender los comandos idiomáticos de Nushell y comprender sus tipos de retorno permite componer pipelines de notable sofisticación analítica.
 
+
+
+<!--
+### El entorno de Nushell es *scoped*
+Nushell toma múltiples indicaciones de diseño de lenguajes compilados. Una de esas indicaciones es que los lenguajes deben evitar el estado mutable global. Los shells han utilizado comúnmente la mutación global para actualizar el entorno, pero Nushell se aleja de este enfoque.
+
+En Nushell, los bloques controlan su propio entorno. Los cambios en el entorno tienen un ámbito limitado al bloque donde ocurren.
+
+En la práctica, esto permite escribir código conciso para trabajar con subdirectorios, por ejemplo, si se quisiera construir cada subproyecto en el directorio actual, podrías ejecutar:
+
+```nu
+# skip-docker-exec
+ls | where type == dir | each { |row|
+    cd $row.name
+    make
+}
+```
+
+El comando `cd` cambia las variables de entorno `PWD`, y este cambio de variable no escapa del bloque, lo que permite que cada iteración comience desde el directorio actual e ingrese al siguiente subdirectorio.
+
+Tener el entorno *scoped* de esta manera hace que los comandos sean más predecibles, fáciles de leer y, cuando llegue el momento, fáciles de depurar. Nushell también proporciona comandos auxiliares como `def --env`, `load-env`, como formas convenientes de realizar lotes de actualizaciones en el entorno.
+
+La buena práctica de codificación de no tener variables mutables globales se extiende al entorno en Nushell. El uso de los comandos auxiliares integrados permitirá trabajar más fácilmente con el entorno en Nushell. Aprovechar el hecho de que los entornos tienen un ámbito limitado a los bloques también puede ayudarte a escribir scripts más concisos e interactuar con comandos externos sin agregar cosas a un entorno global que no necesitas.
+-->
+
+<!--AQUI-->
+
+
+## Elementos básicos de nushell
+
+En esta sección se revisarán los primeros elementos de nushell.
+
+Nushell funciona bajo la base de que todo son datos estructurados, y por lo tanto se pueden realizar consultas, similares a SQL, directamente en la salida de cada comando. Comenzamos en el siguiente directorio:
+
+```nu
+ls
+```
+
+Observar como `ls` retorna en lugar de que vuelva un bloque de texto plano, una tabla estructurada. La tabla hace más que mostrar el directorio de una manera diferente. Al igual que las tablas en una hoja de cálculo, esta tabla permite trabajar con los datos de forma más interactiva.
+
+Para ordenar la tabla por tamaño, tomamos la salida de `ls` y la introduciremos en un comando que puede ordenar tablas en función del contenido de una columna.
+
+```nu
+ls | sort-by size | reverse
+ls | sort-by size -r
+ls | sort-by modified
+```
+
+Se puede observar que para que esto funcione no se utilizan argumentos de línea de comandos de `ls`. En su lugar, se utiliza el comando `sort-by` que Nu proporciona para hacer la clasificación de la salida del comando `ls`. Para ver los archivos más grandes en la parte superior, también se utiliza `reverse` o la opcion `-r` de `sort-by`.
+
+Nu proporciona muchos comandos que pueden funcionar en tablas. Por ejemplo, se puede utilizar `where` para filtrar el contenido de la tabla `ls` para que sólo muestre los archivos de más de 5 kilobytes
+
+```nu
+ls | where size > 100kb
+```
+
+Al igual que en la filosofía Unix, ser capaz de hacer que los comandos se comuniquen entre sí entrega formas de mezclar y combinar en muchas combinaciones diferentes. Veamos un comando diferente:
+
+```nu
+ps
+```
+
+Este comando entrega una lista de todos los procesos actuales que el sistema está ejecutando, cuál es su estado y cuál es su nombre. También podemos ver la carga de CPU de los procesos.
+
+Si se quisiera mostrar los procesos que están utilizando activamente la CPU, se puede proceder como sigue:
+
+```nu
+ps | where cpu > 0
+```
+
+Nu no solo permite tablas estructuradas de forma simple, si no que también permite anidaciones arbitrarias. Por ejemplo, consideremos el comando `help commands`. Este comando proporciona información para todos los comandos de Nushell como una tabla.
+
+```nu
+help commands
+```
+
+La salida es bastante extensa, por lo que se obtendra la fila para el comando `each`.
+
+```nu
+help commands | where name == each
+help commands | where name == each | first
+```
+
+Al ecuperar una sola fila de una tabla se obtiene un _registro_ (_record_), que es un conjunto de pares clave-valor. Observar como la columnas "signatures" contiene un registro en lugar de valores simples. Para ver sólo una de estas "claves" o columnas, se puede utilizar el comando `get`:
+
+```nu
+help commands | where name == each | first | get description
+help commands | where name == each | first | get params
+```
+
+El comando `get` nos permite saltar al contenido de los datos estructurados (una tabla, registro o lista). Incluso se puede pasar columnas anidadas para acceder a los datos a cualquier profundidad.
+
+```nu
+help commands | where name == each | first | get category
+help commands | where name == each | first | get command_type
+help commands | where name == each | first | get description
+help commands | where name == each | first
+```
+
+Estas columnas anidadas se llaman _rutas de celda_ (_cellpaths_). Nu tomará la ruta de la celda e irá al bit de datos correspondiente en una tabla, registro o lista. Las rutas de celda también admiten números de fila, por lo que los comandos anterior también se puede escribir como:
+
+```nu
+help commands | where name == each | first | get params
+help commands | where name == each | first | get params.0
+help commands | where name == each | first | get params.3.description
+```
+
+Si se quiere ver la estructura anidada, se puede utilizar `table -e`:
+
+```nu
+help commands | where name == each | first | table -e
+```
+
+Notar que se pueden acceder a todas las herramientas estandar de la terminal utilizando el símbolo `^` si existe una versión nushell. Si no existe, no es necesario utilizarlo:
+
+```nu
+^ls
+open tips.csv | first 5
+uname
+```
+
+Todo comando nushell que retorna datos lo hará en una tabla, por ejemplo:
+
+```nu
+#muestra los procesos en ejecucion
+ps
+
+#ordenados por mayor utilizacion de cpu
+ps | where cpu > 0 | sort-by cpu -r
+```
+
+### Obtener Ayuda
+
+Se puede leer texto de ayuda para cualquiera de los comandos incorporados de Nu usando el comando `help` o pasando la opción `--help` a un comando. También se puede buscar un tema utilizando `help -f <topic>`.
+
+```nu
+help explore
+help http get
+help -f open
+```
+
+
+## Tipos de Datos y Variables en Nushell
+
+Tras haber interactuado de forma práctica con las tablas estructuradas de `ls`, los filtros relacionales con unidades dimensionales (`where size > 100kb`) y el direccionamiento mediante rutas de celda, resulta indispensable formalizar los fundamentos teóricos que sustentan este comportamiento. En esta sección se analiza la taxonomía del sistema de tipos de Nushell, el modelo de compilación en dos fases y los mecanismos formales de vinculación y ciclo de vida de variables mediante `let`, `mut` y `const`.
+
 ### Sistema de Tipos de Datos en Nushell
 
 Una de las transformaciones conceptuales más profundas que introduce Nushell frente a las shells tradicionales de Unix radica en su sistema de tipos fuertemente estructurado. En entornos convencionales como Bash o Zsh, toda información en tránsito consiste en secuencias arbitrarias de bytes o cadenas de texto sin formato. Dicha arquitectura fuerza al usuario a recurrir de manera constante a utilidades externas como `awk`, `cut` o expresiones regulares complejas para extraer significado numérico, categórico o temporal. Por el contrario, en Nushell cada elemento que fluye a través de un pipeline conserva íntegra su identidad de tipo, lo cual posibilita operaciones semánticas directas, validaciones rigurosas en tiempo de ejecución y notables optimizaciones al manipular datos estructurados.
@@ -640,145 +786,6 @@ La Tabla 2 sintetiza las diferencias operativas y técnicas entre las tres modal
 | **Uso canónico en Nushell** | Por defecto en el 90%+ del código | Bucles clásicos (`while`, `loop`) | Rutas de módulos, plugins, esquemas fijos |
 
 Table: Comparativa de vinculación de variables en Nushell: `let`, `mut` y `const`.
-
-<!--
-### El entorno de Nushell es *scoped*
-Nushell toma múltiples indicaciones de diseño de lenguajes compilados. Una de esas indicaciones es que los lenguajes deben evitar el estado mutable global. Los shells han utilizado comúnmente la mutación global para actualizar el entorno, pero Nushell se aleja de este enfoque.
-
-En Nushell, los bloques controlan su propio entorno. Los cambios en el entorno tienen un ámbito limitado al bloque donde ocurren.
-
-En la práctica, esto permite escribir código conciso para trabajar con subdirectorios, por ejemplo, si se quisiera construir cada subproyecto en el directorio actual, podrías ejecutar:
-
-```nu
-# skip-docker-exec
-ls | where type == dir | each { |row|
-    cd $row.name
-    make
-}
-```
-
-El comando `cd` cambia las variables de entorno `PWD`, y este cambio de variable no escapa del bloque, lo que permite que cada iteración comience desde el directorio actual e ingrese al siguiente subdirectorio.
-
-Tener el entorno *scoped* de esta manera hace que los comandos sean más predecibles, fáciles de leer y, cuando llegue el momento, fáciles de depurar. Nushell también proporciona comandos auxiliares como `def --env`, `load-env`, como formas convenientes de realizar lotes de actualizaciones en el entorno.
-
-La buena práctica de codificación de no tener variables mutables globales se extiende al entorno en Nushell. El uso de los comandos auxiliares integrados permitirá trabajar más fácilmente con el entorno en Nushell. Aprovechar el hecho de que los entornos tienen un ámbito limitado a los bloques también puede ayudarte a escribir scripts más concisos e interactuar con comandos externos sin agregar cosas a un entorno global que no necesitas.
--->
-
-<!--AQUI-->
-
-
-## Elementos básicos de nushell
-
-En esta sección se revisarán los primeros elementos de nushell.
-
-Nushell funciona bajo la base de que todo son datos estructurados, y por lo tanto se pueden realizar consultas, similares a SQL, directamente en la salida de cada comando. Comenzamos en el siguiente directorio:
-
-```nu
-ls
-```
-
-Observar como `ls` retorna en lugar de que vuelva un bloque de texto plano, una tabla estructurada. La tabla hace más que mostrar el directorio de una manera diferente. Al igual que las tablas en una hoja de cálculo, esta tabla permite trabajar con los datos de forma más interactiva.
-
-Para ordenar la tabla por tamaño, tomamos la salida de `ls` y la introduciremos en un comando que puede ordenar tablas en función del contenido de una columna.
-
-```nu
-ls | sort-by size | reverse
-ls | sort-by size -r
-ls | sort-by modified
-```
-
-Se puede observar que para que esto funcione no se utilizan argumentos de línea de comandos de `ls`. En su lugar, se utiliza el comando `sort-by` que Nu proporciona para hacer la clasificación de la salida del comando `ls`. Para ver los archivos más grandes en la parte superior, también se utiliza `reverse` o la opcion `-r` de `sort-by`.
-
-Nu proporciona muchos comandos que pueden funcionar en tablas. Por ejemplo, se puede utilizar `where` para filtrar el contenido de la tabla `ls` para que sólo muestre los archivos de más de 5 kilobytes
-
-```nu
-ls | where size > 100kb
-```
-
-Al igual que en la filosofía Unix, ser capaz de hacer que los comandos se comuniquen entre sí entrega formas de mezclar y combinar en muchas combinaciones diferentes. Veamos un comando diferente:
-
-```nu
-ps
-```
-
-Este comando entrega una lista de todos los procesos actuales que el sistema está ejecutando, cuál es su estado y cuál es su nombre. También podemos ver la carga de CPU de los procesos.
-
-Si se quisiera mostrar los procesos que están utilizando activamente la CPU, se puede proceder como sigue:
-
-```nu
-ps | where cpu > 0
-```
-
-Nu no solo permite tablas estructuradas de forma simple, si no que también permite anidaciones arbitrarias. Por ejemplo, consideremos el comando `help commands`. Este comando proporciona información para todos los comandos de Nushell como una tabla.
-
-```nu
-help commands
-```
-
-La salida es bastante extensa, por lo que se obtendra la fila para el comando `each`.
-
-```nu
-help commands | where name == each
-help commands | where name == each | first
-```
-
-Al ecuperar una sola fila de una tabla se obtiene un _registro_ (_record_), que es un conjunto de pares clave-valor. Observar como la columnas "signatures" contiene un registro en lugar de valores simples. Para ver sólo una de estas "claves" o columnas, se puede utilizar el comando `get`:
-
-```nu
-help commands | where name == each | first | get description
-help commands | where name == each | first | get params
-```
-
-El comando `get` nos permite saltar al contenido de los datos estructurados (una tabla, registro o lista). Incluso se puede pasar columnas anidadas para acceder a los datos a cualquier profundidad.
-
-```nu
-help commands | where name == each | first | get category
-help commands | where name == each | first | get command_type
-help commands | where name == each | first | get description
-help commands | where name == each | first
-```
-
-Estas columnas anidadas se llaman _rutas de celda_ (_cellpaths_). Nu tomará la ruta de la celda e irá al bit de datos correspondiente en una tabla, registro o lista. Las rutas de celda también admiten números de fila, por lo que los comandos anterior también se puede escribir como:
-
-```nu
-help commands | where name == each | first | get params
-help commands | where name == each | first | get params.0
-help commands | where name == each | first | get params.3.description
-```
-
-Si se quiere ver la estructura anidada, se puede utilizar `table -e`:
-
-```nu
-help commands | where name == each | first | table -e
-```
-
-Notar que se pueden acceder a todas las herramientas estandar de la terminal utilizando el símbolo `^` si existe una versión nushell. Si no existe, no es necesario utilizarlo:
-
-```nu
-^ls
-open tips.csv | first 5
-uname
-```
-
-Todo comando nushell que retorna datos lo hará en una tabla, por ejemplo:
-
-```nu
-#muestra los procesos en ejecucion
-ps
-
-#ordenados por mayor utilizacion de cpu
-ps | where cpu > 0 | sort-by cpu -r
-```
-
-### Obtener Ayuda
-
-Se puede leer texto de ayuda para cualquiera de los comandos incorporados de Nu usando el comando `help` o pasando la opción `--help` a un comando. También se puede buscar un tema utilizando `help -f <topic>`.
-
-```nu
-help explore
-help http get
-help -f open
-```
 
 
 ## Moviéndose por el Sistema
