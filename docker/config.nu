@@ -43,8 +43,13 @@ if ($env.LS_COLORS? | is-empty) {
 # PROMPT CONFIGURATION
 # =========================================================
 $env.PROMPT_COMMAND = {||
+  let prompt_color = if $env.LAST_EXIT_CODE == 0 or ($env.LAST_EXIT_CODE | is-empty) {
+    (ansi -e { fg: '#000000' bg: '#00ff00' attr: b })
+  } else {
+    (ansi -e { fg: '#ffffff' bg: '#ff0000' attr: b })
+  }
   [
-    (ansi -e { fg: '#00ff00' })
+    $prompt_color
     (char -u f525)
     (char -u e621)
     ($env.PWD | path split | last)
@@ -64,9 +69,14 @@ $env.PROMPT_COMMAND_RIGHT = {||
 }
 
 $env.PROMPT_INDICATOR = {||
+  let indicator_color = if $env.LAST_EXIT_CODE == 0 or ($env.LAST_EXIT_CODE | is-empty) {
+    (ansi -e { fg: '#00ff00' attr: b })
+  } else {
+    (ansi -e { fg: '#ff0000' attr: b })
+  }
   [
-    (ansi -e { fg: '#00ff00' })
-    $"(char -u e0b1) "
+    $indicator_color
+    $"(char -u e0b0) "
     (ansi reset)
   ]
   | str join
