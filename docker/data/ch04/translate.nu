@@ -30,7 +30,7 @@ export def trans [
             }
         } | url join
 
-        let response = (http post $url {})
+        let response = http post $url {}
         $response.data.translations.0.translatedText
     } else {
         let url = {
