@@ -48,11 +48,19 @@ export def ollama-search [
     }
 
     if $md {
-        mut md_output = ""
-        for item in ($data.results | default []) {
-            $md_output = $md_output + $"# ($item.title)\nlink: ($item.url)\n\n($item.content)\n\n"
-        }
-        return $md_output
+        return (
+            $data.results
+            | default []
+            | each { |item|
+                [
+                    $"# ($item.title)"
+                    $"link: ($item.url)"
+                    ""
+                    $item.content
+                ] | str join (char nl)
+            }
+            | str join $"(char nl)(char nl)"
+        )
     }
 
     $data.results | default []
