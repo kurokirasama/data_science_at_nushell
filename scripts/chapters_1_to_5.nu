@@ -409,12 +409,12 @@ Nos ubicamos primero en el directorio del capítulo 4 (`/data/ch04`) y definimos
 ```nu
 cd /data/ch04
 let mapsAPIkey = "the_api_key"
-let address = "Avenida Collao 1202, Concepcion, Chile"
+let address = "Paseo Yugoslavo 176, Valparaiso, Chile"
 ```
 
 Para consultar la API, debemos construir una URL con la siguiente estructura:
 
-`https://maps.googleapis.com/maps/api/geocode/json?address=Avenida+Collao+1202%2C+Concepcion%2C+Chile&key=the_api_key`
+`https://maps.googleapis.com/maps/api/geocode/json?address=Paseo+Yugoslavo+176%2C+Valparaiso%2C+Chile&key=the_api_key`
 
 Toda URL (*Uniform Resource Locator*) se compone de las siguientes partes estructurales:
 
@@ -432,7 +432,7 @@ En lugar de concatenar cadenas manualmente (lo que es propenso a errores con esp
 ```nu
 cd /data/ch04
 let mapsAPIkey = "the_api_key"
-let address = "Avenida Collao 1202, Concepcion, Chile"
+let address = "Paseo Yugoslavo 176, Valparaiso, Chile"
 let url_record = {
     scheme: "https"
     host: "maps.googleapis.com"
@@ -462,16 +462,16 @@ let sample_response = {
     status: "OK"
     results: [
         {
-            formatted_address: "Collao 1202, Concepción, Bío Bío, Chile"
+            formatted_address: "Paseo Yugoslavo 176, Valparaíso, Región de Valparaíso, Chile"
             geometry: {
-                location: { lat: -36.8221967, lng: -73.0120093 }
+                location: { lat: -33.0400281, lng: -71.6289843 }
             }
         }
     ]
 }
 $sample_response.results | select formatted_address
 $sample_response.results.geometry.location
-$sample_response.results.geometry.location | save -f coordenadas_ubb.json
+$sample_response.results.geometry.location | save -f coordenadas.json
 ```
 
 ### Empaquetando el Módulo `maps.nu` con `ttt`
@@ -497,8 +497,8 @@ Cuando se cuenta con una clave válida de Google Maps, se importa el módulo con
 # skip-docker-exec
 cd /data/ch04
 use maps.nu *
-loc-from-address "Avenida Collao 1202, Concepcion, Chile"
-address-from-loc -36.8221967 -73.0120093
+loc-from-address "Paseo Yugoslavo 176, Valparaiso, Chile"
+address-from-loc -33.0400281 -71.6289843
 ```
 
 ## Conversión de One-Liners en Herramientas de Línea de Comandos
