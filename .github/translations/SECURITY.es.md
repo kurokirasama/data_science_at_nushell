@@ -1,6 +1,6 @@
 # Política de Seguridad
 
-> *Read the English version of this policy at [SECURITY.md](SECURITY.md).*
+> *Read the English version of this policy at [SECURITY.md](../SECURITY.md).*
 
 ## Alcance y Versiones Compatibles
 

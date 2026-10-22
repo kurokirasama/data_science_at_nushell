@@ -1,6 +1,6 @@
-# Código de Conducta de Contributor Covenant
+# Código de Conducta del Pacto de Contribuyentes
 
-> *Read the English version at [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).*
+> *Para consultar la versión oficial en inglés, revise [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md).*
 
 ## Nuestro compromiso
 
@@ -121,6 +121,6 @@ pública dentro de la comunidad.
 
 ## Atribución
 
-Este Código de Conducta es una adaptación del [Contributor Covenant](https://www.contributor-covenant.org),
+Este Código de Conducta es una adaptación del Pacto de Contribuyentes ([Contributor Covenant](https://www.contributor-covenant.org)),
 versión 2.1, disponible en
 [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).

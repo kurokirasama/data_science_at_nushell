@@ -1,6 +1,6 @@
 ## Descripción de los Cambios
 
-> *Read the English version of this Pull Request template at [pull_request_template.md](pull_request_template.md).*
+> *Read the English version of this Pull Request template at [pull_request_template.md](../pull_request_template.md).*
 
 Por favor proporcione un resumen claro y conciso de las modificaciones propuestas en este Pull Request:
 

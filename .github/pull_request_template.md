@@ -1,6 +1,6 @@
 ## Description of Changes
 
-> *Para la versión en español de esta plantilla de Pull Request, consulte [pull_request_template.es.md](pull_request_template.es.md).*
+> *Para la versión en español de esta plantilla de Pull Request, consulte [translations/pull_request_template.es.md](translations/pull_request_template.es.md).*
 
 Please provide a clear, concise summary of the changes proposed in this Pull Request:
 

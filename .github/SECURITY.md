@@ -1,6 +1,6 @@
 # Security Policy
 
-> *Para la versión en español de esta política de seguridad, consulte [SECURITY.es.md](SECURITY.es.md).*
+> *Para la versión en español de esta política de seguridad, consulte [translations/SECURITY.es.md](translations/SECURITY.es.md).*
 
 ## Scope & Supported Versions
 

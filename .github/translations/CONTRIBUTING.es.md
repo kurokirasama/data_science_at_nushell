@@ -2,7 +2,7 @@
 
 ¡Gracias por su interés en contribuir a *Ciencia de Datos en la Terminal Linux con Nushell*! Este repositorio alberga un libro de acceso abierto y un entorno Docker reproducible (`dsin`) diseñado para enseñar flujos modernos de ciencia de datos estructurados en la terminal Linux utilizando [Nushell](https://www.nushell.sh/).
 
-> *Read the English version of this guide at [CONTRIBUTING.md](CONTRIBUTING.md).*
+> *Read the English version of this guide at [CONTRIBUTING.md](../CONTRIBUTING.md).*
 
 ---
 
