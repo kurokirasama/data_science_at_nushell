@@ -1,6 +1,7 @@
 # Agentic & Private Files (NEVER push to public remote)
 conductor/
 docs/
+scripts/
 GEMINI.md
 AGENTS.md
 CLAUDE.md
