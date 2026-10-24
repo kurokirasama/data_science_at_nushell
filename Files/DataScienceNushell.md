@@ -665,6 +665,19 @@ help http get
 help -f open
 ```
 
+Asimismo, Nushell proporciona el comando `tutor`, una guía interactiva integrada directamente en la terminal orientada al aprendizaje práctico y progresivo de las capacidades de la shell:
+
+- `tutor`: Muestra el mensaje de bienvenida y las instrucciones de uso generales.
+- `tutor list`: Enumera todos los temas didácticos disponibles (como tablas, rutas de celda, expresiones, variables, bloques, condicionales y cierres).
+- `tutor <tema>`: Carga la lección correspondiente al concepto indicado (por ejemplo, `tutor table`, `tutor closure` o `tutor pipeline-input`).
+- `tutor -f <frase>` o `tutor --find <frase>`: Busca términos y explicaciones específicas a lo largo de las lecciones del tutorial.
+
+```nu
+tutor
+tutor list
+tutor table
+```
+
 
 ## Tipos de Datos y Variables en Nushell
 
