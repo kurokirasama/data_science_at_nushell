@@ -11,7 +11,7 @@ monofont: "DejaVu Sans Mono"
 header-includes:
   - '\usepackage{graphics}'
   - '\usepackage{amsmath}'
-  - '\usepackage[spanish,activeacute,es-tabla]{babel}'
+  - '\usepackage[spanish,es-noshorthands,es-tabla]{babel}'
   - '\usepackage{hyphenat}'
   - '\usepackage{dsfont}'
   - '\usepackage[algoruled]{algorithm2e}'
@@ -42,6 +42,7 @@ header-includes:
   - '\setcounter{tocdepth}{5}'
   - '\setcounter{secnumdepth}{5}'
   - '\makeatletter'
+  - '\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}{3.25ex \@plus1ex \@minus.2ex}{1.5ex \@plus.2ex}{\normalfont\normalsize\bfseries}}'
   - '\renewcommand\subparagraph{\@startsection{subparagraph}{5}{\z@}{3.25ex \@plus1ex \@minus.2ex}{1.5ex \@plus.2ex}{\normalfont\normalsize\bfseries}}'
   - '\makeatother'
 ---
@@ -453,7 +454,7 @@ Aunque el flujo de texto plano fue revolucionario hace cincuenta años, cuando h
 
 1. **Ausencia de tipos de datos:** Para `bash`, el número `42.5`, la fecha `2026-10-20`, el booleano `true` y el texto `"hola"` son exactamente lo mismo: secuencias de bytes ASCII. Para sumar una columna o comparar números hay que invocar lenguajes externos como `awk` o `bc`.
 2. **Fragilidad ante delimitadores y espacios:** Herramientas como `cut -d ','` o `awk` dividen el texto buscando comas o espacios literales. Si un archivo CSV contiene un campo entre comillas con una coma interna (por ejemplo, `"Concepción, Chile"`), `cut` y `awk` parten erróneamente la columna por la mitad y corrompen toda la tabla.
-3. **Pérdida de encabezados:** Si aplicas `sort` o `grep` a un archivo CSV en `bash`, la primera línea (que contiene los nombres de las columnas) es tratada como una fila de datos cualquiera, mezclándose con los registros o desapareciendo tras el filtro.
+3. **Pérdida de encabezados:** Si se aplica `sort` o `grep` a un archivo CSV en `bash`, la primera línea (que contiene los nombres de las columnas) es tratada como una fila de datos cualquiera, mezclándose con los registros o desapareciendo tras el filtro.
 4. **Incompatibilidad con datos jerárquicos (JSON, XML, Excel, SQLite, Parquet):** El texto línea por línea no puede representar directamente objetos anidados ni tablas tipadas sin recurrir a múltiples conversores externos (`jq`, `xmllint`, `sqlite3`) con sintaxis inconexas entre sí.
 
 **Nushell conserva lo mejor de la filosofía Unix** (la composición modular mediante pipes `|`), pero reemplaza los flujos de texto crudo por **flujos de datos estructurados y tipados (tablas, registros y listas)**. Comprender esta diferencia hace que la siguiente sección resulte completamente natural.
@@ -463,27 +464,55 @@ Aunque el flujo de texto plano fue revolucionario hace cincuenta años, cuando h
 
 ### Nushell no es bash
 
-Nushell es tanto un lenguaje de programación como un shell. Debido a esto, tiene su propia forma de trabajar con archivos, directorios, sitios web y más. Se ha modelado para que funcione en estrecha colaboración con lo que se puede estar familiarizado con otros shells. Las _pipelines_ funcionan uniendo dos comandos:
+Nushell es tanto un lenguaje de programación estructurado como un shell interactivo. Debido a esta concepción dual, posee una metodología propia y consistente para operar sobre archivos, directorios, servicios web y estructuras de datos tabulares. Se ha diseñado tomando como inspiración los flujos de trabajo tradicionales de otros shells para facilitar la transición:
 
 ```nu
 ls | length
 ```
 
-Nushell, por ejemplo, también tiene soporte para otras capacidades comunes como obtener el código de salida de comandos ejecutados previamente.
+Nushell también ofrece soporte nativo para inspeccionar el estado y el código de salida de comandos ejecutados previamente mediante la variable de entorno `$env.LAST_EXIT_CODE`.
 
-Si bien tiene estas comodidades, Nushell no es bash. La forma de trabajar de bash, y el estilo POSIX en general, no es algo que Nushell soporte. Por ejemplo, en bash, se podrías usar:
+Sin embargo, a pesar de estas comodidades, Nushell no es bash. El modelo de ejecución de bash y el estándar POSIX tradicional (basado en cadenas de caracteres no estructuradas) difieren de la arquitectura tipada de Nushell. Por ejemplo, en bash se utiliza habitualmente el operador de redirección `>` para escribir en un archivo:
 
 ```sh
 echo "hello" > output.txt
 ```
 
-En Nushell, se usa `>` como el operador "mayor que". Esto encaja mejor con el aspecto del lenguaje de Nushell. En cambio, se canalizas a un comando que tiene la tarea de guardar contenido:
+En Nushell, el carácter `>` está reservado como el operador aritmético de comparación "mayor que", lo que garantiza la coherencia sintáctica dentro del lenguaje. Para persistir datos en disco, el flujo se canaliza de forma explícita hacia el comando `save`:
 
 ```nu
 "hello" | save -f output.txt
 ```
 
-La forma en que Nushell concibe los datos es que estos fluyen a través del pipeline hasta llegar al usuario o ser procesados por un comando terminal. Es posible escribir directamente cualquier estructura, desde cadenas elementales hasta listas y registros jerárquicos de estilo JSON, encadenándolos con el operador pipe (`|`) para transmitirlos a lo largo del procesamiento. Aprender los comandos idiomáticos de Nushell y comprender sus tipos de retorno permite componer pipelines de notable sofisticación analítica.
+En Nushell, la información fluye estructuradamente a lo largo del pipeline hasta su presentación final o hasta ser procesada por un comando terminal. Es posible emitir directamente cualquier estructura de datos (escalares, listas, registros y tablas) encadenándolas con el operador pipe (`|`).
+
+### «Bashismos» y Atajos de Productividad Soportados en Nushell
+
+Aunque Nushell no es un shell POSIX y promueve el procesamiento de datos estructurados, incorpora deliberadamente diversos atajos interactivos populares en bash (frecuentemente denominados *bashismos*) para agilizar la labor diaria en la terminal sin comprometer la integridad del lenguaje:
+
+#### Expansión de Historial con Sintaxis *Bang-Bang* (`!`)
+
+Gracias al motor de línea de comandos interactivo de Nushell (`reedline`), se cuenta con soporte nativo para atajos de recuperación de comandos del historial:
+
+- **`!!`:** Inserta en el búfer de entrada el último comando ejecutado.
+- **`!$`:** Inserta el último argumento o token separado por espacios del comando previo.
+- **`!<índice>`:** Recupera e inserta el comando correspondiente a dicho número de orden en el historial (consultable con `history`).
+- **`!-<n>`:** Inserta el comando ejecutado $n$ posiciones atrás en el historial.
+- **`!<prefijo>`:** Recupera el comando más reciente que coincida con el prefijo indicado.
+
+A diferencia del comportamiento tradicional en bash (donde los comandos *bang-bang* se ejecutan de manera inmediata), en Nushell **el comando expandido se deposita en el búfer de edición de la línea de comandos**, permitiendo inspeccionar, modificar y validar la instrucción antes de presionar `Enter`. Es posible explorar el tutorial interactivo integrado ejecutando directamente:
+
+```nu
+# skip-docker-exec (tutorial interactivo en terminal)
+tutor bashisms
+```
+
+#### Secuenciación y Control de Procesos Externos
+
+- **Secuenciación con punto y coma (`;`):** Se permite encadenar múltiples instrucciones consecutivas separándolas mediante `;` (por ejemplo, `cd /data; ls`). A diferencia de bash, los operadores booleanos no son `&&` ni `||`, sino las palabras clave `and` y `or` (o bloques condicionales `if`).
+- **Invocación explícita de ejecutables externos (`^`):** Cuando un comando interno de Nushell coincide en nombre con un binario instalado en el sistema operativo (como `ls`, `ps` o `find`), anteponer el símbolo circunflejo `^` (`^ls`, `^ps`) fuerza la ejecución directa del binario del sistema operativo ubicado en `$env.PATH`.
+- **Variables de entorno por comando (*one-shot*):** Para definir una variable de entorno temporal asociada exclusivamente a una única ejecución externa, se antepone la asignación al comando (por ejemplo, `FOO=bar ^mi_script`).
+- **Redirecciones estándar para ejecutables externos:** Nushell dispone de operadores de redirección hacia archivos (`o>` para *stdout*, `e>` para *stderr*, `o+e>` para ambos flujos combinados y `e>|` para canalizar los errores hacia una tubería).
 
 
 
@@ -493,7 +522,7 @@ Nushell toma múltiples indicaciones de diseño de lenguajes compilados. Una de 
 
 En Nushell, los bloques controlan su propio entorno. Los cambios en el entorno tienen un ámbito limitado al bloque donde ocurren.
 
-En la práctica, esto permite escribir código conciso para trabajar con subdirectorios, por ejemplo, si se quisiera construir cada subproyecto en el directorio actual, podrías ejecutar:
+En la práctica, esto permite escribir código conciso para trabajar con subdirectorios; por ejemplo, si se requiere compilar cada subproyecto en el directorio actual, se puede ejecutar:
 
 ```nu
 # skip-docker-exec
@@ -515,17 +544,27 @@ La buena práctica de codificación de no tener variables mutables globales se e
 
 ## Elementos básicos de nushell
 
-En esta sección se revisarán los primeros elementos de nushell.
+En esta sección se revisarán los primeros elementos de Nushell.
 
-Nushell funciona bajo la base de que todo son datos estructurados, y por lo tanto se pueden realizar consultas, similares a SQL, directamente en la salida de cada comando. Comenzamos en el siguiente directorio:
+Nushell funciona bajo el principio fundamental de que todo flujo de información consiste en datos estructurados; en consecuencia, se pueden formular consultas y transformaciones directas (análogas a las de SQL) sobre la salida de cada instrucción. Para ilustrar esta distinción, resulta clarificador contrastar la salida de texto plano que genera el comando externo del sistema operativo con la salida estructurada que produce Nushell.
+
+Si se ejecuta el comando externo tradicional del sistema anteponiendo el acento circunflejo `^`:
+
+```nu
+^ls
+```
+
+> **Nota sobre el operador `^`:** En Nushell, el símbolo `^` actúa como operador de escape hacia binarios externos del sistema operativo. Le indica al motor que ignore cualquier comando interno (*built-in*), alias o función personalizada de Nushell y ejecute directamente el archivo binario ejecutable que coincida con ese nombre en las rutas de `$env.PATH` (en este caso, `/bin/ls`). Su salida consiste puramente en un flujo de caracteres sin estructura interna.
+
+Por el contrario, al ejecutar el comando nativo `ls` de Nushell:
 
 ```nu
 ls
 ```
 
-Observar como `ls` retorna en lugar de que vuelva un bloque de texto plano, una tabla estructurada. La tabla hace más que mostrar el directorio de una manera diferente. Al igual que las tablas en una hoja de cálculo, esta tabla permite trabajar con los datos de forma más interactiva.
+Se observa que `ls` retorna una tabla estructurada y tipada en lugar de un bloque de texto no estructurado. Cada fila representa un archivo o directorio y cada columna (`name`, `type`, `size`, `modified`) posee un tipo de dato concreto. Al igual que en una base de datos o en una hoja de cálculo, esta tabla permite ordenar, filtrar, proyectar y consultar los registros de manera directa.
 
-Para ordenar la tabla por tamaño, tomamos la salida de `ls` y la introduciremos en un comando que puede ordenar tablas en función del contenido de una columna.
+Para ordenar la tabla por tamaño, se toma la salida de `ls` y se canaliza hacia un comando capaz de ordenar colecciones tabulares según los valores de una columna:
 
 ```nu
 ls | sort-by size | reverse
@@ -662,7 +701,7 @@ Nushell clasifica sus tipos en escalares primitivos, tipos con unidades dimensio
 | **Dimensionales** | `duration` | `100ms`, `5sec`, `2min`, `3hr`, `7day` | Intervalo temporal con conversión y suma automática (`1hr + 30min`). |
 | **Dimensionales** | `datetime` | `2026-10-21`, `2026-10-21T15:30:00Z` | Marca temporal absoluta en formato ISO 8601 con zona horaria. |
 | **Estructuras** | `list<T>` | `[1 2 3]`, `["a" "b" "c"]` | Colección ordenada de valores indexables secuencialmente. |
-| **Estructuras** | `record<...>` | `{nombre: "Luis", edad: 30}` | Conjunto de pares clave-valor heterogéneos análogos a un objeto JSON. |
+| **Estructuras** | `record<...>` | `{nombre: "Carlos", edad: 30}` | Conjunto de pares clave-valor heterogéneos análogos a un objeto JSON. |
 | **Estructuras** | `table<...>` | `[[id valor]; [1 100] [2 200]]` | Estructura bidimensional equivalente a una lista homogénea de registros. |
 | **Estructuras** | `range` | `1..10`, `0..<5`, `1..` | Intervalo numérico continuo o semiabierto eficiente en memoria. |
 | **Avanzados** | `binary` | `0x[deadbeef]`, `0x[48 65 6c 6c 6f]` | Secuencia cruda de bytes binarios para flujos de red o archivos binarios. |
@@ -789,9 +828,33 @@ Esta directriz garantiza la robustez del sistema: los comandos integrados en pip
 
 #### Constantes de tiempo de análisis: const
 
-La arquitectura interna de Nushell opera bajo una estricta separación en dos fases: una fase preliminar de análisis sintáctico y compilación estática (*parse-time*), seguida por la etapa de evaluación dinámica (*runtime*). Determinados comandos estructurales de la shell (entre ellos `source`, `use`, `plugin use` o la especificación de valores por defecto en firmas de funciones) requieren conocer sus argumentos durante el análisis inicial, antes de que comience cualquier ejecución efectiva en el procesador.
+La arquitectura interna de Nushell opera bajo una estricta separación en dos fases:
 
-Para cubrir este requisito arquitectónico se diseñó `const`. Una constante declarada con `const` se resuelve de forma determinista y estática en la fase de análisis. En consecuencia, solo puede asociarse a valores literales o expresiones puras, desprovistas de efectos colaterales, que el compilador logre computar íntegramente de manera anticipada:
+1. **Fase de análisis sintáctico y compilación estática (*parse-time*):** El analizador de Nushell procesa el texto completo del script o bloque de instrucciones antes de que se ejecute la primera línea. En esta fase se verifica la validez gramatical, se determinan las firmas de los comandos, se resuelven las palabras clave y se cargan los módulos externos (`source`, `use`).
+2. **Fase de evaluación y ejecución dinámica (*runtime*):** Es la etapa en la que los datos fluyen a través de las tuberías (*pipelines*), se evalúan las expresiones, se escribe en el disco (`save`), se invocan procesos externos y se computan los resultados en memoria.
+
+Comprender la frontera entre ambas etapas es esencial en Nushell. Consideremos, por ejemplo, la siguiente secuencia de instrucciones:
+
+```nu
+# skip-docker-exec (demostración de la separación parse-time vs runtime)
+"def abc [] { 1 + 2 }" | save -f output.nu
+source "output.nu"
+abc
+```
+
+Si se ejecutan estas instrucciones **línea por línea** de manera interactiva en la terminal (REPL), el procedimiento funciona correctamente: la primera línea se compila (*parse-time*) y se ejecuta (*runtime*), creando el archivo `output.nu` en disco; al ingresar la segunda línea, `output.nu` ya existe físicamente, por lo que el analizador puede leerlo estáticamente en su propia fase de análisis e incorporar el comando `abc` al entorno.
+
+Sin embargo, si se intenta **ejecutar todo el bloque en una sola llamada** (o dentro de un script `.nu`), el proceso falla inmediatamente con el error `nu::parser::sourced_file_not_found`:
+
+```text
+Error: nu::parser::sourced_file_not_found
+  × File not found: output.nu
+  help: sourced files need to be available before your script is run
+```
+
+El motivo radica en que `source` es una directiva de tiempo de análisis (*parse-time*). Cuando Nushell analiza el bloque completo, necesita inspeccionar el contenido de `output.nu` para compilar la llamada a `abc` en la tercera línea; pero en ese instante la primera línea (`save -f output.nu`) aún no ha comenzado a evaluarse dinámicamente en *runtime*, por lo que el archivo todavía no existe en el sistema de archivos.
+
+Para resolver requerimientos estructurales donde el compilador necesita conocer valores de antemano (como rutas de módulos fijos o valores por defecto en firmas de comandos) se diseñó `const`. Una constante declarada con `const` se resuelve de forma determinista y estática durante la fase de análisis (*parse-time*). En consecuencia, solo puede asociarse a valores literales o expresiones puras que el compilador logre computar íntegramente de manera anticipada:
 
 ```nu
 # skip-docker-exec (definición de constante en tiempo de compilación)
@@ -817,6 +880,7 @@ Table: Comparativa de vinculación de variables en Nushell: `let`, `mut` y `cons
 #### Paradigma Funcional frente a Mutabilidad Imperativa
 
 En el desarrollo idiomático con Nushell, la recomendación fundamental consiste en preferir variables inmutables para la gran mayoría de las tareas analíticas. Las soluciones funcionales basadas en transformaciones de pipelines ofrecen tres ventajas determinantes:
+
 1. **Mayor rendimiento:** Evitan la continua realocación de estructuras intermedias en memoria.
 2. **Soporte nativo de streaming:** La siguiente etapa del pipeline comienza a procesar datos en cuanto se emite el primer registro, sin esperar a que el bucle complete la totalidad de las iteraciones.
 3. **Escalabilidad concurrente:** Habilitan la paralelización automática de tareas mediante primitivas como `par-each`.
@@ -883,35 +947,38 @@ Además de la drástica reducción temporal, `each` transmite sus salidas inmedi
 
 ## Moviéndose por el Sistema
 
-Una característica definitoria de un shell es la capacidad de navegar e interactuar con el sistema de archivos. Nushell es, por supuesto, ninguna excepción. Aquí hay algunos comandos comunes que puede usar al interactuar con el sistema de archivos:
+Una característica definitoria de un shell es la capacidad de navegar e interactuar con el sistema de archivos. Nushell es, por supuesto, ninguna excepción. A continuación se presentan los comandos fundamentales para la interacción con el sistema de archivos:
 
 ### Viendo el Contenido de un Directorio
 
 ```nu
+cd /data/ch03
 ls
 ```
 
-Como se ve indicó anteriormente, el comando `ls` devuelve el contenido de un directorio. El `ls` de Nushell devolverá el contenido como una tabla.
+Como se indicó anteriormente, el comando `ls` devuelve el contenido de un directorio en forma de tabla estructurada.
 
-El comando `ls` también toma un argumento opcional para cambiar lo que se quiere ver. Por ejemplo, se puede listar los archivos que terminan en ".csv"
+El comando `ls` también admite un argumento posicional opcional para acotar los elementos visualizados. Por ejemplo, se pueden listar los archivos con extensión `.csv`:
 
 ```nu
+cd /data/ch03
 ls *.csv
 ```
 
 ### Patrones Glob (comodines)
 
-Al asterisco (`*`) en el argumento opcional anterior `*.csv` a veces se llama comodín o glob. Permite hacer coincidir cualquier cosa. Se puede leer este glob `*.csv` como _"coincidir con cualquier nombre de archivo, siempre que termine con '.csv'."_
+Al asterisco (`*`) en el argumento opcional anterior `*.csv` se le denomina habitualmente comodín o *glob*. Permite establecer concordancias de patrones sobre rutas del sistema. El patrón `*.csv` se interpreta como: *«coincidir con cualquier nombre de archivo cuyo sufijo sea .csv»*.
 
-El glob más general es `*`, que coincidirá con todas las rutas. Con mayor frecuencia, se verá este patrón utilizado como parte de otro patrón, por ejemplo, `*.bak` y `temp*`.
+El comodín más general es `*`, que concuerda con cualquier secuencia de caracteres en el directorio activo. Con frecuencia, este patrón se combina con prefijos o extensiones, como `*.bak` o `temp*`.
 
-Nushell también admite un `*` doble que atravesará rutas que están anidadas dentro de otros directorios. Por ejemplo, `ls **/*` enumerará todas las rutas no ocultas anidadas en el directorio actual, recursivamente.
+Nushell también soporta el comodín doble `**`, que desciende recursivamente por subdirectorios anidados. Por ejemplo, `ls **/*` enumera recursivamente todas las rutas no ocultas a partir del directorio de trabajo:
 
 ```nu
+cd /data
 ls **/*.csv
 ```
 
-Aquí, buscanmos cualquier archivo que termine con ".csv". Los dobles asteriscos especifican adicionalmente _"en cualquier directorio a partir de aquí."_
+Aquí se busca cualquier archivo con extensión `.csv` en cualquier nivel de profundidad a partir del directorio `/data`.
 
 La sintaxis globbing de Nushell no solo admite `*`, sino también la coincidencia de caracteres individuales con `?` y grupos de caracteres con `[...]`.
 
@@ -2032,7 +2099,6 @@ Continuando con la tabla de muestra anterior:
 
 ```nu
 $data | get 1
-
 $data | select 1
 ```
 
@@ -2043,7 +2109,7 @@ Observe que:
 
 Los índices de fila de la tabla resultante de `select` no son los mismos que los del original. La nueva tabla tiene su propio índice que comienza en 0.
 
-Para obtener el índice original, puede usar el comando [`enumerate`](/commands/docs/enumerate.md). Por ejemplo:
+Para obtener el índice original, se puede usar el comando [`enumerate`](/commands/docs/enumerate.md). Por ejemplo:
 
 ```nu
 $data | enumerate | select 1
@@ -2151,7 +2217,7 @@ ttt mi_script.nu
 
 Atajos esenciales y configuración predeterminada de `ttt` dentro de `dsin`:
 
-- **`Alt + Q`:** Salir del editor (desvinculando `Ctrl + Q` para evitar interferencias con el control de flujo de la terminal).
+- **`Alt + Q`:** Salir del editor.
 - **`Ctrl + S`:** Guardar el archivo actual.
 - **`Ctrl + F`:** Buscar texto dentro del archivo.
 - **`Ctrl + Z` / `Ctrl + Y`:** Deshacer / Rehacer cambios.
@@ -2751,7 +2817,7 @@ greet nushell
 
 En Nushell, un nombre de comando es una cadena de caracteres. Aquí hay algunos ejemplos de nombres de comandos válidos: `greet`, `get-size`, `mycommand123`, `my command`, y `emoji_cmd` (o cualquier símbolo unicode admitido).
 
-> Es una práctica común en Nushell separar las palabras del comando con `-` para una mejor legibilidad.\_ Por ejemplo `get-size` en lugar de `getsize` o `get_size`.
+> Es una práctica común en Nushell separar las palabras del comando con `-` para una mejor legibilidad. Por ejemplo `get-size` en lugar de `getsize` o `get_size`.
 
 ### Subcomandos
 
@@ -3034,48 +3100,54 @@ greet moon ...$planets
 
 ### Documentando un Comando
 
-Para ayudar mejor a los usuarios acerca del uso de los comandos personalizados, también se pueden documentar con descripciones adicionales para los comandos y parámetros.
+Para facilitar el uso y mantenimiento de los comandos personalizados, Nushell permite documentar descripciones detalladas tanto a nivel del comando completo como para cada uno de sus parámetros y opciones.
 
-Tomando el ejemplo anterior:
+Adicionalmente, Nushell soporta un sistema de **anotaciones y metadatos con `@`** que se anteponen a la definición de `def`:
+
+- **`@category <nombre>`:** Clasifica el comando dentro del inventario general del sistema (visible al consultar `help commands`).
+- **`@search-terms <términos...>`:** Registra palabras clave adicionales para que el comando sea localizable mediante búsquedas semánticas con `help --find`.
+- **`@example "descripción" { código } --result resultado`:** Incorpora ejemplos ejecutables con su salida esperada, los cuales se renderizan automáticamente en la sección de ejemplos de `help`.
+
+A continuación se muestra una definición exhaustivamente documentada:
 
 ```nu
+# Comando de saludo personalizado que ilustra anotaciones y documentación
+@category utilidades
+@search-terms saludo bienvenida mensaje
+@example "Saludar indicando la edad" { greet "Carlos" --age 28 } --result ["Carlos", 28]
 def greet [
-  name: string
-  --age (-a): int
+  name: string      # Nombre de la persona a saludar
+  --age (-a): int   # Edad opcional de la persona
 ] {
   [$name $age]
 }
 ```
 
-Una vez definido, se puede ejecutar `help greet` para obtener la información de ayuda para el comando:
+Una vez registrado el comando, al invocar `help greet` se obtiene una ficha técnica completa generada de manera automática:
 
 ```text
+Comando de saludo personalizado que ilustra anotaciones y documentación
+
+Search terms: saludo, bienvenida, mensaje
+
 Usage:
   > greet <name> {flags}
 
-Parameters:
-  <name>
-
 Flags:
-  -h, --help: Display this help message
-  -a, --age <integer>
+  -a, --age <int>: Edad opcional de la persona
+  -h, --help: Muestra este mensaje de ayuda
+
+Parameters:
+  name <string>: Nombre de la persona a saludar
+
+Examples:
+  Saludar indicando la edad
+  > greet "Carlos" --age 28
+  ╭───┬────────╮
+  │ 0 │ Carlos │
+  │ 1 │     28 │
+  ╰───┴────────╯
 ```
-
-Se puede ver el parámetro y la opción que se definió, así como la bandera de ayuda `-h` que tienen todos los comandos.
-
-Para mejorar esta ayuda, se pueden agregar descripciones a la definición que aparecerán en la ayuda:
-
-```nu
-# A greeting command that can greet the caller
-def greet [
-  name: string      # The name of the person to greet
-  --age (-a): int   # The age of the person
-] {
-  [$name $age]
-}
-```
-
-Los comentarios que se incluyen en la definición y sus parámetros aparecen como descripciones dentro del `help` del comando.
 
 Ahora, si se ejecuta `help greet`, se entrega un texto de ayuda más útil:
 
@@ -3092,6 +3164,53 @@ Flags:
   -h, --help: Display this help message
   -a, --age <integer>: The age of the person
 ```
+
+### Cierres (Closures)
+
+Un **cierre** (*closure*) en Nushell es un bloque anónimo de código ejecutable que puede recibir argumentos, procesar el flujo de entrada de una tubería (`$in`) y capturar variables de su entorno léxico exterior. Los cierres constituyen ciudadanos de primera clase en el lenguaje: pueden almacenarse en variables, transferirse como argumentos hacia otros comandos y ejecutarse dinámicamente cuando sea requerido.
+
+#### Sintaxis y Parámetros
+
+Los cierres se delimitan mediante llaves `{ ... }`. Cuando un cierre define parámetros formales, estos se especifican entre barras verticales al inicio del bloque (`{ |parámetro1, parámetro2| ... }`), admitiendo anotaciones estáticas de tipo:
+
+```nu
+# Cierre con un parámetro tipado
+let duplicar = { |x: int| $x * 2 }
+
+# Cierre con dos parámetros
+let ponderar = { |val: float, peso: float| $val * $peso }
+```
+
+#### Invocación Dinámica con el Comando `do`
+
+Para evaluar un cierre almacenado en una variable se utiliza el comando nativo `do`:
+
+```nu
+do $duplicar 21
+do $ponderar 4.5 0.8
+```
+
+#### Uso en Tuberías y Funciones de Orden Superior
+
+El rol más relevante de los cierres en ciencia de datos tiene lugar al procesar colecciones y tablas en combinación con funciones de orden superior como `each`, `where`, `filter`, `reduce` y `par-each`:
+
+```nu
+# Transformación elemento a elemento con each
+[1 2 3 4 5] | each { |n| $n ** 2 }
+
+# Filtrado condicional con where
+[10 25 3 48 7] | where { |val| $val > 20 }
+```
+
+Cuando un cierre no declara parámetros explícitos mediante `|...|`, puede consumir directamente el registro emitido por la etapa anterior de la tubería mediante la variable especial `$in`:
+
+```nu
+[5 12 18] | each { $in * 10 }
+```
+
+#### Captura de Entorno e Inmutabilidad
+
+Un cierre puede capturar variables inmutables (`let` o `const`) presentes en el ámbito léxico donde fue declarado. Sin embargo, por principios de diseño orientados a la seguridad y a la concurrencia determinista en pipelines paralelos, **los cierres en Nushell tienen estrictamente prohibido capturar y mutar variables mutables (`mut`)**. Cualquier tentativa de modificar una variable mutable exterior desde dentro de un cierre genera un error sintáctico inmediato (`nu::shell::capture_of_mutable_var`).
 
 ### Salida de la _pipeline_
 
@@ -3490,7 +3609,7 @@ do $positive_check (-3)
 
 ## Conversión de One-Liners en Herramientas de Línea de Comandos
 
-A lo largo de este libro construiremos numerosos pipelines compactos de una sola línea (*one-liners*). Cuando necesitamos reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
+A lo largo de este libro se construirán numerosos pipelines compactos de una sola línea (*one-liners*). Cuando se requiere reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
 
 En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
 
@@ -3498,7 +3617,7 @@ En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el
 ls
 ```
 
-Primero, veamos cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
+En primer lugar, se muestra cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
 
 ```nu
 open --raw alice.txt |
@@ -3511,7 +3630,7 @@ open --raw alice.txt |
   first 10
 ```
 
-Ahora filtramos las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
+A continuación se filtran las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
 
 ```nu
 let sw = open --raw stopwords | lines | each { str trim | str lowercase }
@@ -3529,30 +3648,71 @@ $top10
 $top10 | save -f top10_alice.csv
 ```
 
-Para convertir este *one-liner* en una herramienta de línea de comandos reutilizable y parametrizada en Nushell, seguimos **6 pasos sistemáticos**:
+Para convertir este *one-liner* en una herramienta de línea de comandos reutilizable y parametrizada en Nushell, se siguen **6 pasos sistemáticos**:
 
 1. Crear el archivo de script (`top-words-1.nu`).
 2. Otorgar permisos de ejecución (`chmod u+x`).
-3. Definir la línea *shebang* (`#!/usr/bin/env nu`).
-4. Remover la entrada fija para leer desde el pipe (`$in`).
-5. Añadir argumentos y opciones tipadas con `def main [...]`.
+3. Definir la directiva *shebang* (`#!/usr/bin/env -S nu --stdin`).
+4. Generalizar la entrada para leer dinámicamente desde el pipe (`$in`).
+5. Añadir argumentos y opciones tipadas mediante `def main [...]`.
 6. Extender la variable de entorno `$env.PATH`.
 
 ### Paso 1: Crear el Archivo
 
-En `/data/ch04` guardamos nuestro pipeline inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`).
+En `/data/ch04` se almacena el pipeline inicial dentro del script `top-words-1.nu` (el cual puede editarse interactivamente con `ttt top-words-1.nu`):
 
-Para inspeccionar el contenido de un script o archivo de código fuente desde la terminal, Nushell permite imprimir su texto directamente mediante `open --raw <archivo>`. Adicionalmente, para una lectura más cómoda con resaltado de sintaxis y numeración de líneas, el entorno dispone de la utilidad **`bat`** (`bat top-words-1.nu`):
+```nu
+# skip-docker-exec (código de top-words-1.nu)
+# Código de top-words-1.nu
+let sw = if ("stopwords" | path exists) {
+    open --raw stopwords | lines | each { str trim | str lowercase }
+} else {
+    []
+}
+open --raw alice.txt
+| str lowercase
+| parse --regex "(?P<word>[a-z]{2,})"
+| get word
+| where { |w| not ($w in $sw) }
+| uniq -c
+| rename word count
+| sort-by count --reverse
+| first 10
+```
+
+Para inspeccionar el contenido de un script o archivo de código fuente desde la terminal, Nushell permite imprimir su texto directamente mediante `open --raw <archivo>`. Adicionalmente, para una lectura más cómoda con resaltado de sintaxis y numeración de líneas, el entorno dispone de la utilidad especializada **`bat`** (`bat top-words-1.nu`). A partir de este punto se adoptará preferentemente `bat` para la visualización de código:
 
 ```nu
 open --raw top-words-1.nu
+bat top-words-1.nu
 nu top-words-1.nu
 nu top-words-1.nu | save -f salida_paso1.csv
 ```
 
 ### Paso 2: Dar Permisos de Ejecución
 
-Copiamos `top-words-1.nu` a `top-words-2.nu` y le otorgamos permisos de ejecución para el usuario propietario mediante `chmod u+x`:
+Se copia `top-words-1.nu` a `top-words-2.nu` y se le otorgan permisos de ejecución para el usuario propietario mediante `chmod u+x`:
+
+```nu
+# skip-docker-exec (código de top-words-2.nu)
+# Código de top-words-2.nu (idéntico en contenido a top-words-1.nu)
+let sw = if ("stopwords" | path exists) {
+    open --raw stopwords | lines | each { str trim | str lowercase }
+} else {
+    []
+}
+open --raw alice.txt
+| str lowercase
+| parse --regex "(?P<word>[a-z]{2,})"
+| get word
+| where { |w| not ($w in $sw) }
+| uniq -c
+| rename word count
+| sort-by count --reverse
+| first 10
+```
+
+Se configuran y verifican los permisos con `chmod` y `ls`:
 
 ```nu
 cp top-words-1.nu top-words-2.nu
@@ -3560,41 +3720,110 @@ chmod u+x top-words-2.nu
 ls -l top-words-1.nu top-words-2.nu | select name mode size
 ```
 
-En la columna `mode` (por ejemplo, `-rwxr-xr-x`), el primer carácter `-` indica un archivo regular (o `d` si es un directorio), los tres siguientes (`rwx`) corresponden a los permisos de lectura (`r`), escritura (`w`) y ejecución (`x`) del propietario (`u`), seguidos por los permisos del grupo (`g`) y de otros usuarios (`o`).
+En la columna `mode` (por ejemplo, `-rwxr-xr-x`), el primer carácter `-` indica un archivo regular, mientras que las ternas siguientes corresponden a los permisos de lectura (`r`), escritura (`w`) y ejecución (`x`) del usuario propietario (`u`), grupo (`g`) y otros usuarios (`o`).
 
 ### Paso 3: Definir el Shebang
 
-El *shebang* (`#!/usr/bin/env nu`) en la primera línea del archivo le indica al sistema operativo que debe utilizar el ejecutable `nu` ubicado en el entorno para interpretar el script cuando se invoca directamente como `./top-words-3.nu`:
+La directiva *shebang* (`#!/usr/bin/env -S nu --stdin`) en la primera línea del archivo le instruye al núcleo del sistema operativo qué intérprete invocar cuando el script se llama directamente como un binario ejecutable (`./top-words-3.nu`):
 
 ```nu
-open --raw top-words-3.nu
+# skip-docker-exec (código de top-words-3.nu)
+# Código de top-words-3.nu
+#!/usr/bin/env -S nu --stdin
+let sw = if ("stopwords" | path exists) {
+    open --raw stopwords | lines | each { str trim | str lowercase }
+} else {
+    []
+}
+open --raw alice.txt
+| str lowercase
+| parse --regex "(?P<word>[a-z]{2,})"
+| get word
+| where { |w| not ($w in $sw) }
+| uniq -c
+| rename word count
+| sort-by count --reverse
+| first 10
+```
+
+Se visualiza el script con `bat` y se ejecuta directamente:
+
+```nu
+bat top-words-3.nu
 ./top-words-3.nu
 ./top-words-3.nu | save -f salida_paso3.json
 ```
 
 ### Paso 4: Remover la Entrada Fija
 
-Si reemplazamos `open --raw alice.txt` por la variable especial de entrada de pipe `$in` en `top-words-4.nu`, nuestra herramienta deja de estar atada a un único archivo y puede analizar cualquier texto que le enviemos mediante `|`:
+Al reemplazar la referencia fija a `alice.txt` por la variable especial `$in` dentro de una función `main` en `top-words-4.nu`, la herramienta queda desacoplada de cualquier archivo concreto y puede procesar cualquier flujo recibido a través de una tubería (`|`):
 
 ```nu
-open --raw top-words-4.nu
+# skip-docker-exec (código de top-words-4.nu)
+# Código de top-words-4.nu
+#!/usr/bin/env -S nu --stdin
+def main [] {
+    $in
+    | str lowercase
+    | parse --regex "(?P<word>[a-z]{2,})"
+    | get word
+    | uniq -c
+    | sort-by count --reverse
+    | first 10
+}
+```
+
+Se inspecciona con `bat` y se prueba la canalización desde la terminal:
+
+```nu
+bat top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
 ```
 
 ### Paso 5: Añadir Argumentos y Opciones Tipadas (`def main`)
 
-En Nushell, al definir `def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]` dentro de un script ejecutable (`top-words-5.nu`), Nushell valida automáticamente los tipos de los argumentos, asigna valores por defecto y genera la página de ayuda `--help` sin necesidad de librerías externas:
+Al declarar parámetros formales en `def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]` dentro de `top-words-5.nu`, Nushell asume la validación estática de tipos, asigna valores predeterminados y genera automáticamente el panel de ayuda `--help`:
 
 ```nu
-open --raw top-words-5.nu
+# skip-docker-exec (código de top-words-5.nu)
+# Código de top-words-5.nu
+#!/usr/bin/env -S nu --stdin
+
+# Extrae las palabras más frecuentes de un texto excluyendo stopwords
+def main [
+    num_words: int = 10 # Número de palabras frecuentes a retornar
+    --stopwords-file (-s): path = "stopwords" # Archivo de palabras vacías
+] {
+    let input_text = $in
+    let sw = if ($stopwords_file | path exists) {
+        open --raw $stopwords_file | lines | each { str trim | str lowercase }
+    } else {
+        []
+    }
+    $input_text
+    | str lowercase
+    | parse --regex "(?P<word>[a-z]{2,})"
+    | get word
+    | where { |w| not ($w in $sw) }
+    | uniq -c
+    | rename word count
+    | sort-by count --reverse
+    | first $num_words
+}
+```
+
+Se inspecciona con `bat` y se ejecuta especificando parámetros posicionales:
+
+```nu
+bat top-words-5.nu
 open --raw alice.txt | ./top-words-5.nu 8
 open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
 ```
 
 ### Paso 6: Extender el `$env.PATH`
 
-Para poder invocar nuestra herramienta desde cualquier directorio sin escribir `./`, agregamos el directorio `/data/ch04` (o `/home/dsin/bin`) a `$env.PATH`:
+Para invocar la herramienta desde cualquier ubicación del sistema de archivos sin necesidad del prefijo `./`, se instala el script en un directorio registrado dentro de `$env.PATH` (como `/home/dsin/bin`):
 
 ```nu
 cp top-words-5.nu /home/dsin/bin/top-words-nu
@@ -3612,7 +3841,7 @@ Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scrip
 En `/data/ch04` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
 
 ```nu
-open --raw top-words.py
+bat top-words.py
 open --raw alice.txt | python3 top-words.py 5 | from csv
 open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.csv
 ```
@@ -3620,7 +3849,7 @@ open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.
 Ahora inspeccionemos el script en R (`top-words.R`), ejecutémoslo sobre `alice.txt`, transformemos su salida a una tabla de Nushell y guardémosla en `top_words_r.csv`:
 
 ```nu
-open --raw top-words.R
+bat top-words.R
 open --raw alice.txt | Rscript top-words.R 5 | from csv
 open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.csv
 ```
@@ -3630,7 +3859,7 @@ open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.cs
 Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch04` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
 
 ```nu
-open --raw fizzbuzz.py
+bat fizzbuzz.py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py | save -f fizzbuzz_py.csv
 ```
@@ -3638,7 +3867,7 @@ open --raw fizzbuzz.py
 Y de manera idéntica con el script `fizzbuzz.R`:
 
 ```nu
-open --raw fizzbuzz.R
+bat fizzbuzz.R
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r | save -f fizzbuzz_r.csv
 ```
@@ -3689,6 +3918,7 @@ open posts.json | first 3 | select id title
 Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/data/ch05`), podemos inspeccionar sus primeras líneas con `open --raw` y guardar un extracto procesado:
 
 ```nu
+# skip-docker-exec (requiere descarga web previa)
 open --raw MolinosFriesland.html | lines | first 10
 open --raw MolinosFriesland.html | lines | first 10 | to text | save -f molinos_encabezado.txt
 ```
@@ -3729,21 +3959,35 @@ http head https://www.wikipedia.org | first 8
 
 ## Descomprimiendo Archivos
 
-Cuando un conjunto de datos es muy grande o agrupa decenas de archivos pequeños, suele distribuirse comprimido en formatos como `.tar.gz`, `.zip` o `.7z`.
+Cuando un conjunto de datos posee un volumen considerable o agrupa múltiples archivos, habitualmente se distribuye comprimido en formatos como `.tar.gz`, `.zip` o `.7z`.
 
-En `/data/ch05` disponemos del archivo comprimido `logs.tar.gz`. Antes de extraerlo a ciegas, inspeccionamos su tabla de contenidos con `tar -tzf`:
+En `/data/ch05` se dispone del archivo comprimido `logs.tar.gz`. Antes de proceder a su extracción, resulta conveniente examinar su tabla de contenidos. Esto puede realizarse tanto con la utilidad estándar `tar` (`-tzf`) como con la herramienta universal **`7z`** (utilizando el subcomando `l` para listar el contenido):
 
 ```nu
 tar -tzf logs.tar.gz | lines | first 10
 tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
+7z l logs.tar.gz
 ```
 
-Como los archivos dentro de `logs.tar.gz` no están contenidos en una subcarpeta única, creamos primero el directorio `logs_extraidos` con `mkdir` y descomprimimos allí usando la opción `-C`, consolidando luego el conteo de líneas de cada archivo en una tabla que también guardamos en `resumen_logs.csv`:
+Dado que los archivos empaquetados en `logs.tar.gz` no residen dentro de un directorio raíz propio, se crea previamente la carpeta `logs_extraidos` y se procede a la descompresión. En primer lugar, se muestra la extracción mediante `tar` con la opción `-C`:
 
 ```nu
 rm -rf logs_extraidos
 mkdir logs_extraidos
 tar -xzf logs.tar.gz -C logs_extraidos
+```
+
+De forma equivalente, la descompresión puede llevarse a cabo utilizando **`7z`**. Dado que `logs.tar.gz` corresponde a un archivo `.tar` comprimido con `gzip`, es posible extraerlo de manera directa canalizando la salida estándar de `7z` a través de un pipeline sin escribir archivos intermedios en disco (`-so` para emitir hacia *stdout* y `-si` para leer desde *stdin* con `-o` para especificar la carpeta de destino):
+
+```nu
+rm -rf logs_7z
+mkdir logs_7z
+7z x logs.tar.gz -so | 7z x -si -ttar -o./logs_7z
+```
+
+Una vez finalizada la extracción, se consolida el tamaño y el número de líneas de cada archivo de registro en una tabla estructurada de Nushell, guardando el resultado en `resumen_logs.csv`:
+
+```nu
 let resumen_logs = ls logs_extraidos
     | each { |f|
         {
@@ -3759,7 +4003,7 @@ $resumen_logs | save -f resumen_logs.csv
 
 ## Conversión de Hojas de Cálculo de Microsoft Excel y Archivos CSV
 
-El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch05` tenemos tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
+El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch05` se tienen tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
 
 En Nushell, `open` detecta automáticamente el encabezado de `tmnt-with-header.csv`:
 
@@ -3785,6 +4029,7 @@ Vemos que `cars.xlsx` contiene la hoja `autos`. Extraemos dicha hoja con `get au
 
 ```nu
 open cars.xlsx | get autos | first 5 | select make "body.style" horsepower "city.mpg" price
+open cars.xlsx | get autos | save -f cars.csv
 open cars.xlsx | get autos | save -f cars_exportado.csv
 ```
 
@@ -3842,6 +4087,7 @@ cd /data/ch05
 Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch05`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada de manera limpia con `url join`:
 
 ```nu
+# skip-docker-exec (requiere clave de API en .secret)
 let api_key = open --raw .secret/newsapi.org_apikey | str trim
 let news_url = {
     scheme: "https"
@@ -4457,6 +4703,7 @@ $usuarios | save -f users_sex.csv
 De igual manera, a partir de la tabla HTML convertida a JSON en `table.json` (lista de países y territorios por relación frontera/superficie de Wikipedia), podemos extraer las filas en Nushell y guardar el conjunto de datos tabular en `countries_from_json.csv`:
 
 ```nu
+# skip-docker-exec (requiere descarga web previa de Wikipedia)
 open countries.csv | first 10
 open countries.csv | first 10 | save -f countries_top10.csv
 ```
@@ -4926,7 +5173,7 @@ En un flujo de trabajo políglota, frecuentemente deseamos aplicar funciones est
 Por ejemplo, revisemos el script `mutate_tips.R` en `/data/ch07`, que calcula el porcentaje de propina (`percent = tip / bill * 100`) usando `dplyr::mutate` y escribe el CSV resultante en la salida estándar:
 
 ```nu
-open --raw mutate_tips.R
+bat mutate_tips.R
 ```
 
 Al ejecutar `Rscript mutate_tips.R` y canalizar su salida hacia `from csv`, Nushell recibe una tabla tipada que podemos filtrar, ordenar y guardar en disco:
@@ -4939,7 +5186,7 @@ Rscript mutate_tips.R | from csv | save -f tips_with_percent.csv
 Del mismo modo, el script `summary_tips.R` agrupa las propinas por día y horario (`group_by(day, time)`) y calcula el conteo, la cuenta media y la propina media:
 
 ```nu
-open --raw summary_tips.R
+bat summary_tips.R
 Rscript summary_tips.R | from csv | sort-by mean_tip -r
 Rscript summary_tips.R | from csv | sort-by mean_tip -r | save -f tips_grouped_summary.csv
 ```
@@ -4947,7 +5194,7 @@ Rscript summary_tips.R | from csv | sort-by mean_tip -r | save -f tips_grouped_s
 Y con Python (`corr_tips.py`), podemos calcular la matriz de correlación de Pearson entre `bill`, `tip` y `size` usando `pandas` y devolverla como tabla a Nushell:
 
 ```nu
-open --raw corr_tips.py
+bat corr_tips.py
 python3 corr_tips.py | from csv
 python3 corr_tips.py | from csv | save -f tips_correlations.csv
 ```
@@ -4961,7 +5208,7 @@ En nuestro entorno `dsin`, combinamos la potencia gráfica de **`ggplot2`** (en 
 Veamos primero el script `plot_faceted.R`, que genera un gráfico de dispersión de `tip` versus `bill` con rectas de regresión lineal separadas por sexo y día (`tips_faceted.png`):
 
 ```nu
-open --raw plot_faceted.R
+bat plot_faceted.R
 Rscript plot_faceted.R
 ls tips_faceted.png
 ```
@@ -5008,7 +5255,7 @@ En `/data/ch07` disponemos de una colección completa de scripts listos para usa
 Para visualizar la distribución de frecuencias de una variable categórica o discreta, como la cantidad de mesas atendidas por día de la semana en `tips.csv`, ejecutamos `plot_bar.R`:
 
 ```nu
-open --raw plot_bar.R
+bat plot_bar.R
 Rscript plot_bar.R
 timg -g 80x25 tips_bar.png
 ```
@@ -5020,7 +5267,7 @@ timg -g 80x25 tips_bar.png
 Para inspeccionar la distribución empírica de una variable continua como el monto total de la cuenta (`bill`), ejecutamos `plot_histogram.R`:
 
 ```nu
-open --raw plot_histogram.R
+bat plot_histogram.R
 Rscript plot_histogram.R
 timg -g 80x25 tips_histogram.png
 ```
@@ -5034,7 +5281,7 @@ Ajustar el número de intervalos (`bins`) es crucial para evitar tanto el sobre-
 Una alternativa suave al histograma es la estimación de densidad por núcleos (*Kernel Density Estimation*, KDE), implementada en `plot_density.R`:
 
 ```nu
-open --raw plot_density.R
+bat plot_density.R
 Rscript plot_density.R
 timg -g 80x25 tips_density.png
 ```
@@ -5048,7 +5295,7 @@ Cuando trabajamos con registros indexados en el tiempo, como la serie de falleci
 ```nu
 open Fatalities.csv | first 5
 open Fatalities.csv | first 5 | save -f fatalities_head.csv
-open --raw plot_accident.R
+bat plot_accident.R
 Rscript plot_accident.R
 timg -g 80x25 fatalities_line.png
 ```
@@ -5060,9 +5307,9 @@ timg -g 80x25 fatalities_line.png
 Para estudiar la relación conjunta entre dos variables cuantitativas continuas (`bill` y `tip`), utilizamos `plot_scatter.R` y `plot_trend.R`:
 
 ```nu
-open --raw plot_scatter.R
+bat plot_scatter.R
 Rscript plot_scatter.R
-open --raw plot_trend.R
+bat plot_trend.R
 Rscript plot_trend.R
 timg --grid=2x1 -g 80x25 tips_scatter.png tips_trend.png
 ```
@@ -5074,9 +5321,9 @@ timg --grid=2x1 -g 80x25 tips_scatter.png tips_trend.png
 Para comparar la distribución de una variable continua (`bill`) a través de varios grupos categóricos (`day`), los diagramas de caja (*boxplots*) resumen la mediana, el rango intercuartílico ($\text{IQR} = Q_3 - Q_1$) y los valores atípicos, mientras que los gráficos de violín muestran además la forma completa de la densidad en cada grupo:
 
 ```nu
-open --raw plot_boxplot.R
+bat plot_boxplot.R
 Rscript plot_boxplot.R
-open --raw plot_violin.R
+bat plot_violin.R
 Rscript plot_violin.R
 timg --grid=2x1 -g 80x25 tips_boxplot.png tips_violin.png
 ```
@@ -5088,7 +5335,7 @@ timg --grid=2x1 -g 80x25 tips_boxplot.png tips_violin.png
 También podemos generar visualizaciones multipanel desde Python ejecutando `plot_tips_py.py`, el cual produce el archivo `tips_python.png` y devuelve en formato JSON las estadísticas por día hacia Nushell:
 
 ```nu
-open --raw plot_tips_py.py
+bat plot_tips_py.py
 python3 plot_tips_py.py | from json
 python3 plot_tips_py.py | from json | save -f tips_py_summary.json
 timg -g 80x25 tips_python.png
@@ -5347,7 +5594,7 @@ open wine-both.csv | histogram type | save -f wine_type_distribution.csv
 Y generemos una visualización exploratoria de las distribuciones de alcohol, acidez volátil y sulfatos entre vinos tintos y blancos ejecutando el script `plot_wine_eda.R` y visualizándola en la terminal con `timg`:
 
 ```nu
-open --raw plot_wine_eda.R
+bat plot_wine_eda.R
 Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
 ```
@@ -5476,7 +5723,7 @@ open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features |
 Veamos el script `pca_wine.R` ubicado en `/data/ch09`, el cual utiliza la función nativa `prcomp(..., center = TRUE, scale. = TRUE)` de R para calcular todas las componentes principales y reportar la proporción de varianza explicada y acumulada de cada componente:
 
 ```nu
-open --raw pca_wine.R
+bat pca_wine.R
 Rscript pca_wine.R | from csv
 Rscript pca_wine.R | from csv | save -f wine_pca_r.csv
 ```
@@ -5488,7 +5735,7 @@ Observa cómo las primeras 4 componentes principales resumen más del 64% de la 
 Revisemos y ejecutemos ahora el script `pca_wine.py`, que utiliza `StandardScaler` y `PCA` de `scikit-learn`:
 
 ```nu
-open --raw pca_wine.py
+bat pca_wine.py
 python3 pca_wine.py | from csv
 python3 pca_wine.py | from csv | save -f wine_pca_py.csv
 ```
@@ -5508,7 +5755,7 @@ El método de **Regresión de Componentes Principales** (**PCR**, *Principal Com
 Ejecutemos el script `vif_pcr_fish.py` para calcular los valores de VIF y comparar el modelo de regresión múltiple tradicional frente al modelo PCR con 2 componentes principales:
 
 ```nu
-open --raw vif_pcr_fish.py
+bat vif_pcr_fish.py
 python3 vif_pcr_fish.py | from csv
 python3 vif_pcr_fish.py | from csv | save -f fish_pcr_py.csv
 open fish_vif_py.csv
@@ -5519,7 +5766,7 @@ Observemos cómo en Python las variables de longitud presentan valores de VIF su
 Ejecutemos también la versión equivalente en R (`vif_pcr_fish.R`):
 
 ```nu
-open --raw vif_pcr_fish.R
+bat vif_pcr_fish.R
 Rscript vif_pcr_fish.R | from csv
 Rscript vif_pcr_fish.R | from csv | save -f fish_pcr_r.csv
 ```
@@ -5591,6 +5838,7 @@ df.to_csv(sys.stdout, index=False)
 ```
 
 El script interno automatiza tres operaciones esenciales:
+
 1. Filtra los predictores numéricos excluyendo las variables de respuesta o clasificación (`type`).
 2. Aplica `StandardScaler()` para garantizar una escala euclidiana homogénea.
 3. Ajusta `KMeans(n_clusters=k, n_init=10)` y agrega la etiqueta `cluster_1`, `cluster_2`, etc., a cada fila, devolviendo una tabla regular de Nushell lista para agregaciones.
@@ -5621,7 +5869,7 @@ open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | po
 Veamos el script `cluster_wine.R` en `/data/ch09`, que ejecuta `kmeans(..., centers = 3, nstart = 20)` en R y resume el tamaño y el perfil químico promedio de cada clúster:
 
 ```nu
-open --raw cluster_wine.R
+bat cluster_wine.R
 Rscript cluster_wine.R | from csv
 Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
 ```
@@ -5631,7 +5879,7 @@ Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
 Revisemos y ejecutemos ahora el script `cluster_wine.py` con `scikit-learn` (`KMeans(n_clusters=3, random_state=42, n_init=10)`):
 
 ```nu
-open --raw cluster_wine.py
+bat cluster_wine.py
 python3 cluster_wine.py | from csv
 python3 cluster_wine.py | from csv | save -f wine_clusters_py.csv
 ```
@@ -5645,7 +5893,7 @@ El enfoque **aglomerativo** (*bottom-up*) inicia con cada observación individua
 En `/data/ch09`, disponemos del conjunto `Fish.csv` (159 observaciones de especies de peces comerciales con medidas biométricas: peso, 3 longitudes, altura y ancho). Ejecutemos el script `hclust_fish.R`, que escala las medidas, calcula la matriz de distancias euclidianas, aplica `hclust(d, method = "ward.D2")`, corta el árbol en $K = 3$ grupos mediante `cutree(hc, k = 3)` y resume la correspondencia con las especies dominantes:
 
 ```nu
-open --raw hclust_fish.R
+bat hclust_fish.R
 Rscript hclust_fish.R | from csv
 Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
 ```
@@ -5653,7 +5901,7 @@ Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
 De igual modo, el script `hclust_fish.py` evalúa el clustering jerárquico aglomerativo con `scikit-learn` (`AgglomerativeClustering(linkage="ward")`) para distintos números de clústeres ($K = 2, 3, 4, 5$) calculando el coeficiente de silueta (*Silhouette Score*):
 
 ```nu
-open --raw hclust_fish.py
+bat hclust_fish.py
 python3 hclust_fish.py | from csv
 python3 hclust_fish.py | from csv | save -f fish_hclust_py.csv
 ```
@@ -5670,7 +5918,7 @@ Uno de los desafíos centrales en minería de datos consiste en seleccionar el n
 El script `cluster_eval.py` evalúa automáticamente estos 4 criterios sobre el conjunto bancario `banco.csv` (segmentación de clientes en variables estandarizadas de edad, ingreso, gasto en tarjeta e hipoteca) para $K \in [2, 6]$:
 
 ```nu
-open --raw cluster_eval.py
+bat cluster_eval.py
 python3 cluster_eval.py | from csv
 python3 cluster_eval.py | from csv | save -f banco_cluster_eval.csv
 ```
@@ -5691,7 +5939,7 @@ Los algoritmos particionales como K-Means asumen que los conglomerados son esfé
 Ejecutemos el script `dbscan_fish.py` sobre las medidas biométricas estandarizadas de `Fish.csv` (`Weight`, `Length1`, `Length2`, `Length3`, `Height`, `Width`):
 
 ```nu
-open --raw dbscan_fish.py
+bat dbscan_fish.py
 python3 dbscan_fish.py | from csv
 python3 dbscan_fish.py | from csv | save -f fish_dbscan_py.csv
 ```
@@ -5701,7 +5949,7 @@ Observemos cómo DBSCAN aísla automáticamente los ejemplares gigantescos como 
 Por su parte, el script `pam_fish.R` ejecuta el algoritmo PAM de la librería `cluster` en R para obtener los medoides representativos y la silueta promedio:
 
 ```nu
-open --raw pam_fish.R
+bat pam_fish.R
 Rscript pam_fish.R | from csv
 Rscript pam_fish.R | from csv | save -f fish_pam_r.csv
 ```
@@ -5736,6 +5984,7 @@ Por ejemplo, una observación del conjunto de datos de vino blanco se expresa co
 ```
 
 Donde:
+
 - `6`: valor de la variable respuesta cuantitativa (`quality`).
 - `|f`: el símbolo de barra vertical divide la etiqueta de las características; `f` es el identificador del espacio de nombres (*features*).
 - `fixed_acidity:7 ...`: pares clave-valor numéricos que definen los predictores.
@@ -5850,7 +6099,7 @@ $metrics
 Veamos el script `regress_wine.R`, que ajusta un modelo lineal clásico por mínimos cuadrados ordinarios (`lm(quality ~ ., data = train)`) sobre los primeros 3.500 registros, evalúa el RMSE y MAE en el conjunto de prueba y devuelve los coeficientes estimados ($\hat{\beta}_j$, error estándar, estadístico $t$ y valor $p$):
 
 ```nu
-open --raw regress_wine.R
+bat regress_wine.R
 Rscript regress_wine.R | from csv
 Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
 ```
@@ -5867,7 +6116,7 @@ open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r | save -f 
 Ejecutemos ahora el script `regress_wine.py`, que estandariza los predictores y ajusta una regresión Ridge ($\ell_2$) con `scikit-learn`:
 
 ```nu
-open --raw regress_wine.py
+bat regress_wine.py
 python3 regress_wine.py | from csv
 python3 regress_wine.py | from csv | save -f wine_regression_py.csv
 ```
@@ -5906,6 +6155,7 @@ log = output
 ```
 
 Los bloques principales definen:
+
 - `task = evaluate`: evalúa los modelos especificados sobre el conjunto de prueba independiente (`test_directory`).
 - `learners`: lista de algoritmos de `scikit-learn` a entrenar y comparar de manera competitiva en paralelo.
 - `label_col`: columna con la variable respuesta o etiqueta supervisada.
@@ -5953,7 +6203,7 @@ skll-metrics output/wine_summary.tsv | save -f wine_skll_summary.csv
 Veamos y ejecutemos el script `classify_wine.R` en `/data/ch09`, que entrena un modelo lineal generalizado binomial (`glm(is_red ~ ., family = binomial())`) sobre una muestra estratificada de entrenamiento y evalúa su exactitud, sensibilidad y especificidad sobre el conjunto de prueba:
 
 ```nu
-open --raw classify_wine.R
+bat classify_wine.R
 Rscript classify_wine.R | from csv
 Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
 ```
@@ -5963,7 +6213,7 @@ Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
 Revisemos y ejecutemos `classify_wine.py`, que entrena un clasificador de Bosques Aleatorios (*Random Forest*) con 100 árboles en `scikit-learn` y devuelve la tabla de importancia de variables (*feature importances*) junto con la exactitud en prueba (`test_accuracy`):
 
 ```nu
-open --raw classify_wine.py
+bat classify_wine.py
 python3 classify_wine.py | from csv
 python3 classify_wine.py | from csv | save -f wine_classification_py.csv
 ```
@@ -5977,7 +6227,7 @@ Los **árboles de decisión** (*Decision Trees*) representan una familia fundame
 Evaluemos la predicción de aceptación de préstamos sobre `banco.csv` (5.000 clientes) utilizando `rpart` en R (`dt_banco.R` con profundidad máxima de 4 niveles):
 
 ```nu
-open --raw dt_banco.R
+bat dt_banco.R
 Rscript dt_banco.R | from csv
 Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
 ```
@@ -5985,7 +6235,7 @@ Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
 Ejecutemos ahora el clasificador equivalente en Python con `DecisionTreeClassifier` de `scikit-learn` (`dt_banco.py`):
 
 ```nu
-open --raw dt_banco.py
+bat dt_banco.py
 python3 dt_banco.py | from csv
 python3 dt_banco.py | from csv | save -f banco_dt_py.csv
 ```
@@ -5997,7 +6247,7 @@ El clasificador **$k$-Vecinos Más Cercanos ($k$-NN, *k-Nearest Neighbors*)** es
 Ejecutemos `knn_banco.R` para evaluar el clasificador en R (`class::knn`) sobre `banco.csv` con $k \in \{3, 5, 7\}$:
 
 ```nu
-open --raw knn_banco.R
+bat knn_banco.R
 Rscript knn_banco.R | from csv
 Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
 ```
@@ -6005,7 +6255,7 @@ Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
 Y ejecutemos la contraparte en Python utilizando `KNeighborsClassifier` (`knn_banco.py`):
 
 ```nu
-open --raw knn_banco.py
+bat knn_banco.py
 python3 knn_banco.py | from csv
 python3 knn_banco.py | from csv | save -f banco_knn_py.csv
 ```
@@ -6020,7 +6270,7 @@ Como complemento a los árboles y vecinos cercanos, la minería de datos contemp
 Ejecutemos `nb_svm_banco.py` para comparar el desempeño de ambos clasificadores sobre `banco.csv`:
 
 ```nu
-open --raw nb_svm_banco.py
+bat nb_svm_banco.py
 python3 nb_svm_banco.py | from csv
 python3 nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
 ```
@@ -6044,7 +6294,7 @@ Un principio fundamental en el entrenamiento de redes neuronales es su **extrema
 Ejecutemos el script `mlp_banco.py` sobre `banco.csv` para entrenar y evaluar dos arquitecturas de MLP (una capa con 8 neuronas y dos capas con $(16, 8)$ neuronas):
 
 ```nu
-open --raw mlp_banco.py
+bat mlp_banco.py
 python3 mlp_banco.py | from csv
 python3 mlp_banco.py | from csv | save -f banco_mlp_py.csv
 ```
@@ -6054,7 +6304,7 @@ La red con arquitectura profunda $(16, 8)$ alcanza un $F_1$-score cercano a $0.9
 De forma complementaria, el script `mlp_banco.R` entrena una red neuronal con la librería `nnet` en R:
 
 ```nu
-open --raw mlp_banco.R
+bat mlp_banco.R
 Rscript mlp_banco.R | from csv
 Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 ```
