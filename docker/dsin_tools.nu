@@ -8,10 +8,10 @@ export def to-vw [
   --namespace(-n): string = "f"    # Feature namespace label
 ]: table -> list<string> {
   let tbl = $in
-  let cols = ($tbl | columns | where $it != $target)
+  let cols = $tbl | columns | where $it != $target
   $tbl | each { |row|
-    let y = ($row | get $target)
-    let feats = ($cols | each { |c| $"($c):($row | get $c)" } | str join " ")
+    let y = $row | get $target
+    let feats = $cols | each { |c| $"($c):($row | get $c)" } | str join " "
     $"($y) |($namespace) ($feats)"
   }
 }
@@ -24,7 +24,7 @@ export def vw-regress [
   --passes(-p): int = 10
   --learning-rate(-l): float = 0.5
 ]: nothing -> table {
-  let tmp_dir = (mktemp -d)
+  let tmp_dir = mktemp -d
   let train_vw = $"($tmp_dir)/train.vw"
   let test_vw = $"($tmp_dir)/test.vw"
   let model_file = $"($tmp_dir)/model.vw"
@@ -36,16 +36,16 @@ export def vw-regress [
   vw --data $train_vw --final_regressor $model_file --passes $passes -l $learning_rate --cache_file $"($tmp_dir)/train.cache" --quiet
   vw --data $test_vw -i $model_file -t -p $pred_file --quiet
 
-  let preds = (open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float })
-  let actuals = ($test_tbl | get $target | each { |x| $x | into float })
+  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
+  let actuals = $test_tbl | get $target | each { |x| $x | into float }
 
   rm -rf $tmp_dir
 
   $actuals | zip $preds | each { |pair|
     let obs = $pair.0
-    let pred = ($pair.1 | math round -p 4)
-    let signed_err = (($pred - $obs) | math round -p 4)
-    let err = (($obs - $pred) | math abs | math round -p 4)
+    let pred = $pair.1 | math round -p 4
+    let signed_err = ($pred - $obs) | math round -p 4
+    let err = ($obs - $pred) | math abs | math round -p 4
     { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $err }
   }
 }
@@ -64,27 +64,27 @@ export def tapkee-reduce [
   } else if ($label_col != null) and ($label_col | is-not-empty) and ($label_col in ($tbl | columns)) {
     $tbl | reject $label_col
   } else {
-    let non_num = (["type"] | where {|c| $c in ($tbl | columns)})
+    let non_num = ["type"] | where {|c| $c in ($tbl | columns)}
     if ($non_num | is-not-empty) { $tbl | reject ...$non_num } else { $tbl }
   }
 
-  let tmp_in = (mktemp --suffix ".csv")
-  let tmp_out = (mktemp --suffix ".tsv")
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_out = mktemp --suffix ".tsv"
   $num_tbl | to csv --noheaders | save -f $tmp_in
 
   tapkee -i $tmp_in -o $tmp_out -m $norm_method -td $target_dim --delimiter ","
-  let raw_coords = (open --raw $tmp_out | lines | where ($it | str trim | is-not-empty))
+  let raw_coords = open --raw $tmp_out | lines | where ($it | str trim | is-not-empty)
   rm -f $tmp_in $tmp_out
 
-  let coords_tbl = ($raw_coords | each { |line|
-    let parts = ($line | split row "," | each { |v| $v | str trim | into float | math round -p 4 })
+  let coords_tbl = $raw_coords | each { |line|
+    let parts = $line | split row "," | each { |v| $v | str trim | into float | math round -p 4 }
     mut rec = {}
     for idx in 0..<($parts | length) {
-      let val = ($parts | get $idx)
+      let val = $parts | get $idx
       $rec = ($rec | insert $"dim($idx + 1)" $val | insert $"dim_($idx + 1)" $val)
     }
     $rec
-  })
+  }
 
   $tbl | merge $coords_tbl
 }
@@ -98,11 +98,11 @@ export def kmeans-cluster [
 ]: table -> table {
   let tbl = $in
   let n_clusters = if $clusters > 0 { $clusters } else { $k }
-  let tmp_in = (mktemp --suffix ".csv")
-  let tmp_py = (mktemp --suffix ".py")
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_py = mktemp --suffix ".py"
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = ($label_col | default "type")
+  let lbl = $label_col | default "type"
   let cols_csv = if ($cols != null) and (($cols | length) > 0) {
     $cols | str join ","
   } else { "" }
@@ -126,7 +126,7 @@ df["cluster"] = [f"cluster_{c+1}" for c in clusters]
 df.to_csv(sys.stdout, index=False)
 ' | save -f $tmp_py
 
-  let res = (python3 $tmp_py $tmp_in ($n_clusters | into string) $lbl $cols_csv | from csv)
+  let res = python3 $tmp_py $tmp_in ($n_clusters | into string) $lbl $cols_csv | from csv
   rm -f $tmp_in $tmp_py
   $res
 }
