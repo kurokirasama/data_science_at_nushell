@@ -6,6 +6,7 @@ FROM datasciencetoolbox/dsatcl2e:latest
 ARG NUSHELL_VERSION="0.116.1"
 LABEL maintainer="Luis Gómez <lgomez@ubiobio.cl>"
 LABEL description="Data Science at Nushell (dsin) — Integrated Nushell, Polars, R, Python, VW, Tapkee, SKLL, ttt, and timg environment"
+LABEL org.opencontainers.image.source="https://github.com/kurokirasama/data_science_at_nushell"
 
 USER root
 
