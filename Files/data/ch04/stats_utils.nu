@@ -1,7 +1,7 @@
 # Módulo de utilidades estadísticas para Ciencia de Datos en Nushell
 
 export def resumen-columna [col: string]: table -> record {
-    let vals = ($in | get $col)
+    let vals = $in | get $col
     {
         columna: $col
         n: ($vals | length)
@@ -15,7 +15,7 @@ export def resumen-columna [col: string]: table -> record {
 
 export def filtrar-outliers [col: string, --z-max: float = 2.5]: table -> table {
     let tbl = $in
-    let mu = ($tbl | get $col | math avg)
-    let sd = ($tbl | get $col | math stddev)
+    let mu = $tbl | get $col | math avg
+    let sd = $tbl | get $col | math stddev
     $tbl | where { |row| ((($row | get $col) - $mu) | math abs) <= ($z_max * $sd) }
 }

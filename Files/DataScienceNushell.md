@@ -873,7 +873,7 @@ El empleo de filtros de pipeline con variables inmutables es con frecuencia órd
 - **Enfoque idiomático funcional con `each`:**
   ```nu
   timeit {
-    let randoms = (1..500 | each { random int })
+    let randoms = 1..500 | each { random int }
   }
   ```
   *Tiempo medido aproximado: ~19 milisegundos para 5,000 elementos, y poco más de 4 segundos para 50,000 iteraciones.*
@@ -959,8 +959,8 @@ Las técnicas de comillas mencionadas anteriormente son útiles al construir glo
 
     ```nu
     # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
-    let current_month = (date now | format date '%Y-%m')
-    let glob_pattern = ($"*($current_month)*" | into glob)
+    let current_month = date now | format date '%Y-%m'
+    let glob_pattern = $"*($current_month)*" | into glob
     ls $glob_pattern
     ```
 
@@ -970,7 +970,7 @@ Las técnicas de comillas mencionadas anteriormente son útiles al construir glo
 
     ```nu
     # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
-    let current_month = (date now | format date '%Y-%m')
+    let current_month = date now | format date '%Y-%m'
     ls ...(glob $"*($current_month)*")
     ```
 
@@ -978,8 +978,8 @@ Las técnicas de comillas mencionadas anteriormente son útiles al construir glo
 
     ```nu
     # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
-    let current_month = (date now | format date '%Y-%m')
-    let glob_pattern: glob = ($"*($current_month)*")
+    let current_month = date now | format date '%Y-%m'
+    let glob_pattern: glob = $"*($current_month)*"
     ls $glob_pattern
     ```
 
@@ -1380,10 +1380,10 @@ Por ejemplo:
 
 ```nu
 let colors = [yellow green]
-let colors = ($colors | prepend red)
-let colors = ($colors | append purple)
-let colors = ($colors ++ ["blue"])
-let colors = (["black"] ++ $colors)
+let colors = $colors | prepend red
+let colors = $colors | append purple
+let colors = $colors ++ ["blue"]
+let colors = ["black"] ++ $colors
 $colors # [black red yellow green purple blue]
 ```
 
@@ -1391,8 +1391,8 @@ En caso de que se requiera eliminar elementos de la lista, hay muchas maneras. `
 
 ```nu
 let colors = [red yellow green purple]
-let colors = ($colors | skip 1)
-let colors = ($colors | drop 2)
+let colors = $colors | skip 1
+let colors = $colors | drop 2
 $colors # [yellow]
 ```
 
@@ -1400,7 +1400,7 @@ También está `last` y `first` que permiten tomar valores desde el final o el p
 
 ```nu
 let colors = [red yellow green purple black magenta]
-let colors = ($colors | last 3)
+let colors = $colors | last 3
 $colors # [purple black magenta]
 ```
 
@@ -1408,7 +1408,7 @@ Y desde el principio de una lista,
 
 ```nu
 let colors = [yellow green purple]
-let colors = ($colors | first 2)
+let colors = $colors | first 2
 $colors # [yellow green]
 ```
 
@@ -2117,7 +2117,7 @@ El comando `default` se puede usar para aplicar un valor predeterminado al resul
 let missing_value = [{a:1 b:2} {b:1}]
 $missing_value
 
-let with_default_value = ($missing_value | default 'n/a' a)
+let with_default_value = $missing_value | default 'n/a' a
 $with_default_value
 
 $with_default_value.1.a
@@ -3514,9 +3514,8 @@ open --raw alice.txt |
 Ahora filtramos las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
 
 ```nu
-let sw = (open --raw stopwords | lines | each { str trim | str lowercase })
-let top10 = (
-    open --raw alice.txt
+let sw = open --raw stopwords | lines | each { str trim | str lowercase }
+let top10 = open --raw alice.txt
     | str lowercase
     | parse --regex '(?P<word>[a-z]{2,})'
     | get word
@@ -3525,7 +3524,7 @@ let top10 = (
     | rename word count
     | sort-by count --reverse
     | first 10
-)
+
 $top10
 $top10 | save -f top10_alice.csv
 ```
@@ -3541,7 +3540,9 @@ Para convertir este *one-liner* en una herramienta de línea de comandos reutili
 
 ### Paso 1: Crear el Archivo
 
-En `/data/ch04` guardamos nuestro pipeline inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`):
+En `/data/ch04` guardamos nuestro pipeline inicial en `top-words-1.nu` (también podemos crearla o editarla interactivamente con `ttt top-words-1.nu`).
+
+Para inspeccionar el contenido de un script o archivo de código fuente desde la terminal, Nushell permite imprimir su texto directamente mediante `open --raw <archivo>`. Adicionalmente, para una lectura más cómoda con resaltado de sintaxis y numeración de líneas, el entorno dispone de la utilidad **`bat`** (`bat top-words-1.nu`):
 
 ```nu
 open --raw top-words-1.nu
@@ -3601,305 +3602,6 @@ chmod +x /home/dsin/bin/top-words-nu
 open --raw alice.txt | top-words-nu 5
 open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 ```
-
-## Desarrollo de Comandos para APIs Web: Casos de Estudio
-
-Una vez dominados los pasos para transformar pipelines en scripts ejecutables con argumentos tipados, podemos extender el alcance analítico de la terminal interactuando con **APIs web** (*Application Programming Interfaces*). En la práctica analítica contemporánea, gran parte de los datos no reside en archivos locales, sino en plataformas remotas accesibles mediante peticiones HTTP.
-
-A continuación, examinaremos tres casos de estudio prácticos en Nushell, estructurados como módulos reutilizables y listos para integrarse en pipelines de datos:
-
-1. **Geocodificación con la API de Google Maps:** Conversión bidireccional entre direcciones postales y coordenadas geográficas (latitud y longitud).
-2. **Traducción Automatizada con Google Translate:** Traducción ágil de flujos textuales integrados en el procesamiento lingüístico.
-3. **Búsqueda Web Estructurada con Ollama Search:** Consulta en vivo e ingesta de resultados web formateados como tablas de Nushell.
-
-Todos los módulos y ejemplos de esta sección se ubican en el directorio `/data/ch04`:
-
-```nu
-cd /data/ch04
-```
-
-### Geocodificación con la API de Google Maps
-
-De acuerdo con la [documentación oficial de Geocoding API de Google Maps](https://developers.google.com/maps/documentation/geocoding/overview), el servicio permite convertir direcciones postales en coordenadas geográficas (geocodificación directa) o transformar pares de latitud y longitud en una dirección formateada legible (geocodificación inversa) mediante peticiones HTTP GET.
-
-#### Obtención de la Clave de Acceso (API Key)
-
-Para utilizar los servicios de Google Maps Platform se requiere una clave de acceso (*API Key*) generada en [Google Cloud Console](https://console.cloud.google.com/):
-
-1. Ingrese a Google Cloud Console con su cuenta de Google.
-2. Cree un nuevo proyecto o seleccione uno existente desde la barra superior.
-3. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
-4. Busque **Geocoding API** y haga clic en **Enable**.
-5. Diríjase a **APIs & Services** $\rightarrow$ **Credentials**.
-6. Haga clic en **Create Credentials** $\rightarrow$ **API Key**. Copie la clave generada y consérvela en un entorno seguro.
-
-#### Anatomía de la Petición y url join
-
-Para consultar la API, debemos construir una URL con esquema `https`, servidor `maps.googleapis.com`, ruta `/maps/api/geocode/json` y parámetros de consulta (`address` o `latlng`, junto con la clave `key`).
-
-En lugar de concatenar cadenas manualmente (lo cual induce errores con espacios y caracteres especiales), Nushell provee el comando **`url join`**, que compone y codifica de manera automática una URL válida a partir de un registro estructurado:
-
-```nu
-let mapsAPIkey = "the_api_key"
-let address = "Paseo Yugoslavo 176, Valparaiso, Chile"
-let url_record = {
-    scheme: "https"
-    host: "maps.googleapis.com"
-    path: "/maps/api/geocode/json"
-    params: {
-        address: $address
-        key: $mapsAPIkey
-    }
-}
-$url_record | url join
-$url_record | save -f consulta_maps.json
-```
-
-De igual forma, el comando inverso **`url parse`** descompone cualquier URL en sus elementos constitutivos como un registro de Nushell:
-
-```nu
-open consulta_maps.json | url join | url parse
-```
-
-Al despachar la petición mediante `http get $url`, la respuesta JSON de Google Maps entrega una tabla `results`, dentro de la cual se encuentra el registro `geometry.location` con los campos `lat` y `lng`:
-
-```nu
-# Estructura de respuesta devuelta por Google Geocoding API
-let sample_response = {
-    status: "OK"
-    results: [
-        {
-            formatted_address: "Paseo Yugoslavo 176, Valparaíso, Región de Valparaíso, Chile"
-            geometry: {
-                location: { lat: -33.0400281, lng: -71.6289843 }
-            }
-        }
-    ]
-}
-$sample_response.results | select formatted_address
-$sample_response.results.geometry.location
-$sample_response.results.geometry.location | save -f coordenadas.json
-```
-
-#### Implementación del Módulo maps.nu
-
-Empaquetamos estas operaciones en el módulo `/data/ch04/maps.nu`. Su código fuente completo es el siguiente:
-
-```nu
-# Módulo de geocodificación con la API de Google Maps
-
-export def loc-from-address [
-    address: string
-    --api-key (-k): string = "the_api_key"
-] {
-    let url = {
-        scheme: "https"
-        host: "maps.googleapis.com"
-        path: "/maps/api/geocode/json"
-        params: {
-            address: $address
-            key: $api_key
-        }
-    } | url join
-
-    http get $url | get results.geometry.location
-}
-
-export def address-from-loc [
-    latitude: number
-    longitude: number
-    --api-key (-k): string = "the_api_key"
-] {
-    let url = {
-        scheme: "https"
-        host: "maps.googleapis.com"
-        path: "/maps/api/geocode/json"
-        params: {
-            latlng: $"($latitude),($longitude)"
-            key: $api_key
-        }
-    } | url join
-
-    let response = (http get $url)
-    if $response.status != "OK" {
-        error make -u {msg: "address not found!"}
-    }
-    $response.results.0.formatted_address
-}
-```
-
-Para utilizar el módulo, lo importamos en nuestra sesión interactiva con `use maps.nu *`:
-
-```nu
-# skip-docker-exec
-use maps.nu *
-loc-from-address "Paseo Yugoslavo 176, Valparaiso, Chile"
-address-from-loc -33.0400281 -71.6289843
-```
-
-### Traducción Automatizada con Google Translate
-
-El segundo caso aborda la traducción de textos y etiquetas dentro de pipelines de datos. De acuerdo con la [documentación de Google Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text), el servicio traduce texto de forma dinámica entre decenas de idiomas mediante peticiones HTTP.
-
-#### Obtención de la Clave de Acceso (API Key)
-
-1. En la misma consola de [Google Cloud Console](https://console.cloud.google.com/), ingrese a su proyecto.
-2. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
-3. Busque **Cloud Translation API** y presione **Enable**.
-4. Puede reutilizar la API Key creada para Google Maps o generar una nueva en **APIs & Services** $\rightarrow$ **Credentials** $\rightarrow$ **Create Credentials** $\rightarrow$ **API Key**.
-
-#### Implementación del Módulo translate.nu
-
-El módulo `/data/ch04/translate.nu` permite recibir texto tanto a través del pipeline (`$in`) como por argumento posicional (`text`), con parámetros opcionales para idioma de origen (`--source`, con auto-detección por defecto) e idioma de destino (`--destination`, con español por defecto). Si no se proporciona una clave comercial, el script utiliza de forma alternativa el endpoint web directo de Google Translate, permitiendo pruebas inmediatas:
-
-```nu
-# Módulo de traducción con Google Translate
-
-export def trans [
-    text?: string                      # Texto a traducir (o desde el pipeline $in)
-    --source (-s): string = "auto"     # Idioma de origen (por defecto auto-detección)
-    --destination (-d): string = "es"  # Idioma de destino (por defecto español)
-    --api-key (-k): string = ""        # Clave opcional de Google Cloud Translation API
-] {
-    let input_text = if ($text | is-empty) { $in } else { $text }
-    if ($input_text | is-empty) {
-        error make -u { msg: "Debe proporcionar un texto para traducir (como argumento o mediante tubería)." }
-    }
-
-    if ($api_key | is-not-empty) {
-        let url = {
-            scheme: "https"
-            host: "translation.googleapis.com"
-            path: "/language/translate/v2"
-            params: {
-                key: $api_key
-                q: $input_text
-                source: (if $source == "auto" { "" } else { $source })
-                target: $destination
-                format: "text"
-            }
-        } | url join
-
-        let response = (http post $url {})
-        $response.data.translations.0.translatedText
-    } else {
-        let url = {
-            scheme: "https"
-            host: "translate.googleapis.com"
-            path: "/translate_a/single"
-            params: {
-                client: "gtx"
-                sl: $source
-                tl: $destination
-                dt: "t"
-                q: $input_text
-            }
-        } | url join
-
-        http get $url | get 0.0.0
-    }
-}
-```
-
-Importamos el comando `trans` y lo aplicamos en nuestras tuberías:
-
-```nu
-# skip-docker-exec
-use translate.nu *
-"Data science workflows at the command line" | trans
-trans "Structured data pipelines in Nushell" --destination "fr"
-```
-
-### Búsqueda Web e Ingesta con Ollama Search API
-
-El tercer caso de estudio integra búsquedas en la web en vivo directamente hacia tablas tipadas de Nushell utilizando la API de búsqueda web de [Ollama](https://ollama.com). Esto permite a los pipelines de datos enriquecer datasets con información actualizada en internet sin recurrir a navegadores gráficos ni volcados de HTML desestructurados.
-
-#### Obtención del Token de Acceso (API Key)
-
-1. Regístrese o inicie sesión en [ollama.com](https://ollama.com).
-2. Diríjase a la sección de configuración de claves de su cuenta en [ollama.com/settings/keys](https://ollama.com/settings/keys).
-3. Genere y copie su clave personal de API (*Ollama API Key*).
-4. En Nushell, puede exportar la variable de entorno `$env.OLLAMA_API_KEY = "su_clave"` en su configuración o pasarla explícitamente con el parámetro `--api-key` (`-k`).
-
-#### Implementación del Módulo ollama_search.nu
-
-El módulo `/data/ch04/ollama_search.nu` realiza una petición HTTP POST con el encabezado de autenticación `Authorization: Bearer <token>`, recibe la respuesta estructurada en formato JSON y devuelve directamente los resultados como una tabla de Nushell (o como texto Markdown si se activa la bandera `--md`):
-
-```nu
-# Módulo de búsqueda web estructurada mediante Ollama Search API
-
-export def ollama-search [
-    query: string                      # Consulta de búsqueda web
-    --max-results (-n): int = 5        # Cantidad máxima de resultados a devolver
-    --api-key (-k): string = ""        # Token de autenticación de Ollama
-    --md (-m)                          # Formatear la salida como texto Markdown
-    --verbose (-v)                     # Mostrar mensajes informativos
-] {
-    let token = if ($api_key | is-not-empty) {
-        $api_key
-    } else {
-        try { $env.OLLAMA_API_KEY } catch { "" }
-    }
-
-    if ($token | is-empty) {
-        error make -u { msg: "Se requiere un token de Ollama. Use --api-key (-k) o defina $env.OLLAMA_API_KEY." }
-    }
-
-    let url = "https://ollama.com/api/web_search"
-    let body = { query: $query, max_results: $max_results }
-    let headers = {
-        Authorization: $"Bearer ($token)"
-        "Content-Type": "application/json"
-    }
-
-    if $verbose { print $"Consultando la web mediante Ollama Search API: ($query)" }
-
-    let response = try {
-        http post -t application/json $url -H $headers $body -e
-    } catch { |e|
-        error make -u { msg: $"Error de conexión con Ollama Search API: ($e.msg)" }
-    }
-
-    let data = if ($response | describe) == "string" {
-        $response | from json
-    } else {
-        $response
-    }
-
-    if ($data | get -o error | is-not-empty) {
-        error make -u { msg: $"Ollama API Error: ($data.error)" }
-    }
-
-    if $md {
-        return (
-            $data.results
-            | default []
-            | each { |item|
-                [
-                    $"# ($item.title)"
-                    $"link: ($item.url)"
-                    ""
-                    $item.content
-                ] | str join (char nl)
-            }
-            | str join $"(char nl)(char nl)"
-        )
-    }
-
-    $data.results | default []
-}
-```
-
-Podemos utilizar la herramienta para alimentar pipelines posteriores con comandos como `select`, `where` o `save`:
-
-```nu
-# skip-docker-exec
-use ollama_search.nu *
-ollama-search "nushell data science pipelines" -n 3 | select title url
-ollama-search "command line data science" --md | save -f resultados_busqueda.md
-```
-
-
 
 ## Creando Herramientas de Línea de Comandos con Python y R
 
@@ -3978,7 +3680,7 @@ Nushell incorpora su propio cliente HTTP nativo (`http get`, `http post`, `http 
 En `/data/ch05` contamos con el archivo `urls.json` y muestras de publicaciones JSON. Cuando consultamos un *endpoint* REST o abrimos `posts_sample.json`, podemos explorar la tabla devuelta y guardarla inmediatamente en disco con `save -f`:
 
 ```nu
-let response = (open posts_sample.json)
+let response = open posts_sample.json
 $response | first 3 | select userId id title
 $response | save -f posts.json
 open posts.json | first 3 | select id title
@@ -4042,8 +3744,7 @@ Como los archivos dentro de `logs.tar.gz` no están contenidos en una subcarpeta
 rm -rf logs_extraidos
 mkdir logs_extraidos
 tar -xzf logs.tar.gz -C logs_extraidos
-let resumen_logs = (
-    ls logs_extraidos
+let resumen_logs = ls logs_extraidos
     | each { |f|
         {
             archivo: ($f.name | path basename)
@@ -4052,7 +3753,6 @@ let resumen_logs = (
         }
     }
     | sort-by archivo
-)
 $resumen_logs | first 5
 $resumen_logs | save -f resumen_logs.csv
 ```
@@ -4113,25 +3813,37 @@ open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars OR
 También podemos realizar agrupaciones SQL directamente con `query db` y guardar el resumen en `mtcars_por_cilindros.csv`:
 
 ```nu
-let resumen_cyl = (
-    open r-datasets.db
+let resumen_cyl = open r-datasets.db
     | query db "SELECT cyl, COUNT(*) AS n_autos, ROUND(AVG(mpg), 2) AS mpg_promedio, ROUND(AVG(hp), 1) AS hp_promedio FROM mtcars GROUP BY cyl ORDER BY cyl"
-)
 $resumen_cyl
 $resumen_cyl | save -f mtcars_por_cilindros.csv
 ```
 
 ## Llamando a las API Web
 
-Las APIs web (*Application Programming Interfaces*) devuelven datos estructurados (generalmente en formato JSON) listos para ser procesados en un pipeline de Nushell.
+Las APIs web (*Application Programming Interfaces*) devuelven datos estructurados (generalmente en formato JSON) listos para ser consumidos y procesados dentro de los pipelines de Nushell. En la práctica analítica contemporánea, gran parte de los datos no reside en archivos locales, sino en plataformas remotas accesibles mediante peticiones HTTP autenticadas o flujos de eventos en tiempo real.
 
-### Autenticación con Clave API
+A continuación, examinaremos la autenticación con claves y cuatro casos de estudio prácticos en Nushell, estructurados como comandos y módulos reutilizables listos para integrarse en pipelines de datos:
 
-Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch05`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada con `url join`:
+1. **Construcción de URLs autenticadas con News API:** Generación segura de endpoints mediante registros y `url join`.
+2. **Geocodificación con la API de Google Maps:** Conversión bidireccional entre direcciones postales y coordenadas geográficas (latitud y longitud).
+3. **Traducción Automatizada con Google Translate:** Traducción dinámica de cadenas y flujos de texto en pipelines analíticos.
+4. **Búsqueda Web Estructurada con Ollama Search:** Consulta en vivo e ingesta de resultados web formateados como tablas de Nushell.
+5. **Flujos de Eventos en Tiempo Real (*Streaming*):** Procesamiento de streams continuos con Wikimedia EventStreams.
+
+Todos los módulos y ejemplos de esta sección se ubican en el directorio `/data/ch05` (con réplicas disponibles en `/data/ch04`):
 
 ```nu
-let api_key = (open --raw .secret/newsapi.org_apikey | str trim)
-let news_url = ({
+cd /data/ch05
+```
+
+### Autenticación con Clave API y Construcción de URLs
+
+Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch05`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada de manera limpia con `url join`:
+
+```nu
+let api_key = open --raw .secret/newsapi.org_apikey | str trim
+let news_url = {
     scheme: "https"
     host: "newsapi.org"
     path: "/v2/everything"
@@ -4139,9 +3851,290 @@ let news_url = ({
         q: "linux"
         apiKey: $api_key
     }
-} | url join)
+} | url join
 $news_url
 $news_url | save -f news_endpoint.txt
+```
+
+### Geocodificación con la API de Google Maps
+
+De acuerdo con la [documentación oficial de Geocoding API de Google Maps](https://developers.google.com/maps/documentation/geocoding/overview), el servicio permite convertir direcciones postales en coordenadas geográficas (geocodificación directa) o transformar pares de latitud y longitud en una dirección formateada legible (geocodificación inversa) mediante peticiones HTTP GET.
+
+#### Obtención de la Clave de Acceso (API Key)
+
+Para utilizar los servicios de Google Maps Platform se requiere una clave de acceso (*API Key*) generada en [Google Cloud Console](https://console.cloud.google.com/):
+
+1. Ingrese a Google Cloud Console con su cuenta de Google.
+2. Cree un nuevo proyecto o seleccione uno existente desde la barra superior.
+3. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
+4. Busque **Geocoding API** y haga clic en **Enable**.
+5. Diríjase a **APIs & Services** $\rightarrow$ **Credentials**.
+6. Haga clic en **Create Credentials** $\rightarrow$ **API Key**. Copie la clave generada y consérvela en un entorno seguro.
+
+#### Anatomía de la Petición y url join
+
+Para consultar la API, construimos una URL con esquema `https`, servidor `maps.googleapis.com`, ruta `/maps/api/geocode/json` y parámetros de consulta (`address` o `latlng`, junto con la clave `key`).
+
+En lugar de concatenar cadenas manualmente (lo cual induce errores con espacios y caracteres especiales), Nushell provee el comando **`url join`**, que compone y codifica de manera automática una URL válida a partir de un registro estructurado:
+
+```nu
+let mapsAPIkey = "the_api_key"
+let address = "Paseo Yugoslavo 176, Valparaiso, Chile"
+let url_record = {
+    scheme: "https"
+    host: "maps.googleapis.com"
+    path: "/maps/api/geocode/json"
+    params: {
+        address: $address
+        key: $mapsAPIkey
+    }
+}
+$url_record | url join
+$url_record | save -f consulta_maps.json
+```
+
+De igual forma, el comando inverso **`url parse`** descompone cualquier URL en sus elementos constitutivos como un registro de Nushell:
+
+```nu
+open consulta_maps.json | url join | url parse
+```
+
+Al despachar la petición mediante `http get $url`, la respuesta JSON de Google Maps entrega una tabla `results`, dentro de la cual se encuentra el registro `geometry.location` con los campos `lat` y `lng`:
+
+```nu
+# Estructura de respuesta devuelta por Google Geocoding API
+let sample_response = {
+    status: "OK"
+    results: [
+        {
+            formatted_address: "Paseo Yugoslavo 176, Valparaíso, Región de Valparaíso, Chile"
+            geometry: {
+                location: { lat: -33.0400281, lng: -71.6289843 }
+            }
+        }
+    ]
+}
+$sample_response.results | select formatted_address
+$sample_response.results.geometry.location
+$sample_response.results.geometry.location | save -f coordenadas.json
+```
+
+#### Implementación del Módulo maps.nu
+
+Empaquetamos estas operaciones en el módulo `/data/ch05/maps.nu` (también disponible en `/data/ch04/maps.nu`). Su código fuente completo es el siguiente:
+
+```nu
+# Módulo de geocodificación con la API de Google Maps
+
+export def loc-from-address [
+    address: string
+    --api-key (-k): string = "the_api_key"
+] {
+    let url = {
+        scheme: "https"
+        host: "maps.googleapis.com"
+        path: "/maps/api/geocode/json"
+        params: {
+            address: $address
+            key: $api_key
+        }
+    } | url join
+
+    http get $url | get results.geometry.location
+}
+
+export def address-from-loc [
+    latitude: number
+    longitude: number
+    --api-key (-k): string = "the_api_key"
+] {
+    let url = {
+        scheme: "https"
+        host: "maps.googleapis.com"
+        path: "/maps/api/geocode/json"
+        params: {
+            latlng: $"($latitude),($longitude)"
+            key: $api_key
+        }
+    } | url join
+
+    let response = http get $url
+    if $response.status != "OK" {
+        error make -u {msg: "address not found!"}
+    }
+    $response.results.0.formatted_address
+}
+```
+
+Para utilizar el módulo, lo importamos en nuestra sesión interactiva con `use maps.nu *`:
+
+```nu
+# skip-docker-exec
+use maps.nu *
+loc-from-address "Paseo Yugoslavo 176, Valparaiso, Chile"
+address-from-loc -33.0400281 -71.6289843
+```
+
+### Traducción Automatizada con Google Translate
+
+El segundo caso aborda la traducción de textos y etiquetas dentro de pipelines de datos. De acuerdo con la [documentación de Google Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text), el servicio traduce texto de forma dinámica entre decenas de idiomas mediante peticiones HTTP.
+
+#### Obtención de la Clave de Acceso (API Key)
+
+1. En la misma consola de [Google Cloud Console](https://console.cloud.google.com/), ingrese a su proyecto.
+2. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
+3. Busque **Cloud Translation API** y presione **Enable**.
+4. Puede reutilizar la API Key creada para Google Maps o generar una nueva en **APIs & Services** $\rightarrow$ **Credentials** $\rightarrow$ **Create Credentials** $\rightarrow$ **API Key**.
+
+#### Implementación del Módulo translate.nu
+
+El módulo `/data/ch05/translate.nu` permite recibir texto tanto a través del pipeline (`$in`) como por argumento posicional (`text`), con parámetros opcionales para idioma de origen (`--source`, con auto-detección por defecto) e idioma de destino (`--destination`, con español por defecto). Si no se proporciona una clave comercial, el script utiliza de forma alternativa el endpoint web directo de Google Translate, permitiendo pruebas inmediatas:
+
+```nu
+# Módulo de traducción con Google Translate
+
+export def trans [
+    text?: string                      # Texto a traducir (o desde el pipeline $in)
+    --source (-s): string = "auto"     # Idioma de origen (por defecto auto-detección)
+    --destination (-d): string = "es"  # Idioma de destino (por defecto español)
+    --api-key (-k): string = ""        # Clave opcional de Google Cloud Translation API
+] {
+    let input_text = if ($text | is-empty) { $in } else { $text }
+    if ($input_text | is-empty) {
+        error make -u { msg: "Debe proporcionar un texto para traducir (como argumento o mediante tubería)." }
+    }
+
+    if ($api_key | is-not-empty) {
+        let url = {
+            scheme: "https"
+            host: "translation.googleapis.com"
+            path: "/language/translate/v2"
+            params: {
+                key: $api_key
+                q: $input_text
+                source: (if $source == "auto" { "" } else { $source })
+                target: $destination
+                format: "text"
+            }
+        } | url join
+
+        let response = http post $url {}
+        $response.data.translations.0.translatedText
+    } else {
+        let url = {
+            scheme: "https"
+            host: "translate.googleapis.com"
+            path: "/translate_a/single"
+            params: {
+                client: "gtx"
+                sl: $source
+                tl: $destination
+                dt: "t"
+                q: $input_text
+            }
+        } | url join
+
+        http get $url | get 0.0.0
+    }
+}
+```
+
+Importamos el comando `trans` y lo aplicamos en nuestras tuberías:
+
+```nu
+# skip-docker-exec
+use translate.nu *
+"Data science workflows at the command line" | trans
+trans "Structured data pipelines in Nushell" --destination "fr"
+```
+
+### Búsqueda Web e Ingesta con Ollama Search API
+
+El tercer caso de estudio integra búsquedas en la web en vivo directamente hacia tablas tipadas de Nushell utilizando la API de búsqueda web de [Ollama](https://ollama.com). Esto permite a los pipelines de datos enriquecer datasets con información actualizada en internet sin recurrir a navegadores gráficos ni volcados de HTML desestructurados.
+
+#### Obtención del Token de Acceso (API Key)
+
+1. Regístrese o inicie sesión en [ollama.com](https://ollama.com).
+2. Diríjase a la sección de configuración de claves de su cuenta en [ollama.com/settings/keys](https://ollama.com/settings/keys).
+3. Genere y copie su clave personal de API (*Ollama API Key*).
+4. En Nushell, puede exportar la variable de entorno `$env.OLLAMA_API_KEY = "su_clave"` en su configuración o pasarla explícitamente con el parámetro `--api-key` (`-k`).
+
+#### Implementación del Módulo ollama_search.nu
+
+El módulo `/data/ch05/ollama_search.nu` realiza una petición HTTP POST con el encabezado de autenticación `Authorization: Bearer <token>`, recibe la respuesta estructurada en formato JSON y devuelve directamente los resultados como una tabla de Nushell (o como texto Markdown si se activa la bandera `--md`):
+
+```nu
+# Módulo de búsqueda web estructurada mediante Ollama Search API
+
+export def ollama-search [
+    query: string                      # Consulta de búsqueda web
+    --max-results (-n): int = 5        # Cantidad máxima de resultados a devolver
+    --api-key (-k): string = ""        # Token de autenticación de Ollama
+    --md (-m)                          # Formatear la salida como texto Markdown
+    --verbose (-v)                     # Mostrar mensajes informativos
+] {
+    let token = if ($api_key | is-not-empty) {
+        $api_key
+    } else {
+        try { $env.OLLAMA_API_KEY } catch { "" }
+    }
+
+    if ($token | is-empty) {
+        error make -u { msg: "Se requiere un token de Ollama. Use --api-key (-k) o defina $env.OLLAMA_API_KEY." }
+    }
+
+    let url = "https://ollama.com/api/web_search"
+    let body = { query: $query, max_results: $max_results }
+    let headers = {
+        Authorization: $"Bearer ($token)"
+        "Content-Type": "application/json"
+    }
+
+    if $verbose { print $"Consultando la web mediante Ollama Search API: ($query)" }
+
+    let response = try {
+        http post -t application/json $url -H $headers $body -e
+    } catch { |e|
+        error make -u { msg: $"Error de conexión con Ollama Search API: ($e.msg)" }
+    }
+
+    let data = if ($response | describe) == "string" {
+        $response | from json
+    } else {
+        $response
+    }
+
+    if ($data | get -o error | is-not-empty) {
+        error make -u { msg: $"Ollama API Error: ($data.error)" }
+    }
+
+    if $md {
+        return (
+            $data.results
+            | default []
+            | each { |item|
+                [
+                    $"# ($item.title)"
+                    $"link: ($item.url)"
+                    ""
+                    $item.content
+                ] | str join (char nl)
+            }
+            | str join $"(char nl)(char nl)"
+        )
+    }
+
+    $data.results | default []
+}
+```
+
+Podemos utilizar la herramienta para alimentar pipelines posteriores con comandos como `select`, `where` o `save`:
+
+```nu
+# skip-docker-exec
+use ollama_search.nu *
+ollama-search "nushell data science pipelines" -n 3 | select title url
+ollama-search "command line data science" --md | save -f resultados_busqueda.md
 ```
 
 ### API de Transmisión (*Streaming*)
@@ -4151,142 +4144,15 @@ Algunas APIs web transmiten eventos en tiempo real de forma continua, como el fl
 En Nushell podemos filtrar las líneas que comienzan con `data: `, quitar el prefijo con `str replace`, convertir cada línea en un registro con `from json` y extraer los títulos editados en la Wikipedia en inglés (`en.wikipedia.org`), mostrando la tabla en pantalla y guardándola en `wikimedia_edits_en.csv`:
 
 ```nu
-let edits_en = (
-    open --raw wikimedia-stream-sample
+let edits_en = open --raw wikimedia-stream-sample
     | lines
     | where ($it | str starts-with "data: ")
     | each { |line| $line | str replace "^data: " "" | from json }
     | where ($it.type? == "edit") and ($it.server_name? == "en.wikipedia.org")
     | select -o title user bot timestamp
-)
+
 $edits_en | first 10
 $edits_en | save -f wikimedia_edits_en.csv
-```
-
-
-## Descargando datos
-
-Nushell tiene su propia herramienta de descarga, similar a `curl`, llamada `http get`.
-
-### Descargando un archivo json
-
-Por ejemplo, para descargar un archivo desde internet, utilizamos:
-
-```nu
-http get https://jsonplaceholder.typicode.com/posts | first 5
-```
-
-Podemos almacenar el resultado en una variable:
-
-```nu
-let response = http get https://jsonplaceholder.typicode.com/posts
-$response
-```
-
-Y explorar el resultado con `explore`:
-
-```nu
-$response | first 5 # En sesión interactiva puedes usar: $response | explore
-```
-
-O podemos ver directamente los primeros elementos:
-
-```nu
-$response | first 10
-```
-
-Tambien podemos guardar el resultado en un archivo:
-
-```nu
-$response | save -f posts.json
-
-ls
-open posts.json
-```
-
-### Descargando desde multiples urls
-
-Supongamos que se están consultando varios _endpoints_,
-tal vez con diferentes parámetros de consulta y se desea ver todas las respuestas como un único conjunto de datos. Se puede usar `each` para ejecutar comandos nu en cada fila de datos.
-
-Por ejemplo:
-
-```nu
-{
-  "urls": [
-    "https://jsonplaceholder.typicode.com/posts/1",
-    "https://jsonplaceholder.typicode.com/posts/2",
-    "https://jsonplaceholder.typicode.com/posts/3"
-  ]
-} | save -f urls.json
-
-open urls.json
-open urls.json | get urls
-```
-
-Luego, ejecutamos:
-
-```nu
-open urls.json | get urls | each { |u| http get $u }
-```
-
-Si se especifica la opcion `--raw`, el archivo json resultante no se transformará en una tabla:
-
-```nu
-open urls.json | get urls | each { |u| http get $u -r }
-```
-
-Para combinar estas respuestas en un formato JSON válido, se puede convertir la tabla a json:
-
-```nu
-open urls.json | get urls | each { |u| http get $u } | to json
-```
-
-Notar que el archivo `urls.json` es opcional, pues se puede realizar directamente:
-
-```nu
-{
-  "urls": [
-    "https://jsonplaceholder.typicode.com/posts/1",
-    "https://jsonplaceholder.typicode.com/posts/2",
-    "https://jsonplaceholder.typicode.com/posts/3"
-  ]
-} | get urls | each { |u| http get $u }
-```
-
-Tambien se puede realizar consultas `post` con el comando `http post`:
-
-```nu
-{
-  "my_payload": {
-    "title": "foo",
-    "body": "bar",
-    "userId": 1
-  }
-} | get my_payload | to json | http post https://jsonplaceholder.typicode.com/posts $in
-```
-
-> `$in` indica la salida del comando anterior.
-
-Se puede colocar todo esto en una _pipeline_ donde se leen datos, se manipulan y luego se envian de vuelta a la API. En el siguiente ejemplo se descarga una publicacióm, se incrementa el `id`, y se sube de vuelta al _endpoint_. En este ejemplo en particular, el _endpoint_ de prueba devuelve una respuesta arbitraria:
-
-```nu
-open urls.json | get urls | first | http get $in | upsert id {|item| $item.id + 1} |
-  to json | http post https://jsonplaceholder.typicode.com/posts $in
-```
-
-En nushell, también se pueden escribir comandos en varias lineas. El ejemplo anterior queda:
-
-```nu
-open urls.json |
-  get urls |
-  first |
-  http get $in |
-  upsert id {|item|
-    $item.id + 1
-  } |
-  to json |
-  http post https://jsonplaceholder.typicode.com/posts $in
 ```
 
 
@@ -4316,14 +4182,12 @@ Con frecuencia, la salida de una herramienta requiere una transformación interm
 
 ```nu
 1..100 | to text | python3 fizzbuzz.py | save -f fb.seq
-let conteo_fb = (
-    open --raw fb.seq
+let conteo_fb = open --raw fb.seq
     | lines
     | where ($it =~ "fizz|buzz")
     | uniq -c
     | rename value count
     | sort-by count --reverse
-)
 $conteo_fb
 $conteo_fb | save -f fb.csv
 ```
@@ -4391,12 +4255,11 @@ Cuando formulamos un pipeline sobre un archivo muy grande, resulta útil tomar u
 Para extraer únicamente el número romano y el título de cada capítulo de `alice.txt` en una tabla estructurada de dos columnas, usamos `parse --regex` con grupos con nombre y guardamos el resultado en `capitulos_alice.csv`:
 
 ```nu
-let caps = (
-    open --raw alice.txt
+let caps = open --raw alice.txt
     | lines
     | where ($it =~ '^CHAPTER ')
     | parse --regex '^CHAPTER (?P<numero>[IVXLCDM]+)\.\s+(?P<titulo>.*)$'
-)
+
 $caps
 $caps | save -f capitulos_alice.csv
 ```
@@ -4404,8 +4267,7 @@ $caps | save -f capitulos_alice.csv
 Y si deseamos construir un conjunto de datos con todas las palabras únicas de `alice.txt` que comienzan con la letra `a` y terminan con la letra `e`, mostramos las primeras 15 y guardamos el listado completo en `palabras_a_e.csv`:
 
 ```nu
-let palabras_ae = (
-    open --raw alice.txt
+let palabras_ae = open --raw alice.txt
     | str lowercase
     | parse --regex '(?P<palabra>[a-z]{2,})'
     | get palabra
@@ -4413,7 +4275,7 @@ let palabras_ae = (
     | uniq
     | sort
     | wrap palabra
-)
+
 $palabras_ae | first 15
 $palabras_ae | save -f palabras_a_e.csv
 ```
@@ -4538,11 +4400,10 @@ open names-comma.csv
 En `names-comma.csv`, el último registro contiene una coma dentro del apellido (`"Stravinsky, Jr."`). Mientras que `sed`, `awk` y `cut` fallaban al partir por esa coma interna, el analizador CSV de Nushell respeta las comillas del estándar RFC 4180 y construye `full_name` de manera impecable:
 
 ```nu
-let nombres_limpios = (
-    open names-comma.csv
+let nombres_limpios = open names-comma.csv
     | insert full_name { |row| $"($row.first_name) ($row.last_name)" }
     | select id full_name born
-)
+
 $nombres_limpios
 $nombres_limpios | save -f names_completos.csv
 ```
@@ -4558,7 +4419,7 @@ open tips.csv | select bill tip | save -f bills.csv
 open tips.csv | select day time | save -f datetime.csv
 open tips.csv | select sex smoker size | save -f customers.csv
 
-let unido_horizontal = (open bills.csv | merge (open customers.csv) | merge (open datetime.csv))
+let unido_horizontal = open bills.csv | merge (open customers.csv) | merge (open datetime.csv)
 $unido_horizontal | first 5
 $unido_horizontal | save -f tips_horizontal.csv
 ```
@@ -4569,11 +4430,10 @@ Cuando dos tablas comparten una columna clave (como `species` en `iris.csv` e `i
 
 ```nu
 open irismeta.csv
-let iris_enriquecido = (
-    open iris.csv
+let iris_enriquecido = open iris.csv
     | join (open irismeta.csv) species
     | select sepal_length sepal_width species usda_id
-)
+
 $iris_enriquecido | slice 48..53
 $iris_enriquecido | save -f iris_usda.csv
 ```
@@ -4585,12 +4445,11 @@ En `/data/ch06` contamos con el archivo JSON `users.json` y los archivos extraí
 En lugar de modificar `users.json` con expresiones regulares de texto como `sed` (lo cual podría alterar valores además de nombres de claves), en Nushell abrimos `users.json` como estructura de datos, renombramos el campo `gender` a `sex` en la tabla `results` y guardamos el resultado tanto en JSON como en CSV:
 
 ```nu
-let usuarios = (
-    open users.json
+let usuarios = open users.json
     | get results
     | select gender email nat phone
     | rename sex email nat phone
-)
+
 $usuarios | first 5
 $usuarios | save -f users_sex.csv
 ```
@@ -4654,7 +4513,7 @@ ls vgsales.csv
 Ahora, se puede cargar el archivo `vgsales.csv` en un DataFrame de Polars de la siguiente manera:
 
 ```nu
-let df = (open vgsales.csv | polars into-df)
+let df = open vgsales.csv | polars into-df
 $df | polars first 5 | polars collect
 $df | describe
 ```
@@ -4674,7 +4533,7 @@ $df | polars schema
 Se observa que algunas variables aparecen de tipo `object`, que es el tipo de datos predeterminado para Polars cuando no se especifica un tipo de datos específico. En estos casos, se puede especificar el tipo de datos adecuado usando el comando `polars into-df` con la opción `--schema`.
 
 ```nu
-let df = (open vgsales.csv)
+let df = open vgsales.csv
   | polars into-df --schema {
       number: i64,
       game: str,
@@ -4837,7 +4696,7 @@ $df_filtered |
 $df_filtered | polars select release_date | polars collect
 
 #primero se extrae año, luego se agrupa
-let data_by_year = ($df_filtered |
+let data_by_year = $df_filtered |
   polars with-column [
     (polars col release_date
        | polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1" # extrae el año
@@ -4852,7 +4711,6 @@ let data_by_year = ($df_filtered |
   ] |
   polars sort-by year |
   polars collect
-)
 
 #se visualiza
 $data_by_year
@@ -4906,7 +4764,7 @@ Primero, se preparan los datos para el pivoteo:
 - Se calcula promedio de `price` de acuerdo al agrupamiento.
 
 ```nu
-let df_aggregated = ($df_filtered |
+let df_aggregated = $df_filtered |
   polars with-column [
     (polars col release_date
       | polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1"
@@ -4922,7 +4780,6 @@ let df_aggregated = ($df_filtered |
   ] |
   polars group-by [developer year] |
   polars agg [(polars col price | polars mean | polars as price_mean)]
-)
 
 $df_aggregated | polars collect
 $df_aggregated | polars sort-by year | polars collect
@@ -4932,7 +4789,7 @@ $df_aggregated | polars sort-by developer | polars collect
 Se hace el pivoteo:
 
 ```nu
-let df_pivoted = ($df_aggregated | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect)
+let df_pivoted = $df_aggregated | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect
 $df_pivoted | polars first 5 | polars into-nu
 $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 ```
@@ -5021,8 +4878,8 @@ En muchos conjuntos de datos administrativos o financieros (como `venture.csv`),
 En Nushell podemos detectar el número de valores únicos de cada columna trasponiendo el primer registro o iterando sobre los nombres de las columnas con `get` y `uniq`:
 
 ```nu
-let df = (open venture.csv)
-let non_const_cols = ($df | columns | where {|c| ($df | get $c | uniq | length) > 1 })
+let df = open venture.csv
+let non_const_cols = $df | columns | where {|c| ($df | get $c | uniq | length) > 1 }
 $df | select ...$non_const_cols | first 5
 $df | select ...$non_const_cols | save -f venture_clean.csv
 ```
@@ -5473,9 +5330,9 @@ Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos
 Veamos cómo podemos construir el conjunto combinado `wine-both.csv` directamente en Nushell añadiendo la columna `type` (`red` o `white`) y guardándolo en disco:
 
 ```nu
-let red = (open wine-red.csv | insert type "red")
-let white = (open wine-white.csv | insert type "white")
-let both = ($red | append $white)
+let red = open wine-red.csv | insert type "red"
+let white = open wine-white.csv | insert type "white"
+let both = $red | append $white
 $both | first 5
 $both | save -f wine-both-generated.csv
 ```
@@ -5506,7 +5363,95 @@ Cuando trabajamos con un espacio de $p = 11$ variables fisicoquímicas correlaci
 
 ### Reducción de Dimensionalidad con Herramientas CLI (`tapkee-reduce`: PCA y t-SNE)
 
-La imagen `dsin` incluye la herramienta C++ `tapkee` junto con el comando de Nushell `tapkee-reduce`, que estandariza automáticamente las columnas numéricas seleccionadas ($z = (x - \mu)/\sigma$), invoca `tapkee` y devuelve las coordenadas proyectadas `dim_1` y `dim_2` como tabla de Nushell.
+#### La Herramienta Base: `tapkee`
+
+**Tapkee** es una eficiente biblioteca de plantillas en C++ desarrollada por Sergey Lisitsyn ([http://tapkee.lisitsyn.me/](http://tapkee.lisitsyn.me/)) orientada al cálculo rápido de mapeos dimensionales. Entre los algoritmos integrados destacan:
+
+- *Principal Component Analysis* (PCA)
+- *t-Distributed Stochastic Neighbor Embedding* (t-SNE)
+- *Multidimensional Scaling* (MDS)
+- *Isomap*
+- *Locally Linear Embedding* (LLE)
+
+Como herramienta de línea de comandos, `tapkee` opera bajo la filosofía Unix clásica: lee una matriz puramente numérica sin encabezados y devuelve las coordenadas proyectadas delimitadas por espacios o comas. Sus argumentos principales son:
+
+- `-i <archivo>`: archivo de entrada con los datos numéricos.
+- `-o <archivo>`: archivo de destino para las coordenadas resultantes.
+- `-m <método>`: método de reducción (`pca`, `t-sne`, `isomap`, `mds`, `lle`, etc.).
+- `-td <dimensiones>`: dimensionalidad del espacio proyectado (típicamente `2`).
+- `--delimiter <delimitador>`: carácter delimitador de columnas (por ejemplo, `","`).
+
+Podemos verificar el funcionamiento elemental de la herramienta base extrayendo las columnas numéricas de los primeros 200 registros de `wine-both.csv` sin encabezados y despachando `tapkee` directamente:
+
+```nu
+# skip-docker-exec
+open wine-both.csv
+    | first 200
+    | select fixed_acidity volatile_acidity citric_acid residual_sugar chlorides free_sulfur_dioxide total_sulfur_dioxide density ph sulphates alcohol
+    | to csv --noheaders
+    | save -f wine_matrix.csv
+
+tapkee -i wine_matrix.csv -o wine_pca_coords.tsv -m pca -td 2 --delimiter ","
+open --raw wine_pca_coords.tsv | lines | first 5
+```
+
+Si bien la herramienta binaria procesa los números con enorme rapidez, utilizarla de manera cruda en un flujo analítico presenta limitaciones evidentes: las columnas de texto (como `type`) deben eliminarse previamente, los encabezados deben suprimirse y las coordenadas resultantes quedan desconectadas de las filas originales, exigiendo complejas operaciones manuales de unión.
+
+#### Implementación del Wrapper: `tapkee-reduce`
+
+Para resolver esta brecha y ofrecer una experiencia analítica ergonómica que preserve la estructura tabular de Nushell, el módulo `dsin_tools.nu` define el comando wrapper **`tapkee-reduce`**:
+
+```nu
+# Run Tapkee dimensionality reduction on a numeric Nushell table and return a structured table.
+export def tapkee-reduce [
+  --method(-m): string = "pca" # Tapkee method: pca, ltsa, isomap, mds, tsne, t-sne, lle
+  --target-dim(-d): int = 2    # Number of output dimensions
+  --label-col(-l): string      # Optional label column to preserve alongside coordinates
+  --cols(-c): list<string>     # Optional explicit list of feature columns
+]: table -> table {
+  let tbl = $in
+  let norm_method = if $method == "tsne" { "t-sne" } else { $method }
+  let num_tbl = if ($cols != null) and (($cols | length) > 0) {
+    $tbl | select ...$cols
+  } else if ($label_col != null) and ($label_col | is-not-empty) and ($label_col in ($tbl | columns)) {
+    $tbl | reject $label_col
+  } else {
+    let non_num = ["type"] | where {|c| $c in ($tbl | columns)}
+    if ($non_num | is-not-empty) { $tbl | reject ...$non_num } else { $tbl }
+  }
+
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_out = mktemp --suffix ".tsv"
+  $num_tbl | to csv --noheaders | save -f $tmp_in
+
+  tapkee -i $tmp_in -o $tmp_out -m $norm_method -td $target_dim --delimiter ","
+  let raw_coords = open --raw $tmp_out | lines | where ($it | str trim | is-not-empty)
+  rm -f $tmp_in $tmp_out
+
+  let coords_tbl = $raw_coords | each { |line|
+    let parts = $line | split row "," | each { |v| $v | str trim | into float | math round -p 4 }
+    mut rec = {}
+    for idx in 0..<($parts | length) {
+      let val = $parts | get $idx
+      $rec = ($rec | insert $"dim($idx + 1)" $val | insert $"dim_($idx + 1)" $val)
+    }
+    $rec
+  }
+
+  $tbl | merge $coords_tbl
+}
+```
+
+Analicemos la arquitectura del comando:
+
+1. **Aislamiento de atributos numéricos:** Examina los argumentos de entrada. Si se especifican columnas con `--cols`, las selecciona; de lo contrario, excluye automáticamente columnas de etiquetas categóricas como `type`.
+2. **Archivos temporales limpios con `mktemp`:** Genera rutas efímeras y exporta la matriz mediante `to csv --noheaders`.
+3. **Invocación transparente de `tapkee`:** Ejecuta el binario C++ con el método seleccionado.
+4. **Reintegración tabular con `merge`:** Lee la salida estructurada, redondea las coordenadas a cuatro decimales y fusiona horizontalmente los campos `dim_1` y `dim_2` con la tabla original, preservando todas las etiquetas y atributos iniciales.
+
+#### Ejecución en Pipelines de Nushell
+
+Con este wrapper integrado, la reducción de dimensionalidad se expresa como una única etapa fluida dentro del pipeline:
 
 Apliquemos primero **PCA** sobre una muestra de 200 vinos de `wine-both.csv`:
 
@@ -5591,13 +5536,72 @@ Un requisito estadístico indispensable antes de aplicar K-Means sobre variables
 
 ### Clustering K-Means con Herramientas CLI (`kmeans-cluster`)
 
-En el módulo `dsin_tools.nu` de la imagen `dsin` disponemos del comando `kmeans-cluster`, que estandariza las columnas numéricas indicadas, ejecuta K-Means con $K$ clústeres e inserta la columna `cluster` en la tabla de Nushell.
+#### Fundamento del Algoritmo y Estandarización Previa
+
+En tareas de agrupamiento con atributos que presentan órdenes de magnitud muy dispares (por ejemplo, `total_sulfur_dioxide` alcanza valores de hasta 440 mg/L mientras que `density` varía entre 0.98 y 1.03 g/cm$^3$), el cálculo de distancias euclidianas queda completamente sesgado por la variable con mayor varianza escalar. Por tanto, antes de calcular centroides es imperativo aplicar **estandarización $z$-score**:
+
+$$z_{ij} = \frac{x_{ij} - \bar{x}_j}{s_j}$$
+
+#### Implementación del Wrapper: `kmeans-cluster`
+
+En lugar de requerir que el analista escriba manualmente scripts externos de preparación y ajuste cada vez que desea evaluar clústeres, el comando **`kmeans-cluster`** (disponible en `dsin_tools.nu`) encapsula la estandarización, el ajuste del modelo y la asignación de clústeres directamente desde la terminal de Nushell:
+
+```nu
+# Run K-Means clustering on a numeric Nushell table and return cluster assignments.
+export def kmeans-cluster [
+  --k(-k): int = 2             # Number of clusters K
+  --clusters: int = 0          # Alias for --k
+  --label-col(-l): string      # Optional label column to exclude from features
+  --cols(-c): list<string>     # Optional explicit list of feature columns
+]: table -> table {
+  let tbl = $in
+  let n_clusters = if $clusters > 0 { $clusters } else { $k }
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_py = mktemp --suffix ".py"
+  $tbl | to csv | save -f $tmp_in
+
+  let lbl = $label_col | default "type"
+  let cols_csv = if ($cols != null) and (($cols | length) > 0) {
+    $cols | str join ","
+  } else { "" }
+
+  'import sys, pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+df = pd.read_csv(sys.argv[1])
+k = int(sys.argv[2])
+lbl = sys.argv[3]
+cols_arg = sys.argv[4]
+if cols_arg:
+    num_cols = [c for c in cols_arg.split(",") if c in df.columns]
+else:
+    num_cols = [c for c in df.columns if c not in (lbl, "type") and pd.api.types.is_numeric_dtype(df[c])]
+X = StandardScaler().fit_transform(df[num_cols])
+km = KMeans(n_clusters=k, n_init=10, random_state=42)
+clusters = km.fit_predict(X)
+df["cluster"] = [f"cluster_{c+1}" for c in clusters]
+df.to_csv(sys.stdout, index=False)
+' | save -f $tmp_py
+
+  let res = python3 $tmp_py $tmp_in ($n_clusters | into string) $lbl $cols_csv | from csv
+  rm -f $tmp_in $tmp_py
+  $res
+}
+```
+
+El script interno automatiza tres operaciones esenciales:
+1. Filtra los predictores numéricos excluyendo las variables de respuesta o clasificación (`type`).
+2. Aplica `StandardScaler()` para garantizar una escala euclidiana homogénea.
+3. Ajusta `KMeans(n_clusters=k, n_init=10)` y agrega la etiqueta `cluster_1`, `cluster_2`, etc., a cada fila, devolviendo una tabla regular de Nushell lista para agregaciones.
+
+#### Ejecución y Análisis de Contingencia
 
 Apliquemos `kmeans-cluster --k 2` sobre las 11 variables químicas de `wine-both.csv` (sin revelar la columna `type` al algoritmo) y comparemos los clústeres descubiertos contra el tipo real de vino (`red` vs `white`):
 
 ```nu
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
-let clustered = (open wine-both.csv | kmeans-cluster --k 2 --cols $features)
+let clustered = open wine-both.csv | kmeans-cluster --k 2 --cols $features
 $clustered | select type quality alcohol volatile_acidity cluster | first 10
 $clustered | select type quality alcohol volatile_acidity cluster | save -f wine_kmeans_cli.csv
 ```
@@ -5713,13 +5717,121 @@ Para evaluar rigurosamente la capacidad de generalización del modelo sobre dato
 
 ### Regresión en Línea con Vowpal Wabbit (`vw-regress`)
 
-**Vowpal Wabbit (`vw`)** es un motor ultrarrápido de aprendizaje en línea por descenso de gradiente estocástico capaz de entrenar modelos sobre millones de registros sin cargar el dataset completo en RAM. El comando `vw-regress` incluido en `dsin_tools.nu` convierte automáticamente tablas de Nushell al formato nativo de Vowpal Wabbit (`target |features feat1:val1 feat2:val2 ...`), entrena el modelo y devuelve una tabla con `actual`, `predicted`, `error` y `abs_error`:
+#### La Herramienta Base: Vowpal Wabbit (`vw`)
+
+**Vowpal Wabbit (`vw`)** es un sistema de aprendizaje automático de alto rendimiento desarrollado originalmente en Yahoo! Research y mantenido por Microsoft Research bajo el liderazgo de John Langford ([https://vowpalwabbit.org/](https://vowpalwabbit.org/)). Está optimizado para aprendizaje en línea (*online learning*) a gran escala mediante algoritmos de gradiente descendente estocástico (SGD) y trucos de *hashing* de características (*feature hashing*), lo que le permite procesar flujos masivos de datos con consumo de memoria constante.
+
+#### Formato Nativo de Entrada de Vowpal Wabbit
+
+A diferencia de las herramientas estándar que aceptan tablas CSV, `vw` utiliza un formato textual propio altamente eficiente diseñado para representaciones dispersas y espacios de nombres. La estructura formal de cada línea es:
+
+```text
+[etiqueta] [peso] [etiqueta_opcional]|EspacioNombres caracteristica1:valor1 caracteristica2:valor2 ...
+```
+
+Por ejemplo, una observación del conjunto de datos de vino blanco se expresa como:
+
+```text
+6 |f fixed_acidity:7 volatile_acidity:0.27 citric_acid:0.36 residual_sugar:20.7 chlorides:0.045 free_sulfur_dioxide:45 total_sulfur_dioxide:170 density:1.001 ph:3 pH:3 sulphates:0.45 alcohol:8.8
+```
+
+Donde:
+- `6`: valor de la variable respuesta cuantitativa (`quality`).
+- `|f`: el símbolo de barra vertical divide la etiqueta de las características; `f` es el identificador del espacio de nombres (*features*).
+- `fixed_acidity:7 ...`: pares clave-valor numéricos que definen los predictores.
+
+#### Comandos Base de Entrenamiento y Prueba en `vw`
+
+En la línea de comandos estándar de Unix, el flujo con `vw` consta de dos llamadas fundamentales:
+
+1. **Entrenamiento del modelo:**
+   ```bash
+   vw --data train.vw --final_regressor model.vw --passes 10 -c -l 0.5 --quiet
+   ```
+   - `--data`: archivo de entrenamiento en formato VW.
+   - `--final_regressor`: archivo binario de salida donde se guardan los pesos ajustados del modelo.
+   - `--passes`: número de iteraciones completas sobre los datos.
+   - `-c` / `--cache_file`: genera y utiliza un archivo de caché binario optimizado para relecturas rápidas durante múltiples pasadas.
+   - `-l`: tasa de aprendizaje inicial (*learning rate*) del gradiente descendente.
+   - `--quiet`: suprime las impresiones diagnósticas por cada bloque de registros.
+
+2. **Evaluación y predicción sobre datos de prueba:**
+   ```bash
+   vw --data test.vw -i model.vw -t -p preds.txt --quiet
+   ```
+   - `-i`: carga los pesos del modelo preentrenado.
+   - `-t`: modo prueba (*test-only*), congelando los pesos sin actualizar el modelo.
+   - `-p`: archivo de salida donde se registrarán las predicciones escalares generadas.
+
+#### Implementación de los Wrappers: `to-vw` y `vw-regress`
+
+En Nushell no es necesario depender de herramientas externas como `csv2vw` ni gestionar manualmente archivos intermedios. El módulo `dsin_tools.nu` define dos comandos complementarios:
+
+El conversor **`to-vw`**, que transforma cualquier tabla de Nushell en una lista de cadenas con el formato nativo de Vowpal Wabbit:
 
 ```nu
-let data = (open wine-white.csv)
-let train = ($data | first 3500)
-let test = ($data | skip 3500)
-let preds = (vw-regress $train $test --target quality --passes 15)
+# Convert a Nushell table into Vowpal Wabbit (VW) line format.
+export def to-vw [
+  --target(-t): string = "quality" # Name of target column
+  --namespace(-n): string = "f"    # Feature namespace label
+]: table -> list<string> {
+  let tbl = $in
+  let cols = $tbl | columns | where $it != $target
+  $tbl | each { |row|
+    let y = $row | get $target
+    let feats = $cols | each { |c| $"($c):($row | get $c)" } | str join " "
+    $"($y) |($namespace) ($feats)"
+  }
+}
+```
+
+Y el comando orquestador **`vw-regress`**, que entrena el modelo sobre una tabla de entrenamiento, infiere predicciones sobre la tabla de prueba y devuelve una tabla estructurada de Nushell:
+
+```nu
+# Train and evaluate a Vowpal Wabbit regression model and return predictions as a Nushell table.
+export def vw-regress [
+  train_tbl: table
+  test_tbl: table
+  --target(-t): string = "quality"
+  --passes(-p): int = 10
+  --learning-rate(-l): float = 0.5
+]: nothing -> table {
+  let tmp_dir = mktemp -d
+  let train_vw = $"($tmp_dir)/train.vw"
+  let test_vw = $"($tmp_dir)/test.vw"
+  let model_file = $"($tmp_dir)/model.vw"
+  let pred_file = $"($tmp_dir)/preds.txt"
+
+  $train_tbl | to-vw --target $target | str join "\n" | save -f $train_vw
+  $test_tbl | to-vw --target $target | str join "\n" | save -f $test_vw
+
+  vw --data $train_vw --final_regressor $model_file --passes $passes -l $learning_rate --cache_file $"($tmp_dir)/train.cache" --quiet
+  vw --data $test_vw -i $model_file -t -p $pred_file --quiet
+
+  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
+  let actuals = $test_tbl | get $target | each { |x| $x | into float }
+
+  rm -rf $tmp_dir
+
+  $actuals | zip $preds | each { |pair|
+    let obs = $pair.0
+    let pred = $pair.1 | math round -p 4
+    let signed_err = (($pred - $obs) | math round -p 4)
+    let err = (($obs - $pred) | math abs | math round -p 4)
+    { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $err }
+  }
+}
+```
+
+#### Ejecución del Pipeline en Nushell
+
+Evaluemos el modelo entrenando sobre los primeros 3.500 vinos blancos y prediciendo sobre los 1.398 restantes:
+
+```nu
+let data = open wine-white.csv
+let train = $data | first 3500
+let test = $data | skip 3500
+let preds = vw-regress $train $test --target quality --passes 15
 $preds | first 10
 $preds | save -f wine_vw_predictions.csv
 ```
@@ -5727,7 +5839,7 @@ $preds | save -f wine_vw_predictions.csv
 Calculemos el MAE y el error medio directamente en Nushell a partir de las predicciones de `vw-regress` y guardémoslos en un archivo resumen:
 
 ```nu
-let preds = (open wine_vw_predictions.csv)
+let preds = open wine_vw_predictions.csv
 let metrics = {model: "Vowpal Wabbit (SGD)", n_test: ($preds | length), mae: ($preds.abs_error | math avg | math round --precision 4), bias: ($preds.error | math avg | math round --precision 4)}
 $metrics
 [$metrics] | save -f wine_vw_metrics.csv
@@ -5766,9 +5878,68 @@ Finalmente, abordemos el problema de **clasificación supervisada**: predecir un
 
 ### Experimentos de Clasificación con SKLL (`run_experiment` + `skll-metrics`)
 
-La imagen `dsin` incluye **SKLL (*SciKit-Learn Laboratory*)**, que permite definir experimentos declarativos de evaluación y validación cruzada mediante archivos de configuración `.cfg` (como `classify.cfg` en `/data/ch09`, que evalúa clasificadores sobre `train/features.csv` y `test/features.csv`).
+#### La Herramienta Base: SciKit-Learn Laboratory (`skll`)
 
-Inspeccionemos `classify.cfg` y ejecutemos `run_experiment` junto con el comando `skll-metrics` para obtener la tabla comparativa de exactitud (*accuracy*) y guardarla en `wine_skll_summary.csv`:
+**SKLL** (*SciKit-Learn Laboratory*, pronunciado *skull*) es un entorno de línea de comandos desarrollado por Educational Testing Service (ETS) para automatizar experimentos reproducibles de aprendizaje automático con `scikit-learn` sin requerir código Python repetitivo ([https://skll.readthedocs.io/](https://skll.readthedocs.io/)).
+
+La ejecución se gobierna íntegramente mediante un archivo de configuración declarativo `.cfg`. En `/data/ch09` disponemos de `classify.cfg`, cuya estructura examinamos a continuación:
+
+```ini
+[General]
+experiment_name = wine
+task = evaluate
+
+[Input]
+train_directory = train
+test_directory = test
+featuresets = [["features.csv"]]
+learners = ["LogisticRegression", "RandomForestClassifier", "LinearSVC"]
+label_col = type
+
+[Tuning]
+grid_search = false
+objectives = ['accuracy']
+
+[Output]
+results_directory = output
+log = output
+```
+
+Los bloques principales definen:
+- `task = evaluate`: evalúa los modelos especificados sobre el conjunto de prueba independiente (`test_directory`).
+- `learners`: lista de algoritmos de `scikit-learn` a entrenar y comparar de manera competitiva en paralelo.
+- `label_col`: columna con la variable respuesta o etiqueta supervisada.
+- `results_directory`: carpeta donde SKLL guardará las predicciones detalladas y el archivo de resumen consolidado `wine_summary.tsv`.
+
+El comando base para iniciar el experimento desde la terminal es:
+
+```bash
+run_experiment -l classify.cfg
+```
+
+#### Implementación del Wrapper: `skll-metrics`
+
+Para incorporar los resultados de SKLL de forma transparente a los pipelines de Nushell sin necesidad de recurrir a herramientas clásicas de corte de columnas, el módulo `dsin_tools.nu` proporciona el comando **`skll-metrics`**:
+
+```nu
+# Parse SKLL experiment summary TSV into a clean Nushell table.
+export def skll-metrics [
+  summary_tsv: path = "output/wine_summary.tsv"
+]: nothing -> table {
+  let target_path = if ($summary_tsv | path exists) {
+    $summary_tsv
+  } else if ("output/wine_summary.tsv" | path exists) {
+    "output/wine_summary.tsv"
+  } else {
+    $summary_tsv
+  }
+  open $target_path | select learner_name accuracy
+}
+```
+
+#### Ejecución y Comparación Tabular
+
+Inspeccionemos `classify.cfg`, ejecutemos `run_experiment` y procesemos el resultado con `skll-metrics`:
 
 ```nu
 open --raw classify.cfg

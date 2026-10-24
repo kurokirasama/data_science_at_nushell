@@ -32,7 +32,7 @@ export def address-from-loc [
         }
     } | url join
 
-    let response = (http get $url)
+    let response = http get $url
     if $response.status != "OK" {
         error make -u {msg: "address not found!"}
     }
