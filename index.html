@@ -276,6 +276,13 @@
       color: var(--text-main);
     }
 
+    .chapter-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      line-height: 1.4;
+    }
+
     .citation-box {
       background: var(--bg-card);
       border-left: 4px solid var(--accent);
@@ -351,16 +358,16 @@
           <h2>English Edition</h2>
           <p>The English release of the curriculum, adapted with standard international computational statistics terminology. Ideal for English-speaking courses and global practitioners.</p>
         </div>
-        <div class="card-meta">Compiled PDF • Single-part 8-chapter monograph • XeLaTeX engine</div>
+        <div class="card-meta">Compiled PDF • Single-part 9-chapter monograph • XeLaTeX engine</div>
         <a href="Files/DataScienceNushell.pdf" class="btn btn-secondary" target="_blank">View / Download PDF</a>
       </div>
 
       <div class="card">
         <div>
           <h2>Spanish Edition</h2>
-          <p>The original Spanish edition (<em>Ciencia de Datos en Nushell</em>). Complete 8-chapter curriculum with code examples, pipelines, and exercises.</p>
+          <p>The original Spanish edition (<em>Ciencia de Datos en Nushell</em>). Complete 9-chapter curriculum with code examples, pipelines, and exercises.</p>
         </div>
-        <div class="card-meta">PDF oficial en Español • Monografía integral • Motor XeLaTeX</div>
+        <div class="card-meta">PDF oficial en Español • Monografía integral de 9 capítulos • Motor XeLaTeX</div>
         <a href="Files/DataScienceNushell.es.pdf" class="btn btn-secondary" target="_blank">Ver / Descargar PDF (Español)</a>
       </div>
     </div>
@@ -381,35 +388,48 @@
       <ul class="chapters-list">
         <li>
           <div class="chapter-num">Chapter 1</div>
-          <div class="chapter-title">Introduction to Command-Line Data Science & Nushell</div>
+          <div class="chapter-title">Introduction</div>
+          <div class="chapter-desc">The terminal as a scientific laboratory, the Nushell structured data paradigm, and reproducible environments.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 2</div>
-          <div class="chapter-title">The Nushell Shell: Architecture, Types, and Pipelines</div>
+          <div class="chapter-title">Software Installation</div>
+          <div class="chapter-desc">The standalone <code>dsin</code> Docker container, interactive setup, and environment verification.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 3</div>
-          <div class="chapter-title">Data Ingestion: Delimited, Structured, and Database Formats</div>
+          <div class="chapter-title">Nushell Fundamentals and Data Structures</div>
+          <div class="chapter-desc">Terminal introduction, shells vs. Nushell, strings, lists, records, tables, cell paths, <code>ttt</code> editor, and Git.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 4</div>
-          <div class="chapter-title">Data Transformation, Filtering, and Statistical Summaries</div>
+          <div class="chapter-title">Programming and Creating Command-Line Tools</div>
+          <div class="chapter-desc">Custom commands (<code>def</code>, <code>export def</code>), flags, strong typing, modules, Google Maps API, and R/Python integration.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 5</div>
-          <div class="chapter-title">High-Performance Analytics with the Polars Plugin</div>
+          <div class="chapter-title">Data Acquisition</div>
+          <div class="chapter-desc">HTTP requests (<code>http get</code>), decompression, Excel spreadsheets (<code>.xlsx</code>), SQLite databases (<code>query db</code>), and REST APIs.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 6</div>
-          <div class="chapter-title">Polyglot Workflows: Interfacing Nushell with Python & R</div>
+          <div class="chapter-title">Data Cleaning and Transformation</div>
+          <div class="chapter-desc">Native Nushell filtering, structural mutations, tabular reshaping, and the high-performance Polars plugin.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 7</div>
-          <div class="chapter-title">Machine Learning in the Terminal: Vowpal Wabbit, Tapkee & SKLL</div>
+          <div class="chapter-title">Exploratory Data Analysis and Visualization</div>
+          <div class="chapter-desc">Descriptive statistics (<code>math</code>, <code>polars summary</code>), polyglot scripts (<code>.R</code>/<code>.py</code>), and in-terminal plotting with <code>timg</code>.</div>
         </li>
         <li>
           <div class="chapter-num">Chapter 8</div>
-          <div class="chapter-title">Capstone Project: Automated End-to-End Data Science Pipeline</div>
+          <div class="chapter-title">Serial and Parallel Data Pipelines</div>
+          <div class="chapter-desc">Serial batching (<code>each</code>), native concurrency (<code>par-each</code>), and GNU <code>parallel</code> orchestration.</div>
+        </li>
+        <li>
+          <div class="chapter-num">Chapter 9</div>
+          <div class="chapter-title">Polyglot Data Modeling</div>
+          <div class="chapter-desc">Dimensionality reduction, clustering (K-Means/Hierarchical/DBSCAN/PAM), regression, and classification (<code>tapkee</code>, <code>vw</code>, <code>skll</code>, <code>Rscript</code>, <code>python3</code> &rarr; Nushell tables).</div>
         </li>
       </ul>
     </section>
