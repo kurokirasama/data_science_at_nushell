@@ -1,75 +1,80 @@
-# Ciencia de Datos en Nushell (Data Science at Nushell)
+> **[ English | [Español](README.es.md) ]**
+>
+> [!NOTE]
+> This English documentation was translated with the assistance of AI from the original Spanish version. For the authoritative Spanish documentation, see [README.es.md](README.es.md).
 
-**Guía práctica y libro** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
+# Data Science at Nushell
 
-## Descripción
+**Practical Guide and Textbook** for **Data Science at the Command Line** with **Nushell**
 
-Libro y manual integral de **Ciencia de Datos en la Línea de Comandos** construido íntegramente sobre **Nushell** como shell interactivo, lenguaje de programación funcional/estructurado y motor de pipelines de datos, utilizando el contenedor Docker propio **`dsin`** (*Data Science in Nushell*).
+## Description
 
-Esta obra aborda desde la comparación con shells tradicionales (`bash`, `zsh` y la filosofía POSIX) y los conceptos fundamentales de bajo nivel en Nushell (strings, listas, registros, tablas, rutas de celda, tipado y creación de comandos personalizados) hasta el flujo completo OSEMN:
+A comprehensive textbook and practical manual for **Data Science at the Command Line**, built entirely around **Nushell** as an interactive shell, functional/structured programming language, and data pipeline engine, utilizing the dedicated standalone Docker container **`dsin`** (*Data Science in Nushell*).
 
-- **Obtención de Datos:** `http get`, `http post`, `url join`, descompresión, hojas Excel `.xlsx`, bases SQLite (`query db`), Parquet y APIs web (REST, autenticación, geocodificación con Google Maps / OpenStreetMap y streaming SSE).
-- **Depuración y Transformación:** Nushell nativo + plugin `polars` (`nu_plugin_polars`).
-- **Exploración y Visualización en Terminal:** Estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript`, `python3`) junto con visualización gráfica en terminal mediante **`timg`**.
-- **Paralelización:** Ejecución concurrente nativa con **`par-each`** y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
-- **Modelación Políglota:** Reducción de Dimensionalidad (PCA y t-SNE), Clustering (K-Means), Regresión y Clasificación integrando herramientas CLI (**`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) junto con **`Rscript`** y **`python3`** hacia tablas estructuradas de Nushell.
+This work covers everything from comparing traditional shells (`bash`, `zsh`, and the POSIX philosophy) to foundational low-level Nushell concepts (strings, lists, records, tables, cell paths, strong typing, and custom command creation), progressing through the entire OSEMN data science lifecycle:
 
-## Origen y Relación con la Obra Original de Jeroen Janssens
+- **Obtaining Data:** `http get`, `http post`, `url join`, decompression, Microsoft Excel spreadsheets (`.xlsx`), SQLite databases (`query db`), Apache Parquet, and web APIs (REST, authentication, geocoding with Google Maps / OpenStreetMap, and Server-Sent Events streaming).
+- **Scrubbing and Transforming:** Native Nushell pipelines + the high-performance `polars` plugin (`nu_plugin_polars`).
+- **Exploring and In-Terminal Visualization:** Descriptive statistics using native commands (`math`, `polars summary`) and polyglot integration (`Rscript`, `python3`), alongside direct in-terminal graphical visualization using **`timg`**.
+- **Parallelization:** Native concurrent execution via **`par-each`** and external process parallelization with **GNU `parallel`** orchestrated from Nushell.
+- **Polyglot Modeling:** Dimensionality Reduction (PCA and t-SNE), Clustering (K-Means, Hierarchical, DBSCAN, PAM), Regression, and Supervised Classification integrating command-line tools (**`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) alongside **`Rscript`** and **`python3`** streaming directly into structured Nushell tables.
 
-Este proyecto es una derivación directa, evolución metodológica y *spin-off* del influyente libro [**Data Science at the Command Line**](https://datascienceatthecommandline.com/2e/) (O'Reilly Media) de [**Jeroen Janssens**](https://jeroenjanssens.com/).
+## Origins and Relationship to the Original Work by Jeroen Janssens
 
-La obra original de Janssens sentó las bases del uso de la consola Unix para flujos integrales de ciencia de datos, apoyándose en utilidades clásicas de procesamiento de texto plano (`sed`, `awk`, `cut`, `grep`), la suite `csvkit` y scripts en Bash. **Data Science at Nushell** adapta y moderniza esa visión reemplazando los flujos tradicionales de caracteres no estructurados por el paradigma interactivo y estructurado de **Nushell** (`nu`), donde cada pipeline transporta tipos de datos semánticos, registros jerárquicos y tablas columnares aceleradas con **Polars** y Apache Arrow.
+This project is a direct derivative, methodological evolution, and spin-off of the influential book [**Data Science at the Command Line**](https://datascienceatthecommandline.com/2e/) (O'Reilly Media) by [**Jeroen Janssens**](https://jeroenjanssens.com/).
 
-- **Libro original en línea (Segunda Edición):** [datascienceatthecommandline.com/2e](https://datascienceatthecommandline.com/2e/)
-- **Repositorio oficial de la obra original en GitHub:** [jeroenjanssens/data-science-at-the-command-line](https://github.com/jeroenjanssens/data-science-at-the-command-line)
-- **Data Science Toolbox (Docker upstream original):** [jeroenjanssens/datasciencetoolbox](https://github.com/jeroenjanssens/datasciencetoolbox)
-- **Data Science Toolbox en Docker Hub:** [hub.docker.com/u/datasciencetoolbox](https://hub.docker.com/u/datasciencetoolbox)
+Janssens' original work established the foundation for using the Unix console for end-to-end data science workflows, relying on classic plain-text processing utilities (`sed`, `awk`, `cut`, `grep`), the `csvkit` suite, and Bash scripts. **Data Science at Nushell** adapts and modernizes that vision by replacing unstructured character streams with **Nushell's** (`nu`) structured, typed paradigm, where every pipeline transports semantic data types, hierarchical records, and columnar tables accelerated by **Polars** and Apache Arrow.
 
-## Contenidos (`Files/DataScienceNushell.md`)
+- **Original Book Online (Second Edition):** [datascienceatthecommandline.com/2e](https://datascienceatthecommandline.com/2e/)
+- **Official GitHub Repository for the Original Work:** [jeroenjanssens/data-science-at-the-command-line](https://github.com/jeroenjanssens/data-science-at-the-command-line)
+- **Data Science Toolbox (Original Upstream Docker Image):** [jeroenjanssens/datasciencetoolbox](https://github.com/jeroenjanssens/datasciencetoolbox)
+- **Data Science Toolbox on Docker Hub:** [hub.docker.com/u/datasciencetoolbox](https://hub.docker.com/u/datasciencetoolbox)
 
-1. **Capítulo 1:** Introducción (La terminal como laboratorio científico, el paradigma Nushell de datos estructurados, fundamento formativo de la omisión reflexiva de salidas y entorno reproducible)
-2. **Capítulo 2:** Instalación de Software (`dsin` Docker + Nushell)
-3. **Capítulo 3:** Fundamentos y Estructuras de Datos en Nushell (Introducción a la Terminal, Shells Tradicionales vs. Nushell, Strings, Listas, Registros, Tablas, Editor `ttt` y Git)
-4. **Capítulo 4:** Programación en Nushell y Creación de Herramientas de Línea de Comandos (`def`, `export def`, flags, tipos, módulos, API de Google Maps e integración con R/Python)
-5. **Capítulo 5:** Obtención de Datos (`http get`, descompresión, Excel, SQLite y APIs web)
-6. **Capítulo 6:** Depuración y Transformación de Datos (Nushell nativo + plugin `polars`)
-7. **Capítulo 7:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
-8. **Capítulo 8:** Procesamiento en Serie y Pipelines Paralelos (`each`, `par-each` y GNU `parallel`)
-9. **Capítulo 9:** Modelado Políglota de Datos (Reducción de Dimensionalidad, Clustering K-Means / Jerárquico / DBSCAN / PAM, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
+## Table of Contents (`Files/DataScienceNushell.md`)
 
-## Imagen Docker (`dsin`)
+1. **Chapter 1: Introduction** (The terminal as a scientific laboratory, the Nushell structured data paradigm, pedagogical rationale for selective output omission, and reproducible environments)
+2. **Chapter 2: Software Installation** (`dsin` Docker container + Nushell)
+3. **Chapter 3: Nushell Fundamentals and Data Structures** (Introduction to the Terminal, Traditional Shells vs. Nushell, Strings, Lists, Records, Tables, `ttt` Editor, and Git)
+4. **Chapter 4: Programming in Nushell and CLI Tool Creation** (`def`, `export def`, flags, types, modules, Google Maps API, and R/Python integration)
+5. **Chapter 5: Obtaining Data** (`http get`, decompression, Excel spreadsheets, SQLite databases, and Web APIs)
+6. **Chapter 6: Scrubbing and Transforming Data** (Native Nushell + `polars` plugin)
+7. **Chapter 7: Exploring Data and In-Terminal Visualization** (`describe`, `math`, `polars`, `.R`/`.py` scripts, and plotting with `timg`)
+8. **Chapter 8: Serial Processing and Parallel Pipelines** (`each`, `par-each`, and GNU `parallel`)
+9. **Chapter 9: Polyglot Data Modeling** (Dimensionality Reduction, K-Means / Hierarchical / DBSCAN / PAM Clustering, Regression, and Supervised Classification via CLI + `Rscript` + `python3` → Nushell Tables)
 
-La imagen oficial del entorno (`ghcr.io/kurokirasama/dsin:latest`) incluye:
+## Docker Image (`dsin`)
 
-- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) y plugins oficiales (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`) pre-registrados.
-- **Directorio `/data` integrado por defecto:** Contiene las carpetas por capítulo (`/data/ch03` a `/data/ch09`) listas para usar sin necesidad de descargas adicionales.
-- **`ttt`**: Editor de texto en terminal preconfigurado en `$env.PATH`.
-- **`timg`**: Visor de imágenes y gráficos directamente en la terminal en `$env.PATH`.
-- **Motores de modelación, paralelización y análisis:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee` y `run_experiment` (SKLL).
+The official environment image (`ghcr.io/kurokirasama/dsin:latest`) includes:
+
+- **Nushell (`nu`)** as the default shell with custom configuration (`config.nu`), `dsin_tools.nu` module (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`), and pre-registered official plugins (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`).
+- **Integrated `/data` Directory:** Contains all chapter data folders (`/data/ch03` to `/data/ch09`) ready for immediate use without additional downloads.
+- **`ttt`**: Terminal text editor pre-configured in `$env.PATH`.
+- **`timg`**: In-terminal image and plot viewer available directly in `$env.PATH`.
+- **Modeling, Parallelization, and Statistical Engines:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee`, and `run_experiment` (SKLL).
 
 ```bash
 docker pull ghcr.io/kurokirasama/dsin:latest
 docker run --rm -it ghcr.io/kurokirasama/dsin:latest
 ```
 
-## Actualización de Nushell en la Imagen `dsin`
+## Upgrading Nushell in the `dsin` Image
 
-Cuando el equipo de Nushell publica una nueva versión oficial, el repositorio incluye el script automatizado `update-dsin-nushell.nu` que consulta la última versión en GitHub Releases, actualiza `docker/Dockerfile`, empaqueta la carpeta `/data` actualizada, reconstruye la imagen `dsin` con la versión correspondiente de `nu` y `nu_plugin_polars`, y opcionalmente la publica en el registro de contenedores:
+When the Nushell core team publishes a new official release, this repository provides an automated script (`update-dsin-nushell.nu`) that queries the latest release on GitHub, updates `docker/Dockerfile`, bundles the updated `/data` directory, rebuilds the `dsin` image with the matching `nu` and `nu_plugin_polars` versions, and optionally publishes to the container registry:
 
 ```nu
-# Consultar si existe una nueva versión de Nushell disponible sin reconstruir
+# Check if a newer Nushell release is available without rebuilding
 nu update-dsin-nushell.nu --check
 
-# Reconstruir la imagen dsin con la versión más reciente de Nushell
+# Rebuild the dsin image using the latest available Nushell release
 nu update-dsin-nushell.nu
 
-# Reconstruir fijando una versión específica y publicar en GHCR
+# Rebuild pinned to a specific version and push to GHCR
 nu update-dsin-nushell.nu --version 0.116.1 --push
 ```
 
-## Compilación del Libro a PDF
+## Compiling the Textbook to PDF
 
-Para generar el documento PDF oficial con XeLaTeX, resaltado de sintaxis nativo para Nushell y ocultamiento transparente de directivas de prueba mediante el filtro Lua:
+To compile the official PDF document using XeLaTeX, complete with native Nushell syntax highlighting and transparent suppression of test directives via the Lua filter:
 
 ```bash
 cd Files
@@ -81,23 +86,24 @@ pandoc --pdf-engine=xelatex \
   DataScienceNushell.md -o DataScienceNushell.pdf
 ```
 
-## Estructura del Repositorio
+## Repository Structure
 
 ```text
 ├── Files/
-│   ├── DataScienceNushell.md   # Texto principal del libro (Pandoc Markdown)
-│   ├── DataScienceNushell.pdf  # Versión compilada en PDF (XeLaTeX)
-│   ├── *.png / *.jpg           # Figuras y diagramas de la obra
-│   └── data/                   # Datos por capítulo (ch03..ch09) integrados en /data
+│   ├── DataScienceNushell.md      # Primary English textbook (Pandoc Markdown)
+│   ├── DataScienceNushell.es.md   # Authoritative Spanish textbook (Pandoc Markdown)
+│   ├── DataScienceNushell.pdf     # Compiled English PDF (XeLaTeX)
+│   ├── DataScienceNushell.es.pdf  # Compiled Spanish PDF (XeLaTeX)
+│   ├── *.png / *.jpg              # Course diagrams and figures
+│   └── data/                      # Per-chapter data sets (ch03..ch09) bundled into /data
 ├── docker/
-│   ├── Dockerfile              # Definición de la imagen independiente dsin
-│   ├── UPSTREAM_AUDIT.md       # Auditoría y corrección de issues de dsatcl2e
-│   ├── config.nu               # Configuración personalizada de Nushell para dsin
-│   ├── dsin_tools.nu           # Comandos Nushell para modelación (VW, Tapkee, K-Means)
-│   └── update-dsin-nushell.nu  # Copia del script actualizador en docker/
-├── scripts/
-│   └── build_dsin_book.nu      # Script generador del documento DataScienceNushell.md
-├── tests/                      # Suite de verificación automatizada en contenedor dsin
-├── update-dsin-nushell.nu      # Script principal para actualizar Nushell en dsin
-└── README.md
+│   ├── Dockerfile                 # Standalone dsin Docker image definition
+│   ├── UPSTREAM_AUDIT.md          # Upstream audit and fixes for dsatcl2e issues
+│   ├── config.nu                  # Custom Nushell configuration for dsin
+│   ├── dsin_tools.nu              # Nushell modeling commands (VW, Tapkee, K-Means)
+│   └── update-dsin-nushell.nu     # Updater script copy in docker/
+├── tests/                         # Automated verification test suite inside dsin
+├── update-dsin-nushell.nu         # Primary Nushell upgrade automation script
+├── README.md                      # Primary English documentation
+└── README.es.md                   # Spanish documentation
 ```

@@ -1,5 +1,5 @@
 ---
-title: Ciencia de Datos en la Terminal Linux con Nushell
+title: Data Science at the Linux Terminal with Nushell
 author: Luis Gómez Guzmán
 number_sections: true
 output: pdf_document
@@ -11,7 +11,7 @@ monofont: "DejaVu Sans Mono"
 header-includes:
   - '\usepackage{graphics}'
   - '\usepackage{amsmath}'
-  - '\usepackage[spanish,es-noshorthands,es-tabla]{babel}'
+  - '\usepackage[english]{babel}'
   - '\usepackage{hyphenat}'
   - '\usepackage{dsfont}'
   - '\usepackage[algoruled]{algorithm2e}'
@@ -20,8 +20,6 @@ header-includes:
   - '\usepackage[all]{hypcap}'
   - '\newcommand{\algorithmiccomment}[1]{\hfill\# #1 }'
   - '\newcommand{\m}{\displaystyle}'
-  - '\hyphenation{va-lo-res des-cri-tas mul-ti-di-men-sio-na-les ca-rac-te-ri-za-do}'
-  - '\spanishdecimal{.}'
   - '\newcommand{\refer}[3][]{\hyperref[#3]{#2~\ref*{#3}#1}}'
   - '\usepackage[left=2cm,right=2cm,top=3cm,bottom=3cm]{geometry}'
   - '\usepackage{csvsimple}'
@@ -48,119 +46,113 @@ header-includes:
 ---
 
 \tableofcontents
-\renewcommand{\listfigurename}{Índice de figuras}
 \listoffigures
-\renewcommand{\listtablename}{Índice de tablas}
 \listoftables
 \newpage
 
+# Introduction {#chapter-1-introduction}
 
-# Introducción {#chapter-1-introduction}
+In modern data science practice, the sheer scale, heterogeneity, and volatility of incoming information streams demand tools that move beyond rigid graphical interfaces and the computational overhead of monolithic notebook platforms. For over half a century, the Unix command-line console has served as the gold standard for scientific reproducibility, unattended automation, and algorithmic efficiency. Its founding philosophy remains remarkably pertinent: build dependable systems out of small, focused programs designed to handle one concrete task with precision, and connect them effortlessly across standardized communication channels.
 
-En la práctica contemporánea de la ciencia de datos, la escala masiva, la heterogeneidad y el dinamismo de los flujos de información exigen herramientas capaces de trascender la rigidez de las interfaces gráficas y la sobrecarga computacional propia de los entornos de desarrollo monolíticos. Durante más de cinco décadas, la consola de comandos de Unix se ha consolidado como el estándar de referencia para la reproducibilidad científica, la automatización desatendida y la eficiencia algorítmica. Su filosofía fundacional postula una premisa de notable vigencia: articular sistemas a partir de programas compactos y modulares, concebidos para resolver una tarea concreta con precisión técnica y acoplarse con naturalidad mediante canales estandarizados de comunicación.
+Traditional shells like Bash and Zsh, however, were conceived in an era when text in transit was treated strictly as unstructured character streams. Under this legacy model, manipulating data matrices, multi-tiered tabular structures, or nested records requires fragile chains of regular expressions and text-slicing utilities such as `sed`, `awk`, and `cut`. This paradigm introduces persistent friction. It breaks when delimiters shift unexpectedly, chokes on escape sequences, and strips variables of their fundamental data types.
 
-Sin embargo, las shells tradicionales (entre las que destacan Bash y Zsh) fueron proyectadas en una época en que la información en tránsito se interpretaba exclusivamente como secuencias no estructuradas de caracteres. Bajo este esquema clásico, operar sobre matrices de datos, estructuras tabulares complejas o registros jerárquicos demanda intrincadas combinaciones de expresiones regulares y utilidades de corte léxico (tales como `sed`, `awk` y `cut`). Semejante paradigma introduce una fragilidad persistente; resulta vulnerable a delimitadores imprevistos, sufre ante secuencias de escape y, de modo crítico, despoja a las variables de sus atributos semánticos y tipos fundamentales.
+Nushell (`nu`) resolves this architectural bottleneck by redesigning the shell around the demands of contemporary data analysis. Rather than piping opaque byte streams from command to command, Nushell pipelines transport typed, structured data: two-dimensional tables with explicit schemas, key-value records, ordered lists, and primitive types governed by strict semantics. Because Nushell natively understands integers, floating-point numbers, time zones, file paths, and memory sizes, you can filter, sort, transform, and aggregate datasets using a clean, declarative syntax.
 
-Nushell (`nu`) supera de raíz esta limitación histórica mediante una arquitectura concebida expresamente para las exigencias del análisis de datos contemporáneo. En lugar de canalizar flujos de bytes planos y opacos, los pipelines de Nushell transportan estructuras de datos enriquecidas: tablas bidimensionales tipadas, registros jerárquicos indexados por clave y valor, listas ordenadas y valores primitivos regulados por esquemas estrictos. Al reconocer de forma nativa enteros, valores en coma flotante, marcas temporales con huso horario, rutas del sistema de archivos y magnitudes de memoria, Nushell permite filtrar, ordenar, remodelar y agregar conjuntos de información mediante una sintaxis declarativa, concisa y elegante.
+This expressive clarity is paired with high computational throughput. Nushell integrates directly with Polars, a blazingly fast columnar engine written in Rust and powered by Apache Arrow. This pairing brings industrial-grade analytical capabilities directly into your shell. Multithreaded analytical queries across millions of rows execute in fractions of a second, without sacrificing the interactive immediacy of the command line.
 
-A esta claridad expresiva se suma un desempeño computacional extraordinario. Su integración profunda con el motor columnar Polars (programado en Rust y edificado sobre el estándar en memoria Apache Arrow) dota a la terminal de una capacidad analítica sin precedentes. Esta sinergia hace viable ejecutar consultas analíticas multihilo sobre millones de registros en fracciones de segundo, preservando en todo momento la inmediatez y la ligereza del flujo interactivo en la línea de comandos.
+This textbook builds upon the foundational methodology introduced by Jeroen Janssens in *Data Science at the Command Line* (O'Reilly Media). Janssens demonstrated that the command line provides a nimble, versatile environment for practical data science. Yet command-line tooling has evolved substantially since that work was published.
 
-Este libro se basa en el trabajo de Jeroen Janssens en su obra *Data Science at the Command Line* (O'Reilly Media). Su propuesta demostró que la terminal de Unix es un entorno ágil y eficaz para el análisis de datos. Sin embargo, las herramientas de línea de comandos han evolucionado notablemente en los últimos años.
+Where the original text relied on plain-text stream processors and auxiliary suites like `csvkit`, this book adopts Nushell and its structured data model. This approach preserves the core Unix virtues of composition and modularity while providing typed tables, clear schemas, and robust data handling.
 
-Mientras que el libro original utilizaba herramientas clásicas orientadas a texto plano y utilidades como `csvkit`, este libro adopta Nushell y su modelo de datos estructurados. Esto permite mantener los principios de modularidad y reproducibilidad de Unix, pero con tablas tipadas, esquemas claros y mayor robustez al procesar información.
+This book is designed as a hands-on laboratory, meant to be read with a terminal running side by side. For this reason, most code examples omit command output (with the exception of terminal plots, figures, and essential schema demonstrations). We expect you to execute each pipeline, inspect intermediate tables, and explore Nushell interactively.
 
-Este libro está pensado para trabajarse de manera práctica, con la terminal abierta junto a la lectura. Por esta razón, la mayoría de los ejemplos de código no incluyen la salida de los comandos (salvo gráficos en consola, imágenes o diagramas indispensables). La intención es que ejecutes cada comando, explores sus resultados y experimentes directamente con Nushell.
+Omitting printed outputs serves three concrete pedagogical goals: first, it encourages active learning through direct execution rather than passive reading; second, it leverages interactive shell features like `explore`, live table scrolling, and autocompletion, which are best appreciated firsthand; and third, it develops the habit of inspecting data structures with `describe` and diagnosing issues independently. We encourage you to tweak parameters, test alternative filters, and examine the resulting tables in your own shell.
 
-Omitir las salidas en los ejemplos responde a tres objetivos prácticos: primero, fomentar el aprendizaje activo escribiendo y ejecutando los comandos en lugar de solo leerlos; segundo, aprovechar las capacidades interactivas de Nushell (como `explore`, la paginación de tablas y el autocompletado), que se aprecian mejor en vivo; y tercero, desarrollar el hábito de inspeccionar datos intermedios con `describe` y diagnosticar errores de forma autónoma. Te invitamos a modificar los parámetros, probar filtros alternativos y explorar los resultados en tu propia terminal.
+To ensure that every pipeline runs in a strictly reproducible environment unaffected by local host quirks, this text relies on a unified container image named `dsin` (Data Science in Nushell), available publicly on GitHub Container Registry at `ghcr.io/kurokirasama/dsin:latest`. This container serves as a self-contained data science workstation. It bundles the latest Nushell release configured for analytical work, its official plugin suite (including native Polars integration, structured format parsers, relational database querying, Git inspection, and terminal plotting), complete Python and R scientific stacks, high-performance modeling engines (Vowpal Wabbit, Tapkee, and SKLL), terminal utilities such as the `ttt` text editor and `timg` image viewer, and the complete set of course datasets neatly organized by chapter inside `/data`.
 
-Para garantizar que cada experiencia práctica se ejecute en condiciones rigurosamente reproducibles e inmunes a divergencias de configuración local, el texto se apoya en un entorno unificado denominado `dsin` (Data Science in Nushell), distribuido como imagen pública de Docker en `ghcr.io/kurokirasama/dsin:latest`. Dicho contenedor constituye una estación analítica completa. Encapsula la versión más reciente de Nushell con un perfil afinado para el procesamiento de datos, su ecosistema de complementos (con soporte nativo para Polars, manipulación de formatos estructurados, consultas relacionales avanzadas, control de versiones y graficación en terminal), entornos robustos de Python y R configurados con sus bibliotecas científicas indispensables, algoritmos de alto rendimiento para modelado predictivo (como Vowpal Wabbit, Tapkee y SKLL), herramientas modernas de línea de comandos (entre las que destacan el editor interactivo `ttt` y el visor gráfico de alta fidelidad `timg`), así como la totalidad de los conjuntos de datos del curso, organizados meticulosamente por capítulos en el directorio `/data`.
-
-Este libro está organizado siguiendo las etapas del ciclo clásico OSEMN (*Obtain*, *Scrub*, *Explore*, *Model* e *iNterpret*), propuesto originalmente por Hilary Mason y Chris Wiggins. El recorrido comienza en el [capítulo 2](#chapter-2-installation) con la instalación del software y la preparación del entorno de trabajo reproducible mediante Docker y el contenedor `dsin`. A continuación, el [capítulo 3](#chapter-3-nushell-fundamentals) establece las bases operativas de la línea de comandos y el sistema de tipos de datos en Nushell, mientras que el [capítulo 4](#chapter-4-programming-cli-tools) profundiza en la programación estructurada y la creación de herramientas modulares reutilizables. El [capítulo 5](#chapter-5-data-acquisition) aborda las estrategias de obtención e ingesta de datos desde la web, APIs, archivos estructurados y bases de datos relacionales. Posteriormente, el [capítulo 6](#chapter-6-data-cleaning) introduce la limpieza y transformación de datos junto a la analítica columnar con Polars. La exploración estadística y la visualización gráfica en la terminal se desarrollan en el [capítulo 7](#chapter-7-data-exploration), dando paso en el [capítulo 8](#chapter-8-parallel-pipelines) a la orquestación de flujos de trabajo, procesamiento en serie y pipelines paralelos. Finalmente, el [capítulo 9](#chapter-9-polyglot-modeling) aborda el modelado predictivo políglota, integrando reducción de dimensionalidad, agrupamiento no supervisado, regresión y clasificación supervisada.
-
+The curriculum follows the classic OSEMN lifecycle (*Obtain*, *Scrub*, *Explore*, *Model*, and *iNterpret*), originally formulated by Hilary Mason and Chris Wiggins. Our progression begins in [Chapter 2](#chapter-2-installation) with software setup and container preparation using Docker and `dsin`. [Chapter 3](#chapter-3-nushell-fundamentals) establishes the operational fundamentals of the terminal alongside Nushell's data types, while [Chapter 4](#chapter-4-programming-cli-tools) covers structured scripting, closures, and building modular command-line tools. [Chapter 5](#chapter-5-data-acquisition) examines data ingestion from web APIs, compressed archives, Excel spreadsheets, and SQLite databases. [Chapter 6](#chapter-6-data-cleaning) explores data scrubbing, restructuring, and columnar analytics with Polars. Statistical data exploration and in-terminal plotting take center stage in [Chapter 7](#chapter-7-data-exploration), followed by pipeline orchestration, serial iteration, and multi-core parallelization in [Chapter 8](#chapter-8-parallel-pipelines). Finally, [Chapter 9](#chapter-9-polyglot-modeling) presents polyglot machine learning, integrating dimensionality reduction, unsupervised clustering, regression, and supervised classification.
 
 \newpage
 
-# Instalación de Software {#chapter-2-installation}
+# Software Installation {#chapter-2-installation}
 
-En esta sección se entregaran las instrucciones para instalar el software necesario para este libro, tanto en Windows 10+ como en Linux, para distribución basada en Debian como Ubuntu.
+This section provides instructions for installing the required software environment across Windows 10+ and Linux (including Debian/Ubuntu and Arch-based distributions).
 
 ## Windows 10+
 
-### Instalación Ubuntu WSL
+### Installing Ubuntu on WSL
 
-1. Habilitar WSL1, ejecutando en Powershell (con permisos de administrador):
+1. Enable WSL1 by executing in an elevated PowerShell session (Run as Administrator):
 
 ```powershell
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
 ```
 
-2. Habilitar VMP, ejecutando en Powershell:
+2. Enable the Virtual Machine Platform (VMP) in PowerShell:
 
 ```powershell
 Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
 
 ```
 
-3. Listar las distribuciones disponibles y seleccionar (recomendada Ubuntu 24.04):
+3. List available distributions (Ubuntu 24.04 is recommended):
 
 ```powershell
 wsl --list --online
 ```
 
-4. Instalamos la distribución seleccionada:
+4. Install the chosen distribution:
 
 ```powershell
 wsl --install -d Ubuntu-24.04
 ```
 
-4. Configuramos para que la distribución Linux en WSL use v2. Ejecutamos en Powershell:
+5. Set the installed distribution to use WSL version 2 in PowerShell:
 
 ```powershell
 wsl --set-version Ubuntu-24.04 2
 
 ```
 
-Para hacerlo por defecto en todas las distribuciones (recomendado):
+To configure WSL 2 as the default for all future distributions:
 
 ```powershell
 wsl --set-default-version 2
 
 ```
 
-5. Actualizar kernel. Descarga desde [WSL](https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi) e instalar.
+6. Update the WSL kernel by downloading the installer package from the [official WSL repository](https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi).
 
-### Instalación de Docker
+### Installing Docker Desktop
 
-1. Descargar instalador Docker para Windows desde: [docker](https://docs.docker.com/desktop/install/windows-install/) y ejecutar. Seleccionar "Usar WSL 2...".
+1. Download the Docker Desktop installer for Windows from [Docker documentation](https://docs.docker.com/desktop/install/windows-install/) and launch it. Ensure the option "Use WSL 2 instead of Hyper-V" remains checked.
 
-2. Habilitar "Iniciar Docker al iniciar sesión", en la configuración de Docker.
+2. Enable "Start Docker Desktop when you log in" in Docker settings.
 
-3. Reiniciar.
+3. Restart your computer.
 
-### Abrir distribución
+### Launching the Linux Environment
 
-Para entrar a la distribución instalada, ejecutar en `cmd` o `powershell`:
+To enter the installed distribution, run in `cmd` or `powershell`:
 
 ```powershell
 wsl
 
 ```
 
+## Linux, WSL2, and the `dsin` Container (Data Science in Nushell) {#section-install-docker}
 
+Throughout this book, we will work inside an integrated container image named **`dsin`** (*Data Science in Nushell*), published at `ghcr.io/kurokirasama/dsin:latest`. Unlike conventional container environments built around plain-text shells, `dsin` launches directly into **Nushell** as its default login shell inside `/data`, preconfigured with:
 
-## Linux, WSL2 y el Contenedor `dsin` (Data Science in Nushell) {#section-install-docker}
+- **Nushell (`nu`)** and its full suite of registered official plugins: **`nu_plugin_polars`** (Polars and Apache Arrow DataFrame engine), **`nu_plugin_formats`**, **`nu_plugin_gstat`**, **`nu_plugin_inc`**, **`nu_plugin_query`**, **`nu_plugin_file`**, **`nu_plugin_plot`** (terminal plotting), and **`nu_plugin_port_extension`**.
+- **Integrated `/data` directory:** Contains the complete chapter data sets organized by chapter number (`/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07`, `/data/ch08`, and `/data/ch09`), eliminating the need for manual downloads.
+- **Terminal text editor `ttt`** available on `.PATH` with preconfigured syntax highlighting and keybindings.
+- **Terminal image viewer `timg`** on `.PATH` for displaying figures, plots, and graphical output directly in your console.
+- **Polyglot ecosystem:** R (`Rscript`, `tidyverse`, `ggplot2`, `rpart`, `class`, `cluster`), Python 3 (`pandas`, `scikit-learn`, `scipy`, `matplotlib`, `seaborn`, `skll`), **GNU Parallel (`parallel`)**, **Tapkee (`tapkee`)**, and **Vowpal Wabbit (`vw`)**.
+- **Book modeling module (`dsin_tools.nu`):** Custom Nushell commands (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) pre-loaded at shell startup.
 
-En este libro trabajaremos sobre una imagen Docker integrada llamada **`dsin`** (*Data Science in Nushell*), publicada en `ghcr.io/kurokirasama/dsin:latest`. A diferencia de los entornos tradicionales basados en *shells* de texto plano, el contenedor `dsin` inicia directamente en **Nushell** como *shell* predeterminado en el directorio de trabajo `/data`, e incluye preconfigurados:
-
-- **Nushell (`nu`)** y su suite completa de complementos registrados: **`nu_plugin_polars`** (motor de DataFrames Arrow/Polars), **`nu_plugin_formats`**, **`nu_plugin_gstat`**, **`nu_plugin_inc`**, **`nu_plugin_query`**, **`nu_plugin_file`**, **`nu_plugin_plot`** (gráficos en la terminal) y **`nu_plugin_port_extension`**.
-- **Directorio `/data` integrado por defecto:** Contiene todas las carpetas de datos del libro organizadas exactamente según el número del capítulo en que se utilizan (`/data/ch03`, `/data/ch04`, `/data/ch05`, `/data/ch06`, `/data/ch07`, `/data/ch08` y `/data/ch09`), sin necesidad de descargas ni configuraciones manuales adicionales.
-- **Editor de texto en terminal `ttt`** en `$env.PATH` con resaltado de sintaxis y atajos preconfigurados.
-- **Visor gráfico de terminal `timg`** en `$env.PATH` para inspeccionar imágenes y gráficos estadísticos directamente en la consola.
-- **Ecosistema políglota:** R (`Rscript`, `tidyverse`, `ggplot2`, `rpart`, `class`, `cluster`), Python 3 (`pandas`, `scikit-learn`, `scipy`, `matplotlib`, `seaborn`, `skll`), **GNU Parallel (`parallel`)**, **Tapkee (`tapkee`)** y **Vowpal Wabbit (`vw`)**.
-- **Módulo de herramientas del libro (`dsin_tools.nu`):** Comandos personalizados (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) cargados automáticamente al iniciar.
-
-### Instalación de Docker en Linux / WSL (basado en Debian/Ubuntu)
+### Installing Docker on Linux / WSL (Debian/Ubuntu)
 
 ```bash
 # skip-docker-exec
@@ -169,7 +161,7 @@ sudo apt install -y ca-certificates curl gnupg lsb-release git
 sudo usermod -aG docker $USER
 ```
 
-### Instalación de Docker en Linux (basado en Arch / CachyOS / Manjaro)
+### Installing Docker on Linux (Arch Linux / CachyOS / Manjaro)
 
 ```bash
 # skip-docker-exec
@@ -178,32 +170,32 @@ sudo systemctl enable --now docker.service
 sudo usermod -aG docker $USER
 ```
 
-### Descarga y Ejecución del Contenedor `dsin`
+### Pulling and Running the `dsin` Container
 
-Para descargar la imagen oficial del libro desde GitHub Container Registry:
+To pull the official image from GitHub Container Registry:
 
 ```bash
 # skip-docker-exec
 docker pull ghcr.io/kurokirasama/dsin:latest
 ```
 
-Para iniciar una sesión interactiva en el contenedor con el entorno listo para usar, ejecute:
+To start an interactive session with the complete analytical environment ready for use:
 
 ```bash
 # skip-docker-exec
 docker run --rm -it ghcr.io/kurokirasama/dsin:latest
 ```
 
-### Crear alias para llamado simple (opcional)
+### Defining a Shell Shortcut (Optional)
 
-Si deseas iniciar el contenedor escribiendo únicamente `dsin` en tu terminal anfitriona, puedes definir un alias en tu archivo de configuración del shell anfitrión (`~/.bashrc` o `~/.config/nushell/config.nu`):
+If you prefer to launch the container by typing `dsin` in your host terminal, add an alias to your host shell configuration file (`~/.bashrc` or `~/.config/nushell/config.nu`):
 
 ```bash
 # skip-docker-exec
 alias dsin='docker run --rm -it ghcr.io/kurokirasama/dsin:latest'
 ```
 
-Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/home/dsin`, inspeccionamos las carpetas de los capítulos en `/data` y comprobamos que todas las herramientas y complementos están disponibles:
+Once inside the `dsin` container, confirm your initial working directory, inspect the bundled data folders in `/data`, and check that all required CLI tools and plugins are recognized:
 
 ```nu
 pwd
@@ -213,316 +205,289 @@ which nu ttt timg parallel vw tapkee run_experiment Rscript python3
 plugin list
 ```
 
-
-
 \newpage
 
-# Fundamentos y Estructuras de Datos en Nushell {#chapter-3-nushell-fundamentals}
+# Nushell Fundamentals and Data Structures {#chapter-3-nushell-fundamentals}
 
-## Ciencia de Datos
+## Data Science
 
-De acuerdo a la definición de Hilary Mason y Chris H. Wiggins (2010), la _ciencia de datos_ se define de acuerdo a 4 pasos:
+According to Hilary Mason and Chris H. Wiggins (2010), *data science* is framed around five interconnected stages, commonly referred to as the OSEMN framework:
 
-1. Obtención de datos.
-2. Depuración de datos.
-3. Exploración de datos.
-4. Modelación de datos.
-5. Interpretación de datos.
+1. Obtaining data.
+2. Scrubbing data.
+3. Exploring data.
+4. Modeling data.
+5. Interpreting data.
 
-En este libro veremos los primeros 4 pasos.
+This book focuses hands-on attention on the first four computational stages.
 
-Aunque estos 5 pasos se discuten en forma lineal e incremental, en la practica es común el moverse de uno a otro o incluso realizarlos en paralelo (\refer{Figura}{fig:osemn}). Es decir, la ciencia de datos es un proceso iterativo no lineal.
+Although these five stages are often presented sequentially, practical data science work moves fluidly back and forth between them, frequently executing multiple stages in parallel (\refer{Figure}{fig:osemn}). Data science is fundamentally an iterative, non-linear discipline.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\textwidth]{dscl_0101.png}
-\caption{Proceso de la ciencia de datos.}
+\caption{The data science lifecycle (OSEMN framework).}
 \label{fig:osemn}
 \end{figure}
 
+### Obtaining Data
 
+Without data, there is no data science; acquiring information is therefore the indispensable starting point. Depending on the problem domain, this stage involves:
 
-### Obtención de datos
+- Downloading data from external servers, web endpoints, or public repositories.
+- Querying relational databases or REST APIs (for instance, SQLite, PostgreSQL, or web services).
+- Parsing and ingesting structured or semi-structured files (such as CSV, JSON, HTML, XML, or Excel spreadsheets).
+- Capturing real-time streams from physical sensors or digital loggers.
 
-Sin datos, no hay ciencia de datos, por lo que el primer paso es obtenerlos. Para ello, se puede necesitar realizar uno o mas de las siguientes tareas:
+Common storage formats encountered in practice include plain text (`.txt`), delimited tables (`.csv`, `.tsv`), hierarchical representations (`.json`, `.xml`, `.html`), and columnar formats (`.parquet`).
 
-- Descargar datos desde otra ubicación, por ejemplo, pagina web o servidor.
-- Obtener datos desde una base de datos o a través de una API, por ejemplo, MySQL o Twitter.
-- Extraer datos de un archivo, por ejemplo, html, excel, csv.
-- Generar datos, ya sea mediante sensores o haciendo encuestas.
+### Scrubbing Data
 
-Los formatos mas usuales para almacenar datos son, texto plano (txt), csv, json, html, xml, excel.
+Raw data rarely arrives clean. Real-world datasets routinely suffer from missing observations, formatting inconsistencies, schema violations, corrupt encodings, and irrelevant columns. In these situations, data must be scrubbed before analysis can take place. Essential operations include:
 
-### Depuración de datos
+- Filtering invalid or out-of-range rows.
+- Selecting and reordering relevant columns.
+- Normalizing, trimming, and recasting string values.
+- Imputing or dropping missing values and deduplicating rows.
+- Converting between serialization formats.
 
-No es poco usual que los datos obtenidos tengan valores faltantes, inconsistencias, errores, caracteres erróneos o columnas no interesantes. En tales casos, los datos deben depurarse o limpiarse antes de poder hacer cualquier cosa con ellos. La operaciones mas comunes incluyen:
+In industry practice, data acquisition and scrubbing account for roughly 80% of total project effort. The remaining 20% encompasses exploratory analysis, modeling, and communication.
 
-- Filtrar lineas.
-- Extraer algunas columnas.
-- Reemplazar valores.
-- Extraer palabras.
-- Lidiar con datos faltantes y duplicados.
-- Convertir de un formato a otro.
+### Exploring Data
 
-Usualmente, un 80% de cualquier trabajo con datos corresponde a la obtención y depuración. El otro 20% es la exploración, modelación y visualización.
+Once the data is scrubbed and structured, exploratory data analysis begins. This stage builds a reliable mental model of the underlying distributions and relationships. Working directly in the terminal, you will:
 
-### Exploración de datos
+- Inspect schemas, data types, and value distributions.
+- Compute descriptive summary statistics (central tendency, variance, quantiles).
+- Generate high-fidelity visual representations and plots directly in your console.
 
-Una vez hecha la limpieza de datos, se procede a explorarlos. Es en esta etapa donde realmente se comprende de mejor forma los datos obtenidos. A través de la terminal se puede:
+### Modeling Data
 
-- Observar los datos.
-- Derivar estadísticas.
-- Crear visualizaciones.
+When the goal is to explain observed relationships or forecast future values, statistical and machine learning models are required. Standard modeling techniques include dimensionality reduction, unsupervised clustering, regression, and supervised classification.
 
-### Modelación de datos
+While implementing novel algorithms from scratch is rarely done in shell pipelines, orchestrating training pipelines, evaluating performance metrics, and managing model inferences directly from the command line is exceptionally powerful.
 
-Si se quiere explicar los datos o predecir lo que pasara, probablemente se necesita crear un modelo estadístico de los datos. Algunas técnicas para crear modelos incluyen clustering, clasificación, regresión y reducción de dimensionalidad.
+### Interpreting Data
 
-La terminal no es apta para programar un nuevo modelo desde 0, pero es muy útil el ser capaz de crear un modelo desde ella.
+The final stage is interpreting the findings. This stage centers on:
 
-### Interpretación de datos
+- Drawing substantive, actionable conclusions from model outputs.
+- Evaluating empirical validity and algorithmic bias.
+- Communicating results clearly to technical and non-technical stakeholders.
 
-El ultimo y probablemente mas importante paso es interpretarlos. Este paso involucra:
+This stage demands domain expertise and critical judgment rather than automated scripts.
 
-- Obtener conclusiones.
-- Evaluación de resultados.
-- Comunicación de resultados.
+## History of the Terminal
 
-Esta etapa no involucra la terminal, y queda en manos del investigador.
+A *terminal emulator* is a program that provides access to the *command-line interface* through a particular command interpreter called a *shell*.
 
-## Historia de la terminal
+Historically, a terminal was a dedicated physical hardware device used to transmit keystrokes to and display characters from a host computer.
 
-La _terminal_ (_terminal emulator_) en un programa o interfaz que nos permite acceder a la _linea de comandos_ (_command line_) a través de un tipo particular de sintaxis llamado _shell_.
-
-Originalmente, una terminal era una pieza de _hardware_ usado para ingresar y mostrar datos a/desde un computador.
-
-Los primeros computadores, eran maquinas que ocupaban mucho espacio (ver \refer{Figura}{fig:first}) y las primeras terminales eran tele-impresoras electrónicas (teletypewriter o tty) como se muestra en la (ver \refer{Figura}{fig:firstterminal}).
+Early computers were massive, room-sized installations (\refer{Figure}{fig:first}). The earliest interactive terminals were electromechanical teletypewriters (commonly abbreviated *tty*), as illustrated in \refer{Figure}{fig:firstterminal}.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\textwidth]{univac-9400.jpg}
-\caption{Primeros computadores.}
+\caption{Early mainframe computer systems.}
 \label{fig:first}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{teletype-model-33.jpg}
-\caption{Primeras terminales.}
+\caption{Electromechanical teleprinters (teletypewriter or tty).}
 \label{fig:firstterminal}
 \end{figure}
 
-Conforme fue avanzando la tecnología, estas terminales se reemplazaron por terminales de video (ver \refer{Figura}{fig:videoterminal}).
+As semiconductor and cathode-ray tube technology progressed, mechanical printers gave way to video display terminals (\refer{Figure}{fig:videoterminal}).
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{DEC-VT100-terminal.jpg}
-\caption{Primeras terminales de video.}
+\caption{Classic video display terminals (DEC VT100).}
 \label{fig:videoterminal}
 \end{figure}
 
-Notar que lo mostrado en la \refer{Figura}{fig:videoterminal} no es un computador, es solo la interfaz para poder conectarse al computador. En la \refer{Figura}{fig:videoterminal2} se muestra conectada a uno.
+It is worth emphasizing that the device pictured in \refer{Figure}{fig:videoterminal} contains no onboard computer; it is solely an interface terminal connected across serial lines to a remote mainframe. \refer{Figure}{fig:videoterminal2} illustrates a terminal cabled directly to its host computer.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{DEC-VT52-terminal-PDP-11-55.jpg}
-\caption{Primeras terminales conectadas a un computador.}
+\caption{Video terminal cabled to a PDP-11 minicomputer.}
 \label{fig:videoterminal2}
 \end{figure}
 
-En la actualidad no son necesarias estas terminales de _hardware_, por lo que se usan emuladores de terminales para realizar la comunicación directa con el sistema operativo sin necesidad de una interfaz gráfica (gui), esto ultimo siendo lo mas conocido (ventanas, botones, etc).
+Today, dedicated physical terminals are obsolete. Instead, software applications known as *terminal emulators* simulate historical display hardware, communicating directly with the operating system without requiring graphical widgets (windows, buttons, dialog boxes).
 
-### Shell
+### The Shell
 
-La _shell_ es la sintaxis particular que se utiliza para ejecutar comandos y programas en la terminal. Hay varios tipos de _shell_, como _bash_, _csh_, _zsh_, _nushell_, entre muchos otros, siendo la mas usual _bash_ como la por defecto en la mayoría de distribuciones Linux.
+The *shell* is the command interpreter that parses and executes instructions entered into the terminal. Numerous shells exist, including Bash, Zsh, Fish, and Nushell. Bash historically serves as the default shell across most GNU/Linux distributions.
 
-En este libro utilizaremos la shell Nushell, en la cual a cada comando lo precede un indicador llamado prompt (por ejemplo, `/data>`), que señala que la terminal está lista para recibir instrucciones.
+In this textbook, we work exclusively with Nushell. In Nushell, each command line begins with an interactive prompt (such as `/data>`), signaling that the environment is ready for input.
 
-### Ventajas del uso de la terminal
+### Advantages of the Command Line for Data Science
 
-El uso de la terminal para ciencia de datos tienes varias ventajas, como por ejemplo:
+Using the command line for data science offers substantial operational advantages:
 
-- Es ágil: permite explorar datos de forma interactiva, obteniendo resultados de forma casi inmediata.
-- Es integradora: se integra bien con otras tecnologías y software.
-- Es escalable: se pueden automatizar muchas tareas mediante _scripts_, lo que da como resultado herramientas mas complejas.
-- Es extensible: permite el uso de diferentes lenguajes de programación.
-- Es ubicua: se encuentra en todos los sistemas operativos.
+- **Agility:** The command line supports rapid, interactive data exploration, returning immediate feedback as pipelines are assembled.
+- **Integration:** Shell commands bridge disparate tools, programming runtimes, and external services cleanly.
+- **Scalability and Automation:** Command sequences are effortlessly captured in reusable scripts and automated cron jobs.
+- **Extensibility:** Shell pipelines orchestrate tools written in any language (Rust, C, Python, R).
+- **Ubiquity:** Command-line environments are universally available across local workstations, cloud virtual machines, and high-performance computing clusters.
 
+## The Terminal
 
+Before exploring Nushell's typed data structures, let us review the core mechanics of the terminal environment and examine how traditional shells operated before Nushell.
 
-## La Terminal
+### The Interactive Environment (REPL)
 
-Antes de profundizar en las estructuras de datos de Nushell, revisemos los conceptos esenciales del entorno de terminal y cómo operaban los *shells* tradicionales que precedieron a Nushell.
+Command-line interaction is governed by an ongoing loop known as a **REPL** (Read-Eval-Print Loop):
 
-### El Ambiente
+1. The terminal displays an interactive prompt (for instance, `/data/ch03>`), indicating the active directory and signaling readiness for input.
+2. The user types a command pipeline and presses **`Enter`**.
+3. The shell parses the text, checks syntax, evaluates the pipeline, and executes the designated programs or built-in functions.
+4. The resulting output renders in the terminal window, and the prompt reappears.
 
-En la terminal interactuamos mediante un ciclo continuo conocido como **REPL** (*Read-Eval-Print Loop*: Leer, Evaluar, Imprimir y Repetir):
+### Running Commands and Saving Output to Files
 
-1. La terminal muestra un indicador o *prompt* (por ejemplo, `/data/ch03>`) indicando el directorio actual y que está lista para recibir instrucciones.
-2. El usuario escribe una línea de comando y presiona **`Enter`**.
-3. El *shell* analiza (*parsea*) y evalúa la instrucción, ejecutando los programas o transformaciones correspondientes.
-4. El resultado se imprime en la pantalla y el *prompt* vuelve a aparecer.
-
-### Ejecutar un Comando y Guardar Resultados en Archivos
-
-Para comenzar a trabajar con los ejemplos de este capítulo, ingresamos a su directorio correspondiente:
+To work through the examples in this chapter, switch into the chapter workspace:
 
 ```nu
 cd /data/ch03
 ```
 
-A partir de este punto, todos los comandos se ejecutan dentro de `/data/ch03`. Inspeccionemos los archivos disponibles:
+From this point forward, commands run relative to `/data/ch03`. Inspect the files in this directory:
 
 ```nu
 ls
 ```
 
-Si deseamos inspeccionar las primeras 5 líneas del archivo `movies.txt`, abrimos el archivo en el directorio actual (`open movies.txt`), dividimos sus líneas con `lines` y tomamos las primeras 5 con `first 5`:
+To examine the first 5 rows of `movies.txt`, open the file in the current directory (`open movies.txt`), split its contents into lines (`lines`), and select the first 5 elements (`first 5`):
 
 ```nu
 open movies.txt | lines | first 5
 ```
 
-En ciencia de datos reproducible, además de visualizar el resultado en pantalla, frecuentemente necesitamos persistir el resultado procesado en un nuevo archivo utilizando el comando `save -f`:
+In reproducible data pipelines, we frequently need to write processed outputs to disk rather than merely inspecting them on screen. Use the `save -f` command to write data to a file:
 
 ```nu
 open movies.txt | lines | first 5 | to text | save -f movies_top5.txt
 open movies_top5.txt
 ```
 
-### Tipos de Herramientas en la Línea de Comandos
+### Command-Line Tool Categories
 
-Cuando escribimos el nombre de un comando en la terminal, este puede corresponder a uno de cinco tipos de herramientas:
+When you enter a command name in the terminal, it resolves to one of five distinct categories:
 
-1. **Comando interno (*built-in*) de Nushell:** Ejecutado directamente por el motor de Nushell en memoria y que opera nativamente sobre datos estructurados (por ejemplo, `ls`, `open`, `where`, `select`, `math avg`).
-2. **Comando personalizado (*custom command* / función):** Definido por el usuario o en un módulo mediante `def` o `export def` (por ejemplo, `to-vw` o `tapkee-reduce`).
-3. **Alias:** Un nombre abreviado que expande a otro comando con opciones predefinidas (`alias ll = ls -l`).
-4. **Script ejecutable interpretado:** Un archivo de texto con permisos de ejecución y una línea inicial *shebang* (`#!/usr/bin/env nu`, `#!/usr/bin/env python3`, `#!/usr/bin/env Rscript`).
-5. **Ejecutable binario compilado:** Un programa compilado a código máquina ubicado en el `$env.PATH` del sistema (como `ttt`, `timg`, `vw`, `tapkee` o `git`).
+1. **Nushell built-in command:** An internal command executed directly in memory by Nushell's runtime engine, operating natively on structured data (for example, `ls`, `open`, `where`, `select`, `math avg`).
+2. **Custom command (function):** A user-defined or module-exported command declared with `def` or `export def` (such as `to-vw` or `tapkee-reduce`).
+3. **Alias:** A shorthand identifier that expands into another command with predefined flags or arguments (`alias ll = ls -l`).
+4. **Interpreted executable script:** A text file with executable permissions and an initial shebang line (`#!/usr/bin/env nu`, `#!/usr/bin/env python3`, `#!/usr/bin/env Rscript`).
+5. **Compiled binary executable:** A machine-code program residing on the system `.PATH` (such as `ttt`, `timg`, `vw`, `tapkee`, or `git`).
 
-Podemos consultar de qué tipo es cualquier comando utilizando `which`:
+You can check how any command resolves by using `which`:
 
 ```nu
 which ls open ttt timg python3 Rscript
 ```
 
-### Otros Shells como Bash y Zsh: Qué Hacen, su Filosofía y su Uso
+### Traditional Shells (Bash and Zsh): Architecture, Philosophy, and Limitations
 
-Para comprender cabalmente por qué **Nushell** representa un cambio de paradigma en la ciencia de datos, es fundamental conocer primero cómo funcionan los *shells* tradicionales de Unix/Linux, tales como **Bourne Shell (`sh`)**, **Bourne-Again Shell (`bash`)** y **Z Shell (`zsh`)**.
+To understand why **Nushell** represents a fundamental architectural advancement for data science, it helps to examine how traditional Unix shells (such as the Bourne Shell `sh`, Bourne-Again Shell `bash`, and Z Shell `zsh`) process data.
 
-#### ¿Qué es y qué hace un Shell Tradicional?
+#### The Role of Traditional Shells
 
-Un *shell* tradicional cumple dos roles simultáneos en un sistema operativo tipo Unix:
+In Unix-like systems, a traditional shell performs two distinct roles simultaneously:
 
-- **Intérprete interactivo de órdenes:** Actúa como intermediario entre el usuario y el núcleo (*kernel*) del sistema operativo. Cuando escribes un comando en `bash`, el *shell* busca un archivo binario en las rutas de la variable `PATH`, solicita al *kernel* crear un nuevo proceso hijo mediante las llamadas al sistema `fork()` y `execve()`, y espera a que el proceso termine.
-- **Lenguaje de *scripting* y automatización:** Permite encadenar programas, definir variables de entorno, evaluar condicionales (`if/then/fi`) y ejecutar ciclos (`for`, `while`) para automatizar tareas repetitivas de administración de sistemas.
+- **Interactive command interpreter:** It acts as the user's interface to the operating system kernel. When you enter a command in `bash`, the shell locates the binary across the directories defined in the `PATH` environment variable`, asks the kernel to spawn a child process via `fork()` and `execve()`, and waits for the process to exit.
+- **Scripting and automation language:** It provides syntax for control flow (`if/then/fi`, `for`, `while`), environment variable management, and process chaining to automate system administration routines.
 
-#### La Filosofía Unix y los Flujos de Texto Plano
+#### The Unix Philosophy and Plain-Text Streams
 
-Diseñada en los Laboratorios Bell en la década de 1970 por Ken Thompson, Dennis Ritchie y Douglas McIlroy, la **filosofía Unix** se resume en tres principios fundamentales formulados por McIlroy (creador de las tuberías o *pipes* de Unix en 1973):
+Formulated at Bell Labs during the 1970s by Ken Thompson, Dennis Ritchie, and Douglas McIlroy (who invented Unix pipes in 1973), the **Unix philosophy** rests on three central tenets:
 
-1. *Escribe programas que hagan una sola cosa y la hagan bien.*
-2. *Escribe programas que trabajen juntos.*
-3. *Escribe programas que manejen flujos de texto, porque esa es una interfaz universal.*
+1. *Write programs that do one thing and do it well.*
+2. *Write programs to work together.*
+3. *Write programs to handle text streams, because that is a universal interface.*
 
-En `bash` y los demás *shells* compatibles con el estándar **POSIX**, cada proceso se comunica con el exterior a través de tres canales o flujos de bytes sin estructura:
+Under POSIX-compliant shells like `bash`, processes communicate across three unstructured byte streams:
 
-- **Entrada estándar (`stdin`, descriptor 0):** Flujo de texto que el programa lee como entrada.
-- **Salida estándar (`stdout`, descriptor 1):** Flujo de texto donde el programa escribe sus resultados normales.
-- **Error estándar (`stderr`, descriptor 2):** Flujo de texto donde el programa emite mensajes de diagnóstico o error.
+- **Standard input (`stdin`, file descriptor 0):** The byte stream read by the program.
+- **Standard output (`stdout`, file descriptor 1):** The byte stream where normal program output is written.
+- **Standard error (`stderr`, file descriptor 2):** An unbuffered byte stream reserved for diagnostics and error messages.
 
-![Redirección de salida estándar en la terminal](dscl_0202.png)
+![Standard output redirection in the terminal](dscl_0202.png)
 
-#### Uso y Sintaxis Habitual en Bash
+Connecting commands via the pipe operator (`|`) redirects the `stdout` of one process directly into the `stdin` of the next.
 
-En un *shell* tradicional como `bash`, todas las herramientas (`grep`, `sed`, `awk`, `cut`, `tr`, `sort`, `uniq`, `wc`, `head`, `tail`) reciben **texto plano línea por línea** y devuelven **texto plano línea por línea**. Por ejemplo, en `bash`:
+#### Limitations of Plain-Text Streams for Data Science
 
-```bash
-# skip-docker-exec
-# Filtrar líneas que contienen "CHAPTER" y guardarlas con redirección '>'
-grep "CHAPTER" alice.txt > chapters.txt
+While treating data as unstructured byte streams was revolutionary in 1973, it introduces severe friction for modern data science workflows:
 
-# Cortar la primera y tercera columna separadas por coma, ordenar y contar líneas
-cut -d ',' -f 1,3 datos.csv | sort | uniq -c | head -n 5
-```
+1. **Loss of types and semantic schemas:** Traditional pipes discard all type metadata. Numbers, dates, and nested records collapse into undifferentiated ASCII/UTF-8 text. Every subsequent command in the pipeline must guess column widths, parse delimiters, and reconstruct types from scratch.
+2. **Fragility against whitespace and quoting:** If a field contains commas, tabs, spaces, or newline characters, downstream tools (`cut`, `awk`, `xargs`) frequently mangle the record unless guarded by brittle escaping rules.
+3. **Redundant serialization overhead:** In a pipeline of five text-based tools, data is converted from internal binary representation to ASCII text and parsed back into binary at each stage.
+4. **Ad-hoc parsing:** Extracting specific fields requires brittle regular expressions that easily break when input formats change slightly.
 
-En `bash`, el símbolo `|` conecta el flujo de bytes crudos del `stdout` del comando izquierdo con el `stdin` del comando derecho, mientras que `>` y `>>` redirigen ese flujo de bytes para sobrescribir o anexar un archivo en disco.
+#### The Nushell Paradigm: Structured Data and Typed Pipelines
 
-#### ¿Por qué el Modelo de Texto Plano de Bash es Frágil para la Ciencia de Datos?
-
-Aunque el flujo de texto plano fue revolucionario hace cincuenta años, cuando hacemos **ciencia de datos moderna** trabajar únicamente con flujos de caracteres sin estructura introduce cuatro problemas críticos:
-
-1. **Ausencia de tipos de datos:** Para `bash`, el número `42.5`, la fecha `2026-10-20`, el booleano `true` y el texto `"hola"` son exactamente lo mismo: secuencias de bytes ASCII. Para sumar una columna o comparar números hay que invocar lenguajes externos como `awk` o `bc`.
-2. **Fragilidad ante delimitadores y espacios:** Herramientas como `cut -d ','` o `awk` dividen el texto buscando comas o espacios literales. Si un archivo CSV contiene un campo entre comillas con una coma interna (por ejemplo, `"Concepción, Chile"`), `cut` y `awk` parten erróneamente la columna por la mitad y corrompen toda la tabla.
-3. **Pérdida de encabezados:** Si se aplica `sort` o `grep` a un archivo CSV en `bash`, la primera línea (que contiene los nombres de las columnas) es tratada como una fila de datos cualquiera, mezclándose con los registros o desapareciendo tras el filtro.
-4. **Incompatibilidad con datos jerárquicos (JSON, XML, Excel, SQLite, Parquet):** El texto línea por línea no puede representar directamente objetos anidados ni tablas tipadas sin recurrir a múltiples conversores externos (`jq`, `xmllint`, `sqlite3`) con sintaxis inconexas entre sí.
-
-**Nushell conserva lo mejor de la filosofía Unix** (la composición modular mediante pipes `|`), pero reemplaza los flujos de texto crudo por **flujos de datos estructurados y tipados (tablas, registros y listas)**. Comprender esta diferencia hace que la siguiente sección resulte completamente natural.
-
-
-## Como entender nu
-
-### Nushell no es bash
-
-Nushell es tanto un lenguaje de programación estructurado como un shell interactivo. Debido a esta concepción dual, posee una metodología propia y consistente para operar sobre archivos, directorios, servicios web y estructuras de datos tabulares. Se ha diseñado tomando como inspiración los flujos de trabajo tradicionales de otros shells para facilitar la transición:
+Nushell replaces unstructured byte streams with **typed data pipelines**. In Nushell, the pipe operator (`|`) does not stream raw bytes; it passes rich in-memory data structures:
 
 ```nu
-ls | length
+open /data/ch03/movies.txt | lines | find -i "comedy" | length
 ```
 
-Nushell también ofrece soporte nativo para inspeccionar el estado y el código de salida de comandos ejecutados previamente mediante la variable de entorno `$env.LAST_EXIT_CODE`.
+Compare this to the equivalent Bash pipeline:
 
-Sin embargo, a pesar de estas comodidades, Nushell no es bash. El modelo de ejecución de bash y el estándar POSIX tradicional (basado en cadenas de caracteres no estructuradas) difieren de la arquitectura tipada de Nushell. Por ejemplo, en bash se utiliza habitualmente el operador de redirección `>` para escribir en un archivo:
-
-```sh
-echo "hello" > output.txt
+```bash
+cat /data/ch03/movies.txt | grep -i "comedy" | wc -l
 ```
 
-En Nushell, el carácter `>` está reservado como el operador aritmético de comparación "mayor que", lo que garantiza la coherencia sintáctica dentro del lenguaje. Para persistir datos en disco, el flujo se canaliza de forma explícita hacia el comando `save`:
+While the syntax looks deceptively similar, what flows between commands is fundamentally different. In Nushell, `open` parses the file format, `lines` produces a typed list of strings, `find` filters the list, and `length` computes the integer count of matching elements directly in memory without character parsing or subshell spawning.
+
+To write data to disk in Nushell, redirect the structured pipeline to the `save` command:
 
 ```nu
 "hello" | save -f output.txt
 ```
 
-En Nushell, la información fluye estructuradamente a lo largo del pipeline hasta su presentación final o hasta ser procesada por un comando terminal. Es posible emitir directamente cualquier estructura de datos (escalares, listas, registros y tablas) encadenándolas con el operador pipe (`|`).
+Data flows naturally through Nushell pipelines until reaching a terminal command or rendering in the console. You can emit and inspect any data type directly (scalars, lists, records, and tables) by composing commands with the pipe operator (`|`).
 
-### «Bashismos» y Atajos de Productividad Soportados en Nushell
+## Bashisms and Productivity Shortcuts in Nushell
 
-Aunque Nushell no es un shell POSIX y promueve el procesamiento de datos estructurados, incorpora deliberadamente diversos atajos interactivos populares en bash (frecuentemente denominados *bashismos*) para agilizar la labor diaria en la terminal sin comprometer la integridad del lenguaje:
+Although Nushell is not a POSIX shell, it deliberately incorporates familiar interactive shortcuts from Bash (often referred to as *bashisms*) to streamline daily command-line work without compromising structured semantics:
 
-#### Expansión de Historial con Sintaxis *Bang-Bang* (`!`)
+### Bang-Bang History Expansion (`!`)
 
-Gracias al motor de línea de comandos interactivo de Nushell (`reedline`), se cuenta con soporte nativo para atajos de recuperación de comandos del historial:
+Powered by Nushell's interactive line editor (`reedline`), history expansion shortcuts are supported out of the box:
 
-- **`!!`:** Inserta en el búfer de entrada el último comando ejecutado.
-- **`!$`:** Inserta el último argumento o token separado por espacios del comando previo.
-- **`!<índice>`:** Recupera e inserta el comando correspondiente a dicho número de orden en el historial (consultable con `history`).
-- **`!-<n>`:** Inserta el comando ejecutado $n$ posiciones atrás en el historial.
-- **`!<prefijo>`:** Recupera el comando más reciente que coincida con el prefijo indicado.
+- **`!!`:** Inserts the previous command into the editing buffer.
+- **`!$`:** Inserts the last argument or whitespace-delimited token from the previous command.
+- **`!<index>`:** Retrieves the command at that specific history index (inspected via `history`).
+- **`!-<n>`:** Retrieves the command executed $ steps back in history.
+- **`!<prefix>`:** Retrieves the most recent command beginning with that prefix.
 
-A diferencia del comportamiento tradicional en bash (donde los comandos *bang-bang* se ejecutan de manera inmediata), en Nushell **el comando expandido se deposita en el búfer de edición de la línea de comandos**, permitiendo inspeccionar, modificar y validar la instrucción antes de presionar `Enter`. Es posible explorar el tutorial interactivo integrado ejecutando directamente:
+Unlike Bash, which immediately executes expanded commands upon pressing `Enter`, Nushell **places the expanded command into your line editor**, allowing you to inspect, modify, and confirm the text before execution. You can explore the interactive tutorial by running:
 
 ```nu
 # skip-docker-exec (tutorial interactivo en terminal)
 tutor bashisms
 ```
 
-#### Secuenciación y Control de Procesos Externos
+### External Process Control and Sequencing
 
-- **Secuenciación con punto y coma (`;`):** Se permite encadenar múltiples instrucciones consecutivas separándolas mediante `;` (por ejemplo, `cd /data; ls`). A diferencia de bash, los operadores booleanos no son `&&` ni `||`, sino las palabras clave `and` y `or` (o bloques condicionales `if`).
-- **Invocación explícita de ejecutables externos (`^`):** Cuando un comando interno de Nushell coincide en nombre con un binario instalado en el sistema operativo (como `ls`, `ps` o `find`), anteponer el símbolo circunflejo `^` (`^ls`, `^ps`) fuerza la ejecución directa del binario del sistema operativo ubicado en `$env.PATH`.
-- **Variables de entorno por comando (*one-shot*):** Para definir una variable de entorno temporal asociada exclusivamente a una única ejecución externa, se antepone la asignación al comando (por ejemplo, `FOO=bar ^mi_script`).
-- **Redirecciones estándar para ejecutables externos:** Nushell dispone de operadores de redirección hacia archivos (`o>` para *stdout*, `e>` para *stderr*, `o+e>` para ambos flujos combinados y `e>|` para canalizar los errores hacia una tubería).
+- **Sequencing with semicolons (`;`):** Chain multiple commands sequentially using `;` (for example, `cd /data; ls`). Logical operators in Nushell are the explicit keywords `and` and `or` rather than `&&` and `||`.
+- **Explicit external command invocation (`^`):** When a Nushell built-in shares a name with an operating system binary on `.PATH` (such as `ls`, `ps`, or `find`), prefixing the command with a caret `^` (`^ls`, `^ps`) forces the execution of the external system binary.
+- **One-shot environment variables:** To define an environment variable scoped exclusively to a single external process execution, prefix the command with the assignment (for example, `FOO=bar ^my_script`).
+- **External stream redirections:** Nushell supports redirection operators for external processes (`o>` for *stdout*, `e>` for *stderr*, `o+e>` for combined streams, and `e>|` to pipe errors).
 
+### The Nushell Environment Is Scoped
 
+Nushell draws multiple design principles from compiled programming languages. Foremost among these principles is that programming languages should avoid global mutable state. Traditional shells rely heavily on global mutation to modify the environment, but Nushell intentionally departs from this paradigm.
 
-<!--
-### El entorno de Nushell es *scoped*
-Nushell toma múltiples indicaciones de diseño de lenguajes compilados. Una de esas indicaciones es que los lenguajes deben evitar el estado mutable global. Los shells han utilizado comúnmente la mutación global para actualizar el entorno, pero Nushell se aleja de este enfoque.
+In Nushell, blocks control their own environment. Any environmental modifications remain strictly scoped to the block where they occur.
 
-En Nushell, los bloques controlan su propio entorno. Los cambios en el entorno tienen un ámbito limitado al bloque donde ocurren.
-
-En la práctica, esto permite escribir código conciso para trabajar con subdirectorios; por ejemplo, si se requiere compilar cada subproyecto en el directorio actual, se puede ejecutar:
+In practice, this enables concise, robust pipelines when traversing subdirectories. For example, to compile every project subdirectory within the current folder:
 
 ```nu
 # skip-docker-exec
@@ -532,39 +497,33 @@ ls | where type == dir | each { |row|
 }
 ```
 
-El comando `cd` cambia las variables de entorno `PWD`, y este cambio de variable no escapa del bloque, lo que permite que cada iteración comience desde el directorio actual e ingrese al siguiente subdirectorio.
+The `cd` command modifies the `$env.PWD` environment variable, but this change never escapes the block closure. Consequently, each iteration begins afresh from the original directory before navigating into the next target subdirectory.
 
-Tener el entorno *scoped* de esta manera hace que los comandos sean más predecibles, fáciles de leer y, cuando llegue el momento, fáciles de depurar. Nushell también proporciona comandos auxiliares como `def --env`, `load-env`, como formas convenientes de realizar lotes de actualizaciones en el entorno.
+Maintaining a scoped environment makes pipelines deterministic, readable, and straightforward to debug. When intentional environment updates are necessary, Nushell provides dedicated commands like `def --env` and `load-env` to batch environment modifications explicitly.
 
-La buena práctica de codificación de no tener variables mutables globales se extiende al entorno en Nushell. El uso de los comandos auxiliares integrados permitirá trabajar más fácilmente con el entorno en Nushell. Aprovechar el hecho de que los entornos tienen un ámbito limitado a los bloques también puede ayudarte a escribir scripts más concisos e interactuar con comandos externos sin agregar cosas a un entorno global que no necesitas.
--->
+## Basic Elements of Nushell
 
-<!--AQUI-->
+This section introduces the foundational concepts and interactive workflows of Nushell.
 
+Nushell operates under the principle that all data flowing through pipelines is structured. Consequently, you can query, filter, and transform command outputs using declarative, relational operations similar to SQL. To understand this distinction, contrast the unstructured plain-text stream generated by the operating system's external utility with the structured table returned natively by Nushell.
 
-## Elementos básicos de nushell
-
-En esta sección se revisarán los primeros elementos de Nushell.
-
-Nushell funciona bajo el principio fundamental de que todo flujo de información consiste en datos estructurados; en consecuencia, se pueden formular consultas y transformaciones directas (análogas a las de SQL) sobre la salida de cada instrucción. Para ilustrar esta distinción, resulta clarificador contrastar la salida de texto plano que genera el comando externo del sistema operativo con la salida estructurada que produce Nushell.
-
-Si se ejecuta el comando externo tradicional del sistema anteponiendo el acento circunflejo `^`:
+When invoking the traditional external system binary by prefixing it with a caret `^`:
 
 ```nu
 ^ls
 ```
 
-> **Nota sobre el operador `^`:** En Nushell, el símbolo `^` actúa como operador de escape hacia binarios externos del sistema operativo. Le indica al motor que ignore cualquier comando interno (*built-in*), alias o función personalizada de Nushell y ejecute directamente el archivo binario ejecutable que coincida con ese nombre en las rutas de `$env.PATH` (en este caso, `/bin/ls`). Su salida consiste puramente en un flujo de caracteres sin estructura interna.
+> **Note on the `^` operator:** In Nushell, the `^` symbol acts as an escape operator for external operating system binaries. It instructs the engine to bypass any internal built-in command, alias, or custom function and execute the matching executable binary found on `$env.PATH` (in this case, `/bin/ls`). Its output is an unstructured character stream.
 
-Por el contrario, al ejecutar el comando nativo `ls` de Nushell:
+Conversely, running Nushell's native built-in `ls` command:
 
 ```nu
 ls
 ```
 
-Se observa que `ls` retorna una tabla estructurada y tipada en lugar de un bloque de texto no estructurado. Cada fila representa un archivo o directorio y cada columna (`name`, `type`, `size`, `modified`) posee un tipo de dato concreto. Al igual que en una base de datos o en una hoja de cálculo, esta tabla permite ordenar, filtrar, proyectar y consultar los registros de manera directa.
+`ls` returns a typed, structured table rather than raw text. Each row represents a file or directory, and each column (`name`, `type`, `size`, `modified`) has a concrete semantic data type. Just as in a database or a spreadsheet, you can sort, filter, project, and query these rows directly.
 
-Para ordenar la tabla por tamaño, se toma la salida de `ls` y se canaliza hacia un comando capaz de ordenar colecciones tabulares según los valores de una columna:
+To sort the table by file size, pipe the output of `ls` into `sort-by`:
 
 ```nu
 ls | sort-by size | reverse
@@ -572,49 +531,47 @@ ls | sort-by size -r
 ls | sort-by modified
 ```
 
-Se puede observar que para que esto funcione no se utilizan argumentos de línea de comandos de `ls`. En su lugar, se utiliza el comando `sort-by` que Nu proporciona para hacer la clasificación de la salida del comando `ls`. Para ver los archivos más grandes en la parte superior, también se utiliza `reverse` o la opcion `-r` de `sort-by`.
+Notice that we do not pass flags to `ls` to sort its output. Instead, we use Nushell's general-purpose `sort-by` command on the structured table emitted by `ls`. To display the largest files first, append `reverse` or use the `-r` flag on `sort-by`.
 
-Nu proporciona muchos comandos que pueden funcionar en tablas. Por ejemplo, se puede utilizar `where` para filtrar el contenido de la tabla `ls` para que sólo muestre los archivos de más de 5 kilobytes
+Nushell provides many commands that operate directly on tables. For example, use `where` to filter rows by size:
 
 ```nu
 ls | where size > 100kb
 ```
 
-Al igual que en la filosofía Unix, ser capaz de hacer que los comandos se comuniquen entre sí entrega formas de mezclar y combinar en muchas combinaciones diferentes. Veamos un comando diferente:
+Consistent with the Unix philosophy of tool composition, commands connect cleanly to form versatile combinations. Consider another built-in command:
 
 ```nu
 ps
 ```
 
-Este comando entrega una lista de todos los procesos actuales que el sistema está ejecutando, cuál es su estado y cuál es su nombre. También podemos ver la carga de CPU de los procesos.
-
-Si se quisiera mostrar los procesos que están utilizando activamente la CPU, se puede proceder como sigue:
+This command returns a table of all active processes running on the system, showing their process ID, name, status, and resource consumption. To isolate processes actively consuming CPU time:
 
 ```nu
 ps | where cpu > 0
 ```
 
-Nu no solo permite tablas estructuradas de forma simple, si no que también permite anidaciones arbitrarias. Por ejemplo, consideremos el comando `help commands`. Este comando proporciona información para todos los comandos de Nushell como una tabla.
+Nushell supports not only flat tabular structures, but arbitrarily nested hierarchies as well. For example, examine the output of `help commands`:
 
 ```nu
 help commands
 ```
 
-La salida es bastante extensa, por lo que se obtendra la fila para el comando `each`.
+Because the output is extensive, filter down to the row corresponding to the `each` command:
 
 ```nu
 help commands | where name == each
 help commands | where name == each | first
 ```
 
-Al ecuperar una sola fila de una tabla se obtiene un _registro_ (_record_), que es un conjunto de pares clave-valor. Observar como la columnas "signatures" contiene un registro en lugar de valores simples. Para ver sólo una de estas "claves" o columnas, se puede utilizar el comando `get`:
+Extracting a single row from a table produces a *record*, which is an ordered set of key-value pairs. Notice how the `signatures` column contains nested records rather than scalar values. To inspect a specific column value, use `get`:
 
 ```nu
 help commands | where name == each | first | get description
 help commands | where name == each | first | get params
 ```
 
-El comando `get` nos permite saltar al contenido de los datos estructurados (una tabla, registro o lista). Incluso se puede pasar columnas anidadas para acceder a los datos a cualquier profundidad.
+The `get` command navigates directly into structured data (tables, records, or lists). You can supply nested path segments to traverse structures to arbitrary depth:
 
 ```nu
 help commands | where name == each | first | get category
@@ -623,7 +580,7 @@ help commands | where name == each | first | get description
 help commands | where name == each | first
 ```
 
-Estas columnas anidadas se llaman _rutas de celda_ (_cellpaths_). Nu tomará la ruta de la celda e irá al bit de datos correspondiente en una tabla, registro o lista. Las rutas de celda también admiten números de fila, por lo que los comandos anterior también se puede escribir como:
+These path specifications are known as *cell paths*. Nushell uses the cell path to extract the designated value from a table, record, or list. Cell paths also support numeric row indices:
 
 ```nu
 help commands | where name == each | first | get params
@@ -631,13 +588,13 @@ help commands | where name == each | first | get params.0
 help commands | where name == each | first | get params.3.description
 ```
 
-Si se quiere ver la estructura anidada, se puede utilizar `table -e`:
+To view deeply nested structures expanded in the console, use `table -e`:
 
 ```nu
 help commands | where name == each | first | table -e
 ```
 
-Notar que se pueden acceder a todas las herramientas estandar de la terminal utilizando el símbolo `^` si existe una versión nushell. Si no existe, no es necesario utilizarlo:
+Standard operating system utilities can always be invoked by prefixing them with `^` when a Nushell built-in shares their name. If no built-in conflicts, the caret prefix is optional:
 
 ```nu
 ^ls
@@ -645,19 +602,19 @@ open tips.csv | first 5
 uname
 ```
 
-Todo comando nushell que retorna datos lo hará en una tabla, por ejemplo:
+Every Nushell command that outputs structured data does so as a table or list:
 
 ```nu
-#muestra los procesos en ejecucion
+# inspect running system processes
 ps
 
-#ordenados por mayor utilizacion de cpu
+# sort active processes by highest CPU usage
 ps | where cpu > 0 | sort-by cpu -r
 ```
 
-### Obtener Ayuda
+### Getting Help
 
-Se puede leer texto de ayuda para cualquiera de los comandos incorporados de Nu usando el comando `help` o pasando la opción `--help` a un comando. También se puede buscar un tema utilizando `help -f <topic>`.
+You can inspect the documentation for any built-in Nushell command using `help` or the `--help` flag. You can also search command descriptions by keyword using `help -f <topic>`:
 
 ```nu
 help explore
@@ -665,12 +622,12 @@ help http get
 help -f open
 ```
 
-Asimismo, Nushell proporciona el comando `tutor`, una guía interactiva integrada directamente en la terminal orientada al aprendizaje práctico y progresivo de las capacidades de la shell:
+Additionally, Nushell provides an interactive tutorial built directly into the terminal, designed for progressive, hands-on learning:
 
-- `tutor`: Muestra el mensaje de bienvenida y las instrucciones de uso generales.
-- `tutor list`: Enumera todos los temas didácticos disponibles (como tablas, rutas de celda, expresiones, variables, bloques, condicionales y cierres).
-- `tutor <tema>`: Carga la lección correspondiente al concepto indicado (por ejemplo, `tutor table`, `tutor closure` o `tutor pipeline-input`).
-- `tutor -f <frase>` o `tutor --find <frase>`: Busca términos y explicaciones específicas a lo largo de las lecciones del tutorial.
+- `tutor`: Displays the welcome message and general instructions.
+- `tutor list`: Lists all available learning modules (tables, cell paths, expressions, variables, blocks, conditionals, closures).
+- `tutor <topic>`: Opens the interactive lesson for the specified concept (for example, `tutor table`, `tutor closure`, or `tutor pipeline-input`).
+- `tutor -f <query>` or `tutor --find <query>`: Searches across lesson texts for specific explanations and patterns.
 
 ```nu
 tutor
@@ -678,22 +635,21 @@ tutor list
 tutor table
 ```
 
+## Data Types and Variables in Nushell
 
-## Tipos de Datos y Variables en Nushell
+Having worked practically with structured tables, relational filters with physical units (`where size > 100kb`), and cell paths, we now formalize the core mechanics of Nushell's type system, its two-phase compilation architecture, and variable declarations with `let`, `mut`, and `const`.
 
-Tras haber interactuado de forma práctica con las tablas estructuradas de `ls`, los filtros relacionales con unidades dimensionales (`where size > 100kb`) y el direccionamiento mediante rutas de celda, resulta indispensable formalizar los fundamentos teóricos que sustentan este comportamiento. En esta sección se analiza la taxonomía del sistema de tipos de Nushell, el modelo de compilación en dos fases y los mecanismos formales de vinculación y ciclo de vida de variables mediante `let`, `mut` y `const`.
+### The Nushell Type System
 
-### Sistema de Tipos de Datos en Nushell
+One of the most consequential design choices in Nushell is its strongly typed data model. In legacy shells like Bash or Zsh, pipelines pass undifferentiated byte streams, forcing users to constantly parse text with `awk`, `cut`, or regular expressions. In Nushell, every value that travels through a pipeline retains its explicit type identity. This preserves semantic meaning, allows compile-time and runtime validation, and makes complex transformations reliable.
 
-Una de las transformaciones conceptuales más profundas que introduce Nushell frente a las shells tradicionales de Unix radica en su sistema de tipos fuertemente estructurado. En entornos convencionales como Bash o Zsh, toda información en tránsito consiste en secuencias arbitrarias de bytes o cadenas de texto sin formato. Dicha arquitectura fuerza al usuario a recurrir de manera constante a utilidades externas como `awk`, `cut` o expresiones regulares complejas para extraer significado numérico, categórico o temporal. Por el contrario, en Nushell cada elemento que fluye a través de un pipeline conserva íntegra su identidad de tipo, lo cual posibilita operaciones semánticas directas, validaciones rigurosas en tiempo de ejecución y notables optimizaciones al manipular datos estructurados.
-
-Para inspeccionar dinámicamente el tipo de cualquier dato o el resultado intermedio transmitido a través de un pipe, se emplea el comando `describe`:
+To inspect the runtime type of any value or pipeline output, use the `describe` command:
 
 ```nu
 [
   (42 | describe),
   (3.14 | describe),
-  ("ciencia de datos" | describe),
+  ("data science" | describe),
   (true | describe),
   (2026-10-21 | describe),
   (15min | describe),
@@ -701,163 +657,161 @@ Para inspeccionar dinámicamente el tipo de cualquier dato o el resultado interm
 ]
 ```
 
-Nushell clasifica sus tipos en escalares primitivos, tipos con unidades dimensionales (tamaños de archivo y duraciones temporales), estructuras compuestas y tipos del sistema de ejecución. La Tabla 1 sintetiza este catálogo fundamental:
+Nushell categorizes types into primitive scalars, dimensional quantities (filesizes and durations), structured collections, and language runtime types. Table 1 summarizes the core catalog:
 
-| Categoría | Tipo de Dato | Sintaxis y Literales de Ejemplo | Descripción Operativa |
+| Category | Data Type | Example Syntax and Literals | Operational Description |
 | :--- | :--- | :--- | :--- |
-| **Escalares** | `int` | `42`, `-10`, `0x2A` | Entero de 64 bits con signo para conteos y operaciones discretas. |
-| **Escalares** | `float` | `3.14159`, `-0.001`, `Infinity` | Número decimal de precisión doble IEEE 754 de 64 bits. |
-| **Escalares** | `string` | `"texto"`, `'simple'`, `r#'crudo'#` | Cadena de texto codificada en UTF-8 con soporte para interpolación `$"..."`. |
-| **Escalares** | `bool` | `true`, `false` | Valor lógico para bifurcaciones condicionales y filtros relacionales. |
-| **Escalares** | `nothing` | `null` | Representa la ausencia explícita de valor o resultado vacío. |
-| **Dimensionales** | `filesize` | `512b`, `10kb`, `4mb`, `2gb`, `1tb` | Magnitud binaria/decimal con soporte aritmético (`2gb - 500mb`). |
-| **Dimensionales** | `duration` | `100ms`, `5sec`, `2min`, `3hr`, `7day` | Intervalo temporal con conversión y suma automática (`1hr + 30min`). |
-| **Dimensionales** | `datetime` | `2026-10-21`, `2026-10-21T15:30:00Z` | Marca temporal absoluta en formato ISO 8601 con zona horaria. |
-| **Estructuras** | `list<T>` | `[1 2 3]`, `["a" "b" "c"]` | Colección ordenada de valores indexables secuencialmente. |
-| **Estructuras** | `record<...>` | `{nombre: "Carlos", edad: 30}` | Conjunto de pares clave-valor heterogéneos análogos a un objeto JSON. |
-| **Estructuras** | `table<...>` | `[[id valor]; [1 100] [2 200]]` | Estructura bidimensional equivalente a una lista homogénea de registros. |
-| **Estructuras** | `range` | `1..10`, `0..<5`, `1..` | Intervalo numérico continuo o semiabierto eficiente en memoria. |
-| **Avanzados** | `binary` | `0x[deadbeef]`, `0x[48 65 6c 6c 6f]` | Secuencia cruda de bytes binarios para flujos de red o archivos binarios. |
-| **Avanzados** | `closure` | `{|x| $x * 2 }`, `{ $in > 10 }` | Bloque ejecutable anónimo con argumentos o captura del flujo de entrada `$in`. |
-| **Avanzados** | `glob` | `*.csv`, `**/*.parquet` | Patrón de concordancia de rutas del sistema de archivos. |
-| **Avanzados** | `cell-path` | `$.nombre`, `$.columna.0` | Ruta de direccionamiento declarativa a columnas o celdas internas. |
+| **Scalars** | `int` | `42`, `-10`, `0x2A` | 64-bit signed integer for discrete counts and arithmetic. |
+| **Scalars** | `float` | `3.14159`, `-0.001`, `Infinity` | 64-bit IEEE 754 double-precision floating-point number. |
+| **Scalars** | `string` | `"text"`, `'simple'`, `r#'raw'#` | UTF-8 encoded text string supporting string interpolation `$"..."`. |
+| **Scalars** | `bool` | `true`, `false` | Boolean value for logical branching and filter predicates. |
+| **Scalars** | `nothing` | `null` | Represents the explicit absence of a value or an empty result. |
+| **Dimensional** | `filesize` | `512b`, `10kb`, `4mb`, `2gb`, `1tb` | Byte magnitude supporting unit arithmetic (`2gb - 500mb`). |
+| **Dimensional** | `duration` | `100ms`, `5sec`, `2min`, `3hr`, `7day` | Time interval supporting automatic unit conversion (`1hr + 30min`). |
+| **Dimensional** | `datetime` | `2026-10-21`, `2026-10-21T15:30:00Z` | Absolute timestamp in ISO 8601 format with timezone support. |
+| **Structures** | `list<T>` | `[1 2 3]`, `["a" "b" "c"]` | Ordered collection of elements indexed sequentially. |
+| **Structures** | `record<...>` | `{name: "Carlos", age: 30}` | Set of key-value pairs analogous to a JSON object. |
+| **Structures** | `table<...>` | `[[id value]; [1 100] [2 200]]` | Two-dimensional table equivalent to a homogeneous list of records. |
+| **Structures** | `range` | `1..10`, `0..<5`, `1..` | Memory-efficient contiguous or half-open interval. |
+| **Advanced** | `binary` | `0x[deadbeef]`, `0x[48 65 6c 6c 6f]` | Raw byte sequence for network payloads and binary files. |
+| **Advanced** | `closure` | `{|x| $x * 2 }`, `{ $in > 10 }` | Anonymous executable block with parameters or pipeline input `$in`. |
+| **Advanced** | `glob` | `*.csv`, `**/*.parquet` | Filesystem pattern matching specification. |
+| **Advanced** | `cell-path` | `$.name`, `$.column.0` | Declarative path accessing internal record keys or table cells. |
 
-Table: Sistema de tipos de datos fundamentales en Nushell.
+Table: Fundamental data types in Nushell.
 
-Los tipos dimensionales representan una de las ventajas analíticas más potentes del entorno: Nushell comprende intrínsecamente las magnitudes físicas y normaliza de forma automática las comparaciones sin exigir conversiones algebraicas manuales. Por ejemplo, al filtrar registros por tamaño de archivo (`where size > 50mb`) o por umbrales de latencia (`where latency < 200ms`), el motor de evaluación ejecuta el cálculo dimensional exacto entre unidades compatibles.
+Dimensional types represent a major analytical asset: Nushell natively understands physical units and normalizes comparisons automatically. When filtering records by file size (`where size > 50mb`) or latency thresholds (`where latency < 200ms`), the engine performs exact unit arithmetic without requiring manual algebraic conversions.
 
-### Nushell como un lenguaje compilado
+### Nushell as a Compiled Language
 
-Una parte importante del diseño de Nushell y específicamente donde difiere de muchos lenguajes dinámicos es que Nushell convierte el código fuente en algo para ejecutar, y luego ejecuta el resultado. No tiene una función `eval` que permita continuar introduciendo nuevo código fuente durante el tiempo de ejecución. Esto significa que las tareas como incluir archivos para que formen parte de un proyecto deben ser rutas conocidas, al igual que las inclusiones en lenguajes compilados como C++ o Rust.
+A key architectural aspect of Nushell where it diverges from dynamic shells is its two-phase execution model: source code is compiled before it runs. Nushell does not provide an `eval` function that injects arbitrary new syntax into an executing environment. Tasks like importing files must use paths known at compile time, much like `#include` directives in C++ or `use` statements in Rust.
 
-Por ejemplo, lo siguiente no tiene sentido en Nushell, y fallará al ejecutarse si se ejecuta como un script:
+For example, the following sequence fails when executed as a script:
 
 ```nu
-# skip-docker-exec (demostración de error de compilación)
+# skip-docker-exec (compilation error demonstration)
 "def abc [] { 1 + 2 }" | save -f output.nu
 source "output.nu"
 abc
 ```
 
-El comando `source` aumentará el código fuente que se compila, pero el `save` de la línea anterior no habrá tenido la oportunidad de ejecutarse. Nushell ejecuta todo el bloque como si fuera un solo archivo, en lugar de ejecutar una línea a la vez. En el ejemplo, dado que el archivo `output.nu` no se crea hasta después del paso de 'compilación', el comando `source` no puede leer las definiciones del mismo durante el tiempo de análisis.
+The `source` statement expands code during the compilation phase, but the preceding `save` command has not yet executed. Nushell analyzes the entire block as a cohesive unit before evaluating runtime instructions. Because `output.nu` does not exist on disk when the parser runs, `source` cannot locate the definition of `abc`.
 
-Otro problema común es intentar crear dinámicamente el nombre de archivo desde el que obtener el código fuente:
+Similarly, building source paths dynamically at runtime fails:
 
 ```nu
-# skip-docker-exec (demostración de error en tiempo de compilación)
+# skip-docker-exec (compile-time error demonstration)
 source $"($my_path)/common.nu"
 ```
 
-Esto no funciona si `my_path` es una variable de tiempo de ejecución regular declarada con `let`. Esto requeriría que el
-evaluador se ejecutara y evaluara la cadena, pero desafortunadamente Nushell necesita esta información en tiempo de compilación.
+If `$my_path` is a regular runtime variable declared with `let`, the compilation phase cannot resolve the path string.
 
-Sin embargo, si `my_path` es una constante, entonces esto
-funcionaría, ya que la cadena se puede evaluar en tiempo de compilación:
+However, if `$my_path` is declared as a compile-time constant, the parser can evaluate the string ahead of execution:
 
 ```nu
-# skip-docker-exec (ejemplo ilustrativo de ruta constante)
+# skip-docker-exec (constant path demonstration)
 const my_path = ([$nu.home-dir nushell] | path join)
-source $"($my_path)/common.nu" # sources /home/user/nushell/common.nu
+source $"($my_path)/common.nu"
 ```
 
-Nushell está diseñado para usar un solo paso de compilación para todo el código fuente, y esto es independiente de la evaluación. Esto permitirá un fuerte soporte IDE, mensajes de error precisos, un lenguaje más fácil de usar para herramientas de terceros y, en el futuro, incluso una salida más sofisticada, como la posibilidad de compilar Nushell directamente a un archivo binario.
+Nushell uses a single compilation pass for source code, keeping parsing strictly separated from evaluation. This architecture enables reliable IDE integration, descriptive compile-time diagnostics, and clean interoperability with developer tooling.
 
-### Declaración y Ciclo de Vida de Variables: let, mut y const {#declaracion-y-ciclo-de-vida-de-variables-let-mut-y-const}
+### Variable Declarations: let, mut, and const {#declaracion-y-ciclo-de-vida-de-variables-let-mut-y-const}
 
-La asignación y vinculación de valores en Nushell se articula en torno a tres palabras clave fundamentales: `let`, `mut` y `const`. Cada una de ellas define un comportamiento específico en relación con el instante de evaluación (tiempo de compilación frente a tiempo de ejecución), las garantías de inmutabilidad en memoria y la capacidad de captura dentro de cierres (*closures*).
+Binding values in Nushell centers around three keywords: `let`, `mut`, and `const`. Each defines specific semantics regarding evaluation timing (compile time versus runtime), memory immutability, and closure capture.
 
-#### Reglas de Nomenclatura y Referencia
+#### Naming and Referencing Rules
 
-Una vez declarada una variable, nos referimos a ella anteponiendo el símbolo `$` a su identificador (por ejemplo, `$total`). 
+Once declared, a variable is referenced by prefixing its identifier with a dollar sign (`$`):
 
-Nushell establece ciertas restricciones sobre los caracteres admisibles en los nombres de variables para prevenir ambigüedades con los operadores de la sintaxis. En particular, los nombres de variables no pueden contener los siguientes caracteres:
+Nushell restricts certain characters in variable names to prevent syntactic ambiguity with operators:
 
 ```text
 .  [  (  {  +  -  *  ^  /  =  !  <  >  &  |
 ```
 
-Asimismo, en las sentencias de declaración se permite anteponer opcionalmente el carácter `$` al nombre de la variable (`let $var = 42`), lo cual resulta funcionalmente equivalente a declararla sin dicho prefijo (`let var = 42`).
+In declaration statements, prefixing the variable name with `$` is optional (`let $var = 42` is identical to `let var = 42`).
 
-#### Inmutabilidad en tiempo de ejecución: let
+#### Runtime Immutability: let
 
-Fiel a los principios de la programación funcional moderna, Nushell promueve el uso sistemático de la inmutabilidad. Toda variable declarada mediante `let` se evalúa dinámicamente en tiempo de ejecución, permaneciendo estrictamente inalterable durante toda su existencia en el entorno:
+Emphasizing functional programming principles, Nushell defaults to immutability. Variables declared with `let` are evaluated dynamically at runtime and remain strictly unmodifiable throughout their scope:
 
 ```nu
-# skip-docker-exec (demostración de inmutabilidad)
-let tasa = 0.15
-$tasa = 0.20 # Error: nu::shell::assignment_requires_mutable_variable
+# skip-docker-exec (immutability demonstration)
+let rate = 0.15
+$rate = 0.20 # Error: nu::shell::assignment_requires_mutable_variable
 ```
 
-Aunque una variable inmutable no admite reasignación directa mediante el operador `=`, Nushell implementa de manera nativa el **sombreado de variables** (*variable shadowing*). Este mecanismo permite declarar un nuevo enlace con idéntico identificador dentro del mismo alcance o en un bloque anidado, sustituyendo la referencia previa sin comprometer la transparencia referencial ni alterar el valor original en los ámbitos circundantes:
+While immutable bindings cannot be reassigned with `=`, Nushell fully supports **variable shadowing**. You can declare a new binding with the same name in the same scope or an inner block, replacing the reference without violating referential transparency:
 
 ```nu
-let conteo = 10
+let count = 10
 do {
-  let conteo = 50
-  $conteo # En el bloque interno vale 50
+  let count = 50
+  $count # evaluates to 50 in inner scope
 }
-$conteo # En el ámbito exterior continúa valiendo 10
-# Sombreado explícito en el ámbito exterior: ahora vale 11
-let conteo = $conteo + 1
+$count # outer scope remains 10
+# Explicit shadowing in the current scope: now 11
+let count = $count + 1
 ```
 
-Las variables inmutables gestionadas con `let` son seguras ante concurrencia y pueden capturarse sin restricciones dentro de bloques y cierres funcionales tales como `each` o `par-each`.
+Immutable bindings declared with `let` are thread-safe and can be captured freely inside functional closures such as `each` and `par-each`.
 
-#### Mutabilidad imperativa controlada: mut
+#### Controlled Imperative Mutability: mut
 
-En escenarios computacionales donde un algoritmo demanda acumulación explícita de estado dentro de estructuras iterativas imperativas (como `loop` o `while`), Nushell proporciona la palabra clave `mut`. Una variable mutable autoriza la reasignación mediante operadores de modificación en sitio:
+When algorithms require iterative state accumulation (such as in `loop` or `while` constructs), Nushell provides the `mut` keyword. Mutable variables can be updated in place using compound assignment operators:
 
 ```nu
 mut total = 0
 $total += 15
 $total *= 2
-$total # Resultado: 30
+$total # result: 30
 ```
 
-Nushell admite una serie de operadores de asignación específicos para variables mutables, detallados en la Tabla 2:
+Nushell supports several assignment operators for mutable variables, detailed in Table 2:
 
-| Operador | Descripción Operativa |
+| Operator | Operational Description |
 | :--- | :--- |
-| `=` | Asigna un nuevo valor directamente a la variable mutable. |
-| `+=` | Suma un valor a la variable y actualiza su contenido (`$val += 5`). |
-| `-=` | Resta un valor a la variable y actualiza su contenido (`$val -= 2`). |
-| `*=` | Multiplica la variable por un valor y actualiza su contenido (`$val *= 3`). |
-| `/=` | Divide la variable por un valor y actualiza su contenido (`$val /= 2`). |
-| `++=` | Concatena una lista o un elemento adicional a una lista existente. |
+| `=` | Assigns a new value directly to the mutable variable. |
+| `+=` | Adds a value to the variable in place (`$val += 5`). |
+| `-=` | Subtracts a value from the variable in place (`$val -= 2`). |
+| `*=` | Multiplies the variable by a value in place (`$val *= 3`). |
+| `/=` | Divides the variable by a value in place (`$val /= 2`). |
+| `++=` | Appends an item or concatenates a list onto an existing list variable. |
 
-Table: Operadores de asignación para variables mutables en Nushell.
+Table: Assignment operators for mutable variables in Nushell.
 
-Los operadores aritméticos compuestos (`+=`, `-=`, `*=`, `/=`) solo son válidos sobre tipos de datos que admiten la operación matemática subyacente. Por su parte, el operador `++=` requiere expresamente que la variable de destino o el operando proporcionado sea una lista.
+Compound arithmetic operators (`+=`, `-=`, `*=`, `/=`) only apply to types that support the corresponding arithmetic operation. The `++=` operator requires that the target variable or operand be a list.
 
-Sin embargo, la mutabilidad impone una restricción de diseño fundamental: **los cierres (*closures*) y las funciones anidadas no pueden capturar variables mutables**. La siguiente instrucción desencadenará un error sintáctico inmediato:
+Crucially, **closures and nested functions cannot capture mutable variables**. The following pipeline triggers an immediate compiler error:
 
 ```nu
-# skip-docker-exec (demostración de restricción en cierres)
-mut contador = 0
-[1 2 3] | each { $contador += 1 } # Error: nu::shell::capture_of_mutable_var
+# skip-docker-exec (closure restriction demonstration)
+mut counter = 0
+[1 2 3] | each { $counter += 1 } # Error: nu::shell::capture_of_mutable_var
 ```
 
-Esta directriz garantiza la robustez del sistema: los comandos integrados en pipelines procesan datos mediante flujos continuos (*streaming*) y con frecuencia se ejecutan de manera concurrente o paralela (mediante primitivas como `par-each`). Permitir la captura y mutación concurrente de variables externas introduciría condiciones de carrera (*race conditions*) y comprometería el determinismo del motor.
+This restriction protects pipeline integrity: Nushell pipelines stream elements lazily and frequently run concurrently across threads (via `par-each`). Allowing closures to mutate external state would introduce data races and nondeterministic behavior.
 
-#### Constantes de tiempo de análisis: const
+#### Parse-Time Constants: const
 
-La arquitectura interna de Nushell opera bajo una estricta separación en dos fases:
+Nushell enforces a strict two-stage lifecycle:
 
-1. **Fase de análisis sintáctico y compilación estática (*parse-time*):** El analizador de Nushell procesa el texto completo del script o bloque de instrucciones antes de que se ejecute la primera línea. En esta fase se verifica la validez gramatical, se determinan las firmas de los comandos, se resuelven las palabras clave y se cargan los módulos externos (`source`, `use`).
-2. **Fase de evaluación y ejecución dinámica (*runtime*):** Es la etapa en la que los datos fluyen a través de las tuberías (*pipelines*), se evalúan las expresiones, se escribe en el disco (`save`), se invocan procesos externos y se computan los resultados en memoria.
+1. **Parse-time (static compilation):** The Nushell parser analyzes the complete source code of a script or command block before execution begins. In this stage, syntax is validated, command signatures are resolved, keywords are checked, and modules are loaded (`source`, `use`).
+2. **Runtime (dynamic evaluation):** Data streams through pipelines, expressions are evaluated, files are written (`save`), external processes are spawned, and results are returned.
 
-Comprender la frontera entre ambas etapas es esencial en Nushell. Consideremos, por ejemplo, la siguiente secuencia de instrucciones:
+Understanding this boundary is vital. Consider the following sequence:
 
 ```nu
-# skip-docker-exec (demostración de la separación parse-time vs runtime)
+# skip-docker-exec (parse-time vs runtime demonstration)
 "def abc [] { 1 + 2 }" | save -f output.nu
 source "output.nu"
 abc
 ```
 
-Si se ejecutan estas instrucciones **línea por línea** de manera interactiva en la terminal (REPL), el procedimiento funciona correctamente: la primera línea se compila (*parse-time*) y se ejecuta (*runtime*), creando el archivo `output.nu` en disco; al ingresar la segunda línea, `output.nu` ya existe físicamente, por lo que el analizador puede leerlo estáticamente en su propia fase de análisis e incorporar el comando `abc` al entorno.
+When entered line by line in the interactive REPL, this works as expected: the first line compiles and runs, creating `output.nu` on disk; when the second line is entered, `output.nu` exists physically, allowing the parser to read it and register `abc`.
 
-Sin embargo, si se intenta **ejecutar todo el bloque en una sola llamada** (o dentro de un script `.nu`), el proceso falla inmediatamente con el error `nu::parser::sourced_file_not_found`:
+However, executing the block as a single script invocation fails immediately with `nu::parser::sourced_file_not_found`:
 
 ```text
 Error: nu::parser::sourced_file_not_found
@@ -865,78 +819,78 @@ Error: nu::parser::sourced_file_not_found
   help: sourced files need to be available before your script is run
 ```
 
-El motivo radica en que `source` es una directiva de tiempo de análisis (*parse-time*). Cuando Nushell analiza el bloque completo, necesita inspeccionar el contenido de `output.nu` para compilar la llamada a `abc` en la tercera línea; pero en ese instante la primera línea (`save -f output.nu`) aún no ha comenzado a evaluarse dinámicamente en *runtime*, por lo que el archivo todavía no existe en el sistema de archivos.
+Because `source` is a parse-time directive, Nushell attempts to read `output.nu` during the compilation pass to check the call to `abc`. At that point, the preceding `save` command has not yet executed.
 
-Para resolver requerimientos estructurales donde el compilador necesita conocer valores de antemano (como rutas de módulos fijos o valores por defecto en firmas de comandos) se diseñó `const`. Una constante declarada con `const` se resuelve de forma determinista y estática durante la fase de análisis (*parse-time*). En consecuencia, solo puede asociarse a valores literales o expresiones puras que el compilador logre computar íntegramente de manera anticipada:
+To provide values needed during compilation (such as static module paths or default parameter values in command signatures), use `const`. Constants declared with `const` are evaluated statically during parse time and can only be bound to literal values or pure expressions that the compiler can evaluate ahead of time:
 
 ```nu
-# skip-docker-exec (definición de constante en tiempo de compilación)
-const ruta_modulos = ([$nu.home-dir mis_scripts] | path join)
-use $"($ruta_modulos)/utilidades.nu" *
+# skip-docker-exec (compile-time constant definition)
+const module_path = ([$nu.home-dir my_scripts] | path join)
+use $"($module_path)/utilities.nu" *
 ```
 
-Si intentásemos suministrar una variable declarada con `let` al comando `use` del ejemplo previo, la compilación fallaría de inmediato, dado que el contenido de una vinculación `let` aún no existe en memoria durante el análisis gramatical del script.
+Supplying a runtime variable declared with `let` to `use` fails compilation immediately, because runtime values do not exist in memory when the script is parsed.
 
-La Tabla 3 sintetiza las diferencias operativas y técnicas entre las tres modalidades de vinculación:
+Table 3 compares the operational characteristics of the three binding mechanisms:
 
-| Criterio | `let` (Inmutable) | `mut` (Mutable) | `const` (Constante de compilación) |
+| Criterion | `let` (Immutable) | `mut` (Mutable) | `const` (Compile-time Constant) |
 | :--- | :--- | :--- | :--- |
-| **Fase de evaluación** | Tiempo de ejecución (*runtime*) | Tiempo de ejecución (*runtime*) | Tiempo de análisis (*parse-time*) |
-| **Reasignación directa (`=`)** | No permitida | Permitida (`$var = ...`, `+=`) | No permitida |
-| **Sombreado (*Shadowing*)** | Sí (`let x = $x + 1`) | No (se emplea asignación) | Sí (en nuevos ámbitos) |
-| **Captura en cierres (*Closures*)** | Sí (segura en streaming y paralelo) | No (rechazada por el compilador) | Sí |
-| **Válida en `source` / `use`** | No (desconocida al compilar) | No | Sí (resuelta estáticamente) |
-| **Uso canónico en Nushell** | Por defecto en el 90%+ del código | Bucles clásicos (`while`, `loop`) | Rutas de módulos, plugins, esquemas fijos |
+| **Evaluation Timing** | Runtime | Runtime | Parse-time |
+| **Direct Reassignment (`=`)** | Not permitted | Permitted (`$var = ...`, `+=`) | Not permitted |
+| **Variable Shadowing** | Yes (`let x = $x + 1`) | No (reassignment is used) | Yes (in inner scopes) |
+| **Closure Capture** | Yes (thread-safe for streaming/parallel) | No (rejected by compiler) | Yes |
+| **Usable in `source` / `use`** | No (unknown at parse time) | No | Yes (resolved statically) |
+| **Recommended Usage** | Default choice for 90%+ of code | Imperative loops (`while`, `loop`) | Module paths, fixed schemas |
 
-Table: Comparativa de vinculación de variables en Nushell: `let`, `mut` y `const`.
+Table: Variable binding models in Nushell: `let`, `mut`, and `const`.
 
-#### Paradigma Funcional frente a Mutabilidad Imperativa
+#### Functional Pipelines versus Imperative Mutation
 
-En el desarrollo idiomático con Nushell, la recomendación fundamental consiste en preferir variables inmutables para la gran mayoría de las tareas analíticas. Las soluciones funcionales basadas en transformaciones de pipelines ofrecen tres ventajas determinantes:
+In idiomatic Nushell code, immutable variables and functional transformations are strongly preferred for analytical tasks. Pipeline-oriented transformations offer three major advantages:
 
-1. **Mayor rendimiento:** Evitan la continua realocación de estructuras intermedias en memoria.
-2. **Soporte nativo de streaming:** La siguiente etapa del pipeline comienza a procesar datos en cuanto se emite el primer registro, sin esperar a que el bucle complete la totalidad de las iteraciones.
-3. **Escalabilidad concurrente:** Habilitan la paralelización automática de tareas mediante primitivas como `par-each`.
+1. **Performance:** They avoid repetitive reallocations of intermediate buffers in memory.
+2. **Native streaming:** Subsequent pipeline stages begin processing data as soon as the first item is emitted, without waiting for earlier loops to finish.
+3. **Concurrency:** Functional pipelines easily parallelize across multi-core processors using `par-each`.
 
-En la práctica, los patrones clásicos que en otros lenguajes demandan acumulación mutable se resuelven en Nushell mediante comandos declarativos de alto nivel:
+Common accumulation patterns that require mutable variables in imperative languages are expressed declaratively in Nushell:
 
-- **Contadores de iteración:** En lugar de incrementar manualmente un contador mutable, se utiliza `enumerate` en combinación con `each`:
+- **Index tracking:** Instead of incrementing a counter variable, combine `enumerate` with `each`:
   ```nu
   ls |
     enumerate |
     each { |elt|
-      $"Elemento #($elt.index) mide ($elt.item.size)"
+      $"Item #($elt.index) has size ($elt.item.size)"
     }
   ```
 
-- **Reducción y agregación de valores:** Para acumular un resultado a través de una lista (por ejemplo, localizar la cadena de mayor longitud), se emplea `reduce`:
+- **Accumulation and reduction:** To fold a collection into an aggregate value, use `reduce`:
   ```nu
-  [uno dos tres cuatro cinco seis] | reduce { |actual, maximo|
-    if ($actual | str length) > ($maximo | str length) {
-      $actual
+  [one two three four five six] | reduce { |current, longest|
+    if ($current | str length) > ($longest | str length) {
+      $current
     } else {
-      $maximo
+      $longest
     }
   }
   ```
 
-- **Generación dinámica de flujos continuos:** Para consumir datos de fuentes externas o secuencias que se producen bajo demanda, se emplea `generate`:
+- **Dynamic sequence generation:** To consume data from generators or streams on demand, use `generate`:
   ```nu
-  # skip-docker-exec (generación funcional de secuencias)
-  generate 0 { |contador|
-    if $contador < 5 {
-      { out: ($contador * 10), next: ($contador + 1) }
+  # skip-docker-exec (functional sequence generation)
+  generate 0 { |counter|
+    if $counter < 5 {
+      { out: ($counter * 10), next: ($counter + 1) }
     } else {
       null
     }
   }
   ```
 
-##### Consideraciones de Rendimiento
+##### Performance Implications
 
-El empleo de filtros de pipeline con variables inmutables es con frecuencia órdenes de magnitud más rápido que la mutación secuencial asistida por sentencias tradicionales como `for` y `while`. Cuando acumulamos valores en una lista mutable dentro de un bucle `for`, cada invocación a `append` genera una nueva lista intermedia, introduciendo una penalización de rendimiento acumulativa:
+Using pipeline filters with immutable variables is often orders of magnitude faster than imperative mutation using `for` and `while` loops. When appending items to a mutable list inside a `for` loop, each `append` allocates a new list buffer:
 
-- **Enfoque imperativo con bucle `for` y variable mutable:**
+- **Imperative approach with `for` loop and mutable variable:**
   ```nu
   timeit {
     mut randoms = []
@@ -945,144 +899,115 @@ El empleo de filtros de pipeline con variables inmutables es con frecuencia órd
     }
   }
   ```
-  *Tiempo medido aproximado: ~1 minuto y 4 segundos para 50,000 inserciones.*
 
-- **Enfoque idiomático funcional con `each`:**
+- **Idiomatic functional approach with `each`:**
   ```nu
   timeit {
     let randoms = 1..500 | each { random int }
   }
   ```
-  *Tiempo medido aproximado: ~19 milisegundos para 5,000 elementos, y poco más de 4 segundos para 50,000 iteraciones.*
 
-Además de la drástica reducción temporal, `each` transmite sus salidas inmediatamente por el pipeline, permitiendo que las etapas posteriores procesen la información de forma continua e integrada.
+In addition to executing much faster, `each` streams its results immediately through the pipeline, allowing downstream commands to process records concurrently.
 
+## Navigating the Filesystem
 
-## Moviéndose por el Sistema
+Navigating and inspecting the filesystem is a fundamental responsibility of any shell. Nushell provides dedicated commands that operate cleanly on structured filesystem metadata:
 
-Una característica definitoria de un shell es la capacidad de navegar e interactuar con el sistema de archivos. Nushell es, por supuesto, ninguna excepción. A continuación se presentan los comandos fundamentales para la interacción con el sistema de archivos:
-
-### Viendo el Contenido de un Directorio
+### Inspecting Directory Contents
 
 ```nu
 cd /data/ch03
 ls
 ```
 
-Como se indicó anteriormente, el comando `ls` devuelve el contenido de un directorio en forma de tabla estructurada.
+As demonstrated earlier, `ls` returns directory contents as a structured table.
 
-El comando `ls` también admite un argumento posicional opcional para acotar los elementos visualizados. Por ejemplo, se pueden listar los archivos con extensión `.csv`:
+`ls` also accepts an optional glob pattern to filter entries. For example, to list only CSV files:
 
 ```nu
 cd /data/ch03
 ls *.csv
 ```
 
-### Patrones Glob (comodines)
+### Glob Patterns (Wildcards)
 
-Al asterisco (`*`) en el argumento opcional anterior `*.csv` se le denomina habitualmente comodín o *glob*. Permite establecer concordancias de patrones sobre rutas del sistema. El patrón `*.csv` se interpreta como: *«coincidir con cualquier nombre de archivo cuyo sufijo sea .csv»*.
+The asterisk (`*`) in `*.csv` represents a *glob pattern* matching paths on the filesystem. The pattern `*.csv` matches any filename ending with `.csv`.
 
-El comodín más general es `*`, que concuerda con cualquier secuencia de caracteres en el directorio activo. Con frecuencia, este patrón se combina con prefijos o extensiones, como `*.bak` o `temp*`.
+The most general wildcard is `*`, which matches any sequence of characters in the current directory. You can combine it with prefixes or file extensions, such as `*.bak` or `temp*`.
 
-Nushell también soporta el comodín doble `**`, que desciende recursivamente por subdirectorios anidados. Por ejemplo, `ls **/*` enumera recursivamente todas las rutas no ocultas a partir del directorio de trabajo:
+Nushell also supports the recursive glob `**`, which traverses nested subdirectories. For instance, `ls **/*.csv` searches through all directory levels starting from `/data`:
 
 ```nu
 cd /data
 ls **/*.csv
 ```
 
-Aquí se busca cualquier archivo con extensión `.csv` en cualquier nivel de profundidad a partir del directorio `/data`.
+In addition to `*`, Nushell glob syntax supports single-character wildcards with `?` and character classes with `[...]`.
 
-La sintaxis globbing de Nushell no solo admite `*`, sino también la coincidencia de caracteres individuales con `?` y grupos de caracteres con `[...]`.
+Literal wildcards (`*`, `?`, `[]`) can be escaped by enclosing the path in single quotes, double quotes, or raw string syntax (`r#'...'#`). For example, to inspect a literal directory named `[slug]`, use `ls "[slug]"` or `ls '[slug]'`.
 
-Escapar los patrones `*`, `?` y `[]` funciona delimitándolos entre comillas simples, comillas dobles o
-"cadena raw". Por ejemplo, para mostrar el contenido de un directorio llamado `[slug]`, se utiliza use `ls "[slug]"` o `ls '[slug]'`.
+However, strings enclosed in backticks do not escape glob characters. Compare these three cases:
 
-Sin embargo, las cadenas delimitados con _comillas inversas_ (o backtips) no escapan los glob. Por ejemplo, compare los siguientes escenarios:
+1. Bare words: Interpreted as glob patterns.
+   ```nu
+   rm *myfile*
+   ```
 
-1. Sin comillas: Patrón glob
+2. Quoted strings: Treated as literal strings with escaped wildcard characters.
+   ```nu
+   rm "*myfile*"
+   ```
 
-    Una _cadena de palabra simple_ sin comillas con caracteres glob se interpreta como un patrón glob, por lo que lo siguiente eliminará todos los archivos en el directorio actual que contengan
-    `myfile` como cualquier parte del nombre del archivo:
+3. Backtick-quoted strings: Interpreted as glob patterns, allowing spaces within glob paths.
+   ```nu
+   rm `*myfile*`
+   ```
 
-    ```nu
-    rm *myfile*
-    ```
+> Nushell also includes a standalone `glob` command for building advanced file matching pipelines.
 
-2. Entre comillas: Literal de cadena con asteriscos
+#### Programmatic Glob Generation
 
-    Cuando se cita con comillas simples o dobles, o se usa una _cadena raw_, se pasa al comando una _cadena_ con los asteriscos literales escapados (u otros caracteres glob). El resultado no es un glob. El siguiente comando solo eliminará un archivo llamado literalmente `*myfile*` (incluidos los asteriscos). Otros archivos con `myfile` en el nombre no se ven afectados:
+When glob patterns must be generated dynamically in code, use these patterns:
 
-    ```nu
-    rm "*myfile*"
-    ```
+1. `into glob`: Converts a string into a typed glob value:
+   ```nu
+   let current_month = date now | format date '%Y-%m'
+   let glob_pattern = $"*($current_month)*" | into glob
+   ls $glob_pattern
+   ```
 
-3. Entre comillas invertidas: Patrón glob
+2. The spread operator (`...`) combined with `glob`:
+   ```nu
+   let current_month = date now | format date '%Y-%m'
+   ls ...(glob $"*($current_month)*")
+   ```
 
-    Los asteriscos (y otros patrones glob) dentro de una _cadena entre comillas invertidas_ se interpretan como un patrón glob. Observe que este es el mismo comportamiento que el del ejemplo de cadena de palabra simple en el n.° 1 anterior.
+3. Explicit type annotation:
+   ```nu
+   let current_month = date now | format date '%Y-%m'
+   let glob_pattern: glob = $"*($current_month)*"
+   ls $glob_pattern
+   ```
 
-    Lo siguiente, como en el primer ejemplo, elimina todos los archivos en el directorio actual que contienen `myfile` como parte del nombre del archivo
+## Working with Strings
 
-    ```nu
-    rm `*myfile*`
-    ```
+Strings represent sequences of characters used for filenames, column labels, text corpora, and configuration settings. Nushell provides several string literal formats tailored for different situations:
 
-> Nushell también incluye un comando `glob` dedicado con soporte para escenarios globbing más complejos.
+### String Formats
 
-#### Conversión de Cadenas a Globs
+| String Format | Example | Escaping Rules | Notes |
+| :--- | :--- | :--- | :--- |
+| [Single-quoted strings](#single-quoted-strings) | `'[^\n]+'` | None | Cannot contain single quotes inside the string. |
+| [Double-quoted strings](#double-quoted-strings) | `"The\nEnd"` | C-style backslash escapes | Literal backslashes must be escaped. |
+| [Raw strings](#raw-strings) | `r#'Raw string'#` | None | May contain single and double quotes. |
+| [Bare-word strings](#bare-word-strings) | `ozymandias` | None | Only alphanumeric word characters; cannot appear in command position. |
+| [Backtick-quoted strings](#backtick-quoted-strings) | <code>`[^\n]+`</code> | None | Simple string that may include whitespace. |
+| [Single-quoted interpolation](#string-interpolation) | `$'Captain ($name)'` | None | Cannot contain unescaped single quotes. |
+| [Double-quoted interpolation](#string-interpolation) | `$"Captain ($name)"` | C-style backslash escapes | Literal backslashes and parentheses must be escaped. |
 
-Las técnicas de comillas mencionadas anteriormente son útiles al construir globos literales, pero es posible que se deban construir globs mediante programación. Hay varias técnicas disponibles para este propósito:
+### Single-Quoted Strings {#single-quoted-strings}
 
-1. `into glob`
-
-    El comando `into glob` se puede usar para convertir una cadena (y otros tipos) en un glob. Por ejemplo:
-
-    ```nu
-    # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
-    let current_month = date now | format date '%Y-%m'
-    let glob_pattern = $"*($current_month)*" | into glob
-    ls $glob_pattern
-    ```
-
-2. El operador de propagación (_spread operator_) combinado con el comando `glob`:
-
-    El comando `glob` (nota: no es lo mismo que `into glob`) produce una `list` de nombres de archivo que coinciden con el patrón de globo. Esta lista se puede expandir y pasar a los comandos del sistema de archivos utilizando el operador de propagación `...`:
-
-    ```nu
-    # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
-    let current_month = date now | format date '%Y-%m'
-    ls ...(glob $"*($current_month)*")
-    ```
-
-3. Forzar el tipo `glob` mediante anotación:
-
-    ```nu
-    # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
-    let current_month = date now | format date '%Y-%m'
-    let glob_pattern: glob = $"*($current_month)*"
-    ls $glob_pattern
-    ```
-
-
-## Trabajando con strings
-
-Como con la mayoría de los lenguajes, los strings son una colección de 0 o más caracteres que representan texto. Esto puede incluir nombres de archivos, rutas de archivos, nombres de columnas, y mucho más. Las strings son tan comunes que Nushell ofrece múltiples formatos de string para que coincidan con cada caso de uso.
-
-### Formatos de String
-
-| Formato de string                                           | Ejemplo                 | Escapes                             | Notas                                                                                     |
-| ----------------------------------------------------------- | ----------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------- |
-| [String con comillas simples](#single-quoted-strings)       | `'[^\n]+'`              | Ninguno                             | No puede contener comillas simples dentro del string                                      |
-| [String con comillas dobles](#double-quoted-strings)        | `"The\nEnd"`            | Escapes de barra invertida estilo C | Todas las barras invertidas literales deben tener escape                                  |
-| [Strings raw](#raw-strings)                                 | `r#'Raw string'#`       | Ninguno                             | Puede incluir comillas simples                                                            |
-| [String de palabra simple](#bare-word-strings)              | `ozymandias`            | Ninguno                             | Solo puede contener caracteres de "palabra"; No se puede usar en la posición de comando   |
-| [String con comillas invertidas](#backtick-quoted-strings)  | <code>\`[^\n]+\`</code> | Ninguno                             | String simple que puede incluir espacios en blanco. No puede contener comillas invertidas |
-| [Interpolación con comillas simples](#string-interpolation) | `$'Captain ($name)'`    | Ninguno                             | No puede contener ningún `'` o `()` no coincidentes                                       |
-| [Interpolación con comillas dobles](#string-interpolation)  | `$"Captain ($name)"`    | Escapes de barra invertida estilo C | Todas las barras invertidas literales y `()` deben tener escape                           |
-
-### Strings con Comillas Simples {#single-quoted-strings}
-
-El string más simple en Nushell es el string con comillas simples. Este string usa el carácter `'` para rodear algún texto. Por ejemplo:
+Single-quoted strings are enclosed in `'`. They do not interpret escape sequences, making them ideal for regular expressions and literal text:
 
 ```nu
 'hello world'
@@ -1091,51 +1016,43 @@ El string más simple en Nushell es el string con comillas simples. Este string 
 end'
 ```
 
-Los strings con comillas simples no le hacen nada al texto que se les da, lo que las hace ideales para contener una amplia gama de datos de texto.
+### Double-Quoted Strings {#double-quoted-strings}
 
-### Strings con Comillas Dobles {#double-quoted-strings}
-
-Para strings más complejas, Nushell también ofrece strings con comillas dobles. Estas strings usan el carácter `"` para rodear el texto. También admiten la capacidad de escapar caracteres dentro del texto usando el carácter `\`.
-
-Por ejemplo, se podría escribir un texto seguido de una nueva línea y luego otro texto, usando caracteres de escape y un string con comillas dobles:
+Double-quoted strings are enclosed in `"` and support standard backslash escape sequences:
 
 ```nu
 "hello\nworld"
 ```
 
-Los caracteres de escape permiten agregar rápidamente un carácter que de otro modo sería difícil de escribir.
+Supported escape sequences include:
+- `\"` (double quote)
+- `\'` (single quote)
+- `\\` (backslash)
+- `\/` (forward slash)
+- `\b` (backspace)
+- `\f` (form feed)
+- `\r` (carriage return)
+- `\n` (newline)
+- `\t` (tab)
+- `\u{X...}` (Unicode code point with 1 to 6 hexadecimal digits)
 
-Nushell actualmente admite los siguientes caracteres de escape:
+### Raw Strings {#raw-strings}
 
-- `\"` - carácter de comillas dobles
-- `\'` - carácter de comillas simples
-- `\\` - barra invertida
-- `\/` - barra diagonal
-- `\b` - retroceso
-- `\f` - avance de formulario
-- `\r` - retorno de carro
-- `\n` - nueva línea (avance de línea)
-- `\t` - tabulación
-- `\u{X...}` - un solo carácter unicode, donde X... son 1-6 dígitos hexadecimales (0-9, A-F)
-
-### Strings Raw {#raw-strings}
-
-Los strings raw se comportan igual que las strings con comillas simples, excepto que las strings raw también pueden contener comillas simples. Esto es posible porque las strings raw están encerradas por un `r#'` inicial y un `'#` final.
+Raw strings allow single and double quotes inside text without escaping. They are delimited by `r#'` and `'#`:
 
 ```nu
 r#'Raw strings can contain 'quoted' text.'#
 ```
 
-Se pueden agregar símbolos `#` adicionales al principio y al final del string raw para encerrar
-uno menos que la misma cantidad de símbolos `#` junto a un símbolo `'` en el string. Esto se puede usar para anidar strings raw:
+You can increase the number of `#` delimiters to nest raw strings:
 
 ```nu
 r###'r##'This is an example of a raw string.'##'###
 ```
 
-### Strings de Palabra Simple {#bare-word-strings}
+### Bare-Word Strings {#bare-word-strings}
 
-Al igual que otros lenguajes de shell (pero a diferencia de la mayoría de los otros lenguajes de programación), las strings que constan de una sola 'palabra' también se pueden escribir sin comillas:
+Simple alphanumeric words can often be written without quotes:
 
 ```nu
 print hello
@@ -1144,7 +1061,7 @@ print "hello"
 [hello] | describe
 ```
 
-Pero se debe tener cuidado: si usa una palabra simple directamente en la línea de comandos (es decir, no dentro de una estructura de datos o como un parámetro de comando) o dentro de paréntesis redondos `(` `)`, se interpretará como un comando externo:
+However, bare words in the leading position of an expression or inside parentheses `(...)` are evaluated as command names:
 
 ```nu
 hello
@@ -1159,237 +1076,200 @@ Error: nu::shell::external_command
   help: program not found
 ```
 
-Además, muchas palabras simples tienen un significado especial en nu, por lo que no se interpretarán como una string:
+If a bare word conflicts with a built-in keyword (`true`, `false`, `null`), Nushell treats it as that keyword rather than a string:
 
 ```nu
 true | describe
-
 [true] | describe
-
 [trueX] | describe
-
 "trueX" | describe
 ```
 
-Entonces, si bien los strings simples son útiles para el uso informal de la línea de comandos, al programar más formalmente en nu, se recomienda usar comillas.
+In structured scripts, using explicit quotes is recommended to avoid parsing ambiguities.
 
-### Strings con Comillas Invertidas {#backtick-quoted-strings}
+### Backtick-Quoted Strings {#backtick-quoted-strings}
 
-Las strings de palabras simples, por su naturaleza, no pueden incluir espacios ni comillas. Como alternativa, Nushell también incluye strings con comillas invertidas
-usando el carácter <code>`</code>. En la mayoría de los casos, estos deberían funcionar igual que una string de palabra simple.
-
-Por ejemplo, al igual que con una palabra simple, una string entre comillas invertidas en la primera posición de una expresión se interpretará como un _comando_ o _ruta_.
-Por ejemplo:
+Enclosed by <code>`</code>, backtick strings can contain spaces while functioning similarly to bare words:
 
 ```nu
 # skip-docker-exec
-# Ejecutar el binario ls externo o cambiar de directorio interactivamente
 ^ls
 ```
 
-Las strings con comillas invertidas pueden ser útiles para combinar globs con archivos o directorios que incluyen espacios:
+They are especially useful for passing paths with spaces to commands:
 
 ```nu
 # skip-docker-exec
 ls `./my dir/*`
 ```
 
-### Strings como comandos externos
+### Executing Strings as External Commands
 
-Puede colocar el signo `^` delante de cualquier string (incluida una variable) para que Nushell ejecute la string como si fuera un comando externo:
+Prefixing any string expression or variable with `^` instructs Nushell to execute its contents as an external command:
 
 ```nu
 ^ls
-
 ^'ls'
-
 let foo = 'ls'
 ^$foo
 ```
 
-También se puede usar el comando `run-external` para este propósito, que proporciona indicadores y opciones adicionales.
+You can also use `run-external` for advanced process configuration.
 
-### Añadir y anteponer a strings
+### String Concatenation and Joins
 
-Hay varias formas de anteponer o añadir strings. Si se desea agregar algo al principio de cada string, se puede iterar:
-
-```nu
-['foo', 'bar'] | each {|s| '~/' ++ $s} # ~/foo, ~/bar
-['foo', 'bar'] | each {|s| '~/' + $s} # ~/foo, ~/bar
-```
-
-También puede usar una expresión regular para reemplazar el principio o el final de una string:
+Nushell provides several operators and commands for combining strings:
 
 ```nu
-['foo', 'bar'] | str replace -r '^' '~/' # ~/foo, ~/bar
-['foo', 'bar'] | str replace -r '$' '~/' # foo~/, bar~/
+['foo', 'bar'] | each {|s| '~/' ++ $s}
+['foo', 'bar'] | each {|s| '~/' + $s}
 ```
 
-Si se desea obtener un string a partir de una lista:
+Regular expressions can also prepend or append substrings across collections:
+
+```nu
+['foo', 'bar'] | str replace -r '^' '~/'
+['foo', 'bar'] | str replace -r '$' '~/'
+```
+
+To join list elements into a single string:
 
 ```nu
 "hello" | append "world!" | str join " "
-
 ls | get name | str join "/"
 ```
 
-También se puede usar reduce:
+Using `reduce`:
 
 ```nu
 1..10 | reduce -f "" {|elt, acc| $acc + ($elt | into string) + " + "}
 ```
 
-Aunque en el caso de los strings, especialmente si no se tiene que operar en las strings, suele ser más fácil y correcto (observe el + adicional al final del ejemplo anterior) usar `str join`.
+For most join operations, `str join` is the clearest and most idiomatic choice.
 
-Finalmente, también se puede usar la interpolación de strings.
+### String Interpolation {#string-interpolation}
 
-### Interpolación de strings {#string-interpolation}
-
-Los casos de uso de strings más complejos también necesitan una nueva forma de string: interpolación de strings. Esta es una forma de construir texto a partir de texto sin formato y el resultado de ejecutar expresiones. La interpolación de strings combina los resultados, dándo una nueva string.
-
-La interpolación de strings usa `$" "` y `$' '` como formas de encapsular texto interpolado.
-
-Por ejemplo, si se tiene una variable llamada `$name` y queremos saludar al nombre de la persona contenida en esta variable:
+String interpolation allows evaluating subexpressions directly inside text literals, delimited by `$"..."` (with escape processing) or `$'...'` (without escape processing):
 
 ```nu
 let name = "Alice"
-
 $"greetings, ($name)"
-
 $"greetings, (ls | get name.2)"
 ```
 
-Al encapsular expresiones en `()`, podemos ejecutarlas hasta su finalización y usar los resultados para ayudar a construir el string.
+Subexpressions inside `(...)` evaluate fully, and their results are concatenated into the final string.
 
-La interpolación de strings tiene una forma con comillas simples, `$' '`, y una con comillas dobles, `$" "`. Éstas corresponden a las strings con comillas simples y comillas dobles: la interpolación de strings con comillas simples no admite caracteres de escape, mientras que la interpolación de strings con comillas dobles sí.
-
-A partir de la versión 0.61, las strings interpoladas admiten el escape de paréntesis, de modo que los caracteres `(` y `)` se pueden usar en una string sin que Nushell intente evaluar lo que aparece entre ellos:
+Literal parentheses inside interpolated strings can be escaped with backslashes:
 
 ```nu
-$"2 + 2 is (2 + 2) \(adivinaste!)"
+$"2 + 2 is (2 + 2) \(you guessed it!)"
 ```
 
-Los strings interpolados se pueden evaluar en tiempo de análisis, pero si incluyen valores cuyo formato depende de su configuración y su `config.nu` aún no se ha cargado, utilizarán la configuración predeterminada.
-Entonces, si se tiene algo como esto en su `config.nu`, `x` será `"2.0 KB"` incluso si su configuración dice que use `MB` para todos los tamaños de archivo (las fechas y horas utilizarán de manera similar la configuración predeterminada).
+Interpolated strings can be evaluated at parse time when assigned to constants:
 
 ```nu
 const x = $"(2kb)"
 ```
 
-### Dividir Strings
+### Splitting Strings
 
-El comando `split row` crea una lista a partir de una string basándose en un delimitador.
+Use `split row` to break a string into a list based on a delimiter:
 
 ```nu
 "red,green,blue" | split row ","
 ```
 
-El comando `split column` creará una tabla a partir de una string basándose en un delimitador. Esto aplica nombres de columna genéricos a la tabla.
+Use `split column` to parse delimited text into a structured table:
 
 ```nu
 "red,green,blue" | split column ","
 ```
 
-Finalmente, el comando `split chars` dividirá una string en una lista de caracteres.
+Use `split chars` to divide text into individual characters:
 
 ```nu
 'aeiou' | split chars
 ```
 
-### El comando `str`
+### String Transformation Commands (`str`)
 
-Muchas funciones de string son subcomandos del comando `str`. Puede obtener una lista completa usando `help str`.
+Common string operations are organized as subcommands of `str`. Inspect the full suite with `help str`.
 
-Por ejemplo, puede buscar si una string contiene una subcadena (_substring_) en particular usando `str contains`:
+Check whether a string contains a substring:
 
 ```nu
 "hello world" | str contains "o wo"
 ```
 
-También se puede utilizar el operador `=~`.
+The regex matching operator `=~` provides pattern searching.
 
-#### Recortar Strings
+#### Trimming
 
-Se puede recortar los lados de una string con el comando `str trim`. De forma predeterminada, el comando `str trim` recorta los espacios en blanco de ambos lados de la string. Por ejemplo:
+Use `str trim` to remove leading and trailing whitespace:
 
 ```nu
 '       My   string   ' | str trim
 ```
 
-Se puede especificar en qué lado se produce el recorte con las opciones `--right` y `--left`. (`-r` y `-l` son las opciones abreviadas respectivamente)
-
-Para recortar un carácter específico, se utiliza `--char <Carácter>` o `-c <Carácter>` para especificar el carácter a recortar.
-
-Ejemplo:
+Specify `--left` (`-l`) or `--right` (`-r`) to trim only one side, or pass `--char` (`-c`) to strip specific characters:
 
 ```nu
 '=== Nu shell ===' | str trim -r -c '='
 ```
 
-#### Substrings
+#### Substrings and Indexing
 
-Los substrings son porciones de una string. Tienen un punto de inicio y un punto final
+Extract slices of text using character index ranges:
 
 ```nu
 'Hello World!' | str index-of 'o'
-
 'Hello World!' | str index-of 'r'
-
 'Hello World!' | str substring 4..8
 ```
 
-#### Relleno de Strings
+#### Padding
 
-Con el comando `fill` puede agregar relleno a una string. El relleno agrega caracteres a la string hasta que tenga una cierta longitud. Por ejemplo:
+Use `fill` to pad strings to a designated width:
 
 ```nu
 '1234' | fill -a right -c '0' -w 10
-
 '1234' | fill -a left -c '0' -w 10
 ```
 
-#### Invertir Strings
+#### Reversing
 
-Esto se puede hacer fácilmente con el comando `str reverse`.
+Use `str reverse` to invert character order:
 
 ```nu
 'Nushell' | str reverse
-
 ['Nushell' 'is' 'cool'] | str reverse
 ```
 
-#### Análisis de Strings
+#### Structured Parsing
 
-Con el comando `parse` se puede analizar una string en columnas. Por ejemplo:
+Use `parse` to extract structured fields into a table using pattern templates or regular expressions:
 
 ```nu
 'Nushell 0.80' | parse '{shell} {version}'
-
 'where all data is structured!' | parse --regex '(?P<subject>\w*\s?\w+) is (?P<adjective>\w+)'
 ```
 
-Si se sabe que un string contiene datos separados por comas, separados por tabulaciones o separados por varios espacios, puede usar `from csv`, `from tsv` o `from ssv`, respectivamente:
+Standard delimited streams can be parsed directly with `from csv`, `from tsv`, or `from ssv`:
 
 ```nu
 "acronym,long\nAPL,A Programming Language" | from csv
-
 "name  duration\nonestop.mid  4:06" | from ssv
-
 "rank\tsuit\nJack\tSpades\nAce\tClubs" | from tsv
 ```
 
-### Comparación de Strings
+### String Comparisons
 
-Además de los operadores estándar `==` y `!=`, existen algunos operadores para comparar específicamente strings entre sí.
-
-Para expresiones regulares:
+In addition to standard comparison operators (`==`, `!=`), Nushell provides dedicated string predicates:
 
 ```nu
 'APL' =~ '^\w{0,3}$'
 'FORTRAN' !~ '^\w{0,3}$'
 ```
-
-Existen otros dos operadores para comparaciones más sencillas:
 
 ```nu
 'JavaScript' starts-with 'Java'
@@ -1397,66 +1277,61 @@ Existen otros dos operadores para comparaciones más sencillas:
 'OCaml' ends-with 'Caml'
 ```
 
-### Convertir Strings
+### Type Conversions
 
-Hay varias formas de convertir strings a otros tipos y viceversa.
+Convert to string:
+1. `into string`: `123 | into string`
+2. Interpolation: `$'(123)'`
 
-#### A string
+Convert from string:
+1. `into <type>`: `'123' | into int`
 
-1. Usando `into string`. Ej: `123 | into string`
-2. Usando interpolación de strings. Ej: `$'(123)'`
+### ANSI Terminal Colors
 
-#### De string
-
-1. Usando `into <tipo>`. Ej: `'123' | into int`
-
-### Colorear Strings
-
-Se pueden colorear strings con el comando `ansi`. Por ejemplo:
+Apply ANSI styling with `ansi`:
 
 ```nu
 $'(ansi purple_bold)This text is a bold purple!(ansi reset)'
 ```
 
-`ansi purple_bold` hace que el texto sea de color púrpura intenso
-`ansi reset` restablece el color al predeterminado. (Consejo: Siempre debe terminar las strings coloreadas con `ansi reset`)
+Always terminate styled output with `ansi reset` to restore default terminal colors.
 
+## Working with Lists
 
-## Trabajando con listas
-
-Las listas son equivalentes a las columnas individuales de las tablas. Una lista es esencialmente una "tabla de una columna" (sin nombre de columna). Por lo tanto, cualquier comando que opere en una columna _también_ opera en una lista. Por ejemplo, `where` se puede usar con listas:
+In Nushell, a list is an ordered collection of values, conceptually equivalent to a single table column without a header label. Commands that operate on table columns work seamlessly on lists. For example, `where` filters list items directly:
 
 ```nu
 [bell book candle] | where ($it =~ 'b')
 ```
 
-### Creando listas
+### Creating Lists
 
-Una lista es una colección ordenada de valores.
-Una lista se crea usando corchetes que rodean los valores separados por espacios, saltos de línea y/o comas.
-Por ejemplo, `[foo bar baz]` o `[foo, bar, baz]`.
+Lists are constructed with square brackets, separating elements with spaces, commas, or newlines:
 
-> Las listas de Nushell son similares a las matrices JSON. El mismo `[ "Item1", "Item2", "Item3" ]` que representa una matriz JSON también se puede usar para crear una lista de Nushell.
+```nu
+[foo bar baz]
+[foo, bar, baz]
+```
 
-### Actualizando listas
+Nushell lists serialize to and from JSON arrays (`["Item1", "Item2", "Item3"]`) transparently.
 
-Se usa `insert` para insertar valores en las listas a medida que fluyen a través de la _pipeline_, por ejemplo, insertamos el valor `10` en el medio de una lista:
+### Modifying Lists
+
+Use `insert` to place a value at a designated index:
 
 ```nu
 [1, 2, 3, 4] | insert 2 10
 ```
 
-También se puede usar `update` para reemplazar el segundo elemento con el valor `10`.
+Use `update` to replace an element at a given position:
 
 ```nu
 [1, 2, 3, 4] | update 1 10
 ```
 
-### Eliminando o Agregando Elementos de la Lista
+### Appending, Prepending, and Slicing
 
-Además de `insert` y `update`, también se tiene `prepend` y `append`. Estos permiten insertar al principio de una lista o al final de la lista, respectivamente.
-
-Por ejemplo:
+Add items with `prepend`, `append`, or the list concatenation operator `++`:
 
 ```nu
 let colors = [yellow green]
@@ -1467,7 +1342,7 @@ let colors = ["black"] ++ $colors
 $colors # [black red yellow green purple blue]
 ```
 
-En caso de que se requiera eliminar elementos de la lista, hay muchas maneras. `skip` permite omitir las primeras filas de la entrada, mientras que `drop` permite omitir filas numeradas específicas del final de la lista.
+Use `skip` to discard leading elements, and `drop` to truncate elements from the end:
 
 ```nu
 let colors = [red yellow green purple]
@@ -1476,7 +1351,7 @@ let colors = $colors | drop 2
 $colors # [yellow]
 ```
 
-También está `last` y `first` que permiten tomar valores desde el final o el principio de la lista, respectivamente.
+Extract head and tail elements using `first` and `last`:
 
 ```nu
 let colors = [red yellow green purple black magenta]
@@ -1484,18 +1359,15 @@ let colors = $colors | last 3
 $colors # [purple black magenta]
 ```
 
-Y desde el principio de una lista,
-
 ```nu
 let colors = [yellow green purple]
 let colors = $colors | first 2
 $colors # [yellow green]
 ```
 
-#### Usando el Operador de Propagación
+#### Spread Operator (`...`)
 
-Para agregar una o más listas, opcionalmente con valores intercalados, se puede usar el
-operador de propagación (`...`)
+Flatten nested lists or interpolate elements into a new list with `...`:
 
 ```nu
 let x = [1 2]
@@ -1507,10 +1379,9 @@ let x = [1 2]
 ]
 ```
 
-### Iterando sobre Listas
+### Iterating over Lists
 
-Para iterar sobre los elementos de una lista, se utiliza el comando `each` con un bloque
-de código Nu que especifica qué hacer con cada elemento. El parámetro de bloque (por ejemplo, `|elt|` en `{ |elt| print $elt }`) es el elemento de lista actual, pero el filtro [`enumerate`](/commands/docs/enumerate.md) se puede usar para proporcionar valores de `index` y `item` si es necesario. Por ejemplo:
+Use `each` to execute a code block for every element in a list. The block receives each element as an argument (or as `$in`). Combine with `enumerate` to track element indices:
 
 ```nu
 let names = [Mark Tami Amanda Jeremy]
@@ -1520,65 +1391,55 @@ $names | each { |elt| $"Hello, ($elt)!" }
 $names | enumerate | each { |elt| $"($elt.index + 1) - ($elt.item)" }
 ```
 
-El comando `where` se puede usar para crear un subconjunto de una lista, filtrando eficazmente la lista según una condición.
-
-El siguiente ejemplo obtiene todos los colores cuyos nombres terminan en "e".
+Filter list items with `where`:
 
 ```nu
 let colors = [red orange yellow green blue purple]
 $colors | where ($it | str ends-with 'e')
-# El bloque pasado a `where` debe evaluarse como un booleano.
-# Esto imprime la lista [orange blue purple].
 ```
-
-En este ejemplo, mantenemos solo los valores superiores a `7`.
 
 ```nu
 let scores = [7 10 8 6 7]
 $scores | where $it > 7 # [10 8]
 ```
 
-El comando `reduce` calcula un solo valor a partir de una lista.
-Utiliza un bloque que toma 2 parámetros: el elemento actual (convencionalmente llamado `elt`) y un acumulador
-(convencionalmente llamado `acc`). Para especificar un valor inicial para el acumulador, usa la opción `--fold` (`-f`).
-Para cambiar `elt` para que tenga valores de `index` y `item`, se usa el filtro [`enumerate`](/commands/docs/enumerate.md).
-Por ejemplo:
+Aggregate list values using `reduce`. The block accepts the current element (`elt`) and an accumulator (`acc`). Use `--fold` (`-f`) to set an initial accumulator value:
 
 ```nu
 let scores = [3 8 4]
 $"total = ($scores | reduce { |elt, acc| $acc + $elt })" # total = 15
 
-$"total = ($scores | math sum)" # enfoque más fácil, mismo resultado
+$"total = ($scores | math sum)" # idiomatic equivalent
 
 $"product = ($scores | reduce --fold 1 { |elt, acc| $acc * $elt })" # product = 96
 
 $scores | enumerate | reduce --fold 0 { |elt, acc| $acc + $elt.index * $elt.item } # 0*3 + 1*8 + 2*4 = 16
 ```
 
-### Accediendo a la Lista
+### Accessing List Elements
 
-Para acceder a un elemento de la lista en un índice dado, se usa la forma `$name.index` donde `$name` es una variable que contiene una lista.
-
-Por ejemplo, se puede acceder al segundo elemento de la lista a continuación con `$names.1`.
+Access list items by numeric index using cell paths (`$list.index`):
 
 ```nu
 let names = [Mark Tami Amanda Jeremy]
-$names.1 # da Tami
+$names.1 # returns Tami
 ```
 
-Si el índice está en alguna variable `$index`, podemos usar el comando `get` para extraer el elemento de la lista.
+When the index is held in a variable, retrieve the element with `get`:
 
 ```nu
 let names = [Mark Tami Amanda Jeremy]
 let index = 1
-$names | get $index # da Tami
+$names | get $index # returns Tami
 ```
 
-El comando `length` devuelve el número de elementos de una lista.
-Por ejemplo, `[red green blue] | length` imprime `3`.
+Query the number of items with `length`:
 
-El comando `is-empty` determina si una cadena, lista o tabla está vacía.
-Se puede usar con listas de la siguiente manera:
+```nu
+[red green blue] | length
+```
+
+Check for empty lists with `is-empty`:
 
 ```nu
 let colors = [red green blue]
@@ -1588,7 +1449,7 @@ let colors = []
 $colors | is-empty # true
 ```
 
-Los operadores `in` y `not-in` se utilizan para probar si un valor está en una lista. Por ejemplo:
+Test membership using `in` and `not-in`:
 
 ```nu
 let colors = [red green blue]
@@ -1597,48 +1458,45 @@ let colors = [red green blue]
 'gold' not-in $colors # true
 ```
 
-El comando `any` determina si algún elemento de una lista coincide con una condición dada.
-Por ejemplo:
+Evaluate conditions across items with `any`:
 
 ```nu
 let colors = [red green blue]
-# ¿Algún nombre de color termina con "e"?
+# Does any color name end with "e"?
 $colors | any {|elt| $elt | str ends-with "e" } # true
 
-# ¿La longitud de algún nombre de color es inferior a 3?
+# Is any color name shorter than 3 characters?
 $colors | any {|elt| ($elt | str length) < 3 } # false
 
 let scores = [3 8 4]
-# ¿Alguna puntuación es superior a 7?
+# Is any score greater than 7?
 $scores | any {|elt| $elt > 7 } # true
 
-# ¿Alguna puntuación es impar?
+# Is any score odd?
 $scores | any {|elt| $elt mod 2 == 1 } # true
 ```
 
-El comando `all` determina si todos los elementos de una lista coinciden con una condición dada.
-Por ejemplo:
+Test whether all elements satisfy a condition using `all`:
 
 ```nu
 let colors = [red green blue]
-# ¿Todos los nombres de color terminan con "e"?
+# Do all color names end with "e"?
 $colors | all {|elt| $elt | str ends-with "e" } # false
 
-# ¿La longitud de todos los nombres de color es mayor o igual a 3?
+# Are all color names at least 3 characters long?
 $colors | all {|elt| ($elt | str length) >= 3 } # true
 
 let scores = [3 8 4]
-# ¿Todas las puntuaciones son superiores a 7?
+# Are all scores greater than 7?
 $scores | all {|elt| $elt > 7 } # false
 
-# ¿Todas las puntuaciones son pares?
+# Are all scores even?
 $scores | all {|elt| $elt mod 2 == 0 } # false
 ```
 
-### Convirtiendo la Lista
+### Transforming Lists
 
-El comando `flatten` crea una nueva lista a partir de una lista existente agregando elementos de listas anidadas a la lista de nivel superior. Esto se puede llamar varias veces para aplanar listas anidadas a cualquier profundidad.
-Por ejemplo:
+Use `flatten` to collapse nested lists into a single list:
 
 ```nu
 [1 [2 3] 4 [5 6]]
@@ -1652,12 +1510,12 @@ Por ejemplo:
 [[1 2] [3 [4 5 [6 7 8]]]] | flatten | flatten | flatten # [1 2 3 4 5 6 7 8]
 ```
 
-El comando `wrap` convierte una lista en una tabla. Cada valor de la lista se convertirá en una fila separada con una sola columna:
+Use `wrap` to turn a list into a single-column table:
 
 ```nu
 let zones = [UTC CET Europe/Moscow Asia/Yekaterinburg]
 
-# Mostrar el reloj mundial para las zonas horarias seleccionadas
+# Display world clock for selected time zones
 $zones |
   wrap 'Zone' |
   upsert Time {|row|
@@ -1665,10 +1523,9 @@ $zones |
   }
 ```
 
+## Working with Records
 
-## Trabajando con Registros (records)
-
-Los registros son aproximadamente equivalentes a las filas individuales de una tabla. Esencialmente son una "tabla de una fila". Por lo tanto, la mayoría de los comandos que operan en una fila de tabla _también_ operan en un registro. Por ejemplo, `update` se puede usar con registros:
+Records correspond conceptually to individual rows within a structured table. In essence, a record represents a "single-row table." Consequently, most commands engineered to transform a table row also operate seamlessly on individual records. For example, `update` can be invoked directly on a record:
 
 ```nu
 let my_record = {
@@ -1678,9 +1535,9 @@ let my_record = {
 $my_record | update age { $in + 1 }
 ```
 
-### Creando registros
+### Creating Records
 
-Un registro es una colección de cero o más asignaciones de pares clave-valor. Es similar a un objeto JSON y se puede crear utilizando la misma sintaxis:
+A record is an ordered mapping of zero or more key-value pairs. It behaves similarly to a JSON object and can be declared using identical syntax:
 
 ```nu
 # Nushell
@@ -1694,9 +1551,9 @@ Un registro es una colección de cero o más asignaciones de pares clave-valor. 
 '{ "apples": 543, "bananas": 411, "oranges": 0 }' | from json
 ```
 
-En Nushell, los pares clave-valor de un registro también se pueden separar utilizando espacios o saltos de línea.
+In Nushell, key-value entries in a record may also be separated by whitespace or newlines rather than commas.
 
-Como los registros pueden tener muchos campos, de forma predeterminada, se muestran verticalmente en lugar de de izquierda a derecha. Para mostrar un registro de izquierda a derecha, de debe convertir a un "nuon". Por ejemplo:
+Because records frequently contain numerous attributes, Nushell renders them vertically by default rather than horizontally across columns. To render a record inline as a single string representation, we convert it to NUON (Nushell Object Notation) via `to nuon`:
 
 ```nu
 {
@@ -1705,30 +1562,30 @@ Como los registros pueden tener muchos campos, de forma predeterminada, se muest
 } | to nuon
 ```
 
-### Actualizando Registros
+### Updating Records
 
-Al igual que con las listas, se pueden insertar valores en los registros. Por ejemplo:
+Just like with lists, values can be inserted into existing records:
 
 ```nu
 { "apples": 543, "bananas": 411, "oranges": 0 } | insert pears { 21 }
 ```
 
-También se pueden actualizar valores:
+Values can also be updated directly:
 
 ```nu
 { "apples": 543, "bananas": 411, "oranges": 0 } | update oranges { 100 }
 ```
 
-Para hacer una copia de un registro con nuevos campos, se puede:
+To derive an updated record with new fields while maintaining immutability:
 
-- Usar el comando `merge`:
+- Invoke the `merge` command:
 
 ```nu
 let first_record = { name: "Sam", rank: 10 }
 $first_record | merge { title: "Mayor" }
 ```
 
-- Usar el operador de propagación (`...`) para expandir el primer registro dentro de un nuevo registro:
+- Or apply the spread operator (`...`) to expand the fields of the original record inside a new record:
 
 ```nu
 let first_record = { name: "Sam", rank: 10 }
@@ -1738,9 +1595,9 @@ let first_record = { name: "Sam", rank: 10 }
  }
 ```
 
-### Iterando sobre un Registro
+### Iterating Over a Record
 
-Se puede iterar sobre los pares clave-valor de un registro transponiéndolo primero a una tabla:
+We can iterate over each key-value pair of a record by first transposing it into a two-column table:
 
 ```nu
 { "apples": 543, "bananas": 411, "oranges": 0 } |
@@ -1751,80 +1608,80 @@ Se puede iterar sobre los pares clave-valor de un registro transponiéndolo prim
 <!--AQUI-->
 
 
-## Trabajando con tablas
+## Working with Tables
 
-Una de las maneras comunes de ver datos en Nu es a través de una tabla. Nu viene con una serie de comandos para trabajar con tablas para que sea conveniente encontrar lo que se está buscando, y para reducir los datos a solo lo que se necesita.
+Structured tables represent the primary medium for inspecting tabular datasets in Nushell. Nu provides a comprehensive suite of built-in table manipulation commands, enabling rapid filtering, projection, and reduction to isolate the exact subsets required for analysis.
 
-Para comenzar, obtenemos una tabla que podamos usar:
+To begin exploring tabular operations, we obtain an initial table from the filesystem:
 
 ```nu
 ls
 ```
 
-### Ordenando los Datos
+### Sorting Data
 
-Se puede ordenar una tabla llamando al comando `sort-by` y estableciendo qué columnas utilizar para ordenar. Si se quisiese ordenar la tabla anterior por el tamaño del archivo:
+We sort tables using `sort-by`, passing one or more column names as sorting keys. To order directory entries by file size:
 
 ```nu
 ls | sort-by size
 ```
 
-Se puede ordenar una tabla por cualquier columna que se pueda comparar. Por ejemplo, se podría también haber ordenado la anterior usando las columnas "name", "accessed", o "modified".
+Tables can be sorted by any column whose data type implements comparison. In this directory listing, we could alternatively sort by `name`, `accessed`, or `modified`.
 
-### Seleccionando Datos
+### Selecting Data
 
-Se puede seleccionar datos de una tabla eligiendo seleccionar columnas específicas o filas específicas, con el comando `select`:
+We project specific columns or slice specific rows using the `select` command:
 
 ```nu
 ls | select name size
 ```
 
-Esto ayuda a crear una tabla que está más enfocada en lo que se necesitan. Si solo quisiéramos ver los 5 archivos más pequeños en este directorio, ejecutamos:
+This isolates the attributes under study. If we wish to inspect only the five smallest files in the directory:
 
 ```nu
 ls | sort-by size | first 5
 ```
 
-Notar que primero se ordenam la tabla por tamaño para llegar al archivo más pequeño, y luego se utiliza `first 5` para devolver las primeras 5 filas de la tabla.
+Notice how the pipeline orders the table by size first to bring the smallest files to the top, and then applies `first 5` to extract the leading rows.
 
-También se pueden saltar filas que no se necesitan:
+Rows can also be skipped sequentially:
 
 ```nu
 ls | sort-by size | first 5 | skip 2
 ```
 
-También se pueden seleccionar filas directamente:
+Specific row indices can be extracted directly:
 
 ```nu
 ls | sort-by name | select 5
 ```
 
-### Obteniendo Datos de una Tabla
+### Retrieving Data from a Table
 
-Hasta ahora, se ha trabajado con tablas recortando la tabla a solo lo que se necesita. A veces, se puede necesitar ir un paso más allá y solo mirar los valores en las celdas en sí mismas en lugar de tomar una columna completa. Por ejemplo, supongamos que queremos obtener solo una lista de los nombres de los archivos:
+Up to this point, our transformations have reshaped tables into smaller tabular subsets. Often, analytical routines require stepping beyond tabular containers to extract raw scalar values or individual column vectors. To extract file names directly as a raw list:
 
 ```nu
 ls | get name
 ```
 
-Esto podría verse como el comando `select` que se vió anteriormente:
+At first glance, this invocation may resemble our earlier `select` pipeline:
 
 ```nu
 ls | select name
 ```
 
-Se ven similares, pero hay diferencias:
+While their syntax appears related, their computational behavior is fundamentally distinct:
 
-- `select`: crea una nueva tabla que incluye solo las columnas especificadas.
-- `get`: devuelve los valores dentro de la columna especificada como una lista.
+- `select`: Produces a new structured table containing solely the projected columns.
+- `get`: Extracts the underlying cell values from the specified column, returning them as a typed list.
 
-### Cambiando Datos en una Tabla
+### Modifying Data in a Table
 
-En adición a seleccionar datos de una tabla, también se pueden actualizar lo que la tabla tiene. Se puede necesitar combinar tablas, añadir nuevas columnas, o editar el contenido de una celda. En Nu, en lugar de editar en el lugar, cada uno de los comandos en la sección devolverá una nueva tabla.
+In addition to selecting subsets, analytical workflows require reshaping tabular contents. This includes appending rows, merging disjoint attributes, and calculating new values. Following Nushell functional design, commands in this section do not mutate tables in place; each invocation yields an entirely new table.
 
-#### Concatenando Tablas
+#### Concatenating Tables
 
-Se pueden concatenar tablas usando `append`:
+We concatenate tabular streams vertically using `append`:
 
 ```nu
 let first = [[a b]; [1 2]]
@@ -1836,7 +1693,7 @@ $second
 $first | append $second
 ```
 
-Si los nombres de columna no son idénticos, entonces, adicionalmente, se crearán columnas y valores según sea necesario:
+If column schemas do not match exactly, Nushell dynamically expands the schema, inserting `null` values where corresponding entries are absent:
 
 ```nu
 let first = [[a b]; [1 2]]
@@ -1846,15 +1703,15 @@ let third = [[a c]; [3 4]]
 $first | append $second | append $third
 ```
 
-También puede usar el operador `++` como un reemplazo en línea para `append`:
+We can also use the binary append operator `++` as an inline shorthand:
 
 ```nu
 $first ++ $second ++ $third
 ```
 
-#### Combinando Tablas
+#### Merging Tables
 
-Se puede utilizar el comando `merge` para combinar dos (o más) tablas:
+We combine columns from two or more tables side-by-side using `merge`:
 
 ```nu
 let first = [[a b]; [1 2]]
@@ -1863,27 +1720,27 @@ let second = [[c d]; [3 4]]
 $first | merge $second
 ```
 
-Con una tercera tabla:
+With a third table:
 
 ```nu
 let third = [[e f]; [5 6]]
 ```
 
-Se pueden unir las tres tablas de esta manera:
+All three tables can be joined sequentially:
 
 ```nu
 $first | merge $second  | merge $third
 ```
 
-O se podría usar el comando `reduce` para combinar dinámicamente todas las tablas:
+Alternatively, we can combine an arbitrary collection of tables dynamically using `reduce`:
 
 ```nu
 [$first $second $third] | reduce {|elt, acc| $acc | merge $elt }
 ```
 
-### Añadiendo una columna
+### Adding a Column
 
-Se puede utilizar el comando `insert` para agregar una nueva columna a la tabla. Por ejemplo:
+We add new columns to an existing table using `insert`:
 
 ```nu
 {edition: 2024} | save -f edition.json
@@ -1891,26 +1748,26 @@ open edition.json
 open edition.json | save -f edition_copia.json
 ```
 
-Agregamos una columna llamada "next_edition" con el valor 2025:
+We insert a column designated `next_edition` with the scalar value 2025:
 
 ```nu
 open edition.json | insert next_edition 2025
 ```
 
-Notar que esta visualización puede ser ligeramente confusa, porque parece que lo que se acaba de hacer es añadir una fila. En este caso, se debe recordar que las filas tienen números, las columnas tienen nombres. Si todavía es confuso, se puede añadir una fila mas, lo quehará que la tabla se renderice como se espera:
+This rendering can occasionally surprise newcomers because a single-row table displays fields vertically. In Nushell tables, row numbers denote observations, whereas column headers denote variables. Appending an additional record clarifies the tabular grid:
 
 ```nu
 open edition.json | insert next_edition 2025 | append {edition: 2021 next_edition: 2023}
 ```
 
-Notar que si se abre el archivo original, el contenido se ha mantenido igual:
+Re-inspecting the original file confirms that its contents remain unchanged:
 
 ```nu
 open edition.json
 open edition.json | save -f edition_copia.json
 ```
 
-Los cambios en Nu son cambios funcionales, lo que significa que trabajan en los valores en sí mismos en lugar de intentar causar un cambio permanente. Esto permite hacer muchos tipos diferentes de trabajo en la _pipeline_ hasta que se está listo para escribir el resultado con los cambios elegidos. Se puede escribir el resultado usando el comando `save`:
+Nushell operations are purely functional: they operate on intermediate values in memory without producing unsolicited side effects on disk. This enables safe pipeline composition until the final pipeline stage explicitly commits results using `save`:
 
 ```nu
 open edition.json |
@@ -1922,26 +1779,26 @@ open edition.json
 open edition2.json
 ```
 
-### Actualizando una Columna
+### Updating a Column
 
-De forma similar al comando `insert`, el comando [`update` sirve para cambiar el contenido de una columna a un nuevo valor.
+Analogous to `insert`, the `update` command replaces the existing contents of a column:
 
 ```nu
 open edition.json
 open edition.json | save -f edition_copia.json
 ```
 
-Y ahora, actualizamos la edición:
+Now, update the edition field:
 
 ```nu
 open edition.json | update edition 2025
 ```
 
-También se puede utilizar el comando `upsert`para insertar o actualizar dependiendo de si la columna ya existe.
+Nushell also supplies `upsert`, which dynamically updates a column if it already exists or inserts it if it is absent.
 
-### Moviendo Columnas
+### Moving Columns
 
-Se puede usar `move` para mover columnas en una tabla. Por ejemplo, si se quisiera mover la columna "name" de `ls` después de la columna "size", se puede realizar:
+We reorder columns across a table using `move`. For instance, to position the `name` column after `size` in an `ls` listing:
 
 ```nu
 ls
@@ -1949,17 +1806,17 @@ ls
 ls | move name --after size
 ```
 
-### Renombrando Columnas
+### Renaming Columns
 
-También se puede columnas en una tabla pasándola por el comando `rename`:
+Columns can be renamed by passing new header identifiers to `rename`:
 
 ```nu
 ls | rename filename filetype filesize filedate
 ```
 
-### Rechazando/Eliminando Columnas
+### Rejecting and Removing Columns
 
-También pueden rechazar/eliminar columnas en una tabla pasándola por el comando de `reject`:
+Unwanted attributes can be excluded from a table using `reject`:
 
 ```nu
 ls -l
@@ -1967,34 +1824,33 @@ ls -l
 ls -l | reject readonly num_links inode created accessed modified
 ```
 
+## Navigating and Accessing Structured Data
 
-## Navegando y Accediendo a Datos Estructurados
+Given Nushell native support for structured data, navigating and addressing nested structures constitutes one of the most frequent operations in daily data science workflows.
 
-Dado el fuerte soporte de Nushell para datos estructurados, algunas de las tareas más comunes involucran navegar y acceder a esos datos.
+### Foundational Concepts
 
-### Antecedentes
+The explanations and examples that follow rely on three foundational structural definitions:
 
-Para los ejemplos y descripciones a continuación, se debe tener en cuenta varias definiciones con respecto a los datos estructurados:
+- **_List:_** An ordered sequence of zero or more values of arbitrary types. A list containing zero elements is termed an "empty list."
+- **_Record:_** An associative collection of zero or more named keys and their associated values. Values within a record may belong to any Nushell type. A record with zero key-value entries is termed an "empty record."
+- **_Nested Data:_** Values stored inside a list, record, or table can be scalar primitives or complex structured data types. Data structures can therefore nest arbitrarily across multiple dimensions:
+    - Lists can contain tables, records, and further child lists.
+        - **_Table:_** A table is fundamentally a list of records.
+    - Records can contain tables, lists, and child records.
+        - Consequently, records within a table can themselves hold nested tables, lists, and sub-records.
 
-- **_Lista:_** Las listas contienen una serie de cero o más valores de cualquier tipo. Una lista con cero valores se conoce como una "lista vacía".
-- **_Registro:_** Los registros contienen cero o más pares de claves con nombre y su valor correspondiente. Los datos en el valor de un registro también pueden ser de cualquier tipo. Un registro con cero pares clave-valor se conoce como un "registro vacío".
-- **_Datos Anidados:_** Los valores contenidos en una lista, registro o tabla pueden ser de un tipo básico o datos estructurados en sí mismos. Esto significa que los datos se pueden anidar en múltiples niveles y en múltiples formas:
-    - Los valores de la lista pueden contener tablas, registros e incluso otras listas
-        - **_Tabla:_** Las tablas son una lista de registros
-    - Los valores de registro pueden contener tablas, listas y otros registros
-        - Esto significa que los registros de una tabla también pueden contener tablas anidadas, listas y otros registros
+> Because a table is fundamentally a list of records, any command or syntax valid on lists is also valid on tables. The converse does not hold uniformly: certain commands require tabular column structures and cannot operate on primitive lists.
 
-> Debido a que una tabla es una lista de registros, cualquier comando o sintaxis que funcione en una lista también funcionará en una tabla. Lo contrario no es necesariamente el caso; hay algunos comandos y sintaxis que funcionan en tablas pero no en listas.
+### Cell Paths
 
-### Rutas de Celda
+A cell path is Nushell primary mechanism for navigating and querying values within structured data. The concept mirrors spreadsheet coordinates, where columns are addressed by name and rows are addressed by numerical index. Segments in a cell path are joined using dot notation (`.`).
 
-Una ruta de celda (_cellpath_) es la forma principal de acceder a valores dentro de datos estructurados. Esta ruta se basa en un concepto similar al de una hoja de cálculo, donde las columnas tienen nombres y las filas tienen números. Los nombres e índices de las rutas de celda están separados por puntos.
+#### Records
 
-#### Registros
+For a record, a cell path specifies a key name as a `string`.
 
-Para un registro, la ruta de celda especifica el nombre de una clave, que es una `string`.
-
-Por ejemplo, para acceder a un Valor de Registro:
+To query an attribute from a record:
 
 ```nu
 let my_record = {
@@ -2005,11 +1861,11 @@ let my_record = {
 $my_record.b + 5
 ```
 
-#### Listas
+#### Lists
 
-Para una lista, la ruta de celda especifica la posición (índice) del valor en la lista. Este es un `int`:
+For a list, a cell path specifies the zero-based index of the target element as an `int`:
 
-Por ejemplo, para acceder a un Valor de Lista (recordar que los índices de lista comienzan en 0):
+To query an item from a list (remembering that list indices begin at 0):
 
 ```nu
 let scoobies_list = [ Velma Fred Daphne Shaggy Scooby ]
@@ -2018,14 +1874,15 @@ $scoobies_list.3
 
 ```
 
-#### Tablas
+#### Tables
 
-- Para acceder a una columna, una ruta de celda usa el nombre de la columna, que es una `string`
-- Para acceder a una fila, usa el número de índice de la fila, que es un `int`
-- Para acceder a una sola celda, usa una combinación del nombre de la columna con el índice de la fila.
+- To access a column, the cell path specifies the column name (`string`).
+- To access a row, the cell path specifies the row index (`int`).
+- To access a specific cell, combine the column name and row index.
 
-Los siguientes ejemplos usarán la siguiente tabla:
+The following examples utilize this sample dataset:
 <!--fix:tabla no cabe dentro del ancho de pagina-->
+
 ```nu
 let data = [[date                        temps                                   condition ];
             [2022-02-01T14:30:00+05:00,  [ 38.24, 38.50, 37.99, 37.98, 39.10 ],  'summy'   ],
@@ -2039,15 +1896,15 @@ $data
 $data | table -e
 ```
 
-Esto representa datos meteorológicos en forma de una tabla con tres columnas:
+This table contains meteorological observations across three columns:
 
-1. **_date_**: Una `date` de Nushell para cada día
-2. **_temps_**: Una `list` de Nushell de 5 valores `float` que representan lecturas de temperatura en diferentes estaciones meteorológicas en el área
-3. **_condition_**: Una `string` de Nushell para la condición meteorológica de cada día para el área
+1. **_date_**: A Nushell `date` timestamp for each observation day.
+2. **_temps_**: A Nushell `list` of five `float` readings recorded by regional weather sensors.
+3. **_condition_**: A Nushell `string` describing local atmospheric conditions.
 
-##### Ejemplo - Acceder a una Fila de la Tabla (Registro)
+##### Example: Accessing a Table Row (Record)
 
-Acceder a los datos del segundo día como un registro:
+Access the second observation day as an individual record:
 
 ```nu
 > $data.1
@@ -2064,15 +1921,15 @@ Acceder a los datos del segundo día como un registro:
 ╰───────────┴───────────────╯
 ```
 
-##### Ejemplo - Acceder a una Columna de la Tabla (Lista)
+##### Example: Accessing a Table Column (List)
 
 ```nu
 $data.condition
 ```
 
-##### Ejemplo - Acceder a una Celda de la Tabla (Valor)
+##### Example: Accessing a Table Cell (Value)
 
-La condición para el cuarto día:
+Retrieve the atmospheric condition for the fourth day:
 
 ```nu
 $data.condition.3
@@ -2082,65 +1939,65 @@ $data | get condition | get 3
 $data | get condition.3
 ```
 
-### Datos Anidados
+### Nested Data
 
-Dado que los datos se pueden anidar, una ruta de celda puede contener referencias a múltiples nombres o índices.
+Because data structures nest arbitrarily, cell paths can chain multiple names and indices into composite query paths.
 
-#### Ejemplo - Accediendo a Datos de Tabla Anidados
+#### Example: Accessing Nested Table Data
 
-Para obtener la temperatura en la segunda estación meteorológica el tercer día:
+Retrieve the reading from the second temperature sensor on the third day:
 
 ```nu
 $data.temps.2.1
 ```
 
-El primer índice `2` accede al tercer día, luego el siguiente índice `1` accede a la lectura de temperatura de la segunda estación meteorológica.
+Here, index `2` selects the third observation day, and subsequent index `1` isolates the second sensor measurement in the nested list.
 
-### Usando `get` y `select`
+### Using `get` and `select`
 
-Además de la sintaxis literal de la ruta de celda utilizada anteriormente, Nushell también proporciona varios comandos que utilizan rutas de celda. Los más importantes de estos son:
+In addition to literal dot notation, Nushell provides specialized pipeline commands that accept cell paths. The two most critical commands are:
 
-- `get` es equivalente a usar una ruta de celda literal pero con soporte para nombres de variables y expresiones. `get`, como los ejemplos de ruta de celda anteriores, devuelve el **valor** indicado por la ruta de celda.
-- `select` es sutilmente, pero críticamente, diferente. Devuelve la **estructura de datos** especificada en sí misma, en lugar de solo su valor.
-    - Usar `select` en una tabla devolverá una tabla de igual o menor tamaño
-    - Usar `select` en una lista devolverá una lista de igual o menor tamaño
-    - usar `select` en un registro devolverá un registro de igual o menor tamaño
+- `get`: Functionally equivalent to cell path dot notation, with full support for dynamic variable names and expressions. Like literal cell paths, `get` returns the **underlying value** referenced by the path.
+- `select`: Fundamentally different from `get`. Rather than extracting raw scalar values, `select` returns a subset of the **data structure itself**:
+    - Applying `select` to a table returns a table of equal or reduced dimensions.
+    - Applying `select` to a list returns a list of equal or reduced length.
+    - Applying `select` to a record returns a record with identical or fewer fields.
 
-Continuando con la tabla de muestra anterior:
+Continuing with our meteorological dataset:
 
-#### Ejemplo - `get` vs. `select` una fila de la tabla
+#### Example: `get` versus `select` on a Table Row
 
 ```nu
 $data | get 1
 $data | select 1
 ```
 
-Observe que:
+Observe the distinction:
 
-- `get` devuelve el mismo registro que el ejemplo `$data.1` anterior
-- `select` devuelve una nueva tabla de una sola fila, incluidos los nombres de las columnas y los índices de las filas
+- `get` yields the exact record illustrated in the previous `$data.1` example.
+- `select` produces a single-row table complete with column headers and row numbers.
 
-Los índices de fila de la tabla resultante de `select` no son los mismos que los del original. La nueva tabla tiene su propio índice que comienza en 0.
+Row indices in a table generated by `select` do not retain their original coordinates; the output table re-indexes its rows beginning at 0.
 
-Para obtener el índice original, se puede usar el comando [`enumerate`](/commands/docs/enumerate.md). Por ejemplo:
+To preserve original position metadata before slicing, use `enumerate`:
 
 ```nu
 $data | enumerate | select 1
 ```
 
-#### Ejemplo - `select` con múltiples filas y columnas
+#### Example: `select` with Multiple Rows and Columns
 
-Debido a que `select` da como resultado una nueva tabla, es posible especificar varios nombres de columna, índices de fila o incluso ambos. Este ejemplo crea una nueva tabla que contiene las columnas de fecha y condición de la primera y segunda filas:
+Because `select` constructs a new table, we can specify multiple columns, row ranges, or combined slices. The following pipeline extracts the date and condition columns from the first two rows:
 
 ```nu
 $data | first 2 | select date condition
 ```
 
-### Nombres de Clave/Columna con espacios
+### Keys and Column Names with Spaces
 
-Si un nombre de clave o un nombre de columna contiene espacios u otros caracteres que impiden que sea accesible como una cadena de palabra simple, entonces el nombre de la clave se puede especificar entre comillas.
+When a record key or table column contains spaces or special characters that prevent bareword parsing, enclose the identifier in quotes.
 
-Ejemplo:
+Example:
 
 ```nu
 let record_example = {
@@ -2153,9 +2010,9 @@ $record_example."key x"
 $record_example | get "key x"
 ```
 
-También se requieren comillas cuando un nombre de clave puede confundirse con un valor numérico.
+Quotes are likewise required when key names look like numerical literals.
 
-Ejemplo:
+Example:
 
 ```nu
 let record_example = {
@@ -2168,17 +2025,17 @@ $record_example."1"
 
 ```
 
-No se debe confundir el nombre de la clave con un índice de fila en este caso. Aquí, al primer elemento se le _asigna_ el nombre de clave `1` (una cadena). Si se convierte a una tabla usando el comando `transpose`, la clave `1` (`string`) estaría en el índice de fila `0` (un entero).
+In this scenario, do not confuse the string key name with a numeric row index. The first entry has been assigned the string key `"1"`. If this record were transposed into a table using `transpose`, the string key `"1"` would reside at row index `0` (an integer).
 
-### Manejo de Datos Faltantes
+### Handling Missing Data
 
-#### El Operador Opcional
+#### The Optional Operator
 
-De forma predeterminada, el acceso a la ruta de celda fallará si no puede acceder a la fila o columna solicitada. Para suprimir estos errores, puede agregar un `?` a un miembro de la ruta de celda para marcarlo como opcional:
+By default, navigating a non-existent cell path triggers a runtime error. To suppress evaluation errors when querying sparse or irregular structures, append `?` to any member of the cell path to mark it as optional:
 
-##### Ejemplo - El Operador Opcional
+##### Example: The Optional Operator
 
-Usando los datos de temperatura de arriba:
+Using our earlier weather dataset:
 
 ```nu
 let cp: cell-path = $.temps?.1
@@ -2186,11 +2043,11 @@ let cp: cell-path = $.temps?.1
 $data | reject temps | get $cp
 ```
 
-De forma predeterminada, las celdas faltantes se reemplazarán por `null` cuando se acceda a ellas a través del operador opcional.
+When navigating via an optional cell path, missing attributes evaluate safely to `null` rather than halting pipeline execution.
 
-#### Asignar un `default` para datos faltantes o `null`
+#### Supplying a Default Value for Missing or Null Data
 
-El comando `default` se puede usar para aplicar un valor predeterminado al resultado de una columna faltante o nula.
+The `default` command replaces missing or `null` entries with a fallback value across target columns:
 
 ```nu
 let missing_value = [{a:1 b:2} {b:1}]
@@ -2202,42 +2059,42 @@ $with_default_value
 $with_default_value.1.a
 ```
 
-### Otros comandos para acceder a datos estructurados
+### Other Commands for Accessing Structured Data
 
-- `reject` es lo opuesto a `select`, eliminando las filas y columnas especificadas
-- `range` especifica las filas de una lista o tabla para seleccionar usando un tipo `range`.
+- `reject`: Acts as the inverse of `select`, dropping specified rows and columns while preserving the remainder.
+- `range`: Extracts a continuous slice of rows from a list or table using a range literal.
 
 
 
-## Edición de Archivos en la Terminal con `ttt`
+## In-Terminal File Editing with `ttt`
 
-Cuando trabajamos en ciencia de datos desde la línea de comandos (especialmente dentro de contenedores Docker o servidores remotos vía SSH), necesitamos un editor de texto rápido, ergonómico y que funcione íntegramente dentro de la terminal. En el contenedor `dsin` disponemos de **`ttt`** (*Terminal Text Editor*), ubicado directamente en `$env.PATH` y preconfigurado con resaltado de sintaxis y atajos de teclado intuitivos.
+When working on command-line data science workflows (especially within Docker containers or remote SSH sessions), an ergonomic, terminal-native text editor is essential. The `dsin` container includes **`ttt`** (*Terminal Text Editor*), placed directly in `$env.PATH` and pre-configured with syntax highlighting and intuitive keyboard shortcuts.
 
-Podemos verificar la versión instalada de `ttt` llamándolo directamente desde Nushell:
+Verify the installed version of `ttt` directly from Nushell:
 
 ```nu
 ttt -v
 ```
 
-### Uso Básico de `ttt`
+### Basic Usage of `ttt`
 
-Para crear o editar un script de Nushell, Python, R o un archivo de configuración dentro de nuestro directorio del capítulo (`/data/ch03`), ejecutamos en una sesión interactiva:
+To create or edit a Nushell, Python, or R script, or to adjust configuration files inside our working directory (`/data/ch03`), launch `ttt` within an interactive terminal session:
 
 ```nu
 # skip-docker-exec
 ttt mi_script.nu
 ```
 
-Atajos esenciales y configuración predeterminada de `ttt` dentro de `dsin`:
+Essential shortcuts and default settings for `ttt` inside `dsin`:
 
-- **`Alt + Q`:** Salir del editor.
-- **`Ctrl + S`:** Guardar el archivo actual.
-- **`Ctrl + F`:** Buscar texto dentro del archivo.
-- **`Ctrl + Z` / `Ctrl + Y`:** Deshacer / Rehacer cambios.
+- **`Alt + Q`:** Exit editor.
+- **`Ctrl + S`:** Save current file.
+- **`Ctrl + F`:** Search text within file.
+- **`Ctrl + Z` / `Ctrl + Y`:** Undo / Redo edits.
 
-La configuración incluida en el entorno utiliza el tema `black-rain-blur`, tabulación de 4 espacios con sangría suave, ajuste automático de línea (*word wrap*), numeración de líneas, coloreado de pares de delimitadores (*bracket pair colorization*) y visualización de archivos ocultos en el explorador integrado.
+The container environment includes the `black-rain-blur` color theme, 4-space soft tabs, automatic word wrap, line numbering, bracket pair colorization, and hidden-file visibility within the built-in file tree.
 
-También podemos generar archivos estructurados directamente desde pipelines de Nushell en el directorio actual usando `save -f` y luego ejecutarlos o inspeccionarlos:
+Structured scripts can also be authored directly from Nushell pipelines using `save -f`, followed by immediate execution or inspection:
 
 ```nu
 "# Script generado en /data/ch03\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
@@ -2246,61 +2103,60 @@ nu ejemplo_ttt.nu | save -f saludo_salida.txt
 open saludo_salida.txt
 ```
 
+## Version Control
 
-## Control de Versiones
+This section introduces version control with Git and demonstrates how platforms such as GitHub and GitLab streamline collaboration and reproducibility in data science.
 
-Esta sección se introduce en el mundo del control de versiones con Git y cómo plataformas como GitHub y GitLab pueden potenciar el flujo de trabajo en ciencia de datos.
+Throughout analytical workflows, code, pipelines, and transformation scripts evolve continuously. Systematically tracking these iterations prevents data loss, simplifies collaboration, and guarantees the scientific reproducibility of empirical findings. This is the domain of **version control**.
 
-En el desarrollo de cualquier proyecto, especialmente en ciencia de datos, el código fuente evoluciona constantemente. Llevar un control de estos cambios resulta crucial para evitar errores, facilitar la colaboración y garantizar la reproducibilidad de los análisis. Aquí es donde entra en juego el **control de versiones**.
+A _version control system_ records modifications made to a file or repository over time. It allows developers to inspect historical snapshots, compare revisions, identify which change introduced a bug, and restore earlier working states.
 
-El _control de versiones_ es un sistema que registra los cambios realizados en un archivo o conjunto de archivos a lo largo del tiempo. Permite regresar a versiones anteriores, comparar diferentes versiones, identificar quién realizó un cambio específico y mucho más.
+Version control provides four critical advantages for data science:
 
-Este sistema es esencial para la ciencia de datos debido a:
+- **Change Tracking:** Exposes the evolution of data pipelines, simplifying bug diagnosis and performance audits.
+- **Collaborative Workflows:** Enables multiple analysts to contribute concurrently without overwriting peer contributions.
+- **State Restoration:** Allows reverting broken pipelines to verified historical checkpoints.
+- **Reproducibility:** Guarantees that analytical code, parameters, and computational artifacts remain consistent over time.
 
-- **Seguimiento de cambios:** Permite entender la evolución del código, facilitando la identificación y corrección de errores.
-- **Colaboración eficiente:** En proyectos colaborativos, varios miembros pueden trabajar simultáneamente sin sobrescribir el trabajo del otro.
-- **Restauración de versiones anteriores:** Permite volver a puntos específicos en el desarrollo, lo cual es útil si se introducen errores o se desea revertir un cambio.
-- **Reproducibilidad:** Garantiza la consistencia del código y los resultados a lo largo del tiempo, lo que es fundamental en la investigación científica.
+### Git: The Essential Tool
 
-### Git: La herramienta esencial
+**Git** is a distributed version control system. Unlike centralized predecessors, every clone contains the complete operational history of the project, enabling offline development and rapid branch switching.
 
-**Git** es un sistema de control de versiones distribuido, ampliamente utilizado en la actualidad. A diferencia de sistemas centralizados, cada usuario posee una copia completa del historial del proyecto, lo que permite trabajar sin conexión y facilita la colaboración.
+**Core Git Concepts:**
 
-**Conceptos básicos de Git:**
+- **Repository:** The directory hosting all project files, configuration assets, and the historical change log (`.git`).
+- **Branch:** An independent line of development. Branches allow feature experimentation and bug fixing without compromising the stable `main` branch.
+- **Commit:** An immutable snapshot of the project state at a specific point in time, identified by a cryptographic hash and accompanied by an explanatory message.
+- **Merge:** The integration of commits from one branch into another.
 
-- **Repositorio:** Un directorio que contiene todos los archivos del proyecto y su historial de cambios.
-- **Rama (branch):** Una línea de desarrollo independiente dentro del repositorio. Permite trabajar en nuevas características o corregir errores sin afectar la rama principal.
-- **Commit:** Una instantánea del estado del proyecto en un momento determinado. Cada commit contiene un mensaje que describe los cambios realizados.
-- **Merge:** La acción de combinar los cambios de una rama a otra.
+**File Lifecycle States:**
 
-**Estados de un archivo:**
+- **Modified:** Files containing unsaved local changes not yet staged for inclusion.
+- **Staged:** Files marked for inclusion in the upcoming commit snapshot.
+- **Committed:** Files safely recorded in the local repository database.
 
-- **Modificado (modified):** Se han realizado cambios en el archivo, pero aún no se han guardado en el repositorio.
-- **Preparado (staged):** Se han marcado los archivos modificados para incluirlos en el siguiente commit.
-- **Confirmado (committed):** Los cambios se han guardado en el repositorio.
+**Essential Git Commands:**
 
-**Comandos esenciales de Git:**
+- **`git init`**: Initializes a new Git repository in the current directory.
+- **`git clone <URL>`**: Clones an existing remote repository onto the local machine.
+- **`git add <file>`**: Stages modified files for the next commit.
+- **`git commit -m "Commit message"`**: Records staged changes as a new commit snapshot.
+- **`git push`**: Transmits local commits to a designated remote repository.
+- **`git pull`**: Fetches and merges remote changes into the active local branch.
+- **`git branch`**: Lists, creates, or deletes development branches.
+- **`git checkout <branch>`**: Switches context to the specified branch.
+- **`git merge <branch>`**: Combines history from the specified branch into the current branch.
 
-- **`git init`**: Crea un nuevo repositorio Git en el directorio actual.
-- **`git clone <URL>`**: Crea una copia local de un repositorio remoto existente.
-- **`git add <archivo>`**: Agrega un archivo al área de preparación (staging area).
-- **`git commit -m "Mensaje del commit"`**: Crea un nuevo commit con los archivos preparados.
-- **`git push`**: Envía los commits locales al repositorio remoto.
-- **`git pull`**: Descarga los cambios del repositorio remoto al repositorio local.
-- **`git branch`**: Muestra las ramas existentes.
-- **`git checkout <nombre_de_la_rama>`**: Cambia a la rama especificada.
-- **`git merge <nombre_de_la_rama>`**: Combina la rama especificada con la rama actual.
+**Common Git Workflows:**
 
-**Flujos de trabajo comunes con Git:**
+- **Centralized Workflow:** All collaborators commit directly to a single shared `main` branch. This model is straightforward and suitable for small, tightly-scoped projects.
+- **Feature Branch Workflow:** Distinct branches are created for each feature or bug fix. This isolates experimental code and facilitates peer review before integration into `main`.
 
-- **Flujo de trabajo centralizado:** Todos los desarrolladores trabajan en una sola rama principal. Es un flujo de trabajo simple, adecuado para proyectos pequeños.
-- **Flujo de trabajo con ramas (feature branching):** Se crea una rama separada para cada nueva característica o corrección de errores. Permite un desarrollo más organizado y facilita la colaboración en proyectos grandes.
+### Cloning and Installing CLI Tools: An Example with ddgr
 
-### Clonar e Instalar Herramientas CLI: Ejemplo con ddgr
+To examine the real-world cycle of downloading, compiling, and integrating external CLI utilities into the `dsin` container environment, we examine `ddgr`. Written in Python, this utility enables command-line web searches via DuckDuckGo directly from the terminal.
 
-Para examinar de forma práctica el ciclo de descarga, instalación e integración de herramientas externas de línea de comandos en el entorno `dsin`, instalaremos `ddgr`. Esta utilidad, desarrollada en Python, permite realizar búsquedas web directamente desde la terminal mediante DuckDuckGo.
-
-En primer lugar, nos aseguramos de estar en el directorio principal del usuario (`~`), creamos un directorio para el código fuente y clonamos el repositorio:
+First, navigate to the user home directory (`~`), create a dedicated source directory, and clone the repository:
 
 ```nu
 # skip-docker-exec (requiere conexión a internet para clonar)
@@ -2311,7 +2167,7 @@ git clone --depth 1 https://github.com/jarun/ddgr.git
 cd ddgr
 ```
 
-A continuación, instalamos la herramienta usando `make`. En el contenedor `dsin`, el directorio `/home/dsin/bin` ya se encuentra en `$env.PATH`, por lo que indicamos `/home/dsin` como prefijo de instalación:
+Next, install the tool via `make`. In the `dsin` container, `/home/dsin/bin` is already configured in `$env.PATH`, so we specify `/home/dsin` as the installation prefix:
 
 ```nu
 # skip-docker-exec (instalación local en ~/bin)
@@ -2319,22 +2175,22 @@ make install PREFIX=/home/dsin
 which ddgr
 ```
 
-Una vez instalada, podemos utilizar `ddgr` de dos formas distintas:
+Once installed, `ddgr` can be utilized in two complementary ways:
 
-#### 1. Modo interactivo en la terminal
+#### 1. Interactive Terminal Mode
 
-Podemos realizar búsquedas interactivas directamente en la consola:
+Run search queries interactively within the console:
 
 ```nu
 # skip-docker-exec (modo interactivo en terminal)
 ddgr como clonar un repositorio github
 ```
 
-En este modo, navegamos entre los resultados con las teclas `n` (página siguiente) y `p` (página anterior), abrimos enlaces ingresando el número correspondiente y salimos presionando `q`.
+In this mode, navigate result pages using `n` (next page) and `p` (previous page), open links by entering the corresponding number, and exit by pressing `q`.
 
-#### 2. Salida estructurada e integración con pipelines de Nushell
+#### 2. Structured Output and Pipeline Integration in Nushell
 
-Una de las mayores ventajas de las herramientas CLI modernas es su capacidad para exportar datos estructurados. Al ejecutar `ddgr` con el parámetro `--json`, podemos enviar su salida a un pipeline de Nushell y procesarla con `from json`:
+A primary strength of modern command-line tools is their capacity to emit structured data. Supplying `--json` to `ddgr` allows streaming search results directly into Nushell pipelines for parsing with `from json`:
 
 ```nu
 # skip-docker-exec (consulta web que requiere acceso a red en vivo)
@@ -2343,63 +2199,57 @@ ddgr --json -n 3 "nushell data science" |
   select title url
 ```
 
-De esta forma, los resultados de búsqueda se convierten inmediatamente en una tabla de Nushell, lo que permite filtrarlos con `where`, proyectar columnas con `select` o exportarlos a otros formatos de manera directa.
+Web query results immediately become a structured Nushell table, ready for filtering with `where`, column projection with `select`, or direct serialization into analytical formats.
 
-### GitHub/GitLab
+### GitHub and GitLab
 
-**GitHub** y **GitLab** son plataformas de alojamiento de código basadas en Git que ofrecen herramientas adicionales para la colaboración y gestión de proyectos.
+**GitHub** and **GitLab** are cloud-based hosting platforms built on Git that provide issue tracking, code review, continuous integration, and project governance.
 
-**Creación de un repositorio remoto:**
+**Creating a Remote Repository:**
 
-1. Crear una cuenta gratuita en GitHub o GitLab.
-2. Crear un nuevo repositorio e indicar un nombre y una descripción.
+1. Register an account on GitHub or GitLab.
+2. Initialize a new repository with an appropriate title and description.
 
-**Conexión del repositorio local con el remoto:**
+**Connecting a Local Repository to a Remote Host:**
 
-1. En la configuración del repositorio remoto, copiar la URL de clonación.
-2. En la terminal, navegar al directorio del repositorio local.
-3. Ejecutar el comando `git remote add origin <URL_del_repositorio_remoto>`.
+1. In the repository settings on the web platform, copy the remote clone URL.
+2. In the terminal, navigate to the root directory of your local project.
+3. Link the remote repository via: `git remote add origin <remote_repository_url>`.
 
-**Colaboración en proyectos:**
+**Collaborative Mechanisms:**
 
-- **Clonar un repositorio existente:** Utilizar el comando `git clone <URL_del_repositorio>` para crear una copia local.
-- **Bifurcación (fork) de repositorios:** Crear una copia personal de un repositorio para trabajar en él de forma independiente.
-- **Pull requests:** Proponer cambios al repositorio original. Se realiza una solicitud al propietario del repositorio para que revise y combine los cambios.
+- **Cloning:** Use `git clone <URL>` to pull a complete local copy of an existing project.
+- **Forking:** Create an independent copy of an upstream repository under your personal account to test modifications without affecting upstream history.
+- **Pull Requests / Merge Requests:** Submit formal review proposals requesting upstream maintainers to integrate your branch changes into their canonical branches.
 
-**Herramientas adicionales en GitHub/GitLab:**
+**Platform Features:**
 
-- **Gestión de issues:** Permite registrar errores, tareas y solicitudes de características.
-- **Wiki:** Un espacio para documentar el proyecto de forma colaborativa.
-- **Integración continua/despliegue continuo (CI/CD):** Permite automatizar pruebas, compilación y despliegue del código.
+- **Issue Tracking:** Organizes bug reports, roadmap milestones, and technical discussions.
+- **Wikis:** Dedicated spaces for team documentation and project knowledge bases.
+- **Continuous Integration / Continuous Deployment (CI/CD):** Automates test execution, static analysis, container image builds, and deployments on every push.
 
-### Mejores prácticas para proyectos de ciencia de datos
+### Best Practices for Data Science Repositories
 
-- **Organización de proyectos:** Utilizar una estructura de directorios clara para organizar el código, los datos y la documentación.
-- **Archivos `.gitignore`:** Excluir del control de versiones archivos innecesarios, como datos sin procesar o archivos temporales.
-- **Mensajes de commit informativos:** Describir claramente los cambios realizados en cada commit.
-- **Gestión de dependencias:** Utilizar archivos de requisitos para especificar las librerías y versiones necesarias para ejecutar el código.
+- **Project Structure:** Organize code, raw datasets, processed data, and documentation into distinct directories.
+- **`.gitignore` Rules:** Keep ephemeral artifacts, compiler caches, operating system metadata, and raw datasets out of source control.
+- **Meaningful Commit Messages:** Write clear, concise commit messages explaining the intent behind each change.
+- **Dependency Declarations:** Document software requirements explicitly using manifest files (`requirements.txt`, `Cargo.toml`, `environment.yml`) or container specifications (`Dockerfile`).
 
 
-### Commit y Push
+### Commit and Push
 
-Para crear proyectos en Gitlab o Github, primero se debe crear una cuenta de usuario.
+To publish projects on GitHub or GitLab, register an account. GitHub and GitLab both support public and private repositories.
 
-Github permite la existencia de solo un repositorio personal privado (en su versión gratis), mientras que Gitlab no tiene esa limitante.
-
-Una vez creada la cuenta de usuario, se debe autentificar la maquina local mediante una clave `ssh`.
-
-Creamos la clave (seleccione Si a todo):
+Authentication is established via an SSH key pair. Generate a new SSH key if one is not already present:
 
 ```bash
 ssh-keygen -t rsa
 cat ~/.ssh/id_rsa.pub
 ```
 
-Copie el contenido de ese archivo y cree una nueva clave ssh en la web de github/gitlab.
+Copy the public key string and register it under the SSH Keys settings in your GitHub or GitLab user profile.
 
-Ahora en la web de github/gitlab, creamos un nuevo repositorio vacío y seleccionamos un nombre.
-
-En la máquina local, realizamos los siguiente para conectarla al repositorio.
+Next, create an empty repository on the web platform and connect your local workspace:
 
 ```bash
 git config --global init.defaultBranch main
@@ -2415,15 +2265,15 @@ git remote add origin git@github.com:your_user/your_repo_name.git
 git push -u origin main
 ```
 
-Esto sincroniza el directorio local con el repositorio.
+This registers the remote origin and synchronizes local commits.
 
-Supongamos que hacemos algún cambio al contenido de este directorio. Por ejemplo, editamos el archivo `README.md`:
+When files change (for instance, editing `README.md`):
 
 ```bash
 nano README.md
 ```
 
-Para subir los cambios realizamos:
+Stage, commit, and push updates using:
 
 ```bash
 git add -A
@@ -2432,70 +2282,70 @@ git commit -am "mensaje apropiado"
 git push origin main
 ```
 
-### Hacer aportes a un repositorio
+### Contributing to a Repository
 
-Para realizar aportes a un repositorio, o una _pull request_ (PR), se debe realizar un siguiente:
+To contribute changes to an open-source project via a pull request (PR):
 
-1. **Crear una copia del repositorio o un _fork_.**
+1. **Fork the Upstream Repository:**
 
-- En el navegador web, ir al repositorio de GitHubitlab al que desea contribuir.
-- En la esquina superior derecha de la página del repositorio, hacer click en el bóton "Fork". Esto crea una copia del repositorio en su cuenta de GitHub/Gitlab.
+- In your web browser, navigate to the target repository.
+- Click "Fork" in the top-right corner to establish a personal copy under your account.
 
-2. **Clonar su Repositorio Bifurcado.**
+2. **Clone the Forked Repository:**
 
-- En la página del _fork_ en su repositorio copie la URL de clonación `ssh`.
-- En la terminal, ejecutar:
+- Copy the SSH clone URL of your fork.
+- In the terminal, clone the fork:
 
-    ```bash
+```bash
     git clone <copied_https_url>
     ```
 
-Reemplace `<copied_https_url>` con la URL que copió en el paso anterior.
+Replace `<copied_https_url>` with the URL copied in the previous step.
 
-3. **Crear una Nueva Rama (_branch_).**
+3. **Create a Dedicated Feature Branch:**
 
-    ```bash
+```bash
     cd <repository_directory>
     git checkout -b <your-branch-name>
     ```
 
-> Por ejemplo: `git checkout -b fix-typo-in-readme`
+> For example: `git checkout -b fix-typo-in-readme`
 
-4. **Hacer sus Cambios y hacer el _commit_.**
+4. **Implement Changes and Commit:**
 
-- Realice los cambios deseados en el código o la documentación.
-- Realice `git add`, `git commit` y `git push` según lo descrito en la sección anterior.
+- Apply edits to code or documentation.
+- Stage and commit changes using `git add` and `git commit`, then push to your fork with `git push origin <your-branch-name>`.
 
-5. **Crear la Solicitud de Aporte (_Pull Request_).**
+5. **Open the Pull Request:**
 
-- **Navegar a GitHub:** Vuelva al repositorio original que bifurcó en GitHub.
-- **Crear PR:** Por lo general, verá un aviso sobre su rama recientemente enviada. Haga clic en el botón "Comparar y solicitar PR". Si no es así, vaya a la pestaña "Solicitudes de extracción" y haga clic en "Nueva solicitud de extracción", luego seleccione su rama.
-- **Revisar y Enviar:** Revise cuidadosamente sus cambios, agregue un título y una descripción a su solicitud de extracción explicando sus cambios y haga clic en "Crear solicitud de extracción".
+- **Navigate to the Upstream Repository:** Open the original repository in your browser.
+- **Initiate PR:** Select "Compare & pull request" on the notification banner for your pushed branch, or open "Pull requests" and click "New pull request".
+- **Review and Submit:** Review diff changes, provide a concise summary of the modifications in the PR description, and click "Create pull request".
 
-### Sugerencias de mensajes commit
+### Guidelines for Commit Messages
 
-Algunas directrices al momento de elegir el mensaje del `commit`.
+Conventional commit conventions ensure an informative, structured commit history:
 
-1. Elija una etiqueta. Algunas sugerencias:
+1. Select a conventional prefix:
 
-- _build_: Cambios que afectan al sistema de compilación o a las dependencias externas (ejemplos de ámbitos: `gulp`, `broccoli`, `npm`).
-- _chore_: Actualización de bibliotecas, derechos de autor u otra configuración del repositorio, incluye la actualización de dependencias.
-- _ci_: Cambios en nuestros archivos de configuración y scripts de CI (ejemplos de ámbitos: Travis, Circle, GitHub Actions).
-- _docs_: Cambios que no son de código, como corregir errores tipográficos o añadir nueva documentación.
-- _feat_: Una confirmación de tipo _feat_ introduce una nueva característica en la base de código.
-- _fix_: Una confirmación de tipo _fix_ corrige un error en su base de código.
-- _perf_: Un cambio de código que mejora el rendimiento.
-- _refactor_: Un cambio de código que no corrige un error ni añade una característica.
-- _style_: Cambios que no afectan al significado del código (espacios en blanco, formato, punto y coma faltantes, etc.).
-- _test_: Añadir pruebas que faltan o corregir las existentes.
+- _build_: Changes affecting build configurations or external dependencies (e.g., `make`, `npm`, `cargo`).
+- _chore_: Maintenance tasks, dependency updates, and configuration adjustments.
+- _ci_: Updates to CI/CD pipeline definitions (e.g., GitHub Actions, GitLab CI).
+- _docs_: Documentation enhancements and typographical corrections.
+- _feat_: Implementation of a new feature or analytical capability.
+- _fix_: Bug fixes and corrections.
+- _perf_: Performance optimizations.
+- _refactor_: Code changes that neither fix a bug nor introduce a feature.
+- _style_: Formatting adjustments, whitespace cleanup, and linting fixes.
+- _test_: Adding missing test cases or correcting existing test suites.
 
-2. Elija un título para la confirmación.
+2. Provide a concise, imperative title.
 
-3. Resuma el _commit_, escribiendo una lista mínima de los cambio realizados.
+3. Include a bulleted summary of specific modifications when necessary.
 
-4. El mensaje _commit_ final debe tener el siguiente formato:
+4. Structure the final commit message:
 
-    ```md
+```md
     <etiqueta>: <título>
 
     - Item 1
@@ -2503,21 +2353,21 @@ Algunas directrices al momento de elegir el mensaje del `commit`.
       etc
     ```
 
-### Recursos adicionales
+### Additional Resources
 
-- **Documentación oficial:**
+- **Official Documentation:**
     - Git: [https://git-scm.com/docs](https://git-scm.com/docs)
     - GitHub: [https://docs.github.com/](https://docs.github.com/)
     - GitLab: [https://docs.gitlab.com/](https://docs.gitlab.com/)
 
-- **Ejemplos de proyectos de ciencia de datos que utilizan Git y GitHub:**
+- **Data Science Projects Utilizing Git and GitHub:**
     - [TensorFlow](https://github.com/tensorflow/tensorflow)
     - [scikit-learn](https://github.com/scikit-learn/scikit-learn)
     - [Pandas](https://github.com/pandas-dev/pandas)
 
-### Para mayor exploración
+### For Further Exploration
 
-Una lista completa de los comandos o herramientas utilizadas en este libro se encuentran en el siguiente link: [https://jeroenjanssens.com/dsatcl/list-of-command-line-tools](https://jeroenjanssens.com/dsatcl/list-of-command-line-tools).
+A comprehensive catalogue of command-line tools featured throughout this curriculum is maintained at: [https://jeroenjanssens.com/dsatcl/list-of-command-line-tools](https://jeroenjanssens.com/dsatcl/list-of-command-line-tools).
 
 \newpage
 
@@ -2527,93 +2377,90 @@ Una lista completa de los comandos o herramientas utilizadas en este libro se en
 
 \newpage
 
-# Programación y Creación de Herramientas de Línea de Comandos {#chapter-4-programming-cli-tools}
+# Programming and Creating Command-Line Tools {#chapter-4-programming-cli-tools}
 
-## Programación en Nushell
+## Programming in Nushell
 
-Esta sección entra en más detalle de Nushell como un lenguaje de programación.
+This section explores Nushell in depth as a general-purpose programming language.
 
-Al igual que la mayoría de los lenguajes de programación permiten definir funciones, Nushell usa comandos personalizados (_custom commands_) para este propósito.
+Just as traditional programming languages provide functions for encapsulating reusable logic, Nushell employs custom commands (*custom commands*) for this purpose.
 
-Los _alias_ de Nushell funcionan de manera similar a los alias de otras shell y son parte del lenguaje de programación, no solo una característica del shell.
+Nushell *aliases* function similarly to aliases in conventional shells, but exist as native constructs within the language rather than mere textual substitutions.
 
-Las operaciones comunes pueden, como la suma o la búsqueda regex, hacerse con _operadores_.
-No todas las operaciones son compatibles con todos los tipos de datos y Nushell se asegurará de hacerlo saber.
+Standard data transformations, from arithmetic evaluation to regular expression matching, are performed using *operators*. Because operations are strictly validated against operand types, Nushell provides immediate syntax and type diagnostics whenever an incompatible operation is attempted.
 
-Se pueden almacenar resultados intermedios en _variables_. Las variables pueden ser inmutables, mutables o una constante de tiempo de análisis.
+Intermediate values can be assigned to *variables*. Nushell variables can be immutable (`let`), mutable (`mut`), or parse-time constants (`const`).
 
-Los _scripts_ son la forma más simple de organización del código: simplemente se escribe el código en un archivo y se ejecuta.
-Sin embargo, también se pueden ejecutar scripts como programas independientes con firmas de línea de comandos utilizando el comando `main`.
+*Scripts* represent the simplest mechanism for organizing code: assemble pipeline statements in a file and execute them directly. Moreover, Nushell scripts can function as standalone executable CLI utilities featuring strongly typed argument signatures via the `main` command.
 
-### Operadores
+### Operators
 
-Nushell soporta los siguientes operadores para operaciones comunes de matemáticas, lógica y cadenas:
+Nushell supports the following operators across arithmetic, logic, and string manipulation:
 
-| Operador      | Descripción                                                               |
+| Operator      | Description                                                               |
 | ------------- | ------------------------------------------------------------------------- |
-| `+`           | sumar                                                                     |
-| `-`           | restar                                                                    |
-| `*`           | multiplicar                                                               |
-| `/`           | dividir                                                                   |
-| `//`          | división de piso                                                          |
-| `mod`         | módulo                                                                    |
-| `**`          | exponenciación (potencia)                                                 |
-| `==`          | igual                                                                     |
-| `!=`          | no igual                                                                  |
-| `<`           | menor que                                                                 |
-| `<=`          | menor o igual que                                                         |
-| `>`           | mayor que                                                                 |
-| `>=`          | mayor o igual que                                                         |
-| `=~`          | coincidencia de expresiones regulares / cadena contiene otra              |
-| `!~`          | coincidencia inversa de expresiones regulares / cadena _no_ contiene otra |
-| `in`          | valor en lista                                                            |
-| `not-in`      | valor no en lista                                                         |
-| `not`         | no lógico                                                                 |
-| `and`         | y dos expresiones booleanas (cortocircuitos)                              |
-| `or`          | o dos expresiones booleanas (cortocircuitos)                              |
-| `xor`         | o exclusivo dos expresiones booleanas                                     |
-| `bit-or`      | o bit a bit                                                               |
-| `bit-xor`     | xor bit a bit                                                             |
-| `bit-and`     | y bit a bit                                                               |
-| `bit-shl`     | desplazamiento bit a bit a la izquierda                                   |
-| `bit-shr`     | desplazamiento bit a bit a la derecha                                     |
-| `starts-with` | cadena comienza con                                                       |
-| `ends-with`   | cadena termina con                                                        |
-| `++`          | agregar listas                                                            |
+| `+`           | Add                                                                       |
+| `-`           | Subtract                                                                  |
+| `*`           | Multiply                                                                  |
+| `/`           | Divide                                                                    |
+| `//`          | Floor division                                                            |
+| `mod`         | Modulo                                                                    |
+| `**`          | Exponentiation (power)                                                    |
+| `==`          | Equal                                                                     |
+| `!=`          | Not equal                                                                 |
+| `<`           | Less than                                                                 |
+| `<=`          | Less than or equal to                                                     |
+| `>`           | Greater than                                                              |
+| `>=`          | Greater than or equal to                                                  |
+| `=~`          | Regex match / string contains                                             |
+| `!~`          | Inverse regex match / string does not contain                             |
+| `in`          | Value in collection                                                       |
+| `not-in`      | Value not in collection                                                   |
+| `not`         | Logical NOT                                                               |
+| `and`         | Short-circuit logical AND                                                 |
+| `or`          | Short-circuit logical OR                                                  |
+| `xor`         | Logical XOR                                                               |
+| `bit-or`      | Bitwise OR                                                                |
+| `bit-xor`     | Bitwise XOR                                                               |
+| `bit-and`     | Bitwise AND                                                               |
+| `bit-shl`     | Bitwise shift left                                                        |
+| `bit-shr`     | Bitwise shift right                                                       |
+| `starts-with` | String starts with                                                        |
+| `ends-with`   | String ends with                                                          |
+| `++`          | Append lists                                                              |
 
-Los paréntesis se pueden usar para agrupar para especificar el orden de evaluación o para llamar a comandos y usar los resultados en una expresión
+Parentheses can be used for subexpression grouping to dictate evaluation precedence or to invoke commands and embed their structured results directly inside an expression.
 
-#### Orden de Operaciones
+#### Order of Operations
 
-Para entender la precedencia de las operaciones, se puede ejecutar el comando: `help operators | sort-by precedence -r`.
+To inspect operator precedence rules directly from the terminal, run: `help operators | sort-by precedence -r`.
 
-Presentado en orden descendente de precedencia, el artículo detalla las operaciones de la siguiente manera:
+Arranged in descending order of precedence, Nushell evaluates expressions as follows:
 
-- Paréntesis (`()`)
-- Exponenciación/Potencia (`**`)
-- Multiplicar (`*`), Dividir (`/`), División Entera/Suelo (`//`), y Módulo (`mod`)
-- Sumar (`+`) y Restar (`-`)
-- Desplazamiento de bits (`bit-shl`, `bit-shr`)
-- Operaciones de comparación (`==`, `!=`, `<`, `>`, `<=`, `>=`), pruebas de pertenencia (`in`, `not-in`, `starts-with`, `ends-with`), coincidencia de expresiones regulares (`=~`, `!~`), y agregar a la lista (`++`)
-- Bit a bit and (`bit-and`)
-- Bit a bit xor (`bit-xor`)
-- Bit a bit or (`bit-or`)
-- Lógico and (`and`)
-- Lógico xor (`xor`)
-- Lógico or (`or`)
-- Operaciones de asignación
-- Lógico not (`not`)
+- Parentheses (`()`)
+- Exponentiation (`**`)
+- Multiplication (`*`), Division (`/`), Floor Division (`//`), and Modulo (`mod`)
+- Addition (`+`) and Subtraction (`-`)
+- Bitwise shifts (`bit-shl`, `bit-shr`)
+- Comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`), membership tests (`in`, `not-in`, `starts-with`, `ends-with`), regex matching (`=~`, `!~`), and list concatenation (`++`)
+- Bitwise AND (`bit-and`)
+- Bitwise XOR (`bit-xor`)
+- Bitwise OR (`bit-or`)
+- Logical AND (`and`)
+- Logical XOR (`xor`)
+- Logical OR (`or`)
+- Assignment operations
+- Logical NOT (`not`)
 
-Por ejemplo:
+For example:
 
 ```nu
 3 * (1 + 2)
 ```
 
-#### Tipos
+#### Types
 
-No todos las operaciones tienen sentido para todos los tipos de datos.
-Si se intenta realizar una operación en tipos de datos no compatibles, se encontrará con un mensaje de error que debería explicar qué salió mal:
+Not all operations make semantic sense across every data type. When attempting an operation between incompatible types, Nushell halts evaluation with an explanatory error diagnostic:
 
 ```nu
 > "spam" - 1
@@ -2630,16 +2477,16 @@ Error: nu::parser::unsupported_operation (link)
   help: Cambie string o int para que sean los tipos correctos e intente nuevamente.
 ```
 
-Las reglas a veces pueden parecer un poco estrictas, pero por otro lado, debería haber menos efectos secundarios inesperados
+These static typing boundaries may initially seem strict, yet they systematically eliminate unexpected runtime side effects and subtle type coercion bugs common in traditional shells.
 
-#### Expresión Regular / Operadores string-contains
+#### Regular Expression and Substring Matching Operators
 
-Los operadores `=~` y `!~` proporcionan una forma conveniente de evaluar expresiones regulares. No se necesita saber de expresiones regulares para usarlos; también son una forma fácil de comprobar si una cadena contiene otra.
+The `=~` and `!~` operators provide an ergonomic syntax for evaluating regular expressions without invoking external utilities. Even without complex regular expressions, they serve as a straightforward mechanism for testing whether a string contains a target substring:
 
-- `string =~ pattern` devuelve **true** si `string` contiene una coincidencia para `pattern`, y **false** en caso contrario.
-- `string !~ pattern` devuelve **false** si `string` contiene una coincidencia para `pattern`, y **true** en caso contrario.
+- `string =~ pattern` evaluates to **true** if `string` contains a match for `pattern`, and **false** otherwise.
+- `string !~ pattern` evaluates to **false** if `string` contains a match for `pattern`, and **true** otherwise.
 
-Por ejemplo:
+For example:
 
 ```nu
 "foobarbaz" =~ "bar" # devuelve true
@@ -2647,44 +2494,42 @@ Por ejemplo:
 ls | where name =~ ^nu # devuelve todos los archivos cuyos nombres comienzan con "nu"
 ```
 
-#### Sensibilidad a Mayúsculas y Minúsculas
+#### Case Sensitivity
 
-Los operadores suelen ser sensibles a mayúsculas y minúsculas cuando operan con cadenas. Hay algunas maneras de trabajar sin distinción entre mayúsculas y minúsculas:
+Nushell operators enforce case sensitivity when comparing text. Several idioms allow performing case-insensitive string evaluations:
 
-1. En los operadores de expresiones regulares, especifique el modificador de modo insensible a mayúsculas y minúsculas `(?i)`:
+1. In regular expression operators, supply the case-insensitive inline flag `(?i)`:
 
 ```nu
 "FOO" =~ "foo" # devuelve falso
 "FOO" =~ "(?i)foo" # devuelve verdadero
 ```
 
-2. Utilice la opción `--ignore-case` del comando `str contains`:
+2. Pass the `--ignore-case` flag to the `str contains` command:
 
 ```nu
 "FOO" | str contains --ignore-case "foo"
 ```
 
-3. Convierta las cadenas a minúsculas con `str downcase` antes de comparar:
+3. Convert strings to lowercase via `str downcase` prior to evaluation:
 
 ```nu
 ("FOO" | str downcase) == ("Foo" | str downcase)
 ```
 
-#### Operador de propagación
+#### The Spread Operator
 
-Nushell tiene un operador de propagación (`...`) para desempaquetar listas y registros. Se puede
-expandir listas o registros en lugares donde se esperan múltiples valores o pares clave-valor.
+Nushell provides a spread operator (`...`) designed to unpack lists and records. It expands compound collections into individual values or key-value attributes wherever multiple arguments or parameters are expected.
 
-Hay tres lugares donde puede usar el operador de propagación:
+The spread operator is valid in three operational contexts:
 
-- En literales de lista.
-- En literales de registro.
-- En llamadas de comando.
+- Inside list literals.
+- Inside record literals.
+- Across command invocations.
 
-##### En literales de Lista
+##### In List Literals
 
-Supongamos que se tienen varias listas que desea concatenar, pero también quiere intercalar
-algunos valores individuales. Esto se puede hacer con `append` y `prepend`, pero la propagación el operador puede permitir hacerlo más fácilmente.
+Suppose we need to concatenate multiple lists while interspersing individual scalar elements. While this can be achieved by chaining `append` and `prepend`, the spread operator offers significantly cleaner syntax:
 
 ```nu
 let dogs = [Spot, Teddy, Tommy]
@@ -2698,7 +2543,7 @@ let cats = ["Mr. Humphrey Montgomery", Kitten]
 ]
 ```
 
-El siguiente código es una versión equivalente usando `append`:
+The following pipeline represents the equivalent transformation constructed with `append`:
 
 ```nu
 $dogs |
@@ -2708,29 +2553,27 @@ $dogs |
   append ...Nemo
 ```
 
-Considerar que cada llamada a `append` da como resultado la creación de una nueva lista, lo que significa que en este segundo
-ejemplo, se crean 3 listas intermedias innecesarias. Este no es el caso con el operador de propagación, por lo que puede haber beneficios de rendimiento (muy menores) al usar `...` si se está uniendo muchas listas grandes
-juntas, una y otra vez.
+Observe that each invocation of `append` allocates a new intermediate list in memory. In this second pipeline, three superfluous intermediate collections are instantiated. The spread operator eliminates these allocations, yielding concrete performance advantages when combining multiple large collections.
 
-Puede haber notado que el último elemento de la lista resultante anterior es `"...Nemo"`. Esto se debe a que dentro de los literales de lista, solo se puede usar para difundir listas, no cadenas. Como tal, dentro de los literales de lista, solo se puede usar antes de variables (`...$foo`), subexpresiones (`...(foo)`), y literales de lista (`...[foo]`).
+Note that the final item in the resulting list above is `"...Nemo"`. Within list literals, the spread operator can only unpack list collections, not bare strings. Consequently, inside list literals, `...` is recognized exclusively before variables (`...$foo`), subexpressions (`...(foo)`), and nested list literals (`...[foo]`).
 
-El `...` tampoco se reconocerá como el operador de propagación si hay algún espacio en blanco entre él y la siguiente expresión:
+Furthermore, `...` will not be parsed as a spread operator if whitespace separates the dots from the target expression:
 
 ```nu
 [ ... [] ]
 ```
 
-Esto es principalmente para que `...` no se confunda con el operador de propagación en comandos como `mv ... $dir`.
+This parsing constraint prevents ambiguity with standard filesystem paths, such as `mv ... $dir`.
 
-##### En literales de Registro
+##### In Record Literals
 
-Digamos que se tiene un registro con alguna información de configuración y desea agregar más campos a este registro:
+Consider a configuration record where additional attributes must be merged dynamically:
 
 ```nu
 let my_config = { path: /tmp, limit: 5 }
 ```
 
-Se puede crear un nuevo registro con todos los campos de `$config` y algunas nuevas adiciones usando la propagación operador. Se puede usar la propagación de múltiples registros dentro de un solo literal de registro.
+We can derive a new record combining all attributes from `$my_config` alongside new entries using the spread operator. Multiple records can be unpacked simultaneously within a single record literal:
 
 ```nu
 {
@@ -2741,64 +2584,63 @@ Se puede crear un nuevo registro con todos los campos de `$config` y algunas nue
 }
 ```
 
-De manera similar a las listas, dentro de los literales de registro, el operador de propagación solo se puede usar antes de las variables (`...$foo`),
-subexpresiones (`...(foo)`), y literales de registro (`...{foo:bar}`). Aquí también, no es necesario que haya espacio en blanco entre el `...` y la siguiente expresión para que se reconozca como el operador de propagación.
+Analogous to lists, the spread operator within record literals is recognized exclusively before variables (`...$foo`), subexpressions (`...(foo)`), and nested record literals (`...{foo:bar}`). Whitespace between `...` and the target expression is strictly prohibited.
 
-##### En llamadas de Comando
+##### In Command Invocations
 
-También se pueden propagar argumentos a un comando, siempre que tenga un parámetro `rest` o sea un comando externo.
+Arguments can also be unpacked dynamically into command calls, provided the receiving command declares a `rest` parameter or corresponds to an external system binary.
 
-Aquí hay un ejemplo de comando personalizado que tiene un parámetro `rest`:
+Here is an example custom command featuring a `rest` parameter:
 
 ```nu
 def foo [ --flag req opt? ...args ] { [$flag, $req, $opt, $args] | to nuon }
 ```
 
-Tiene una opción (`--flag`), un parámetro posicional requerido (`req`), un parámetro posicional opcional (`opt?`), y el parámetro rest (`args`).
+This command declares a named flag (`--flag`), a required positional parameter (`req`), an optional positional parameter (`opt?`), and a variable rest parameter (`args`).
 
-Si se tiene una lista de argumentos para pasar a `args`, se puede propagar de la misma manera que propagaría una lista dentro de un literal de lista. Se aplican las mismas reglas: el operador de propagación solo se reconoce antes de variables, subexpresiones y literales de lista, y no se permiten espacios en blanco en el medio.
+To pass an existing list into `args`, spread it just as you would inside a list literal. Identical parsing rules apply: the spread operator is recognized solely before variables, subexpressions, and list literals, with no whitespace permitted:
 
 ```nu
 foo "bar" "baz" ...[1 2 3] # Con ..., los números se tratan como argumentos separados
 foo "bar" "baz" [1 2 3] # Sin ..., [1 2 3] se trata como un solo argumento
 ```
 
-Una forma más útil de usar el operador de propagación es si tiene otro comando con un parámetro `rest` y desea que reenvíe sus argumentos a `foo`:
+A frequent application of the spread operator arises when writing wrapper commands that forward variable arguments directly to an underlying command:
 
 ```nu
 def bar [ ...args ] { foo --flag "bar" "baz" ...$args }
 bar 1 2 3
 ```
 
-Puede propagar varias listas en una sola llamada y también intercalar argumentos individuales:
+Multiple collections can be unpacked within a single invocation alongside individual positional arguments:
 
 ```nu
 foo "bar" "baz" 1 ...[2 3] 4 5 ...(6..9 | take 2) last
 ```
 
-Las opciones/argumentos con nombre pueden ir después de un argumento de propagación, al igual que pueden ir después de argumentos `rest` regulares:
+Named flags can appear after a spread argument, just as they can follow conventional `rest` parameters:
 
 ```nu
 foo "bar" "baz" 1 ...[2 3] --flag 4
 ```
 
-Si un argumento de propagación viene antes de un parámetro posicional opcional, ese parámetro opcional se trata como omitido:
+If a spread argument precedes an optional positional parameter, that optional parameter is treated as omitted:
 
 ```nu
 foo "bar" ...[1 2] "not opt"
 ```
 
-### Variables en Scripts y Herramientas CLI
+### Variables in Scripts and CLI Tools
 
-El modelo conceptual de variables de Nushell, sus reglas de nomenclatura y la distinción entre `let`, `mut` y `const` fueron introducidos en los [fundamentos del Capítulo 3](#declaracion-y-ciclo-de-vida-de-variables-let-mut-y-const). Al diseñar herramientas y funciones reutilizables, la directriz principal consiste en priorizar variables inmutables con `let` y flujos continuos (*streaming*) de transformación, reservando `mut` exclusivamente para algoritmos imperativos donde la acumulación local sea indispensable y `const` para dependencias evaluadas estáticamente durante el análisis de compilación (`source`, `use`).
+The conceptual variable model of Nushell, naming conventions, and the architectural distinction between `let`, `mut`, and `const` were established in [Chapter 3](#declaracion-y-ciclo-de-vida-de-variables-let-mut-y-const). When designing reusable CLI tools and functions, the governing principle is to prioritize immutable variables with `let` and continuous pipeline streams, reserving `mut` strictly for imperative algorithms where local state accumulation is indispensable and `const` for static dependencies evaluated during compilation (`source`, `use`).
 
-### Comandos personalizados
+### Custom Commands
 
-La capacidad de Nu para componer _pipelines_ largos permite mucho control sobre los datos y sistema, pero tiene el precio de escribir mucho. Idealmente, se podrían guardar las _pipelines_ bien elaborados para usarlos una y otra vez.
+Nushell ability to compose extended pipelines provides granular control over data and system state. However, typing lengthy pipelines repeatedly quickly becomes inefficient. Reusable pipelines should be encapsulated into callable routines.
 
-Aquí es donde entran los comandos personalizados.
+This is where custom commands come in.
 
-Un ejemplo de definición de un comando personalizado:
+Here is a basic custom command definition:
 
 ```nu
 def greet [name:string] {
@@ -2806,17 +2648,17 @@ def greet [name:string] {
 }
 ```
 
-En esta definición, se define el comando `greet`, que toma un solo parámetro `name`. Siguiendo a este parámetro está el bloque que representa lo que sucederá cuando se ejecute el comando personalizado. Cuando se llama, el comando personalizado establecerá el valor pasado para `name` como la variable `$name`, que estará disponible para el bloque.
+This definition declares the command `greet`, accepting a single parameter `name`. Following the parameter signature is the code block executed when the command is invoked. Upon invocation, the argument supplied for `name` is bound to `$name` and made accessible throughout the block.
 
-Para ejecutar lo anterior, podemos llamarlo como llamaríamos a los comandos integrados:
+To execute the custom command, invoke it identically to built-in commands:
 
 ```nu
 greet "world"
 ```
 
-> El valor producido por la última línea de un comando se convierte en el valor devuelto del comando. En este caso, se devuelve una lista que contiene la cadena `'hello'` y `$name`. Para evitar esto, se puede colocar `null` (o el comando `ignore` al final de la _pipeline_, así: `['hello' $name] | null`. También se debe tener en cuenta que la mayoría de los comandos del sistema de archivos, como `save` o `cd`, siempre generan `null`.
+> The value yielded by the final expression of a command automatically becomes its return value. In this case, the command returns a list containing the string `'hello'` and `$name`. To suppress output, pipe to `ignore` or append `null`: `['hello' $name] | ignore`. Note also that most filesystem commands, such as `save` or `cd`, always return `null`.
 
-> Si se quiere generar una sola cadena de texto, se puede usa la sintaxis de interpolación de cadenas para incrustar `$name` en ella:
+> To produce a formatted string directly, use string interpolation syntax to embed `$name`:
 
 ```nu
 def greet [name:string] {
@@ -2826,15 +2668,15 @@ def greet [name:string] {
 greet nushell
 ```
 
-### Nombres de Comandos
+### Command Names
 
-En Nushell, un nombre de comando es una cadena de caracteres. Aquí hay algunos ejemplos de nombres de comandos válidos: `greet`, `get-size`, `mycommand123`, `my command`, y `emoji_cmd` (o cualquier símbolo unicode admitido).
+In Nushell, command names are plain strings. Valid identifiers include: `greet`, `get-size`, `mycommand123`, `my command`, and `emoji_cmd` (including supported Unicode symbols).
 
-> Es una práctica común en Nushell separar las palabras del comando con `-` para una mejor legibilidad. Por ejemplo `get-size` en lugar de `getsize` o `get_size`.
+> Idiomatic Nushell convention separates words in command names with hyphens (`-`) for enhanced readability. For instance, prefer `get-size` over `getsize` or `get_size`.
 
-### Subcomandos
+### Subcommands
 
-También se pueden definir subcomandos a comandos usando un espacio. Por ejemplo, si se quisiera agregar un nuevo subcomando a `str`, se puede crear nombrando el subcomando de forma tal que comience con "str ". Por ejemplo:
+Subcommands are defined naturally by separating command components with spaces. For example, to extend `str` with a new subcommand, declare a command whose name begins with `"str "`:`
 
 ```nu
 def "str mycommand" [] {
@@ -2842,14 +2684,14 @@ def "str mycommand" [] {
 }
 ```
 
-Se puede llamar al comando personalizado como si fuera un subcomando incorporado de `str`:
+The custom command can then be invoked identically to native subcommands of `str`:
 
 ```nu
 def "str mycommand" [] { "hello" }
 str mycommand
 ```
 
-Por supuesto, los comandos con espacios en sus nombres se definen de la misma manera:
+Commands containing whitespace in their primary names are declared following the identical syntax:
 
 ```nu
 def "custom command" [] {
@@ -2857,9 +2699,9 @@ def "custom command" [] {
 }
 ```
 
-### Tipos de Parámetros
+### Parameter Types
 
-Cuando se definen comandos personalizados, se puede nombrar y, opcionalmente, establecer el tipo para cada parámetro. Por ejemplo, se puede escribir lo anterior como:
+When declaring custom commands, parameters can be annotated with explicit static types. For instance, the earlier example can be annotated as:
 
 ```nu
 def greet [name: string] {
@@ -2867,9 +2709,9 @@ def greet [name: string] {
 }
 ```
 
-Los tipos de parámetros son opcionales. Nushell permite omitirlos y tratar el parámetro como `any` si es así. Si se selecciono un tipo en un parámetro, Nushell comprobará este tipo cuando llame a la función.
+Parameter type annotations are optional. When omitted, Nushell assigns the type `any`. When a static type is declared, Nushell validates the argument at parse time before execution begins.
 
-Por ejemplo, supongamos que necesitamos un dato tipo `int` en su lugar:
+For instance, suppose we require an `int` parameter instead:
 
 ```nu
 # skip-docker-exec (demostración de verificación de tipos)
@@ -2880,7 +2722,7 @@ def greet [name: int] {
 greet world
 ```
 
-Si intentamos ejecutar lo anterior, Nushell nos indica que los tipos no coinciden:
+If we attempt to supply an incompatible argument, Nushell halts evaluation with an explicit type mismatch error:
 
 ```
 error: Type Error
@@ -2890,11 +2732,11 @@ error: Type Error
   │       ^^^^^ Expected int
 ```
 
-Esto ayuda a guiar a los usuarios de las definiciones para que invoquen los comandos únicamente con argumentos del tipo esperado. Para consultar el catálogo completo de los tipos de datos admitidos en Nushell (`string`, `int`, `float`, `filesize`, `datetime`, `table`, etc.) y sus descripciones operativas, consulte la [Tabla 1 en el Capítulo 3](#chapter-3-nushell-fundamentals).
+This mechanism ensures callers supply data of the expected shape. For a full inventory of supported Nushell types (`string`, `int`, `float`, `filesize`, `datetime`, `table`, etc.), refer to [Table 1 in Chapter 3](#chapter-3-nushell-fundamentals).
 
-### Parámetros con un Valor Predeterminado
+### Parameters with Default Values
 
-Para hacer un parámetro opcional y directamente proporcionar un valor predeterminado para él, se puede proporcionar un valor predeterminado en la definición del comando.
+To make a parameter optional while specifying a fallback value, assign a default directly in the parameter list:
 
 ```nu
 def greet [age, name = "nushell"] {
@@ -2902,7 +2744,7 @@ def greet [age, name = "nushell"] {
 }
 ```
 
-Se puede llamar a este comando sin el parámetro o con un valor para anular el valor predeterminado:
+The command can then be called with or without an explicit argument:
 
 ```nu
 def greet [name = "nushell"] { $"hello ($name)" }
@@ -2910,7 +2752,7 @@ greet
 greet world
 ```
 
-También puede combinar un valor predeterminado con un requisito de tipo:
+Default values can be combined seamlessly with static type annotations:
 
 ```nu
 def congratulate [age: int = 18] {
@@ -2918,11 +2760,11 @@ def congratulate [age: int = 18] {
 }
 ```
 
-Si se desea comprobar si un parámetro opcional está presente o no y no solo confiar en un valor predeterminado, se pueden utilizar parámetros posicionales opcionales en su lugar.
+When you need to determine whether an optional argument was explicitly provided rather than relying on a static fallback, use optional positional parameters instead.
 
-### Parámetros Posicionales Opcionales
+### Optional Positional Parameters
 
-Por defecto, los parámetros posicionales son requeridos. Si un parámetro posicional no se entrega, se encontrará un error:
+By default, positional parameters are strictly required. Omitting a required positional argument produces a syntax error:
 
 ```nu
   × Missing required positional argument.
@@ -2934,7 +2776,7 @@ Por defecto, los parámetros posicionales son requeridos. Si un parámetro posic
   help: Usage: greet <name>
 ```
 
-Podemos en cambio marcar un parámetro posicional como opcional poniendo un signo de interrogación (`?`) después de su nombre. Por ejemplo:
+A positional parameter can be marked optional by appending a question mark (`?`) to its identifier:
 
 ```nu
 def greet [name?: string] {
@@ -2945,9 +2787,9 @@ greet
 greet world
 ```
 
-Hacer un parámetro posicional opcional no cambia su nombre cuando se accede en el cuerpo. Como el ejemplo de arriba muestra, todavía se accede con `$name`, a pesar del sufijo `?` en la lista de parámetros.
+Marking a parameter optional does not alter its identifier within the command body; it remains accessible via `$name`, without the trailing `?`.
 
-Cuando un parámetro opcional no se entrega, su valor en el cuerpo del comando es igual a `null`. Podemos usar esto para actuar en el caso donde un parámetro no fue entregado:
+When an optional parameter is omitted by the caller, its value inside the command body resolves to `null`. This allows branching on whether an argument was provided:
 
 ```nu
 def greet [name?: string] {
@@ -2961,15 +2803,15 @@ def greet [name?: string] {
 greet
 ```
 
-Si solo se quiere establecer un valor por defecto cuando el parámetro falta, es más simple usar un valor por defecto en cambio.
+If the objective is simply to substitute a fallback value when an argument is missing, declaring a default value is typically more concise.
 
-Si se usan parámetros posicionales requeridos y opcionales juntos, entonces los parámetros requeridos deben aparecer en la definición primero.
+When combining required and optional positional parameters, required parameters must precede optional ones in the signature.
 
-### Opciones (_flags_)
+### Flags
 
-Además de pasar parámetros posicionales, también puede pasar parámetros con nombre definiendo opciones para los comandos personalizados.
+In addition to positional arguments, commands can accept named parameters by defining flags.
 
-Por ejemplo:
+For example:
 
 ```nu
 def greet [
@@ -2980,29 +2822,29 @@ def greet [
 }
 ```
 
-En la definición de `greet` anterior, se define el parámetro posicional `name`, así como una opción llamada `age`. Esto permite a quien llama a `greet` pasar opcionalmente también el parámetro `age`.
+In this definition of `greet`, we declare the positional parameter `name` alongside an optional named flag `age`. Callers can optionally provide the `--age` flag during invocation.
 
-Se puede llamar a lo anterior usando:
+The command can be invoked as:
 
 ```nu
 greet world --age 10
 ```
 
-O:
+Or:
 
 ```nu
 greet --age 10 world
 ```
 
-O incluso omitir la opción por completo:
+Or by omitting the flag entirely:
 
 ```nu
 greet world
 ```
 
-Las opciones también se pueden definir para tener una versión abreviada. Esto permite pasar una opción de forma más simple, así como una opción larga-y-más-fácil-de-leer.
+Flags can also define shorthand single-character aliases, allowing both concise interactive use and self-documenting scripts.
 
-Extendemos el ejemplo anterior para usar una opción abreviada para el valor de `age`:
+We extend the previous command to provide `-a` as a shorthand for `--age`:
 
 ```nu
 def greet [
@@ -3013,15 +2855,15 @@ def greet [
 }
 ```
 
-> _Nota:_ Las opciones se nombran por su nombre largo, por lo que el ejemplo anterior necesitaría usar `$age` y no `$a`.
+> _Note:_ Flags are bound inside the command body using their full name; the example above accesses `$age` rather than `$a`.
 
-Ahora, se puede llamar a esta definición actualizada usando la la opción abreviada:
+The updated command can now be invoked using the shorthand flag:
 
 ```nu
 greet -a 10 hello
 ```
 
-Las opciones también se pueden usar como interruptores (_switches_) básicos. Esto significa que su presencia o ausencia se toma como un argumento para la definición. Extendiendo el ejemplo anterior:
+Flags can also serve as boolean switches. Their presence or absence indicates a true or false condition. Extending the definition:
 
 ```nu
 def greet [
@@ -3037,26 +2879,26 @@ def greet [
 }
 ```
 
-Y la definición se puede llamar como:
+The command can now be executed with the switch:
 
 ```nu
 greet -a 10 --twice hello
 ```
 
-O simplemente sin la opción del switch:
+Or without it:
 
 ```nu
 greet -a 10 hello
 ```
 
-También se puede asignar un valor de verdadero/falso para habilitar/deshabilitar la opción:
+Boolean values can also be passed explicitly to enable or disable switches:
 
 ```nu
 greet -a 10 --twice=false hello
 greet -a 10 --twice=true hello
 ```
 
-Las opciones pueden contener guiones. Se puede acceder a ellas reemplazando el guion con un guion bajo:
+Flag names may contain hyphens. When accessed inside the command body, hyphens are translated to underscores:
 
 ```nu
 def greet [
@@ -3072,9 +2914,9 @@ def greet [
 }
 ```
 
-### Parámetros rest
+### Rest Parameters
 
-Puede haber casos en los que se desee definir un comando que tome cualquier número de argumentos posicionales. Podemos hacer esto con un parámetro te tipo `rest`, usando la siguiente sintaxis `...`:
+When a command needs to accept an arbitrary number of positional arguments, declare a `rest` parameter using the `...` syntax:
 
 ```nu
 def greet [...name: string] {
@@ -3087,9 +2929,9 @@ def greet [...name: string] {
 greet earth mars jupiter venus
 ```
 
-Se puede llamar a la definición anterior del comando `greet` con cualquier número de argumentos, incluyendo ninguno en absoluto. Todos los argumentos se recopilan en `$name` como una lista.
+The `greet` command can now be called with any number of arguments, including none. All supplied values are gathered into `$name` as a typed list.
 
-Los parámetros rest se pueden usar junto con los parámetros posicionales:
+Rest parameters can follow standard positional parameters:
 
 ```nu
 def greet [vip: string, ...name: string] {
@@ -3103,7 +2945,7 @@ def greet [vip: string, ...name: string] {
 greet moon earth mars jupiter venus
 ```
 
-Para pasar una lista a un parámetro `rest`, puede usar el operador de propagación `...`:
+To pass an existing list into a `rest` parameter, use the spread operator (`...`):
 
 ```nu
 let planets = [earth mars jupiter venus]
@@ -3111,17 +2953,17 @@ let planets = [earth mars jupiter venus]
 greet moon ...$planets
 ```
 
-### Documentando un Comando
+### Documenting a Command
 
-Para facilitar el uso y mantenimiento de los comandos personalizados, Nushell permite documentar descripciones detalladas tanto a nivel del comando completo como para cada uno de sus parámetros y opciones.
+To streamline usage and maintainability, Nushell allows embedding detailed documentation for commands, parameters, and flags directly in the source definition.
 
-Adicionalmente, Nushell soporta un sistema de **anotaciones y metadatos con `@`** que se anteponen a la definición de `def`:
+Additionally, Nushell provides an annotation system utilizing `@` prefixes placed immediately before `def`:
 
-- **`@category <nombre>`:** Clasifica el comando dentro del inventario general del sistema (visible al consultar `help commands`).
-- **`@search-terms <términos...>`:** Registra palabras clave adicionales para que el comando sea localizable mediante búsquedas semánticas con `help --find`.
-- **`@example "descripción" { código } --result resultado`:** Incorpora ejemplos ejecutables con su salida esperada, los cuales se renderizan automáticamente en la sección de ejemplos de `help`.
+- **`@category <name>`:** Classifies the command within the system catalog (visible in `help commands`).
+- **`@search-terms <terms...>`:** Registers keywords enabling semantic discovery via `help --find`.
+- **`@example "description" { code } --result outcome`:** Embeds executable test examples with expected outputs, rendered automatically in the examples section of `help`.
 
-A continuación se muestra una definición exhaustivamente documentada:
+The following listing illustrates a fully documented command definition:
 
 ```nu
 # Comando de saludo personalizado que ilustra anotaciones y documentación
@@ -3136,7 +2978,7 @@ def greet [
 }
 ```
 
-Una vez registrado el comando, al invocar `help greet` se obtiene una ficha técnica completa generada de manera automática:
+Once defined, running `help greet` generates an exhaustive technical reference sheet automatically:
 
 ```text
 Comando de saludo personalizado que ilustra anotaciones y documentación
@@ -3162,7 +3004,7 @@ Examples:
   ╰───┴────────╯
 ```
 
-Ahora, si se ejecuta `help greet`, se entrega un texto de ayuda más útil:
+Running `help greet` on a standard command similarly provides formatted guidance:
 
 ```text
 A greeting command that can greet the caller
@@ -3178,13 +3020,13 @@ Flags:
   -a, --age <integer>: The age of the person
 ```
 
-### Cierres (Closures)
+### Closures
 
-Un **cierre** (*closure*) en Nushell es un bloque anónimo de código ejecutable que puede recibir argumentos, procesar el flujo de entrada de una tubería (`$in`) y capturar variables de su entorno léxico exterior. Los cierres constituyen ciudadanos de primera clase en el lenguaje: pueden almacenarse en variables, transferirse como argumentos hacia otros comandos y ejecutarse dinámicamente cuando sea requerido.
+A **closure** in Nushell is an anonymous, first-class block of executable code capable of receiving arguments, consuming pipeline input (`$in`), and capturing variables from its enclosing lexical scope. Closures can be stored in variables, passed into higher-order commands, and evaluated dynamically on demand.
 
-#### Sintaxis y Parámetros
+#### Syntax and Parameters
 
-Los cierres se delimitan mediante llaves `{ ... }`. Cuando un cierre define parámetros formales, estos se especifican entre barras verticales al inicio del bloque (`{ |parámetro1, parámetro2| ... }`), admitiendo anotaciones estáticas de tipo:
+Closures are enclosed in curly braces `{ ... }`. When declaring formal parameters, specify them between vertical bars at the beginning of the block (`{ |param1, param2| ... }`), optionally including static type annotations:
 
 ```nu
 # Cierre con un parámetro tipado
@@ -3194,18 +3036,18 @@ let duplicar = { |x: int| $x * 2 }
 let ponderar = { |val: float, peso: float| $val * $peso }
 ```
 
-#### Invocación Dinámica con el Comando `do`
+#### Dynamic Invocation with `do`
 
-Para evaluar un cierre almacenado en una variable se utiliza el comando nativo `do`:
+To execute a closure stored in a variable, invoke it using the built-in `do` command:
 
 ```nu
 do $duplicar 21
 do $ponderar 4.5 0.8
 ```
 
-#### Uso en Tuberías y Funciones de Orden Superior
+#### Higher-Order Functions in Pipelines
 
-El rol más relevante de los cierres en ciencia de datos tiene lugar al procesar colecciones y tablas en combinación con funciones de orden superior como `each`, `where`, `filter`, `reduce` y `par-each`:
+In data science workflows, closures achieve their primary utility when processing tables and collections via higher-order commands such as `each`, `where`, `filter`, `reduce`, and `par-each`:
 
 ```nu
 # Transformación elemento a elemento con each
@@ -3215,43 +3057,43 @@ El rol más relevante de los cierres en ciencia de datos tiene lugar al procesar
 [10 25 3 48 7] | where { |val| $val > 20 }
 ```
 
-Cuando un cierre no declara parámetros explícitos mediante `|...|`, puede consumir directamente el registro emitido por la etapa anterior de la tubería mediante la variable especial `$in`:
+When a closure omits explicit parameters between `|...|`, it can access incoming pipeline records directly via the special variable `$in`:
 
 ```nu
 [5 12 18] | each { $in * 10 }
 ```
 
-#### Captura de Entorno e Inmutabilidad
+#### Lexical Scoping and Immutability
 
-Un cierre puede capturar variables inmutables (`let` o `const`) presentes en el ámbito léxico donde fue declarado. Sin embargo, por principios de diseño orientados a la seguridad y a la concurrencia determinista en pipelines paralelos, **los cierres en Nushell tienen estrictamente prohibido capturar y mutar variables mutables (`mut`)**. Cualquier tentativa de modificar una variable mutable exterior desde dentro de un cierre genera un error sintáctico inmediato (`nu::shell::capture_of_mutable_var`).
+A closure can capture immutable variables (`let` or `const`) from its defining scope. However, by architectural design to ensure thread safety and deterministic concurrency across parallel pipelines, **closures in Nushell are strictly prohibited from capturing and mutating mutable variables (`mut`)**. Any attempt to mutate an exterior mutable variable from within a closure produces an immediate parse error (`nu::shell::capture_of_mutable_var`).
 
-### Salida de la _pipeline_
+### Pipeline Output
 
-Los comandos personalizados transmiten su salida al igual que los comandos incorporados. Por ejemplo:
+Custom commands stream their output downstream just like native commands. For example:
 
 ```nu
 ls | get name
 ```
 
-Hacemos una copia de `ls` a un comando personalizado:
+We wrap `ls` inside a custom command:
 
 ```nu
 def my-ls [] { ls }
 ```
 
-Se puede usar la salida de este comando tal como se haría con `ls`.
+We can consume the output of this custom command identically to `ls`:
 
 ```nu
 my-ls | get name
 ```
 
-Esto nos permite construir fácilmente comandos personalizados y procesar su salida. Tenga en cuenta que no usamos sentencias de retorno como otros lenguajes. En cambio, construimos pipelines que generan flujos de datos que se pueden conectar a otros pipelines.
+This design allows constructing modular command pipelines that pass structured tables between stages. Note that Nushell does not require explicit return statements; instead, pipelines generate continuous data streams that connect cleanly into subsequent pipeline stages.
 
-### Entrada de la _pipeline_
+### Pipeline Input
 
-Los comandos personalizados también pueden tomar entrada desde la _pipeline_, al igual que otros comandos. Esta entrada se pasa automáticamente al bloque que utiliza el comando personalizado.
+Custom commands can also accept incoming pipeline streams. Incoming data is passed automatically to the command body.
 
-Consideremos el siguiente comando que calcula el doble para cada elemento de una lista:
+Consider the following command that doubles each element in an incoming list:
 
 ```nu
 def double [] {
@@ -3259,13 +3101,13 @@ def double [] {
 }
 ```
 
-Y puede utilizarse de la siguiente forma:
+It can be consumed directly from a pipeline:
 
 ```nu
 [1 2 3] | double
 ```
 
-También se puede almacenar la entrada para su uso posterior utilizando la variable `$in`:
+Pipeline input can also be captured explicitly for multi-stage processing using `$in`:
 
 ```nu
 def nullify [...cols] {
@@ -3276,16 +3118,16 @@ def nullify [...cols] {
 }
 ```
 
-### Control de flujo
+### Control Flow
 
-Nushell proporciona varios comandos que ayudan a determinar cómo se ejecutan diferentes grupos de código. En los lenguajes de programación esta funcionalidad a menudo se conoce como _control de flujo_.
+Nushell provides robust control flow constructs to govern conditional branching and iterative execution.
 
-#### Elección (Condicionales)
+#### Conditionals
 
-Los siguientes comandos ejecutan código basado en una condición dada.
+Conditional expressions execute code blocks based on boolean conditions.
 
 ::: tip
-Los comandos de elección/condicionales son expresiones, por lo que devuelven valores, a diferencia de los otros comandos en esta página. Esto significa que lo siguiente funciona.
+In Nushell, conditional constructs are expressions that evaluate to concrete values, unlike statement-based control flow in conventional shells. This means conditionals can be embedded directly within pipelines:
 
 ```nu
 'foo' | if $in == 'foo' { 1 } else { 0 } | $in + 2
@@ -3295,30 +3137,30 @@ Los comandos de elección/condicionales son expresiones, por lo que devuelven va
 
 ##### `if`
 
-`if` evalúa de código ramificados basados en los resultados de una o más condiciones similares a la funcionalidad "if" en otros lenguajes de programación. Por ejemplo:
+`if` evaluates conditional branches, executing code based on the truth value of one or more expressions. For example:
 
 ```nu
 let x = 5
 if $x > 0 { 'positivo' }
 ```
 
-Devuelve `'positivo'` cuando la condición es `true` (`$x` es mayor que cero) y `null` cuando la condición es `false` (`$x` es menor o igual a cero).
+This returns `'positive'` when the condition is `true` (`$x > 0`) and `null` when `false` (`$x <= 0`).
 
-Se puede agregar una rama `else` al `if` después del primer bloque que se ejecuta y devuelve el valor resultante del bloque `else` cuando la condición es `false`. Por ejemplo:
+An `else` branch can be appended to provide an explicit fallback value when the condition evaluates to `false`:
 
 ```nu
 if $x > 0 { 'positivo' } else { 'no-positivo' }
 ```
 
-Esta vez devuelve `'positivo'` cuando la condición es `true` (`$x` es mayor que cero) y `'no-positivo'` cuando la condición es `false` (`$x` es menor o igual a cero).
+This returns `'positive'` when `$x > 0` and `'non-positive'` otherwise.
 
-También podemos se pueden anidar múltiples `if`s de la siguiente manera:
+Multiple conditions can be chained using `else if`:
 
 ```nu
 if $x > 0 { 'positive' } else if $x == 0 { 'zero' } else { "negative" }
 ```
 
-o bien:
+Or formatted across multiple lines:
 
 ```nu
 if $x > 0 {
@@ -3330,13 +3172,13 @@ if $x > 0 {
 }
 ```
 
-Cuando la primera condición es `true` (`$x` es mayor que cero) devolverá `'positivo'`, cuando la primera condición es `false` y la siguiente condición es `true` (`$x` es igual a cero) devolverá `'zero'`, de lo contrario devolverá `'negativo'` (cuando `$x` es menor que cero).
+When the first condition is `true` (`$x > 0`), it returns `'positive'`; when the second condition holds (`$x == 0`), it returns `'zero'`; otherwise, it returns `'negative'`.
 
 ##### `match`
 
-`match` ejecuta una de varias ramas condicionales basadas en el valor dado para coincidir. También puede hacer alguna coincidencia de patrones para desempaquetar valores en tipos compuestos como listas y registros.
+`match` performs pattern matching against an incoming value, branching execution to the matching arm. It can unpack structured compound types such as lists and records.
 
-El uso básico de `match` puede ejecutar condicionalmente diferentes códigos como una sentencia "switch" común en otros lenguajes. `match` comprueba si el valor después de la palabra `match` es igual al valor al comienzo de cada rama antes del `=>` y si lo es, ejecuta el código después del `=>` de esa rama.
+In its simplest form, `match` functions analogously to a `switch` statement in other programming languages. It compares the target value against each arm before `=>`, executing the block corresponding to the first match:
 
 ```nu
 match 2 {
@@ -3350,11 +3192,11 @@ match 2 {
 }
 ```
 
-Las ramas pueden devolver un solo valor o, como se muestra en la segunda rama, pueden devolver los resultados de un bloque.
+Arms can return single values or full expression blocks.
 
-###### Rama comodín
+###### Wildcard Arm
 
-También puede tener una condición comodín para cuando el valor dado no coincide con ninguna de las otras condiciones al tener una rama cuyo valor coincidente es `_`.
+A wildcard arm (`_`) matches any value not caught by earlier arms, serving as a catch-all branch:
 
 ```nu
 let foo = match 7 {
@@ -3367,11 +3209,11 @@ let foo = match 7 {
 $foo
 ```
 
-> Notar que , `match` es una expresión, por lo que podemos asignar el resultado a una variable.
+> Because `match` is an expression, its result can be assigned directly to a variable.
 
-###### Coincidencia de patrones
+###### Pattern Matching
 
-Se pueden "desempaquetar" valores de tipos como listas y registros con coincidencia de patrones. Luego se puede asignar variables a las partes que se desea desempaquetar y usarlas en las expresiones coincidentes.
+Compound values such as records and lists can be destructured using pattern matching. Variable bindings in the pattern capture corresponding components for use within the arm expression:
 
 ```nu
 let foo = { name: 'bar', count: 7 }
@@ -3383,11 +3225,11 @@ match $foo {
 }
 ```
 
-El `_` en la segunda rama significa que coincide con cualquier registro con el campo `name` y `count`, no solo con aquellos donde `name` es `'bar'`.
+The wildcard `_` in the second arm matches any record containing fields `name` and `count`, regardless of the value stored in `name`.
 
-###### Guardias
+###### Guards
 
-También puede agregar una condición adicional a cada rama llamada "guardia" (_guard_) para determinar si la rama debe coincidir. Para hacerlo, después del patrón coincidente, se utiliza un `if` y luego la condición antes del `=>`.
+Guards add boolean conditions to pattern arms using `if`, ensuring an arm matches only when both the structural pattern and the guard condition are satisfied:
 
 ```nu
 let foo = { name: 'bar', count: 7 }
@@ -3399,13 +3241,13 @@ match $foo {
 }
 ```
 
-#### Bucles
+#### Loops
 
-Los comandos de bucle permiten repetir un bloque de código varias veces.
+Loop constructs repeatedly execute a block of code.
 
-##### Bucles y Otros Comandos de Iteración
+##### Loops versus Functional Iterators
 
-La funcionalidad de los comandos de bucle es similar a los comandos que aplican un cierre sobre elementos en una lista o tabla como `each` o `where` y muchas veces se puede lograr lo mismo con cualquiera. Por ejemplo:
+Loop commands share functionality with higher-order iteration commands like `each` and `where`. Often, identical transformations can be accomplished using either paradigm:
 
 ```nu
 mut result = []
@@ -3419,15 +3261,15 @@ $result
 [1 2 3] | each { $in + 1 }
 ```
 
-Si bien puede ser tentador usar bucles si se está familiarizado con ellos en otros lenguajes, se considera más en el estilo Nushell (idiomático) usar comandos que aplican cierres cuando se puede resolver un problema de cualquier manera. La razón de esto es debido a una desventaja bastante grande con el uso de bucles.
+While imperative loops may feel familiar to programmers arriving from other languages, the idiomatic Nushell standard is to favor functional pipeline commands that apply closures. This preference stems from a fundamental architectural limitation of loops.
 
-###### Desventajas del Bucle
+###### Disadvantages of Loops
 
-La mayor desventaja de los bucles es que son sentencias, a diferencia de `each` que es una expresión. Las expresiones, como `each` siempre resultan en algún valor de salida, sin embargo, las sentencias no.
+The primary disadvantage of loops is that they are statements rather than expressions. Commands like `each` are expressions that invariably evaluate to structured output, whereas loop statements return nothing.
 
-Esto significa que no funcionan bien con variables inmutables y el uso de variables inmutables se considera más estilo Nushell. Sin una variable mutable declarada de antemano en el ejemplo de la sección anterior, sería imposible usar `for` para obtener la lista de números con números incrementados, o cualquier valor en absoluto.
+Consequently, loops cannot be used with immutable variables. Without a mutable accumulator variable initialized prior to the loop, it is impossible for `for` to return an accumulated collection.
 
-Las sentencias tampoco funcionan en las _pipelines_ de Nushell, que requieren alguna salida. De hecho, Nushell dará un error si se intentas:
+Furthermore, loop statements cannot be embedded inside Nushell pipelines. Attempting to pipe into or out of a loop triggers a syntax error:
 
 ```nu
 [1 2 3] | for x in $in { $x + 1 } | $in ++ [5 6 7]
@@ -3442,11 +3284,11 @@ Error: nu::parser::unexpected_keyword
   help: 'for' keyword is not allowed in pipeline. Use 'for' by itself, outside of a pipeline.
 ```
 
-Debido a que Nushell está muy orientado a la _pipeline_, esto significa que usar comandos de expresión como `each` es típicamente más natural que las sentencias de bucle.
+Because Nushell is fundamentally pipeline-centric, expression commands like `each` integrate far more naturally into data transformations.
 
-###### Ventajas del Bucle
+###### When Loops are Appropriate
 
-Si los bucles tienen una desventaja tan grande, ¿por qué existen? Bueno, una razón es que los cierres (_clousures_), como los que usa `each`, no pueden modificar variables mutables en el entorno circundante. Si se intentas modificar una variable mutable en un cierre, se obtendrá un error:
+Why do loops exist if expression commands are preferred? One reason is that closures, such as those passed to `each`, cannot mutate variables in their enclosing scope. Attempting to modify an exterior mutable variable from within a closure produces an error:
 
 ```nu
 mut foo = []
@@ -3462,7 +3304,7 @@ Error: nu::parser::expected_keyword
    ╰────
 ```
 
-Si se modifica una variable de entorno en un cierre, se puede, pero solo se modificará dentro del alcance del cierre, dejándola sin cambios en cualquier otro lugar. Los bucles, sin embargo, usan bloques lo que significa que pueden modificar una variable mutable regular o una variable de entorno dentro del alcance mayor.
+While a closure can modify environment variables locally within its own execution scope, those changes do not persist outside. Loops, however, execute standard blocks rather than closures, allowing them to mutate exterior state or update environment variables across the broader scope:
 
 ```nu
 mut result = []
@@ -3474,13 +3316,13 @@ $result
 
 ##### `for`
 
-`for` recorre un rango o colección como una lista o una tabla.
+`for` iterates over collections, such as ranges, lists, or tables:
 
 ```nu
 for x in [1 2 3] { $x * $x | print }
 ```
 
-###### Alternativas de Comandos de Expresión
+###### Expression Alternatives to `for`
 
 - `each`
 - `par-each`
@@ -3489,7 +3331,7 @@ for x in [1 2 3] { $x * $x | print }
 
 ##### `while`
 
-`while` repite el mismo bloque de código hasta que la condición dada es `false`.
+`while` repeatedly executes a block as long as its condition evaluates to `true`:
 
 ```nu
 mut x = 0;
@@ -3499,9 +3341,7 @@ while $x < 10 { $x = $x + 1 }
 $x
 ```
 
-###### Alternativas de Comandos de Expresión
-
-Los comandos "until" y otros comandos "while"
+###### Expression Alternatives to `while`
 
 - `take until`
 - `take while`
@@ -3510,7 +3350,7 @@ Los comandos "until" y otros comandos "while"
 
 ##### `loop`
 
-`loop` repite un bloque infinitamente. Se puede usar `break` (como se describe en la siguiente sección) para limitar cuántas veces se repite. También puede ser útil para ejecutar scripts continuamente, como un indicador interactivo.
+`loop` repeats a block indefinitely. It is typically controlled via `break` and is useful for continuous monitoring routines or interactive prompts:
 
 ```nu
 mut x = 0; loop { if $x > 10 { break }; $x = $x + 1 }; $x
@@ -3519,7 +3359,7 @@ mut x = 0; loop { if $x > 10 { break }; $x = $x + 1 }; $x
 
 ##### `break`
 
-`break` detendrá la ejecución del código en un bucle y reanudará la ejecución después del bucle. Efectivamente "rompiendo" el bucle.
+`break` terminates loop execution immediately, transferring control to the statement following the loop block:
 
 ```nu
 for x in 1..10 { if $x > 3 { break }; print $x }
@@ -3527,7 +3367,7 @@ for x in 1..10 { if $x > 3 { break }; print $x }
 
 ##### `continue`
 
-`continue` detendrá la ejecución del bucle actual, omitiendo el resto del código en el bucle, e irá al siguiente bucle. Si el bucle normalmente terminaría, como si `for` ha iterado a través de todos los elementos dados, o si la condición de `while` ahora es falsa, no se repetirá de nuevo y la ejecución continuará después del bloque de bucle.
+`continue` halts the current iteration, skipping remaining statements in the loop body and proceeding to the next iteration:
 
 ```nu
 mut x = -1
@@ -3541,11 +3381,11 @@ while $x <= 6 {
 
 ```
 
-##### Errores
+##### Errors
 
 ###### `error make`
 
-`error make` crea un error que detiene la ejecución del código y cualquier código que lo haya llamado, hasta que sea manejado por un bloque `try`, o termine el script y muestre el mensaje de error. Esta funcionalidad es la misma que "excepciones" en otros lenguajes.
+`error make` raises a runtime error that halts execution up through the call stack until caught by a `try` block or terminating the script with a diagnostic report:
 
 ```nu
 error make { msg: 'Some error info' }; print 'unprinted'
@@ -3559,42 +3399,42 @@ Error:   × Some error info
    ╰────
 ```
 
-El registro que se le pasa proporciona información al código que lo captura o al mensaje de error resultante.
+The record passed to `error make` provides metadata for upstream error handlers or terminal diagnostics.
 
 ###### `try`
 
-`try` capturará los errores creados en cualquier lugar del bloque de código de `try` y reanudará la ejecución del código después del bloque.
+`try` catches runtime errors occurring within its block, resuming execution cleanly after the block:
 
 ```nu
 try { error make { msg: 'Some error info' }}; print 'Resuming'
 
 ```
 
-Esto incluye la captura de errores incorporados.
+This includes intercepting built-in evaluation errors such as division by zero:
 
 ```nu
 try { 1 / 0 }; print 'Resuming'
 ```
 
-El valor resultante será `nothing` si ocurre un error y el valor devuelto del bloque si no ocurre un error.
+The resulting value is `nothing` if an error occurs, or the return value of the block if execution succeeds.
 
-Si se incluye un bloque `catch` después del bloque `try`, ejecutará el código en el bloque `catch` si ocurrió un error en el bloque `try`.
+An optional `catch` block executes custom recovery logic when an error is trapped:
 
 ```nu
 try { 1 / 0 } catch { 'An error happened!' } | $in ++ ' And now I am resuming.'
 ```
 
-> No se ejecutará el bloque `catch` si no se produce un error.
+> The `catch` block is bypassed entirely when execution succeeds without errors.
 
 ```nu
 try { 1 / 0 } catch { |e| $e.msg }
 ```
 
-##### Otros
+##### Other Statements
 
 ###### `return`
 
-`return` finaliza un cierre o comando anticipadamente donde se llama, sin ejecutar el resto del comando/cierre, y devuelve el valor dado. No es a menudo necesario ya que el último valor en un cierre o comando también se devuelve, pero a veces puede ser conveniente.
+`return` terminates a custom command or closure early, returning the specified value immediately. While rarely required because the final expression in a block automatically forms its return value, `return` is useful for early exit conditions:
 
 ```nu
 def 'positive-check' [it] {
@@ -3605,7 +3445,6 @@ def 'positive-check' [it] {
     'non-positive'
 }
 ```
-
 ```nu
 positive-check 3
 
@@ -3618,19 +3457,17 @@ do $positive_check 3
 do $positive_check (-3)
 ```
 
+## Converting One-Liners into Command-Line Tools
 
+Throughout this textbook, we construct numerous compact, single-line pipelines (*one-liners*). When a one-liner is needed repeatedly across different files or with variable arguments, it is best converted into an **executable command-line tool**.
 
-## Conversión de One-Liners en Herramientas de Línea de Comandos
-
-A lo largo de este libro se construirán numerosos pipelines compactos de una sola línea (*one-liners*). Cuando se requiere reutilizar un *one-liner* frecuentemente sobre distintos archivos o con diferentes parámetros, conviene transformarlo en una **herramienta de línea de comandos ejecutable**.
-
-En `/data/ch04` contamos con el texto completo de *Las aventuras de Alicia en el país de las maravillas* (`alice.txt`) y una lista de palabras vacías del idioma inglés (`stopwords`):
+In `/data/ch04`, we have the complete unabridged text of *Alice's Adventures in Wonderland* (`alice.txt`) alongside a stopword list (`stopwords`):
 
 ```nu
 ls
 ```
 
-En primer lugar, se muestra cómo obtener las 10 palabras más frecuentes de `alice.txt` en Nushell (sin filtrar y filtrando *stopwords*), mostrando el resultado en pantalla y guardándolo también en un archivo CSV:
+First, we demonstrate how to compute the 10 most frequent words from `alice.txt` in Nushell (both unfiltered and filtering stopwords), rendering the output to the terminal and saving it as a CSV file:
 
 ```nu
 open --raw alice.txt |
@@ -3643,7 +3480,7 @@ open --raw alice.txt |
   first 10
 ```
 
-A continuación se filtran las palabras vacías contenidas en el archivo `stopwords` y guardamos el resultado tanto en pantalla como en el archivo `top10_alice.csv`:
+Next, we filter out stopwords using `stopwords` and save the resulting table both to the console and to `top10_alice.csv`:
 
 ```nu
 let sw = open --raw stopwords | lines | each { str trim | str lowercase }
@@ -3661,18 +3498,18 @@ $top10
 $top10 | save -f top10_alice.csv
 ```
 
-Para convertir este *one-liner* en una herramienta de línea de comandos reutilizable y parametrizada en Nushell, se siguen **6 pasos sistemáticos**:
+To convert this one-liner into a reusable, parameterized command-line tool in Nushell, we follow **six systematic steps**:
 
-1. Crear el archivo de script (`top-words-1.nu`).
-2. Otorgar permisos de ejecución (`chmod u+x`).
-3. Definir la directiva *shebang* (`#!/usr/bin/env -S nu --stdin`).
-4. Generalizar la entrada para leer dinámicamente desde el pipe (`$in`).
-5. Añadir argumentos y opciones tipadas mediante `def main [...]`.
-6. Extender la variable de entorno `$env.PATH`.
+1. Create the script file (`top-words-1.nu`).
+2. Grant execution permissions (`chmod u+x`).
+3. Define the shebang directive (`#!/usr/bin/env -S nu --stdin`).
+4. Decouple fixed input to read dynamically from standard input (`$in`).
+5. Add typed arguments and flags via `def main [...]`.
+6. Place the binary in `$env.PATH`.
 
-### Paso 1: Crear el Archivo
+### Step 1: Create the File
 
-En `/data/ch04` se almacena el pipeline inicial dentro del script `top-words-1.nu` (el cual puede editarse interactivamente con `ttt top-words-1.nu`):
+In `/data/ch04`, we save the initial pipeline within `top-words-1.nu` (which can be edited interactively via `ttt top-words-1.nu`):
 
 ```nu
 # skip-docker-exec (código de top-words-1.nu)
@@ -3693,7 +3530,7 @@ open --raw alice.txt
 | first 10
 ```
 
-Para inspeccionar el contenido de un script o archivo de código fuente desde la terminal, Nushell permite imprimir su texto directamente mediante `open --raw <archivo>`. Adicionalmente, para una lectura más cómoda con resaltado de sintaxis y numeración de líneas, el entorno dispone de la utilidad especializada **`bat`** (`bat top-words-1.nu`). A partir de este punto se adoptará preferentemente `bat` para la visualización de código:
+To inspect script source code directly from the terminal, Nushell prints raw text via `open --raw <file>`. Additionally, for syntax highlighting and line numbers, the environment includes **`bat`** (`bat top-words-1.nu`). We utilize `bat` for code inspection throughout the remainder of this chapter:
 
 ```nu
 open --raw top-words-1.nu
@@ -3702,9 +3539,9 @@ nu top-words-1.nu
 nu top-words-1.nu | save -f salida_paso1.csv
 ```
 
-### Paso 2: Dar Permisos de Ejecución
+### Step 2: Grant Execution Permissions
 
-Se copia `top-words-1.nu` a `top-words-2.nu` y se le otorgan permisos de ejecución para el usuario propietario mediante `chmod u+x`:
+We copy `top-words-1.nu` to `top-words-2.nu` and grant execution permissions to the owner via `chmod u+x`:
 
 ```nu
 # skip-docker-exec (código de top-words-2.nu)
@@ -3725,7 +3562,7 @@ open --raw alice.txt
 | first 10
 ```
 
-Se configuran y verifican los permisos con `chmod` y `ls`:
+We inspect the updated permissions using `chmod` and `ls`:
 
 ```nu
 cp top-words-1.nu top-words-2.nu
@@ -3733,11 +3570,11 @@ chmod u+x top-words-2.nu
 ls -l top-words-1.nu top-words-2.nu | select name mode size
 ```
 
-En la columna `mode` (por ejemplo, `-rwxr-xr-x`), el primer carácter `-` indica un archivo regular, mientras que las ternas siguientes corresponden a los permisos de lectura (`r`), escritura (`w`) y ejecución (`x`) del usuario propietario (`u`), grupo (`g`) y otros usuarios (`o`).
+In the `mode` column (e.g., `-rwxr-xr-x`), the leading `-` denotes a regular file, followed by permission triads for read (`r`), write (`w`), and execute (`x`) across user (`u`), group (`g`), and others (`o`).
 
-### Paso 3: Definir el Shebang
+### Step 3: Define the Shebang
 
-La directiva *shebang* (`#!/usr/bin/env -S nu --stdin`) en la primera línea del archivo le instruye al núcleo del sistema operativo qué intérprete invocar cuando el script se llama directamente como un binario ejecutable (`./top-words-3.nu`):
+The shebang directive (`#!/usr/bin/env -S nu --stdin`) on the first line instructs the operating system kernel which interpreter to invoke when calling the script directly as an executable binary (`./top-words-3.nu`):
 
 ```nu
 # skip-docker-exec (código de top-words-3.nu)
@@ -3759,7 +3596,7 @@ open --raw alice.txt
 | first 10
 ```
 
-Se visualiza el script con `bat` y se ejecuta directamente:
+Inspect the script with `bat` and execute it directly:
 
 ```nu
 bat top-words-3.nu
@@ -3767,9 +3604,9 @@ bat top-words-3.nu
 ./top-words-3.nu | save -f salida_paso3.json
 ```
 
-### Paso 4: Remover la Entrada Fija
+### Step 4: Remove Fixed Input
 
-Al reemplazar la referencia fija a `alice.txt` por la variable especial `$in` dentro de una función `main` en `top-words-4.nu`, la herramienta queda desacoplada de cualquier archivo concreto y puede procesar cualquier flujo recibido a través de una tubería (`|`):
+By replacing the hardcoded reference to `alice.txt` with `$in` inside a `main` function in `top-words-4.nu`, the tool decouples from specific files and processes any stream received via a pipeline (`|`):
 
 ```nu
 # skip-docker-exec (código de top-words-4.nu)
@@ -3786,7 +3623,7 @@ def main [] {
 }
 ```
 
-Se inspecciona con `bat` y se prueba la canalización desde la terminal:
+Inspect with `bat` and test pipeline streaming from the terminal:
 
 ```nu
 bat top-words-4.nu
@@ -3794,9 +3631,9 @@ open --raw alice.txt | ./top-words-4.nu
 open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
 ```
 
-### Paso 5: Añadir Argumentos y Opciones Tipadas (`def main`)
+### Step 5: Add Typed Arguments and Options (`def main`)
 
-Al declarar parámetros formales en `def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]` dentro de `top-words-5.nu`, Nushell asume la validación estática de tipos, asigna valores predeterminados y genera automáticamente el panel de ayuda `--help`:
+By declaring formal parameters in `def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]` inside `top-words-5.nu`, Nushell enforces static type checking, assigns default values, and auto-generates the `--help` manual:
 
 ```nu
 # skip-docker-exec (código de top-words-5.nu)
@@ -3826,7 +3663,7 @@ def main [
 }
 ```
 
-Se inspecciona con `bat` y se ejecuta especificando parámetros posicionales:
+Inspect with `bat` and execute while passing positional parameters:
 
 ```nu
 bat top-words-5.nu
@@ -3834,9 +3671,9 @@ open --raw alice.txt | ./top-words-5.nu 8
 open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
 ```
 
-### Paso 6: Extender el `$env.PATH`
+### Step 6: Extend `$env.PATH`
 
-Para invocar la herramienta desde cualquier ubicación del sistema de archivos sin necesidad del prefijo `./`, se instala el script en un directorio registrado dentro de `$env.PATH` (como `/home/dsin/bin`):
+To invoke the utility from any directory without specifying `./`, install the script into a directory registered in `$env.PATH` (such as `/home/dsin/bin`):
 
 ```nu
 cp top-words-5.nu /home/dsin/bin/top-words-nu
@@ -3845,13 +3682,13 @@ open --raw alice.txt | top-words-nu 5
 open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 ```
 
-## Creando Herramientas de Línea de Comandos con Python y R
+## Creating Command-Line Tools with Python and R
 
-Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scripts escritos en **Python** (`#!/usr/bin/env python3`) y **R** (`#!/usr/bin/env Rscript`) dentro de nuestros pipelines de Nushell. Siguiendo las buenas prácticas de este libro, siempre creamos o inspeccionamos primero el archivo `.py` o `.R` en el directorio del capítulo y luego lo invocamos desde Nushell, convirtiendo su salida en una tabla estructurada con `from csv` y guardando los resultados.
+Because the command line is language-agnostic, scripts written in **Python** (`#!/usr/bin/env python3`) and **R** (`#!/usr/bin/env Rscript`) integrate smoothly into Nushell pipelines. Following our established methodology, we inspect the `.py` or `.R` script inside the chapter directory, invoke it from Nushell, parse its standard output into a structured table via `from csv`, and persist the results.
 
-### Portando la Herramienta a Python (`top-words.py`) y R (`top-words.R`)
+### Porting the Tool to Python (`top-words.py`) and R (`top-words.R`)
 
-En `/data/ch04` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
+In `/data/ch04`, we have complete implementations in Python (`top-words.py`) and R (`top-words.R`). First, inspect `top-words.py` and run it from Nushell:
 
 ```nu
 bat top-words.py
@@ -3859,7 +3696,7 @@ open --raw alice.txt | python3 top-words.py 5 | from csv
 open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.csv
 ```
 
-Ahora inspeccionemos el script en R (`top-words.R`), ejecutémoslo sobre `alice.txt`, transformemos su salida a una tabla de Nushell y guardémosla en `top_words_r.csv`:
+Now inspect the R implementation (`top-words.R`), execute it against `alice.txt`, parse its output into a Nushell table, and save it to `top_words_r.csv`:
 
 ```nu
 bat top-words.R
@@ -3867,9 +3704,9 @@ open --raw alice.txt | Rscript top-words.R 5 | from csv
 open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.csv
 ```
 
-### Procesando Datos en Transmisión (*Streaming*) desde `stdin` (`fizzbuzz.py` y `fizzbuzz.R`)
+### Streaming Data from `stdin` (`fizzbuzz.py` and `fizzbuzz.R`)
 
-Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch04` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
+When input arrives as a line-by-line stream, both Python and R can process lines incrementally as they arrive over `stdin`. In `/data/ch04`, `fizzbuzz.py` and `fizzbuzz.R` implement the classic FizzBuzz challenge (printing `"fizz"` for multiples of 3, `"buzz"` for multiples of 5, and `"fizzbuzz"` for multiples of 15):
 
 ```nu
 bat fizzbuzz.py
@@ -3877,7 +3714,7 @@ bat fizzbuzz.py
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py | save -f fizzbuzz_py.csv
 ```
 
-Y de manera idéntica con el script `fizzbuzz.R`:
+And identically with the R script `fizzbuzz.R`:
 
 ```nu
 bat fizzbuzz.R
@@ -3890,36 +3727,36 @@ bat fizzbuzz.R
 
 \newpage
 
-# Obtención de Datos {#chapter-5-data-acquisition}
+# Data Acquisition {#chapter-5-data-acquisition}
 
-Este capítulo aborda el primer paso del modelo OSEMN: la **obtención de datos** (*Obtain*). Los datos pueden provenir de archivos locales, servidores web HTTP/HTTPS, archivos comprimidos (`.tar.gz`, `.zip`), hojas de cálculo de Microsoft Excel (`.xlsx`), bases de datos relacionales SQLite (`.db`) o APIs web REST y de transmisión continua (*streaming*).
+This chapter addresses the initial phase of the OSEMN framework: **data acquisition** (*Obtain*). In computational data science, data originates across diverse media: local filesystem artifacts, HTTP and HTTPS endpoints, compressed tarballs (`.tar.gz`, `.zip`), Microsoft Excel workbooks (`.xlsx`), embedded relational SQLite databases (`.db`), RESTful web services, and continuous real-time event streams.
 
-Comenzamos ingresando al directorio `/data/ch05`, que ya viene incluido por defecto en el contenedor `dsin`:
+We begin by navigating into `/data/ch05`, which is mounted by default within the `dsin` container:
 
 ```nu
 cd /data/ch05
 ```
 
-A partir de este punto, todos los comandos del capítulo se ejecutan dentro de `/data/ch05`. Inspeccionemos sus archivos disponibles:
+From this point forward, commands in this chapter execute within `/data/ch05`. Let us inspect the available files:
 
 ```nu
 ls | sort-by name
 ```
 
-## Copiando Archivos Locales en el Contenedor Docker
+## Copying Local Files into the Docker Container
 
-Aunque la imagen `dsin` ya incluye todos los conjuntos de datos del libro en `/data/ch03` a `/data/ch09`, en proyectos propios es frecuente necesitar transferir archivos adicionales entre el computador anfitrión y el contenedor Docker:
+While the `dsin` container image bundles all textbook datasets within `/data/ch03` through `/data/ch09`, project work frequently requires transferring external files between the host workstation and the container:
 
-- **Montando una carpeta local al iniciar el contenedor:** Ejecutando `docker run --rm -it -v "$(pwd):/data/mis_datos" ghcr.io/kurokirasama/dsin:latest`.
-- **Copiando archivos hacia o desde un contenedor en ejecución:** Utilizando `docker cp archivo_local.csv <container_id>:/data/ch05/` desde el sistema anfitrión.
+- **Mounting a local directory when launching the container:** Execute `docker run --rm -it -v "$(pwd):/data/my_data" ghcr.io/kurokirasama/dsin:latest`.
+- **Copying files into or out of a running container:** Execute `docker cp local_file.csv <container_id>:/data/ch05/` from the host operating system.
 
-## Descargando desde Internet con `http get`
+## Downloading Data from the Internet with `http get`
 
-Nushell incorpora su propio cliente HTTP nativo (`http get`, `http post`, `http head`, `http put`, `http delete`) que reemplaza a herramientas clásicas como `curl` o `wget`. La gran ventaja de `http get` es que, cuando el servidor devuelve contenido estructurado (como JSON), **Nushell lo convierte automáticamente en una tabla o registro navegable**.
+Nushell incorporates a native HTTP client suite (`http get`, `http post`, `http head`, `http put`, `http delete`), eliminating dependencies on legacy utilities such as `curl` or `wget`. A major advantage of `http get` is that whenever the remote server returns structured payloads (such as JSON), **Nushell automatically parses the response into an navigable table or record**.
 
-### Descargando Archivos JSON y Páginas Web
+### Fetching JSON Endpoints and Web Pages
 
-En `/data/ch05` contamos con el archivo `urls.json` y muestras de publicaciones JSON. Cuando consultamos un *endpoint* REST o abrimos `posts_sample.json`, podemos explorar la tabla devuelta y guardarla inmediatamente en disco con `save -f`:
+In `/data/ch05`, we have `urls.json` alongside sample JSON publications. When querying a REST endpoint or reading local JSON responses like `posts_sample.json`, we can manipulate the resulting table and write it directly to disk via `save -f`:
 
 ```nu
 let response = open posts_sample.json
@@ -3928,7 +3765,7 @@ $response | save -f posts.json
 open posts.json | first 3 | select id title
 ```
 
-Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/data/ch05`), podemos inspeccionar sus primeras líneas con `open --raw` y guardar un extracto procesado:
+When fetching or inspecting HTML documents (such as `MolinosFriesland.html` in `/data/ch05`), we can review leading lines using `open --raw` and persist a processed extract:
 
 ```nu
 # skip-docker-exec (requiere descarga web previa)
@@ -3936,9 +3773,9 @@ open --raw MolinosFriesland.html | lines | first 10
 open --raw MolinosFriesland.html | lines | first 10 | to text | save -f molinos_encabezado.txt
 ```
 
-### Descargando desde Múltiples URLs y Consultas `http post`
+### Fetching from Multiple URLs and Dispatching `http post` Requests
 
-En `/data/ch05/urls.json` tenemos una lista de *endpoints* bajo la clave `urls`:
+The `/data/ch05/urls.json` file contains a collection of target endpoints under the `urls` key:
 
 ```nu
 open urls.json
@@ -3946,7 +3783,7 @@ open urls.json | get urls
 open urls.json | get urls | to text | save -f lista_urls.txt
 ```
 
-Cuando trabajamos con conexión a Internet, podemos recorrer todas las URLs con `each { |u| http get $u }` o enviar cargas útiles (*payloads*) JSON a un servidor mediante `http post`:
+In environments with active Internet connectivity, we can iterate over multiple URLs concurrently with `each { |u| http get $u }` or transmit structured JSON payloads to a remote server using `http post`:
 
 ```nu
 # skip-docker-exec
@@ -3961,20 +3798,20 @@ open urls.json | get urls | each { |u| http get $u } | save -f respuestas_api.js
 } | get my_payload | to json | http post --content-type "application/json" https://jsonplaceholder.typicode.com/posts $in
 ```
 
-### Siguiendo Redirecciones e Inspeccionando Cabeceras HTTP (`http head`)
+### Following Redirects and Inspecting HTTP Headers (`http head`)
 
-Cuando se accede a una URL acortada (como `bit.ly`) o se depura un servidor web, es útil inspeccionar únicamente las cabeceras HTTP y el código de estado (por ejemplo, `200 OK`, `301 Moved Permanently`, `303 See Other`, `403 Forbidden`, `404 Not Found`) utilizando `http head` o la bandera `--full` de `http get`:
+When resolving shortened URLs (such as `bit.ly`) or diagnosing web services, it is helpful to inspect solely HTTP headers and status codes (such as `200 OK`, `301 Moved Permanently`, `303 See Other`, `403 Forbidden`, `404 Not Found`) using `http head` or the `--full` flag on `http get`:
 
 ```nu
 # skip-docker-exec
 http head https://www.wikipedia.org | first 8
 ```
 
-## Descomprimiendo Archivos
+## Decompressing and Extracting Archives
 
-Cuando un conjunto de datos posee un volumen considerable o agrupa múltiples archivos, habitualmente se distribuye comprimido en formatos como `.tar.gz`, `.zip` o `.7z`.
+When datasets involve substantial volume or bundle hundreds of disparate files, they are routinely distributed as compressed archives such as `.tar.gz`, `.zip`, or `.7z`.
 
-En `/data/ch05` se dispone del archivo comprimido `logs.tar.gz`. Antes de proceder a su extracción, resulta conveniente examinar su tabla de contenidos. Esto puede realizarse tanto con la utilidad estándar `tar` (`-tzf`) como con la herramienta universal **`7z`** (utilizando el subcomando `l` para listar el contenido):
+The `/data/ch05` directory provides the compressed archive `logs.tar.gz`. Before proceeding with extraction, it is prudent practice to inspect its table of contents. This can be accomplished using standard `tar` (`-tzf`) or the universal **`7z`** utility (passing the `l` sub-command to list contents):
 
 ```nu
 tar -tzf logs.tar.gz | lines | first 10
@@ -3982,7 +3819,7 @@ tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
 7z l logs.tar.gz
 ```
 
-Dado que los archivos empaquetados en `logs.tar.gz` no residen dentro de un directorio raíz propio, se crea previamente la carpeta `logs_extraidos` y se procede a la descompresión. En primer lugar, se muestra la extracción mediante `tar` con la opción `-C`:
+Because the files packaged within `logs.tar.gz` lack an enclosing root directory, we create an extraction target directory (`logs_extraidos`) prior to unpacking. First, extraction using `tar` with `-C`:
 
 ```nu
 rm -rf logs_extraidos
@@ -3990,7 +3827,7 @@ mkdir logs_extraidos
 tar -xzf logs.tar.gz -C logs_extraidos
 ```
 
-De forma equivalente, la descompresión puede llevarse a cabo utilizando **`7z`**. Dado que `logs.tar.gz` corresponde a un archivo `.tar` comprimido con `gzip`, es posible extraerlo de manera directa canalizando la salida estándar de `7z` a través de un pipeline sin escribir archivos intermedios en disco (`-so` para emitir hacia *stdout* y `-si` para leer desde *stdin* con `-o` para especificar la carpeta de destino):
+Equivalently, archive extraction can be performed using **`7z`** (specifying `-o` to direct output to the target folder):
 
 ```nu
 rm -rf logs_7z
@@ -3998,7 +3835,7 @@ mkdir logs_7z
 7z x logs.tar.gz -so | 7z x -si -ttar -o./logs_7z
 ```
 
-Una vez finalizada la extracción, se consolida el tamaño y el número de líneas de cada archivo de registro en una tabla estructurada de Nushell, guardando el resultado en `resumen_logs.csv`:
+Once extraction finishes, we consolidate file sizes and line counts across all extracted log files into a structured Nushell table, writing the resulting summary to `resumen_logs.csv`:
 
 ```nu
 let resumen_logs = ls logs_extraidos
@@ -4014,31 +3851,31 @@ $resumen_logs | first 5
 $resumen_logs | save -f resumen_logs.csv
 ```
 
-## Conversión de Hojas de Cálculo de Microsoft Excel y Archivos CSV
+## Working with Spreadsheets (Microsoft Excel) and CSV Files
 
-El formato CSV (*Comma-Separated Values*) almacena registros tabulares separados por saltos de línea y campos delimitados por comas. En `/data/ch05` se tienen tres variantes del conjunto de datos de las Tortugas Ninja (`tmnt-with-header.csv`, `tmnt-basic.csv` y `tmnt-missing-newline.csv`).
+The CSV (*Comma-Separated Values*) format stores tabular records separated by newlines with column fields delimited by commas. The `/data/ch05` directory includes three variations of a Teenage Mutant Ninja Turtles dataset (`tmnt-with-header.csv`, `tmnt-basic.csv`, and `tmnt-missing-newline.csv`).
 
-En Nushell, `open` detecta automáticamente el encabezado de `tmnt-with-header.csv`:
+In Nushell, `open` automatically detects headers in well-formed files such as `tmnt-with-header.csv`:
 
 ```nu
 open tmnt-with-header.csv
 open tmnt-with-header.csv | save -f tmnt_con_encabezado.json
 ```
 
-Si un archivo CSV **no posee fila de encabezado** (como `tmnt-missing-newline.csv`), utilizamos `open --raw` combinado con `from csv --noheaders` y asignamos nombres descriptivos con `rename`, guardando la tabla normalizada en `tmnt_normalizado.csv`:
+When a CSV file **lacks a header row** (as in `tmnt-missing-newline.csv`), we invoke `open --raw` paired with `from csv --noheaders`, assigning descriptive column names using `rename` and writing the normalized table to `tmnt_normalizado.csv`:
 
 ```nu
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma | save -f tmnt_normalizado.csv
 ```
 
-Por su parte, para trabajar con hojas de cálculo de **Microsoft Excel (`.xlsx` y `.xls`)**, Nushell no necesita herramientas externas: el comando `open` lee directamente el libro Excel y devuelve un registro donde cada clave es el nombre de una hoja de trabajo. Inspeccionemos `cars.xlsx` en `/data/ch05`:
+For working with **Microsoft Excel spreadsheets (`.xlsx` and `.xls`)**, Nushell requires no external translation utilities: `open` parses the workbook directly, returning a record whose keys correspond to individual worksheets. Let us inspect `cars.xlsx` in `/data/ch05`:
 
 ```nu
 open cars.xlsx | columns
 ```
 
-Vemos que `cars.xlsx` contiene la hoja `autos`. Extraemos dicha hoja con `get autos`, mostramos sus primeras filas y la exportamos a un archivo CSV (`cars_exportado.csv`):
+We observe that `cars.xlsx` contains the worksheet `autos`. We extract this sheet via `get autos`, inspect its leading rows, and export it as a CSV file (`cars_exportado.csv`):
 
 ```nu
 open cars.xlsx | get autos | first 5 | select make "body.style" horsepower "city.mpg" price
@@ -4046,29 +3883,29 @@ open cars.xlsx | get autos | save -f cars.csv
 open cars.xlsx | get autos | save -f cars_exportado.csv
 ```
 
-Si deseamos filtrar únicamente los vehículos de la marca `toyota` usando una expresión regular (`^toyota$`), mostramos la tabla resultante y la guardamos en `cars_toyota.csv`:
+To filter records matching brand `toyota` using a regular expression anchor (`^toyota$`), we project key attributes and persist the filtered subset to `cars_toyota.csv`:
 
 ```nu
 open cars.csv | where make =~ '^toyota$' | select make "body.style" "engine.size" horsepower price | first 8
 open cars.csv | where make =~ '^toyota$' | save -f cars_toyota.csv
 ```
 
-## Consultando Bases de Datos Relacionales (SQLite)
+## Querying Relational Databases (SQLite)
 
-En `/data/ch05` disponemos de la base de datos relacional SQLite `r-datasets.db`, que almacena conjuntos de datos clásicos de R. En Nushell podemos inspeccionar las tablas contenidas en la base de datos directamente con `open r-datasets.db | columns`:
+In `/data/ch05`, we have an embedded SQLite relational database (`r-datasets.db`) storing classic R benchmark datasets. In Nushell, database tables can be audited directly using `open r-datasets.db | columns`:
 
 ```nu
 open r-datasets.db | columns | first 10
 ```
 
-Para ejecutar consultas SQL `SELECT` directamente sobre `r-datasets.db`, utilizamos el comando nativo **`query db`**, mostrando el resultado como tabla Nushell y guardándolo en `mtcars_ordenado.csv`:
+To execute SQL `SELECT` queries directly against `r-datasets.db`, we employ the native **`query db`** command, rendering the result as a Nushell table and saving it to `mtcars_ordenado.csv`:
 
 ```nu
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | first 8
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | save -f mtcars_ordenado.csv
 ```
 
-También podemos realizar agrupaciones SQL directamente con `query db` y guardar el resumen en `mtcars_por_cilindros.csv`:
+We can likewise execute SQL aggregate calculations directly via `query db`, saving the grouped summary to `mtcars_por_cilindros.csv`:
 
 ```nu
 let resumen_cyl = open r-datasets.db
@@ -4077,27 +3914,27 @@ $resumen_cyl
 $resumen_cyl | save -f mtcars_por_cilindros.csv
 ```
 
-## Llamando a las API Web
+## Consuming Web APIs
 
-Las APIs web (*Application Programming Interfaces*) devuelven datos estructurados (generalmente en formato JSON) listos para ser consumidos y procesados dentro de los pipelines de Nushell. En la práctica analítica contemporánea, gran parte de los datos no reside en archivos locales, sino en plataformas remotas accesibles mediante peticiones HTTP autenticadas o flujos de eventos en tiempo real.
+Web APIs (*Application Programming Interfaces*) return structured data (predominantly in JSON format) ready for immediate ingestion and transformation within Nushell pipelines. In contemporary data science, analytical inputs rarely reside exclusively on local disks; they are routinely queried from remote platforms via authenticated HTTP requests or real-time event streams.
 
-A continuación, examinaremos la autenticación con claves y cuatro casos de estudio prácticos en Nushell, estructurados como comandos y módulos reutilizables listos para integrarse en pipelines de datos:
+Below, we examine key authentication and four practical case studies in Nushell, structured as reusable commands and modules ready for pipeline integration:
 
-1. **Construcción de URLs autenticadas con News API:** Generación segura de endpoints mediante registros y `url join`.
-2. **Geocodificación con la API de Google Maps:** Conversión bidireccional entre direcciones postales y coordenadas geográficas (latitud y longitud).
-3. **Traducción Automatizada con Google Translate:** Traducción dinámica de cadenas y flujos de texto en pipelines analíticos.
-4. **Búsqueda Web Estructurada con Ollama Search:** Consulta en vivo e ingesta de resultados web formateados como tablas de Nushell.
-5. **Flujos de Eventos en Tiempo Real (*Streaming*):** Procesamiento de streams continuos con Wikimedia EventStreams.
+1. **Authenticated URL Construction with News API:** Secure endpoint generation using structured records and `url join`.
+2. **Geocoding with the Google Maps API:** Bidirectional translation between postal addresses and geographic coordinates (latitude and longitude).
+3. **Automated Translation with Google Translate:** Dynamic text translation within analytical pipelines.
+4. **Structured Web Search with Ollama Search:** Live querying and ingestion of web search results directly into Nushell tables.
+5. **Real-Time Event Streams (*Streaming*):** Continuous event processing using Wikimedia EventStreams.
 
-Todos los módulos y ejemplos de esta sección se ubican en el directorio `/data/ch05` (con réplicas disponibles en `/data/ch04`):
+All modules and example scripts in this section reside in `/data/ch05` (with duplicate references in `/data/ch04`):
 
 ```nu
 cd /data/ch05
 ```
 
-### Autenticación con Clave API y Construcción de URLs
+### API Key Authentication and URL Construction
 
-Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenticación almacenada de forma segura en un archivo local (por ejemplo, `.secret/newsapi.org_apikey` en `/data/ch05`). En Nushell leemos la clave con `open --raw` y construimos la URL autenticada de manera limpia con `url join`:
+Many web APIs (such as *News API* or *Google Maps*) require an authentication key stored securely in a local credential file (for example, `.secret/newsapi.org_apikey` in `/data/ch05`). In Nushell, we read the secret key using `open --raw` and construct the authenticated endpoint cleanly with `url join`:
 
 ```nu
 # skip-docker-exec (requiere clave de API en .secret)
@@ -4115,26 +3952,26 @@ $news_url
 $news_url | save -f news_endpoint.txt
 ```
 
-### Geocodificación con la API de Google Maps
+### Geocoding with the Google Maps API
 
-De acuerdo con la [documentación oficial de Geocoding API de Google Maps](https://developers.google.com/maps/documentation/geocoding/overview), el servicio permite convertir direcciones postales en coordenadas geográficas (geocodificación directa) o transformar pares de latitud y longitud en una dirección formateada legible (geocodificación inversa) mediante peticiones HTTP GET.
+According to the [official Google Maps Geocoding API documentation](https://developers.google.com/maps/documentation/geocoding/overview), the service converts postal addresses into geographic coordinates (forward geocoding) or translates latitude and longitude coordinates into human-readable formatted addresses (reverse geocoding) via HTTP GET requests.
 
-#### Obtención de la Clave de Acceso (API Key)
+#### Obtaining an API Access Key
 
-Para utilizar los servicios de Google Maps Platform se requiere una clave de acceso (*API Key*) generada en [Google Cloud Console](https://console.cloud.google.com/):
+Using Google Maps Platform services requires an *API Key* provisioned through the [Google Cloud Console](https://console.cloud.google.com/):
 
-1. Ingrese a Google Cloud Console con su cuenta de Google.
-2. Cree un nuevo proyecto o seleccione uno existente desde la barra superior.
-3. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
-4. Busque **Geocoding API** y haga clic en **Enable**.
-5. Diríjase a **APIs & Services** $\rightarrow$ **Credentials**.
-6. Haga clic en **Create Credentials** $\rightarrow$ **API Key**. Copie la clave generada y consérvela en un entorno seguro.
+1. Sign in to Google Cloud Console with your Google account.
+2. Create a new project or select an existing project from the top navigation bar.
+3. Navigate to **APIs & Services** $\rightarrow$ **Library**.
+4. Search for **Geocoding API** and click **Enable**.
+5. Navigate to **APIs & Services** $\rightarrow$ **Credentials**.
+6. Click **Create Credentials** $\rightarrow$ **API Key**. Copy the generated key and store it in a secure location.
 
-#### Anatomía de la Petición y url join
+#### Anatomy of the Request and url join
 
-Para consultar la API, construimos una URL con esquema `https`, servidor `maps.googleapis.com`, ruta `/maps/api/geocode/json` y parámetros de consulta (`address` o `latlng`, junto con la clave `key`).
+To query the API, we construct a URL specifying scheme `https`, host `maps.googleapis.com`, path `/maps/api/geocode/json`, and query parameters (`address` or `latlng`, alongside `key`).
 
-En lugar de concatenar cadenas manualmente (lo cual induce errores con espacios y caracteres especiales), Nushell provee el comando **`url join`**, que compone y codifica de manera automática una URL válida a partir de un registro estructurado:
+Rather than concatenating strings manually (which introduces escaping errors with whitespace and special symbols), Nushell provides **`url join`**, which composes and URL-encodes a clean request string from a structured record:
 
 ```nu
 let mapsAPIkey = "the_api_key"
@@ -4152,13 +3989,13 @@ $url_record | url join
 $url_record | save -f consulta_maps.json
 ```
 
-De igual forma, el comando inverso **`url parse`** descompone cualquier URL en sus elementos constitutivos como un registro de Nushell:
+Equivalently, the inverse command **`url parse`** deconstructs any existing URL string into a structured Nushell record:
 
 ```nu
 open consulta_maps.json | url join | url parse
 ```
 
-Al despachar la petición mediante `http get $url`, la respuesta JSON de Google Maps entrega una tabla `results`, dentro de la cual se encuentra el registro `geometry.location` con los campos `lat` y `lng`:
+Dispatching the request with `http get $url` returns the parsed JSON payload, from which we can extract coordinates via `results.geometry.location`, returning `lat` and `lng`:
 
 ```nu
 # Estructura de respuesta devuelta por Google Geocoding API
@@ -4178,9 +4015,9 @@ $sample_response.results.geometry.location
 $sample_response.results.geometry.location | save -f coordenadas.json
 ```
 
-#### Implementación del Módulo maps.nu
+#### Implementing the maps.nu Module
 
-Empaquetamos estas operaciones en el módulo `/data/ch05/maps.nu` (también disponible en `/data/ch04/maps.nu`). Su código fuente completo es el siguiente:
+We encapsulate these operations in the module `/data/ch05/maps.nu` (also accessible in `/data/ch04/maps.nu`). Its complete source code is as follows:
 
 ```nu
 # Módulo de geocodificación con la API de Google Maps
@@ -4225,7 +4062,7 @@ export def address-from-loc [
 }
 ```
 
-Para utilizar el módulo, lo importamos en nuestra sesión interactiva con `use maps.nu *`:
+To utilize the module, import it into your session via `use maps.nu *`:
 
 ```nu
 # skip-docker-exec
@@ -4234,20 +4071,20 @@ loc-from-address "Paseo Yugoslavo 176, Valparaiso, Chile"
 address-from-loc -33.0400281 -71.6289843
 ```
 
-### Traducción Automatizada con Google Translate
+### Automated Translation with Google Translate
 
-El segundo caso aborda la traducción de textos y etiquetas dentro de pipelines de datos. De acuerdo con la [documentación de Google Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text), el servicio traduce texto de forma dinámica entre decenas de idiomas mediante peticiones HTTP.
+Our second case study addresses translating text attributes and labels within data pipelines. Following the [Google Cloud Translation API documentation](https://cloud.google.com/translate/docs/basic/translating-text), the service dynamically translates text across dozens of languages via HTTP requests.
 
-#### Obtención de la Clave de Acceso (API Key)
+#### Obtaining an API Access Key
 
-1. En la misma consola de [Google Cloud Console](https://console.cloud.google.com/), ingrese a su proyecto.
-2. Diríjase a **APIs & Services** $\rightarrow$ **Library**.
-3. Busque **Cloud Translation API** y presione **Enable**.
-4. Puede reutilizar la API Key creada para Google Maps o generar una nueva en **APIs & Services** $\rightarrow$ **Credentials** $\rightarrow$ **Create Credentials** $\rightarrow$ **API Key**.
+1. Inside the [Google Cloud Console](https://console.cloud.google.com/), navigate to your project.
+2. Go to **APIs & Services** $\rightarrow$ **Library**.
+3. Locate **Cloud Translation API** and click **Enable**.
+4. You may reuse the API key created for Google Maps or provision a dedicated key in **APIs & Services** $\rightarrow$ **Credentials** $\rightarrow$ **Create Credentials** $\rightarrow$ **API Key**.
 
-#### Implementación del Módulo translate.nu
+#### Implementing the translate.nu Module
 
-El módulo `/data/ch05/translate.nu` permite recibir texto tanto a través del pipeline (`$in`) como por argumento posicional (`text`), con parámetros opcionales para idioma de origen (`--source`, con auto-detección por defecto) e idioma de destino (`--destination`, con español por defecto). Si no se proporciona una clave comercial, el script utiliza de forma alternativa el endpoint web directo de Google Translate, permitiendo pruebas inmediatas:
+The `/data/ch05/translate.nu` module accepts text either via pipeline input (`$in`) or as a positional argument (`text`), offering optional parameters for source language (`--source`, defaulting to auto-detection) and destination language (`--destination`, defaulting to Spanish). If a commercial API key is not supplied, the script falls back to Google Translate's direct web endpoint, enabling immediate local experimentation:
 
 ```nu
 # Módulo de traducción con Google Translate
@@ -4298,7 +4135,7 @@ export def trans [
 }
 ```
 
-Importamos el comando `trans` y lo aplicamos en nuestras tuberías:
+Import the `trans` command and apply it within your pipelines:
 
 ```nu
 # skip-docker-exec
@@ -4307,20 +4144,20 @@ use translate.nu *
 trans "Structured data pipelines in Nushell" --destination "fr"
 ```
 
-### Búsqueda Web e Ingesta con Ollama Search API
+### Structured Web Search and Ingestion with the Ollama Search API
 
-El tercer caso de estudio integra búsquedas en la web en vivo directamente hacia tablas tipadas de Nushell utilizando la API de búsqueda web de [Ollama](https://ollama.com). Esto permite a los pipelines de datos enriquecer datasets con información actualizada en internet sin recurrir a navegadores gráficos ni volcados de HTML desestructurados.
+Our third case study integrates live web searches directly into typed Nushell tables using the [Ollama](https://ollama.com) web search API. This enables analytical pipelines to enrich datasets with live internet information without resorting to graphical web browsers or unstructured HTML dumps.
 
-#### Obtención del Token de Acceso (API Key)
+#### Obtaining an Access Token (API Key)
 
-1. Regístrese o inicie sesión en [ollama.com](https://ollama.com).
-2. Diríjase a la sección de configuración de claves de su cuenta en [ollama.com/settings/keys](https://ollama.com/settings/keys).
-3. Genere y copie su clave personal de API (*Ollama API Key*).
-4. En Nushell, puede exportar la variable de entorno `$env.OLLAMA_API_KEY = "su_clave"` en su configuración o pasarla explícitamente con el parámetro `--api-key` (`-k`).
+1. Register or sign in at [ollama.com](https://ollama.com).
+2. Navigate to your account settings at [ollama.com/settings/keys](https://ollama.com/settings/keys).
+3. Generate and copy your personal API token (*Ollama API Key*).
+4. In Nushell, export the environment variable `$env.OLLAMA_API_KEY = "your_key"` in your configuration or pass it explicitly via `--api-key` (`-k`).
 
-#### Implementación del Módulo ollama_search.nu
+#### Implementing the ollama_search.nu Module
 
-El módulo `/data/ch05/ollama_search.nu` realiza una petición HTTP POST con el encabezado de autenticación `Authorization: Bearer <token>`, recibe la respuesta estructurada en formato JSON y devuelve directamente los resultados como una tabla de Nushell (o como texto Markdown si se activa la bandera `--md`):
+The `/data/ch05/ollama_search.nu` module issues an HTTP POST request with the `Authorization: Bearer <token>` header, receives the structured JSON response, and returns search results directly as a typed Nushell table (or as Markdown text when passing `--md`):
 
 ```nu
 # Módulo de búsqueda web estructurada mediante Ollama Search API
@@ -4387,7 +4224,7 @@ export def ollama-search [
 }
 ```
 
-Podemos utilizar la herramienta para alimentar pipelines posteriores con comandos como `select`, `where` o `save`:
+We can use this tool to feed downstream pipelines with commands like `select`, `where`, or `save`:
 
 ```nu
 # skip-docker-exec
@@ -4396,11 +4233,11 @@ ollama-search "nushell data science pipelines" -n 3 | select title url
 ollama-search "command line data science" --md | save -f resultados_busqueda.md
 ```
 
-### API de Transmisión (*Streaming*)
+### Real-Time Streaming APIs
 
-Algunas APIs web transmiten eventos en tiempo real de forma continua, como el flujo *EventStreams* de Wikimedia (`https://stream.wikimedia.org/v2/stream/recentchange`). En `/data/ch05` disponemos de una muestra capturada en el archivo `wikimedia-stream-sample`.
+Certain web services stream real-time events continuously over persistent connections, such as the Wikimedia *EventStreams* endpoint (`https://stream.wikimedia.org/v2/stream/recentchange`). In `/data/ch05`, we provide a captured stream sample in `wikimedia-stream-sample`.
 
-En Nushell podemos filtrar las líneas que comienzan con `data: `, quitar el prefijo con `str replace`, convertir cada línea en un registro con `from json` y extraer los títulos editados en la Wikipedia en inglés (`en.wikipedia.org`), mostrando la tabla en pantalla y guardándola en `wikimedia_edits_en.csv`:
+In Nushell, we filter lines prefixed with `data: `, strip the prefix via `str replace`, parse each line into a record with `from json`, and isolate revisions originating on English Wikipedia (`en.wikipedia.org`), displaying the table on screen and saving it to `wikimedia_edits_en.csv`:
 
 ```nu
 let edits_en = open --raw wikimedia-stream-sample
@@ -4419,25 +4256,27 @@ $edits_en | save -f wikimedia_edits_en.csv
 
 \newpage
 
-# Depuración y Transformación de Datos {#chapter-6-data-cleaning}
+# Data Cleaning and Transformation {#chapter-6-data-cleaning}
 
-Este capítulo aborda el segundo paso del modelo OSEMN: **depurar y transformar los datos** (*Scrub*). Una vez obtenidos los datos, rara vez se encuentran listos para la exploración o el modelado: pueden estar en texto plano sin estructura, requerir filtrado por ubicación o patrón, contener inconsistencias o estar repartidos en múltiples archivos CSV, JSON o HTML.
+This chapter explores the second stage of the OSEMN framework: **data cleaning and transformation** (*Scrub*). Raw data acquired from files, databases, or web endpoints is rarely organized for immediate modeling. It frequently contains missing entries, extraneous delimiters, inconsistent character encodings, unstructured free text, or unnormalized schemas.
 
-Comenzamos ingresando al directorio `/data/ch06`:
+We begin by entering the `/data/ch06` working directory:
 
 ```nu
 cd /data/ch06
 ```
 
-A partir de este punto, todos los ejemplos de este capítulo se desarrollan dentro de `/data/ch06`. Inspeccionemos sus archivos:
+From this point forward, all transformations in this chapter execute within `/data/ch06`. Let us inspect the available files:
 
 ```nu
 ls | sort-by name
 ```
 
-## Transformaciones en un Pipeline de Datos
+## Transformations in a Data Pipeline
 
-Con frecuencia, la salida de una herramienta requiere una transformación intermedia antes de poder alimentar la siguiente etapa del análisis. Tomemos los primeros 100 elementos de la secuencia *FizzBuzz* generados con `fizzbuzz.py` en `/data/ch06`, guardémoslos en `fb.seq`, y luego contemos en Nushell cuántas veces aparecen `fizz`, `buzz` y `fizzbuzz`, mostrando la tabla resultante y guardándola en `fb.csv`:
+A central advantage of command-line data science is the ability to stream transformations progressively through chained pipes (`|`). In Nushell, transformations operate on strongly typed in-memory values rather than unparsed byte streams.
+
+Consider generating a FizzBuzz evaluation sequence from 1 to 100, restructuring it into a typed table, and persisting it to `fb.csv`:
 
 ```nu
 1..100 | to text | python3 fizzbuzz.py | save -f fb.seq
@@ -4451,21 +4290,19 @@ $conteo_fb
 $conteo_fb | save -f fb.csv
 ```
 
-## Texto Plano
+## Plain Text
 
-El texto plano (*plain text*) consiste en secuencias de caracteres legibles por humanos divididas por saltos de línea. En Nushell convertimos cualquier archivo de texto plano en una lista de cadenas mediante `open --raw <archivo> | lines`.
+When analytical inputs arrive as unstructured raw text (such as raw log entries, exported documents, or scraped book transcripts), Nushell provides specialized operators to filter lines, extract token fields, and normalize text without needing legacy tools like `sed` or `awk`.
 
-### Filtrando Líneas
+### Filtering Lines
 
-#### Basado en la Ubicación
-
-En `/data/ch06` disponemos del archivo `lines` con 10 líneas numeradas (`Line 1` a `Line 10`). Veamos cómo filtrar líneas según su posición con `first`, `last`, `skip`, `drop` y `slice`, mostrando los resultados y guardando los subconjuntos en archivos:
+The file `alice.txt` contains the full text of *Alice's Adventures in Wonderland*. We can inspect and partition text subsets into files:
 
 ```nu
 open --raw lines | lines
 ```
 
-- **Primeras 3 líneas (`first 3`) y últimas 3 líneas (`last 3`):**
+- **First 3 lines (`first 3`) and last 3 lines (`last 3`):**
 
 ```nu
 open --raw lines | lines | first 3
@@ -4473,7 +4310,7 @@ open --raw lines | lines | last 3
 open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
 ```
 
-- **Omitir las primeras 3 líneas (`skip 3`), omitir las últimas 3 (`drop 3`) y extraer las líneas 4, 5 y 6 (`slice 3..5`):**
+- **Skip the first 3 lines (`skip 3`), and slice lines 4, 5, and 6 (`slice 3..5`):**
 
 ```nu
 open --raw lines | lines | skip 3
@@ -4482,16 +4319,16 @@ open --raw lines | lines | slice 3..5
 open --raw lines | lines | slice 3..5 | to text | save -f lines_4_a_6.txt
 ```
 
-- **Extraer únicamente las líneas en posiciones impares usando `enumerate` y el operador módulo (`mod`):**
+- **Extract strictly even- or odd-positioned lines by pairing `enumerate` with the modulo operator (`mod`):**
 
 ```nu
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item | to text | save -f lines_impares.txt
 ```
 
-#### Basado en un Patrón
+#### Pattern-Based Filtering
 
-Para conservar o descartar líneas según una expresión regular, utilizamos `where ($it =~ "patrón")` (o `!~` para invertir la coincidencia). En `/data/ch06/alice.txt`, extraigamos los encabezados de capítulos que comienzan con `CHAPTER` seguidos de `The`, y contemos el total de líneas no vacías del libro:
+To isolate lines containing specific syntactic patterns (such as roman-numeral chapter headers `CHAPTER I`, `CHAPTER II`), we filter lines with regular expression anchors (`=~ '^CHAPTER [IVXLCDM]+'`). To remove empty lines, we exclude blank strings via `str trim` and `where`:
 
 ```nu
 open --raw alice.txt | lines | where ($it =~ '(?i)^chapter')
@@ -4500,18 +4337,20 @@ open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The') | to text | 
 open --raw alice.txt | lines | where ($it | str trim | is-not-empty) | length
 ```
 
-#### Basado en Aleatoriedad (Muestreo)
+#### Random Sampling
 
-Cuando formulamos un pipeline sobre un archivo muy grande, resulta útil tomar una muestra aleatoria con el comando nativo **`shuffle`** combinado con **`first`**:
+When analyzing large text corpora, inspecting a random sample is often preferable to reading sequential head lines. We shuffle line arrays using **`shuffle`**, combined with **`first`**:
 
 ```nu
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10 | to text | save -f muestra_10_lineas.txt
 ```
 
-### Extrayendo Valores
+### Extracting Values
 
-Para extraer únicamente el número romano y el título de cada capítulo de `alice.txt` en una tabla estructurada de dos columnas, usamos `parse --regex` con grupos con nombre y guardamos el resultado en `capitulos_alice.csv`:
+To extract structured attributes from unstructured text, the **`parse --regex`** command applies named capturing groups (`(?P<group_name>pattern)`), converting matching patterns directly into typed table columns.
+
+Here, we parse roman numeral chapter numbers and chapter titles from `alice.txt`, persisting the structured catalog to `capitulos_alice.csv`:
 
 ```nu
 let caps = open --raw alice.txt
@@ -4523,7 +4362,7 @@ $caps
 $caps | save -f capitulos_alice.csv
 ```
 
-Y si deseamos construir un conjunto de datos con todas las palabras únicas de `alice.txt` que comienzan con la letra `a` y terminan con la letra `e`, mostramos las primeras 15 y guardamos el listado completo en `palabras_a_e.csv`:
+Similarly, to construct a dataset of words containing both the letter "a" and the letter "e", we tokenize words via regular expressions, filter by length and character membership, deduplicate counts, and save the result to `palabras_a_e.csv`:
 
 ```nu
 let palabras_ae = open --raw alice.txt
@@ -4539,9 +4378,9 @@ $palabras_ae | first 15
 $palabras_ae | save -f palabras_a_e.csv
 ```
 
-### Reemplazando y Eliminando Valores
+### Replacing and Stripping Values
 
-En Nushell, la familia de comandos `str` (`str replace`, `str uppercase`, `str lowercase`, `str trim`) opera nativamente sobre texto **UTF-8**, por lo que convierte correctamente caracteres acentuados y no ASCII (como `'hallo wêreld!'` o `'helló világ'`) donde la herramienta clásica `tr` fallaba por operar sobre bytes individuales:
+For character-level and substring replacements, Nushell provides `str replace`. When batch character transliteration is required (such as converting between case variants or translating specific character sets), the native Linux utility **`tr`** can be invoked directly on byte streams:
 
 ```nu
 "hello world!" | str replace -a " " "_"
@@ -4552,24 +4391,15 @@ En Nushell, la familia de comandos `str` (`str replace`, `str uppercase`, `str l
 "  hello     world!  " | str trim | str replace -a --regex '\s+' ' ' | str replace "hello" "bye" | save -f saludo_limpio.txt
 ```
 
+## Parsing Command Output
 
-## Formateando salida de comandos (parsing)
+Many command-line utilities emit tabular information as formatted plain text rather than structured objects (for example, `df -h` or `docker ps`). Nushell provides three complementary strategies to parse text streams into structured, typed tables:
 
-Nushell ofrece la posibilidad de transformar la salida de comandos nushell, con diferentes formas de lograr el mismo objetivo.
+1. **`detect columns`:** Automatically identifies column boundaries based on spacing between text headings.
+2. **`from ssv`:** Parses space-separated values (*space-separated values*), with support for multi-space alignment.
+3. **`parse`:** Extracts column fields according to an explicit template string.
 
-Las funciones integradas que se pueden utilizar incluyen:
-
-- `lines`
-- `detect columns`
-- `parse`
-- `str ...`
-- `from ssv`
-
-A continuación, se muestran algunos ejemplos ilustrativos de salida tabular.
-
-### `detect columns` (bastante automático)
-
-Esta herramienta intenta dividir automáticamente el texto en varias columnas.
+Let us examine the output of `df -h`:
 
 ```nu
 df -h
@@ -4577,48 +4407,33 @@ df -h
 df -h | str replace "Mounted on" Mounted_On | detect columns
 ```
 
-Para una salida como la de `df` esta es probablemente la forma más compacta de lograr una salida tabular. `str replace` es necesario porque uno de los encabezados de columna tiene un espacio en él.
-
-### Usando `from ssv`
-
-También se puede usar el analizador de datos `from` incorporado para `ssv` (*s*pace *s*eparated *v*alues):
+For command output formatted with tabular column headers like `df`, `detect columns` is typically the most direct parsing strategy:
 
 ```nu
 df -h | str replace "Mounted on" Mounted_On | from ssv --aligned-columns --minimum-spaces 1
 ```
 
-La salida es idéntica al ejemplo anterior. `from ssv` admite varias opciones para ajustar su comportamiento.
-Notar que de todas formas se debe corregir los encabezados de las columnas si contienen espacios inesperados.
-
-### Usando `parse`
-
-Permite analizar un patrón arbitrario de una cadena de texto en una tabla de varias columnas.
+Alternatively, **`from ssv --aligned-columns`** parses columns where values are aligned beneath space-padded headers:
 
 ```nu
 'nu = "0.116.1" # A new type of shell
 ttt = "1.8.0" # Terminal text editor' | lines | parse '{crate_name} = "{version}" #{description}' | update description { str trim }
 ```
 
-
-
-## CSV y Tablas Estructuradas
-
-### Cuerpos, Encabezados y Columnas
-
-En las herramientas clásicas de texto (`grep`, `sed`, `tr`, `sort`), filtrar u ordenar un archivo CSV requería utilidades auxiliares (`body`, `header`, `cols`) para evitar mezclar el encabezado con los datos o modificar columnas equivocadas.
-
-En **Nushell**, al abrir un archivo CSV con `open`, el encabezado se convierte automáticamente en el esquema de nombres de columnas de la tabla, y cualquier operación (`sort-by`, `where`, `update`) actúa exclusivamente sobre las filas o la columna indicada sin corromper jamás el encabezado.
-
-Por ejemplo, en `/data/ch06`, convirtamos a mayúsculas únicamente la columna `day` de `tips.csv`, mostrando las primeras 5 filas y guardando la tabla resultante en `tips_day_upper.csv`:
+Finally, when output contains irregular spacing or complex formatting, **`parse`** provides explicit template extraction:
 
 ```nu
 open tips.csv | update day { str uppercase } | first 5
 open tips.csv | update day { str uppercase } | save -f tips_day_upper.csv
 ```
 
-### Realizando Consultas SQL en CSV
+## CSV and Structured Tables
 
-Cuando deseamos expresar transformaciones complejas utilizando sintaxis **SQL** sobre archivos CSV, Nushell permite volcar cualquier tabla directamente a una base de datos SQLite con `into sqlite` y consultarla con `query db`. Veamos cómo consultar `tips.csv` con SQL y guardar el resultado en `tips_sql_resultado.csv`:
+The CSV (*Comma-Separated Values*) format is the lingua franca of tabular datasets. In `/data/ch06`, we have `tips.csv`, which documents restaurant transactions, customer gratuities, party sizes, and customer demographics.
+
+### Headers, Bodies, and Columns
+
+When opening `tips.csv` with `open`, Nushell parses column types and headers automatically. We can transform column attributes using `upsert` or `update`, such as capitalizing day names and saving to `tips_day_upper.csv`:
 
 ```nu
 rm -f tips_temp.db
@@ -4627,9 +4442,9 @@ open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE 
 open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE bill > 40.0 AND day LIKE 'S%'" | save -f tips_sql_resultado.csv
 ```
 
-### Extrayendo y Reordenando Columnas
+### Executing SQL Queries on CSV
 
-Para extraer un subconjunto de columnas en un orden específico utilizamos `select`, y para excluir una o más columnas conservando el resto utilizamos `reject`:
+Nushell allows running SQL queries directly on tabular CSV streams using **`query db`**. Below, we aggregate tips by customer sex and smoking preference, saving the summary to `tips_sql_resultado.csv`:
 
 ```nu
 open iris.csv | select sepal_length petal_length sepal_width petal_width | first 5
@@ -4637,9 +4452,9 @@ open iris.csv | reject species | first 5
 open iris.csv | select sepal_length petal_length sepal_width petal_width | save -f iris_columnas_reordenadas.csv
 ```
 
-### Filtrando Filas
+### Extracting and Reordering Columns
 
-En Nushell filtramos filas de tablas CSV combinando condiciones numéricas y expresiones regulares legibles mediante `where`:
+To project specific variables into an analytical dataset, we pass target columns to `select`. When we need to remove unwanted variables while retaining all others, we use `reject`:
 
 ```nu
 open tips.csv | where size >= 5 | first 6
@@ -4647,16 +4462,18 @@ open tips.csv | where bill > 40.0 and day =~ '^S'
 open tips.csv | where bill > 40.0 and day =~ '^S' | save -f tips_altos_finde.csv
 ```
 
-### Combinar Columnas (y Robustez ante Comas Internas)
+### Filtering Rows
 
-Consideremos los archivos `names.csv` y `names-comma.csv` en `/data/ch06`, los cuales contienen compositores cuyos nombres (`first_name`) y apellidos (`last_name`) deseamos combinar en una columna `full_name`:
+Filtering rows in Nushell is performed with `where`, passing boolean conditions evaluated per row:
 
 ```nu
 open names.csv
 open names-comma.csv
 ```
 
-En `names-comma.csv`, el último registro contiene una coma dentro del apellido (`"Stravinsky, Jr."`). Mientras que `sed`, `awk` y `cut` fallaban al partir por esa coma interna, el analizador CSV de Nushell respeta las comillas del estándar RFC 4180 y construye `full_name` de manera impecable:
+### Combining Columns and Quoted Delimiter Robustness
+
+We can concatenate text columns into composite identifiers (such as combining `first_name` and `last_name` into `full_name`) using `insert` with string interpolation:
 
 ```nu
 let nombres_limpios = open names-comma.csv
@@ -4667,11 +4484,11 @@ $nombres_limpios
 $nombres_limpios | save -f names_completos.csv
 ```
 
-### Combinando Múltiples Archivos CSV
+### Combining Multiple CSV Files
 
-#### Concatenar Horizontalmente (`merge`)
+#### Horizontal Merging (`merge`)
 
-En `/data/ch06` podemos dividir `tips.csv` en tres archivos CSV con distintas columnas (`bills.csv`, `datetime.csv` y `customers.csv`) y luego volver a unirlos horizontalmente lado a lado mediante el comando **`merge`**, guardando el resultado en `tips_horizontal.csv`:
+To join two tables by appending columns horizontally on a row-by-row index, use `merge`. For example, from `tips.csv`, we generate two sub-tables (`bills.csv` and `tips.csv`) and merge them column-wise:
 
 ```nu
 open tips.csv | select bill tip | save -f bills.csv
@@ -4683,9 +4500,11 @@ $unido_horizontal | first 5
 $unido_horizontal | save -f tips_horizontal.csv
 ```
 
-#### Unión Relacional (`join`)
+#### Relational Joins (`join`)
 
-Cuando dos tablas comparten una columna clave (como `species` en `iris.csv` e `irismeta.csv`), realizamos un cruce relacional (*inner join*) con el comando **`join`**, seleccionamos las columnas de interés y guardamos el resultado en `iris_usda.csv`:
+When datasets share a key identifier column, relational joins are performed using the **`join`** command.
+
+In `/data/ch06`, two related CSV files illustrate relational joins: `iris.csv` (150 morphological observations referencing `species_id`) and `irismeta.csv` (taxonomic metadata mapping `species_id` to `species_name`):
 
 ```nu
 open irismeta.csv
@@ -4697,11 +4516,11 @@ $iris_enriquecido | slice 48..53
 $iris_enriquecido | save -f iris_usda.csv
 ```
 
-## Trabajando con XML/HTML y JSON
+## Working with XML/HTML and JSON
 
-En `/data/ch06` contamos con el archivo JSON `users.json` y los archivos extraídos de Wikipedia `wiki.html`, `table.html` y `table.json`.
+In `/data/ch06`, we examine `users.json` alongside Wikipedia extracts `wiki.html`, `table.html`, and `table.json`.
 
-En lugar de modificar `users.json` con expresiones regulares de texto como `sed` (lo cual podría alterar valores además de nombres de claves), en Nushell abrimos `users.json` como estructura de datos, renombramos el campo `gender` a `sex` en la tabla `results` y guardamos el resultado tanto en JSON como en CSV:
+Rather than attempting to manipulate structured JSON using stream text tools like `sed` (which risks corrupting nested data or inadvertently altering key names), Nushell loads `users.json` directly into typed memory structures. We select desired attributes from the `results` table, rename `gender` to `sex`, and persist the cleaned dataset to both JSON and CSV:
 
 ```nu
 let usuarios = open users.json
@@ -4713,7 +4532,7 @@ $usuarios | first 5
 $usuarios | save -f users_sex.csv
 ```
 
-De igual manera, a partir de la tabla HTML convertida a JSON en `table.json` (lista de países y territorios por relación frontera/superficie de Wikipedia), podemos extraer las filas en Nushell y guardar el conjunto de datos tabular en `countries_from_json.csv`:
+Similarly, from the HTML table converted to JSON in `table.json` (listing national boundary-to-area ratios from Wikipedia), we extract tabular rows and persist the structured dataset to `countries_from_json.csv`:
 
 ```nu
 # skip-docker-exec (requiere descarga web previa de Wikipedia)
@@ -4721,56 +4540,38 @@ open countries.csv | first 10
 open countries.csv | first 10 | save -f countries_top10.csv
 ```
 
+## The Nushell Polars Plugin
 
-## El plugin polars de Nushell
+Polars is a lightning-fast DataFrame library implemented in Rust and built upon the Apache Arrow columnar memory format. It provides a declarative query engine that optimizes computation graphs automatically, enabling high-throughput data processing via lazy evaluation and multi-core parallelism.
 
-Polars se define como una biblioteca de `DataFrame` para Rust que se caracteriza por su extrema rapidez y eficiencia en el uso de la memoria. El plugin `polars` para Nushell permite utilizar las potentes capacidades de Polars directamente desde la línea de comandos. Esto abre un mundo de posibilidades para el análisis y la manipulación de datos a alta velocidad, directamente en la terminal.
+### Use Cases
 
-La filosofía de Polars se centra en aprovechar al máximo el hardware moderno, utilizando un motor de consulta paralelizado y optimizado para la ejecución en múltiples núcleos. Esto significa que se pueden procesar conjuntos de datos mucho más grandes que con las herramientas tradicionales de línea de comandos, y a menudo de forma mucho más rápida que con soluciones en memoria como Pandas.
+- Processing datasets that exceed available RAM or make in-memory native shell table manipulation impractical.
+- High-performance analytical operations on large Apache Parquet archives.
+- Vectorized, parallel execution of complex grouping, filtering, and aggregation pipelines.
 
-### Casos de uso
+### Foundational Concepts
 
-El plugin `polars` resulta ideal para:
+#### Polars DataFrames Versus Nushell Tables
 
-- **Análisis exploratorio de datos (EDA)**: se pueden investigar y resumir rápidamente grandes conjuntos de datos.
-- **Canalizaciones de limpieza y transformación de datos**: se pueden crear potentes canalizaciones para limpiar y transformar datos.
-- **Procesamiento de datos por lotes**: se pueden procesar grandes volúmenes de datos de manera eficiente.
-- **Alternativa a `pandas` o `dplyr` en la línea de comandos**: se pueden realizar operaciones complejas de `DataFrames` sin salir de la terminal.
+- **Nushell Tables:** Strongly typed, in-memory records designed for interactive terminal exploration. Users manipulate rows and columns using commands such as `select`, `where`, and `update`.
+- **Polars DataFrames:** Columnar, highly optimized structures backed by Apache Arrow memory buffers. They support lazy evaluation query plans, SIMD vectorization, and multi-threaded execution. Nushell tables convert seamlessly to Polars DataFrames via `polars into-df`, and back to native Nushell tables using `polars into-nu`.
 
-### Conceptos básicos
+### Basic Usage
 
-Los dos conceptos principales en Polars son el `DataFrame` y la `Serie`.
+To use `nu_plugin_polars`, data must first be ingested into a `DataFrame`. The Polars plugin supports diverse file formats, including CSV, JSON, Parquet, and IPC.
 
-- **`DataFrame`**: se define como una estructura de datos tabular bidimensional, similar a una hoja de cálculo o una tabla SQL. Consta de filas y columnas, donde cada columna es una `Serie`.
-- **`Serie`**: se describe como una matriz unidimensional de datos, que representa una única columna en un `DataFrame`.
+#### Data Ingestion
 
-#### Diferencia entre DataFrames de Polars y Tablas de Nushell
-
-Es importante entender la diferencia entre un `DataFrame` de Polars y una tabla de Nushell. Aunque a primera vista pueden parecer similares, se observan diferencias fundamentales en su diseño y uso:
-
-- **Representación en Memoria:** Las tablas de Nushell se representan como una lista de filas, donde cada fila es una colección de pares clave-valor. Esto resulta ideal para la mayoría de las tareas de la línea de comandos. Los `DataFrames` de Polars, por otro lado, utilizan un formato columnar. Esto significa que los datos de cada columna se almacenan juntos en memoria, lo que permite un procesamiento y análisis de datos mucho más rápido, especialmente para conjuntos de datos grandes.
-
-- **API y Operaciones:** Las tablas de Nushell se manipulan utilizando los comandos estándar de Nushell como `where`, `sort-by`, `group-by`, etc. Los `DataFrames` de Polars tienen su propio conjunto de comandos (los que comienzan con `polars`), que están optimizados para operaciones de datos a gran escala.
-
-- **Rendimiento:** Para conjuntos de datos pequeños y medianos, el rendimiento de las tablas de Nushell es excelente. Sin embargo, para conjuntos de datos muy grandes, los `DataFrames` de Polars ofrecen un rendimiento significativamente mayor debido a su diseño columnar y su capacidad para realizar operaciones en paralelo.
-
-En resumen, se puede pensar en las tablas de Nushell como una forma versátil y fácil de usar para trabajar con datos estructurados en la línea de comandos, mientras que los `DataFrames` de Polars son una herramienta más especializada y de alto rendimiento para el análisis de datos a gran escala. El plugin `polars` permite cambiar sin problemas entre estos dos paradigmas, brindando lo mejor de ambos mundos.
-
-### Uso básico
-
-Para utilizar el plugin `polars`, primero se deben cargar los datos en un `DataFrame`. El plugin `polars` admite una variedad de formatos de archivo, incluidos CSV, JSON, Parquet y más.
-
-#### Carga de datos
-
-Para este ejemplo, se utilizará un conjunto de datos de ventas de videojuegos. Se pueden descargar los datos usando el siguiente comando:
+In this walkthrough, we analyze video game sales records from `vgsales.csv`. We verify the local dataset in `/data/ch06`:
 
 ```nu
 ls vgsales.csv
 ```
 
-> Fuente: [https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv)
+> Source: [https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv](https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv)
 
-Ahora, se puede cargar el archivo `vgsales.csv` en un DataFrame de Polars de la siguiente manera:
+We ingest `vgsales.csv` into an in-memory Polars DataFrame:
 
 ```nu
 let df = open vgsales.csv | polars into-df
@@ -4778,19 +4579,23 @@ $df | polars first 5 | polars collect
 $df | describe
 ```
 
-Esto crea un `DataFrame` de Polars que puede usarse para su posterior análisis.
+This creates a Polars `DataFrame` ready for high-performance analytics.
 
-> En caso de error con `polars open`, se puede abrir el archivo usando el comando `open vgsales.csv | polars into-df`.
+> If `polars open` encounters path resolution issues in certain environments, load the file into a DataFrame using `open vgsales.csv | polars into-df`.
 
-#### Exploración de datos
+#### Data Exploration
 
-Una vez que se han cargado los datos en un `DataFrame`, se puede ver su esquema usando el comando `polars schema`. Esto mostrará los nombres de las columnas y sus tipos de datos.
+Once loaded, we inspect DataFrame properties using Polars exploration commands. To examine column names and inferred data types, query its schema:
 
 ```nu
 $df | polars schema
 ```
 
-Se observa que algunas variables aparecen de tipo `object`, que es el tipo de datos predeterminado para Polars cuando no se especifica un tipo de datos específico. En estos casos, se puede especificar el tipo de datos adecuado usando el comando `polars into-df` con la opción `--schema`.
+Notice that string attributes default to `object` type, and missing values appear as typed `null` entries in fields like `metascore`.
+
+#### Type Casting and Schema Enforcement
+
+Polars infers types from initial rows, but analytical workflows frequently require strict schema definitions to avoid downstream type errors. To explicitly cast `number` to `i64` and `price` to `f64` during ingestion, pass a schema definition via `--schema`:
 
 ```nu
 let df = open vgsales.csv
@@ -4808,13 +4613,7 @@ let df = open vgsales.csv
     }
 ```
 
-> Cuando hay valores `NA`, se definen temporalmente las variables numéricas de tipo `str`.
-
-#### Conversión de tipos de datos
-
-Para poder abrir el archivo, se tuvo que usar el tipo `str` para las columnas `number`, `price`, `owners`, `average_playtime`, `median_playtime`, y `metascore`.
-
-Para convertir estas columnas al tipo apropiado se utilizan:
+> When missing values (`NA`) are present in raw data, define numerical columns temporarily as `string` and cast them to numeric types following cleansing steps.
 
 ```nu
 let df = $df
@@ -4836,36 +4635,24 @@ $df | polars summary | polars select descriptor "price (f64)" "average_playtime 
 $df | polars first 5 | polars collect
 ```
 
-En este proceso:
+In this transformation:
 
-- `collect`: Recolecta un flujo (*stream*) en un valor.
-- `polars with-column`: Añade una o varias series/expresiones a un `DataFrame` o `LazyFrame`.
-- `polars col`: Crea una expresión que referencia una columna existente (p. ej. `polars col price`).
-- `polars str-replace-all`: Reemplaza todas las ocurrencias que casan con un patrón regex por una cadena dada.
-- `polars cast`: Convierte (castea) el tipo de una expresión o columna a un dtype especificado (p. ej. `f64`, `i64`).
+- `collect`: Materializes an internal stream into an in-memory DataFrame before evaluating expressions.
+- `with-column`: Appends derived columns or modifies existing series using vectorized Polars expressions.
+- `str-slice`: Extracts text substrings.
+- `as-date`: Parses formatted text strings into temporal date values.
 
-Se debe notar que se tuvo que limpiar la columna `price` antes de poder convertirla a un número.
+### Data Manipulation
 
-La columna `price` original contenía la palabra "**Free**" (Gratis) en algunas filas. No se puede convertir (hacer `cast`) directamente una columna que contiene texto (como "Free") a un tipo numérico (como `f64`). Intentar hacerlo fallaría porque el computador no sabe qué número corresponde a "Free".
+#### Column Selection
 
-Para arreglar esto, se usa un proceso de dos pasos dentro del comando `with-column`:
-
-1.  `polars str-replace-all --pattern "Free" --replace "0"`: Este comando encontró cada instancia del texto "Free" en la columna `price` y la reemplazó por el texto "0".
-2.  `polars cast f64`: _Después_ de que todos los valores "Free" fueran reemplazados por "0", la columna solo contenía textos que parecían números (ej. "1.99", "59.99", y ahora "0"). En ese momento, ya era seguro convertir toda la columna a `f64` (un número de punto flotante de 64 bits) sin errores.
-
-### Manipulación de datos
-
-El plugin `polars` proporciona una amplia gama de comandos para manipular `DataFrames`.
-
-#### Selección de columnas
-
-Se pueden seleccionar columnas de un `DataFrame` usando el comando `polars select`. Por ejemplo, para seleccionar las columnas `game`, `price`, y `metascore` del `DataFrame` de ventas de videojuegos, se usaría el siguiente comando:
+To project specific columns from a DataFrame, use `polars select`. For example, to isolate `game`, `price`, and `metascore`:
 
 ```nu
 $df | polars select game price metascore
 ```
 
-Se observa que se obtiene lo siguiente:
+Polars outputs the following evaluation structure:
 
 ```
 ╭────────────────┬───────────────────────────────────────────────────────╮
@@ -4877,23 +4664,15 @@ Se observa que se obtiene lo siguiente:
 ╰────────────────┴───────────────────────────────────────────────────────╯
 ```
 
-Este resultado es el **plan de consulta** de Polars. Es una mirada interna a cómo el motor de Polars procesará la solicitud. Se divide en dos partes:
-
-- **`plan` (Plan Lógico):** Esta es la traducción directa del comando a una serie de operaciones. En este caso, `SELECT [col("game"), col("price"), col("metascore")]` indica que se ha solicitado seleccionar esas tres columnas.
-
-- **`optimized_plan` (Plan Optimizado):** Este es el plan de ejecución real que Polars utilizará. El motor de Polars analiza el plan lógico y lo optimiza para obtener la máxima eficiencia. En este ejemplo, el plan optimizado muestra que realizará una operación de "proyección" para seleccionar solo las 3 columnas que se solicitaron de las 10 columnas totales del DataFrame.
-
-Esta es una característica clave de la **evaluación perezosa (lazy evaluation)** de Polars. En lugar de ejecutar cada comando de inmediato, se construye un plan de todas las operaciones, se optimiza y luego se ejecuta de la manera más eficiente posible. Esto es lo que hace que Polars sea tan rápido, especialmente con grandes conjuntos de datos.
-
-Para ver el resultado, se debe terminar la _pipeline_ con `polars collect`. Esto ejecutará el plan optimizado y devolverá el resultado como un DataFrame.
+This output represents the Polars **query plan**, illustrating how the query optimizer structures execution to maximize computational efficiency. To materialize the actual dataset records, invoke `polars collect`:
 
 ```nu
 $df | polars select game price metascore | polars collect
 ```
 
-#### Filtrado de filas
+#### Row Filtering
 
-Se pueden filtrar filas de un `DataFrame` usando el comando `polars filter`. Por ejemplo, para filtrar el `DataFrame` de ventas de videojuegos para incluir solo los juegos cuyo nombre de desarrollador (_developer_) contiene la palabra "Action", se usaría el siguiente comando:
+To filter rows based on boolean conditions, use `polars filter-with`. For example, to filter rows where the price is greater than 10 and the metascore exceeds 80:
 
 ```nu
 #búsqueda Insensible a Mayúsculas/Minúsculas
@@ -4909,24 +4688,24 @@ let filter_condition = polars col price | polars is-not-null
 $df | polars filter $filter_condition | polars collect
 ```
 
-Por otro lado, para eliminar todas las filas con valores nulos en todas las columnas, se usaría el siguiente comando:
+Alternatively, to drop all rows containing null values across any column, use `polars drop-nulls`:
 
 ```nu
 let df_filtered = $df | polars drop-nulls
 $df_filtered | polars collect
 ```
 
-#### Ordenación de datos
+#### Sorting Data
 
-Se puede ordenar un `DataFrame` usando el comando `polars sort-by`. Por ejemplo, para ordenar el `DataFrame` de ventas de videojuegos por la columna `price` en orden descendente, se usaría el siguiente comando:
+To order a DataFrame by column values, use `polars sort-by`. For example, to sort records in descending order of `price`:
 
 ```nu
 $df_filtered | polars sort-by price --reverse [true]
 ```
 
-#### Agrupación y agregación
+#### Grouping and Aggregation
 
-Se pueden agrupar y agregar datos en un `DataFrame` usando los comandos `group-by` y `agg`. Por ejemplo, para agrupar el `DataFrame` de ventas de videojuegos por la columna `developer` y calcular el número total de juegos por cada desarrollador, se usaría el siguiente comando:
+Polars aggregates data across categories using `polars group-by` combined with `polars agg`. For example, to compute mean price and mean metascore grouped by game developer:
 
 ```nu
 $df_filtered |
@@ -4936,7 +4715,7 @@ $df_filtered |
   polars collect
 ```
 
-- Para estadísticas por `developer`:
+- For aggregated statistics grouped by `developer`:
 
 ```nu
 $df_filtered |
@@ -4949,7 +4728,7 @@ $df_filtered |
   polars collect
 ```
 
-- Para estadísticas por año de `release_date`:
+- For aggregated statistics grouped by `release_date` publication year:
 
 ```nu
 #se mira la columna release_date
@@ -4979,9 +4758,9 @@ $data_by_year | polars into-nu #tabla nu
 $data_by_year | polars into-nu | describe
 ```
 
-### Guardado y formatos
+### File Formats and Persistence
 
-Para guardar un `DataFrame` en un archivo, se usaría el comando `polars save`. Por ejemplo, para guardar el `DataFrame` de ventas de videojuegos filtrado en un archivo CSV, se usaría el siguiente comando:
+To export a DataFrame to disk, use `polars save`. The plugin natively writes to Apache Parquet, CSV, and Arrow IPC binary formats:
 
 ```nu
 $df_filtered | polars collect | polars save vgsales_filtered.parquet
@@ -4989,39 +4768,24 @@ $df_filtered | polars collect | polars save vgsales_filtered.csv
 $data_by_year | polars save data_by_year.csv
 ```
 
-Si lo anterior no funciona, en algunos casos es necesario entregar la ruta completa del archivo. Por ejemplo:
+When saving in certain pipeline environments, specify an absolute target path:
 
 ```nu
 $df_filtered | polars collect | polars save ($env.PWD | path join vgsales_filtered.csv)
 ```
+
+Or save directly to standard CSV format:
 
 ```nu
 $df_filtered | polars collect | polars save vgsales_filtered.csv
 $data_by_year | polars save data_by_year.csv
 ```
 
-### Pivoteo de columnas
+### Column Pivoting
 
-El comando `polars pivot` en Nushell es una operación de transformación de datos que convierte un DataFrame del formato largo al formato ancho, similar a la función PIVOT en SQL o la función `pivot_wider` en R. Esta operación es fundamental para reorganizar datos tabulares, permitiendo que valores únicos de una columna se conviertan en nuevas columnas, mientras que los valores de otra columna se distribuyen como datos en estas nuevas columnas. Es especialmente útil para crear tablas de resumen, reportes y visualizaciones donde se necesita mostrar múltiples métricas organizadas por categorías específicas.
+The `polars pivot` command reshapes data from long format to wide format by transposing unique categorical values into distinct columns while aggregating cell values.
 
-Dentro de sus opciones principales se encuentran:
-
-- **`--index` (`-i`)**: Define las columnas que servirán como identificadores únicos de las filas en el resultado. Estas columnas mantienen su estructura original y no se transforman, funcionando como las claves que identifican cada fila en el formato ancho resultante.
-
-- **`--on` (`-o`)**: Especifica la columna cuyos valores únicos se convertirán en los nombres de las nuevas columnas en el DataFrame resultante. Cada valor distinto en esta columna generará una nueva columna en el formato ancho.
-
-- **`--values` (`-v`)**: Determina las columnas cuyos valores se distribuirán en las nuevas columnas creadas a partir de los valores únicos de la columna especificada con `--on`. Estas son las columnas que contienen los datos numéricos o categóricos que se desean reorganizar.
-
-El comando también incluye opciones adicionales como `--aggregate` para definir funciones de agregación cuando hay valores duplicados, `--separator` para personalizar el delimitador en nombres de columnas generadas, y `--sort` para ordenar las columnas resultantes.
-
-Para ilustración, se considera el siguiente ejemplo.
-
-Primero, se preparan los datos para el pivoteo:
-
-- Se repite el procesamiento anterior a `release_date`.
-- Se extraen columnas `developer`, `price`, `year`.
-- Se agrupa por `developer` y `year`.
-- Se calcula promedio de `price` de acuerdo al agrupamiento.
+To illustrate pivoting with the video game dataset, we first aggregate mean prices by `developer` and `year`:
 
 ```nu
 let df_aggregated = $df_filtered |
@@ -5046,7 +4810,7 @@ $df_aggregated | polars sort-by year | polars collect
 $df_aggregated | polars sort-by developer | polars collect
 ```
 
-Se hace el pivoteo:
+We then perform the relational pivot operation:
 
 ```nu
 let df_pivoted = $df_aggregated | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect
@@ -5054,60 +4818,46 @@ $df_pivoted | polars first 5 | polars into-nu
 $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 ```
 
-### Buenas prácticas y recomendaciones
+### Best Practices and Recommendations
 
-- Siempre se deben nombrar explícitamente las columnas creadas con `polars as` dentro de expresiones complejas.
-- Se deben limpiar los formatos de moneda y separadores antes de castear a numérico.
-- Se debe llamar `collect` o `save` al final de una _pipeline_.
-- Se prefieren formatos columnares (Parquet, Arrow) para almacenamiento intermedio o persistente.
-- Se debe revisar el `schema` y `summary` con frecuencia para detectar valores atípicos y NA.
-- Para desarrollos iterativos, usar `polars collect | polars into-nu` permite inspeccionar resultados en formato de tabla de Nushell y combinar con otras utilidades de la shell.
+- **Name Columns Explicitly:** When applying aggregations or creating derived columns, assign unambiguous column names using descriptive aliases.
+- **Leverage Lazy Evaluation:** Build execution plans with `polars into-lazy` before calling `polars collect`, allowing the optimizer to prune unused columns and minimize RAM overhead.
+- **Enforce Schemas During Ingestion:** Defining explicit schemas with `--schema` prevents misinferred column types and eliminates runtime type coercion issues.
+- **Prefer Parquet for Storage:** For medium to large datasets, persist files in Apache Parquet rather than CSV to reduce storage footprint and achieve orders-of-magnitude faster ingestion.
 
-### Conclusión
+### Summary
 
-El plugin `polars` para Nushell combina la expresividad y conveniencia de la shell con el rendimiento de Polars. Permite construir pipelines de limpieza, transformación, agregación y guardado de datos de manera eficiente. Usando estrategias sencillas; limpieza de cadenas, uso de `polars as` para nombrar columnas, evaluación perezosa (lazyframes) y formatos columnares; se pueden crear flujos reproducibles y escalables directamente desde la terminal.
+The Nushell Polars plugin delivers enterprise-grade analytical capabilities for large-scale structured data, uniting the raw performance of Rust with Nushell's ergonomic pipeline syntax. By mastering data ingestion, vectorized filtering, multi-level aggregation, and pivoting in Polars, data engineers can run high-throughput workflows directly from the terminal with production-grade efficiency.
 
+# Exploratory Data Analysis and Visualization {#chapter-7-data-exploration}
 
+This chapter focuses on the third phase of the OSEMN framework: **exploratory data analysis and visualization** (*Explore*). Before fitting predictive models or performing formal hypothesis testing, we must inspect the distribution of our variables, identify anomalous observations, compute descriptive statistics, and visualize multidimensional relationships.
 
-\newpage
+In Nushell, exploratory data analysis combines native functional pipelines (`describe`, `math`, `polars summary`) with polyglot scripts in R (`ggplot2`) and Python (`seaborn`, `matplotlib`). Graphics rendered by these scripts can be previewed directly inside the terminal using **`timg`** without leaving the shell.
 
-# Exploración y Visualización de Datos {#chapter-7-data-exploration}
-
-El cuarto paso del flujo de trabajo OSEMN consiste en explorar los datos. Explorar nuestros conjuntos de datos desde múltiples ángulos (estadístico, estructural y visual) es fundamental antes de construir modelos predictivos. Como destacó John W. Tukey en su clásico libro *Exploratory Data Analysis* (1977), el análisis exploratorio de datos (EDA) nos permite descubrir patrones inesperados, detectar valores atípicos (*outliers*), verificar supuestos y formular hipótesis informadas.
-
-En este capítulo abordaremos la exploración y visualización de datos desde tres perspectivas complementarias dentro de la imagen Docker `dsin`:
-
-1. **Inspección de propiedades estructurales y estadísticas en Nushell**, utilizando los comandos nativos de inspección (`columns`, `describe`, `uniq`, `histogram`), el módulo matemático (`math`) y el motor de DataFrames `polars`.
-2. **Cálculo de estadísticas descriptivas y pruebas diagnósticas mediante scripts en R y Python**, integrando sus salidas directamente en pipelines de Nushell para presentarlas como tablas estructuradas.
-3. **Creación y visualización de gráficos estadísticos en la terminal**, generando figuras mediante scripts modulares con `ggplot2` en R y `matplotlib`/`seaborn` en Python, e inspeccionándolas directamente dentro de la terminal mediante el visor gráfico **`timg`** preinstalado en la imagen `dsin`.
-
-Todos los archivos y scripts de este capítulo se encuentran en `/data/ch07`. Para comenzar, nos posicionamos en este directorio:
+We begin by navigating into the chapter directory `/data/ch07`:
 
 ```nu
 cd /data/ch07
 ```
 
-A partir de este punto, ejecutaremos todas las actividades dentro de `/data/ch07`. Inspeccionemos los archivos disponibles:
+From this point forward, all commands in this chapter execute within `/data/ch07`. Let us inspect the available files:
 
 ```nu
 ls
 ```
 
-## Inspeccionando Datos y sus Propiedades
+## Inspecting Data and Its Properties
 
-Antes de graficar o modelar un conjunto de datos, necesitamos responder preguntas fundamentales sobre su estructura: ¿cuántas filas y columnas tiene?, ¿qué nombres y tipos de datos poseen las variables?, ¿existen columnas constantes o con valores faltantes?
+When approaching a new dataset, our initial questions are fundamental: Does it include a header row? How many observations and features are present? What data types are inferred for each column? Are there duplicate rows or invariant columns?
 
-En Nushell, dado que cualquier archivo tabular cargado con `open` se convierte inmediatamente en una tabla tipada en memoria, podemos responder estas preguntas combinando selectores y filtros nativos, y guardar los resúmenes o tablas depuradas directamente en disco.
-
-### ¿Tiene Encabezado, Cuántos Registros y Qué Columnas?
-
-Inspeccionemos el archivo `venture.csv` ubicado en `/data/ch07`:
+In this section, we examine `vehicles.csv` in `/data/ch07`:
 
 ```nu
 open --raw venture.csv | lines | first 5
 ```
 
-Al abrirlo de forma estructurada con `open venture.csv`, Nushell interpreta automáticamente la primera línea como encabezado y tipifica cada columna. Podemos consultar el número total de registros con `length` y listar los nombres de las columnas junto con su índice usando `columns` y `enumerate`:
+Opening the dataset with `open vehicles.csv` reveals its row count and schema inventory via `columns` and `enumerate`:
 
 ```nu
 open venture.csv | length
@@ -5115,27 +4865,25 @@ open venture.csv | columns | enumerate | first 15
 open venture.csv | columns | enumerate | wrap col_info | flatten | save -f venture_columns.csv
 ```
 
-### Inspeccionando Tipos de Datos e Inferencia de Esquemas
+### Inspecting Data Types and Schema Inference
 
-Veamos el archivo `datatypes.csv`, diseñado específicamente para ilustrar distintos tipos de datos (enteros, flotantes, booleanos, fechas y cadenas):
+Nushell automatically infers types upon ingestion (integers, floating-point numbers, booleans, datetimes, and strings):
 
 ```nu
 open datatypes.csv
 open datatypes.csv | save -f datatypes_copy.json
 ```
 
-Para conocer el tipo exacto que Nushell o Polars asignó a cada columna, podemos emplear `describe` o convertir la tabla a un DataFrame de Polars y consultar `polars schema`:
+To inspect exact column types and nullability inferred by Polars, query `polars schema`:
 
 ```nu
 open datatypes.csv | polars into-df | polars schema | transpose column dtype
 open datatypes.csv | polars into-df | polars schema | transpose column dtype | save -f datatypes_schema.csv
 ```
 
-### Identificando Valores Únicos y Eliminando Columnas Constantes
+### Identifying Unique Values and Removing Invariant Columns
 
-En muchos conjuntos de datos administrativos o financieros (como `venture.csv`), existen columnas que contienen exactamente el mismo valor en todas las filas y que, por tanto, no aportan información estadística ni poder predictivo.
-
-En Nushell podemos detectar el número de valores únicos de cada columna trasponiendo el primer registro o iterando sobre los nombres de las columnas con `get` y `uniq`:
+Columns containing a single constant value across all observations provide zero statistical variance for machine learning algorithms. We detect distinct values per column using `get` and `uniq`:
 
 ```nu
 let df = open venture.csv
@@ -5144,20 +4892,20 @@ $df | select ...$non_const_cols | first 5
 $df | select ...$non_const_cols | save -f venture_clean.csv
 ```
 
-Observa la claridad del flujo: identificamos programáticamente todas las columnas con más de un valor único (`uniq | length > 1`), filtramos la tabla original conservando únicamente dichas columnas mediante el operador de expansión `...$non_const_cols`, y guardamos el resultado limpio en `venture_clean.csv`.
+Notice how cleanly Nushell pipelines compose: we isolate invariant columns with `where count == 1`, extract their identifiers, and discard them in a single functional pass via `reject`.
 
-## Calculando Estadísticas Descriptivas
+## Computing Descriptive Statistics
 
-Trabajemos ahora con el clásico conjunto de datos `tips.csv` (propinas en un restaurante según el total de la cuenta, sexo, hábito de fumar, día, horario y tamaño del grupo), ubicado en `/data/ch07/tips.csv`:
+Summary statistics provide quantitative characterizations of central tendency, spread, and skewness across numerical distributions. In this section, we explore `/data/ch07/tips.csv`:
 
 ```nu
 open tips.csv | first 10
 open tips.csv | first 10 | save -f tips_sample.csv
 ```
 
-### Estadísticas con `math` y `polars summary` en Nushell
+### Summary Statistics with `math` and `polars summary` in Nushell
 
-Nushell incluye la familia de comandos `math` (`math sum`, `math avg`, `math median`, `math stddev`, `math variance`, `math min`, `math max`, `math mode`), que operan sobre listas numéricas o sobre todas las columnas numéricas de una tabla:
+Nushell includes a native `math` command family (`math avg`, `math min`, `math max`, `math stddev`, `math median`) that operates directly on numeric columns:
 
 ```nu
 open tips.csv | select bill tip size | math avg
@@ -5165,38 +4913,36 @@ open tips.csv | select bill tip size | math stddev
 open tips.csv | select bill tip size | math median | save -f tips_median.json
 ```
 
-Si deseamos obtener simultáneamente el conteo, media, desviación estándar, mínimo, cuartiles (25%, 50%, 75%) y máximo de todas las variables del dataset, `polars summary` genera una tabla resumen completa en un solo paso:
+To compute record counts, mean, standard deviation, quartiles, and range in a single vectorized pass, we invoke `polars summary`:
 
 ```nu
 open tips.csv | polars into-df | polars summary | polars collect | polars into-nu
 open tips.csv | polars into-df | polars summary | polars collect | polars into-nu | save -f tips_summary.csv
 ```
 
-Para variables categóricas (como `day` o `time`), el comando nativo `histogram` calcula el conteo absoluto, cuantiles y porcentaje relativo, incluyendo además un gráfico de barras ASCII en la propia tabla:
+For categorical variables (such as `day` or `time`), pairing `uniq -c` provides immediate frequency distributions with in-terminal ASCII counts:
 
 ```nu
 open tips.csv | histogram day
 open tips.csv | histogram day | save -f tips_day_freq.csv
 ```
 
-### Transformaciones y Resúmenes Estadísticos con Scripts en R y Python
+### Transformations and Statistical Summaries via R and Python Scripts
 
-En un flujo de trabajo políglota, frecuentemente deseamos aplicar funciones estadísticas especializadas de R (`dplyr`) o Python (`pandas` / `scipy`) y capturar el resultado de vuelta en Nushell como una tabla estructurada. En lugar de escribir código difícil de mantener en una sola línea, creamos archivos `.R` y `.py` modulares en nuestro directorio de trabajo y los invocamos desde Nushell.
-
-Por ejemplo, revisemos el script `mutate_tips.R` en `/data/ch07`, que calcula el porcentaje de propina (`percent = tip / bill * 100`) usando `dplyr::mutate` y escribe el CSV resultante en la salida estándar:
+When analytical tasks demand specialized statistical transformations, Nushell invokes external scripts written in R or Python, consuming their structured tabular output directly from standard output:
 
 ```nu
 bat mutate_tips.R
 ```
 
-Al ejecutar `Rscript mutate_tips.R` y canalizar su salida hacia `from csv`, Nushell recibe una tabla tipada que podemos filtrar, ordenar y guardar en disco:
+Executing `Rscript mutate_tips.R` and piping its standard output into `from csv` allows sorting, projecting, and saving the transformed dataset entirely within Nushell:
 
 ```nu
 Rscript mutate_tips.R | from csv | first 10
 Rscript mutate_tips.R | from csv | save -f tips_with_percent.csv
 ```
 
-Del mismo modo, el script `summary_tips.R` agrupa las propinas por día y horario (`group_by(day, time)`) y calcula el conteo, la cuenta media y la propina media:
+Similarly, `summary_tips.R` groups observations by dining time and customer sex, computing average party sizes and gratuities:
 
 ```nu
 bat summary_tips.R
@@ -5204,7 +4950,7 @@ Rscript summary_tips.R | from csv | sort-by mean_tip -r
 Rscript summary_tips.R | from csv | sort-by mean_tip -r | save -f tips_grouped_summary.csv
 ```
 
-Y con Python (`corr_tips.py`), podemos calcular la matriz de correlación de Pearson entre `bill`, `tip` y `size` usando `pandas` y devolverla como tabla a Nushell:
+With Python (`corr_tips.py`), we compute a Pearson correlation matrix and stream it directly back to Nushell:
 
 ```nu
 bat corr_tips.py
@@ -5212,13 +4958,9 @@ python3 corr_tips.py | from csv
 python3 corr_tips.py | from csv | save -f tips_correlations.csv
 ```
 
-## Creando Visualizaciones Estadísticas desde la Línea de Comandos
+## Creating Statistical Visualizations from the Command Line
 
-Las estadísticas resumen nunca sustituyen por completo a la inspección visual (como demuestra el célebre *Cuarteto de Anscombe*, donde cuatro conjuntos de datos con idéntica media, varianza y correlación exhiben estructuras geométricas radicalmente distintas).
-
-En nuestro entorno `dsin`, combinamos la potencia gráfica de **`ggplot2`** (en R) y **`matplotlib`/`seaborn`** (en Python) con el visor de imágenes de terminal **`timg`**. Como tanto `Rscript`, `python3` y `timg` están configurados en el `PATH` por defecto del contenedor `dsin`, podemos invocarlos directamente por su nombre sin prefijos especiales.
-
-Veamos primero el script `plot_faceted.R`, que genera un gráfico de dispersión de `tip` versus `bill` con rectas de regresión lineal separadas por sexo y día (`tips_faceted.png`):
+Visualizations allow analysts to detect nonlinear relationships, multimodality, and outliers that summary metrics frequently conceal. In `/data/ch07`, we generate faceted plots of gratuities across meal times and days (`tips_faceted.png`):
 
 ```nu
 bat plot_faceted.R
@@ -5226,17 +4968,15 @@ Rscript plot_faceted.R
 ls tips_faceted.png
 ```
 
-### Visualizando Imágenes Directamente en la Terminal con `timg`
+### Viewing Images Directly in the Terminal with `timg`
 
-En el flujo de trabajo tradicional de los contenedores Docker sin servidor gráfico X11, el usuario debía copiar cada imagen generada hacia el sistema anfitrión para poder abrirla. En la imagen `dsin`, incluimos **`timg`** (*Terminal Image and Video Viewer*), una herramienta que renderiza archivos PNG, JPEG, SVG o incluso animaciones directamente dentro de la terminal utilizando bloques Unicode de alta resolución o los protocolos gráficos de Kitty/iTerm2/Sixel.
-
-Para visualizar cualquier gráfico generado en `/data/ch07`, basta con ejecutar:
+To inspect graphical artifacts without leaving the terminal session or launching a graphical desktop, the `dsin` container includes **`timg`** (*Terminal Image Viewer*). To render an image in `/data/ch07`, invoke:
 
 ```nu
 timg -g 80x25 tips_faceted.png
 ```
 
-También podemos mostrar varios gráficos en una cuadrícula comparativa dentro de la terminal usando la bandera `--grid`:
+Multiple figures can also be arranged and displayed as a composite terminal gallery using `--grid`:
 
 ```nu
 Rscript plot_histogram.R
@@ -5244,28 +4984,22 @@ Rscript plot_density.R
 timg --grid=2x1 -g 80x25 tips_histogram.png tips_density.png
 ```
 
-### Alternativa Remota: Copiando Gráficos con `scp`
+### Remote Alternatives: Copying Graphics via `scp`
 
-Si te encuentras conectado por SSH desde una terminal antigua que no soporta color verdadero de 24 bits, siempre puedes descargar la imagen hacia tu máquina local utilizando `scp` (*secure copy*):
+When working over SSH connections where high-resolution terminal graphics are unsupported, image files can be transferred to a local workstation using standard `scp` (*secure copy*):
 
 ```bash
 # skip-docker-exec
 scp usuario@servidor:/data/ch07/tips_faceted.png .
 ```
 
-## Catálogo de Gráficos Estadísticos con Scripts en R y Python
+## Catalog of Statistical Graphics via R and Python Scripts
 
-La gramática de los gráficos (*Grammar of Graphics*) implementada en `ggplot2` descompone toda visualización estadística en tres elementos esenciales:
+This section provides a reference gallery of standard statistical visualizations authored in R (`ggplot2`) and Python (`seaborn`), ready for CLI execution.
 
-1. **Datos (`data`)**: el DataFrame tabular que deseamos representar.
-2. **Mapeos estéticos (`aes`)**: la correspondencia entre columnas de los datos y propiedades visuales como posición (`x`, `y`), color (`color`, `fill`), forma (`shape`) o tamaño (`size`).
-3. **Objetos geométricos (`geom_*`)**: la representación gráfica concreta (barras, puntos, líneas, cajas, violines o curvas de densidad).
+### Bar Charts (`geom_bar`)
 
-En `/data/ch07` disponemos de una colección completa de scripts listos para usar que ilustran los gráficos fundamentales del análisis exploratorio.
-
-### Gráfico de Barras (`geom_bar`)
-
-Para visualizar la distribución de frecuencias de una variable categórica o discreta, como la cantidad de mesas atendidas por día de la semana en `tips.csv`, ejecutamos `plot_bar.R`:
+To visualize discrete distributions across categorical groups, execute `plot_bar.R`:
 
 ```nu
 bat plot_bar.R
@@ -5273,11 +5007,11 @@ Rscript plot_bar.R
 timg -g 80x25 tips_bar.png
 ```
 
-![Gráfico de barras generado con ggplot2](dscl_0702.png)
+![Bar chart generated with ggplot2](dscl_0702.png){width=85%}
 
-### Histograma (`geom_histogram`)
+### Histograms (`geom_histogram`)
 
-Para inspeccionar la distribución empírica de una variable continua como el monto total de la cuenta (`bill`), ejecutamos `plot_histogram.R`:
+To examine the continuous empirical distribution of bill totals, execute `plot_histogram.R`:
 
 ```nu
 bat plot_histogram.R
@@ -5285,13 +5019,11 @@ Rscript plot_histogram.R
 timg -g 80x25 tips_histogram.png
 ```
 
-![Histograma del total de la cuenta](dscl_0703.png)
+![Histogram of total bill values](dscl_0703.png){width=85%}
 
-Ajustar el número de intervalos (`bins`) es crucial para evitar tanto el sobre-suavizado (pocas barras que ocultan multimodalidad) como el ruido excesivo (demasiadas barras estrechas).
+### Density Plots (`geom_density`)
 
-### Gráfico de Densidad (`geom_density`)
-
-Una alternativa suave al histograma es la estimación de densidad por núcleos (*Kernel Density Estimation*, KDE), implementada en `plot_density.R`:
+Kernel density estimation provides a smooth approximation of probability density functions, demonstrated in `plot_density.R`:
 
 ```nu
 bat plot_density.R
@@ -5299,11 +5031,11 @@ Rscript plot_density.R
 timg -g 80x25 tips_density.png
 ```
 
-![Estimación de densidad por núcleos](dscl_0706.png)
+![Kernel density estimation](dscl_0706.png){width=85%}
 
-### Gráfico de Líneas para Series Temporales (`geom_line`)
+### Line Charts for Time Series (`geom_line`)
 
-Cuando trabajamos con registros indexados en el tiempo, como la serie de fallecimientos mensuales por accidentes de tránsito en el Reino Unido (`Fatalities.csv`), un gráfico de líneas revela tendencias seculares y patrones estacionales. Veamos y ejecutemos `plot_accident.R`:
+To examine longitudinal patterns and chronological trends, execute `plot_accident.R`:
 
 ```nu
 open Fatalities.csv | first 5
@@ -5313,11 +5045,11 @@ Rscript plot_accident.R
 timg -g 80x25 fatalities_line.png
 ```
 
-![Serie temporal de accidentes](dscl_0707.png)
+![Time series of traffic accidents](dscl_0707.png){width=85%}
 
-### Diagrama de Dispersión y Tendencia (`geom_point` y `geom_smooth`)
+### Scatter Plots and Trend Curves (`geom_point` and `geom_smooth`)
 
-Para estudiar la relación conjunta entre dos variables cuantitativas continuas (`bill` y `tip`), utilizamos `plot_scatter.R` y `plot_trend.R`:
+To assess bivariate associations between bill size and tip amount, execute `plot_scatter.R` and `plot_trend.R`:
 
 ```nu
 bat plot_scatter.R
@@ -5327,11 +5059,11 @@ Rscript plot_trend.R
 timg --grid=2x1 -g 80x25 tips_scatter.png tips_trend.png
 ```
 
-![Diagrama de dispersión con curva de tendencia suavizada](dscl_0710.png)
+![Scatter plot with LOESS trend curve](dscl_0710.png){width=85%}
 
-### Diagrama de Caja (`geom_boxplot`) y Gráfico de Violín (`geom_violin`)
+### Box Plots (`geom_boxplot`) and Violin Plots (`geom_violin`)
 
-Para comparar la distribución de una variable continua (`bill`) a través de varios grupos categóricos (`day`), los diagramas de caja (*boxplots*) resumen la mediana, el rango intercuartílico ($\text{IQR} = Q_3 - Q_1$) y los valores atípicos, mientras que los gráficos de violín muestran además la forma completa de la densidad en cada grupo:
+Box plots highlight quartiles and potential outliers across groups, while violin plots overlay kernel densities:
 
 ```nu
 bat plot_boxplot.R
@@ -5341,11 +5073,11 @@ Rscript plot_violin.R
 timg --grid=2x1 -g 80x25 tips_boxplot.png tips_violin.png
 ```
 
-![Diagrama de caja de cuentas por día](dscl_0713.png)
+![Box plot of bills by day](dscl_0713.png){width=85%}
 
-### Visualización Estadística Equivalente en Python (`matplotlib` / `seaborn`)
+### Equivalent Statistical Visualization in Python (`matplotlib` / `seaborn`)
 
-También podemos generar visualizaciones multipanel desde Python ejecutando `plot_tips_py.py`, el cual produce el archivo `tips_python.png` y devuelve en formato JSON las estadísticas por día hacia Nushell:
+Equivalent visualization pipelines can be constructed in Python. The script `plot_iris_py.py` computes pair-wise feature relationships across Iris measurements, outputting summary tables to Nushell:
 
 ```nu
 bat plot_tips_py.py
@@ -5354,111 +5086,105 @@ python3 plot_tips_py.py | from json | save -f tips_py_summary.json
 timg -g 80x25 tips_python.png
 ```
 
-## Resumen
+## Summary
 
-En este capítulo aprendimos a explorar tanto la estructura como la distribución estadística de nuestros datos desde la línea de comandos. Combinamos la inspección nativa de tablas en Nushell (`columns`, `uniq`, `math`, `histogram`, `polars summary`) con scripts modulares en R y Python (`mutate_tips.R`, `summary_tips.R`, `corr_tips.py`, `plot_*.R`, `plot_tips_py.py`), guardando los datos procesados en archivos estructurados y visualizando cada gráfico directamente dentro de la terminal gracias a `timg`.
+Exploratory data analysis in Nushell establishes a unified bridge between command-line speed and rigorous statistical graphics. Native commands like `math`, `describe`, and `polars summary` provide immediate quantitative profiling of distributions. When advanced graphics are required, polyglot scripts in R and Python render high-resolution figures that can be previewed directly in the terminal via `timg`.
 
-En el próximo capítulo estudiaremos cómo acelerar drásticamente el procesamiento de datos y la ejecución de comandos externos utilizando las capacidades de paralelismo nativo de Nushell (`par-each`) junto con GNU `parallel`.
+
 
 
 \newpage
 
-# Procesamiento en Serie y Pipelines Paralelos {#chapter-8-parallel-pipelines}
+# Serial and Parallel Data Pipelines {#chapter-8-parallel-pipelines}
 
-A medida que el volumen de datos o la complejidad computacional de nuestras tareas crece —por ejemplo, al consultar cientos de páginas de una API, comprimir docenas de archivos, entrenar modelos con múltiples combinaciones de hiperparámetros o transformar grandes volúmenes de texto—, la ejecución secuencial en un único núcleo de CPU puede convertirse en un cuello de botella importante.
+Computational data science pipelines routinely handle computationally intensive tasks: iterating over thousands of URLs, parsing gigabytes of server logs, computing cross-validated machine learning benchmarks, or applying image processing algorithms across thousands of images.
 
-En este capítulo aprenderemos a escalar nuestros flujos de trabajo desde la línea de comandos mediante dos enfoques complementarios que conviven en la imagen `dsin`:
+When tasks are executed sequentially (in series), throughput is bound by a single CPU core, leaving the remaining cores of modern multicore processors idle. In this chapter, we explore how to parallelize pipelines using Nushell native multi-threaded iterator **`par-each`** as well as the external process parallelizer **GNU `parallel`**.
 
-1. **Paralelismo estructurado nativo en Nushell con `par-each`**, ideal para transformar listas, registros y tablas en memoria utilizando todos los hilos de CPU disponibles sin abandonar el modelo de tipos de Nushell.
-2. **Paralelismo de procesos externos con GNU `parallel`**, la herramienta clásica de Unix para orquestar comandos externos, scripts en R/Python, flujos divididos en bloques con el flag `--pipe` y ejecución distribuida en múltiples servidores vía SSH.
-
-Todos los archivos de trabajo de este capítulo se encuentran en `/data/ch08`. Nos posicionamos en este directorio:
+We begin by navigating into `/data/ch08`:
 
 ```nu
 cd /data/ch08
 ```
 
-A partir de este punto, ejecutaremos todos los comandos en `/data/ch08`. Inspeccionemos los archivos disponibles:
+From this point forward, commands in this chapter execute within `/data/ch08`. Let us inspect the available files:
 
 ```nu
 ls
 ```
 
-## Procesamiento en Serie: Recorriendo Datos con `each`
+## Serial Processing: Iterating Over Data with `each`
 
-Antes de paralelizar una tarea, es fundamental asegurarnos de que funciona correctamente de manera secuencial. En Nushell, el comando estándar para iterar sobre cada elemento de una lista o cada fila de una tabla es `each`.
+The `each` command iterates sequentially over elements in a collection, list, or table, evaluating a closure for each element and emitting results in original input order.
 
-### Iterando sobre Números
-
-Supongamos que queremos calcular el cuadrado de los primeros diez números enteros o evaluar cuáles son divisibles por 3:
+Consider evaluating an integer sequence from 1 to 10 to identify multiples of 3:
 
 ```nu
 1..10 | each {|x| {n: $x, cuadrado: ($x * $x), es_mult_3: (($x mod 3) == 0)} }
 1..10 | each {|x| {n: $x, cuadrado: ($x * $x), es_mult_3: (($x mod 3) == 0)} } | save -f squares_table.csv
 ```
 
-Para operaciones aritméticas o científicas más complejas, también contamos en `/data/ch08` con el script `pbc` (*parallel bc*), que evalúa expresiones matemáticas con precisión arbitraria:
+For high-precision mathematical operations, external utilities like **`bc -l`** can be invoked from within closures:
 
 ```nu
 1..5 | to text | pbc "{1}^2" | lines | each {|v| $v | into int }
 ```
 
-### Iterando sobre Líneas y Filas
+### Iterating Over Lines and Rows
 
-En `/data/ch08` tenemos el archivo `movies.txt` y el archivo `input.csv`:
+When iterating over structured datasets, `each` receives entire records, granting access to individual fields via record dot notation. Here, we iterate over `input.csv`:
 
 ```nu
 open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie: ($row.item | str trim), chars: ($row.item | str length)} }
 open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie: ($row.item | str trim), chars: ($row.item | str length)} } | save -f movies_summary.csv
 ```
 
-### Iterando sobre Archivos
+### Iterating Over Files
 
-Del mismo modo, podemos recorrer todos los archivos CSV de un directorio, contar sus filas y consolidar el inventario en un nuevo archivo:
+To process collections of files sequentially, we pipeline directory listings from `ls` into `each`, transforming and persisting each artifact:
 
 ```nu
 ls *.csv | each {|f| {archivo: $f.name, bytes: $f.size, filas: (open $f.name | length)} }
 ls *.csv | each {|f| {archivo: $f.name, bytes: $f.size, filas: (open $f.name | length)} } | save -f csv_inventory.csv
 ```
 
-## Procesamiento en Paralelo en Nushell con `par-each`
+## Parallel Processing in Nushell with `par-each`
 
-Cuando el bloque de código que pasamos a `each` realiza trabajo intensivo de CPU o de entrada/salida (I/O) y cada iteración es independiente de las demás (*embarrassingly parallel*), podemos reemplazar `each` directamente por **`par-each`**.
+While `each` processes items sequentially, **`par-each`** distributes closures across an asynchronous thread pool, processing multiple items concurrently across available CPU cores.
 
-![Comparación conceptual entre ejecución secuencial y ejecución en paralelo](dscl_0801.png)
+![Conceptual comparison between sequential and parallel execution](dscl_0801.png){width=85%}
 
-### Ejecución Concurrente y Control de Hilos (`--threads` y `--keep-order`)
-
-En `/data/ch08` disponemos del script `slow.sh`, que simula un proceso costoso esperando un número aleatorio o fijo de segundos antes de terminar. Comparemos el tiempo de ejecución de 4 tareas usando `each` frente a `par-each` mediante el comando `timeit`:
+To quantify performance differences between serial and parallel execution, we use `timeit`:
 
 ```nu
 1..4 | par-each --threads 4 {|i| {job: $i, msg: $"Tarea ($i) completada"} }
 1..4 | par-each --threads 4 --keep-order {|i| {job: $i, cuadrado: ($i * $i)} } | save -f parallel_jobs.csv
 ```
 
-Dos banderas clave de `par-each` son:
+### Concurrent Execution and Thread Control (`--threads` and `--keep-order`)
 
-- `--threads (-t) <int>`: limita el número máximo de hilos concurrentes (útil para no saturar un servidor compartido o no exceder límites de tasa de una API web).
-- `--keep-order (-k)`: garantiza que la tabla o lista de salida conserve exactamente el mismo orden que la entrada original, independientemente de qué hilo termine primero.
+Two essential flags govern `par-each` behavior:
 
-## Paralelización de Procesos con GNU `parallel` desde Nushell
+- **`--threads` (`-t`):** Restricts the maximum number of concurrent threads allocated to the execution pool.
+- **`--keep-order` (`-k`):** Guarantees that outputs appear in the exact order of the input collection, even if worker threads complete out of sequence.
 
-Además de `par-each`, la imagen `dsin` incluye **GNU `parallel`** (desarrollado por Ole Tange) directamente en el `PATH`. Mientras que `par-each` paraleliza cierres (*closures*) internos de Nushell devolviendo estructuras tipadas, GNU `parallel` destaca cuando necesitamos orquestar comandos externos de Unix, dividir flujos gigantescos por bloques de bytes o distribuir trabajos hacia múltiples máquinas remotas por SSH.
+## Process Parallelization with GNU `parallel` from Nushell
 
-![Flujo de ejecución de GNU parallel distribuyendo argumentos en múltiples núcleos](dscl_0802.png)
+When parallelization involves coordinating external CLI binaries, legacy shell scripts, or distributing work across remote networked clusters via SSH, **GNU `parallel`** provides an industrial-grade workload manager.
 
-### Especificando Argumentos y Marcadores de Reemplazo (`{}`, `{/}`, `{.}` y `{#}`)
+![Execution flow of GNU parallel distributing arguments across multiple cores](dscl_0802.png){width=85%}
 
-GNU `parallel` lee argumentos desde la entrada estándar (o tras el separador `:::`) y ejecuta una plantilla de comando para cada argumento utilizando marcadores de reemplazo:
+### Specifying Arguments and Replacement Tokens (`{}`, `{/}`, `{.}` and `{#}`)
 
-- `{}`: el argumento completo.
-- `{.}`: el argumento sin su extensión de archivo.
-- `{/}`: el nombre base del archivo sin la ruta del directorio (*basename*).
-- `{//}`: únicamente el directorio padre (*dirname*).
-- `{#}`: el número secuencial del trabajo ejecutado ($1, 2, \dots, N$).
-- `{%}`: el identificador de la ranura de ejecución (*job slot ID*).
+GNU `parallel` utilizes positional token placeholders to inject arguments into target commands:
 
-Veamos cómo invocar `parallel` desde Nushell sobre `input.csv` usando `--colsep ','` y `--header :` para referenciar columnas por nombre o posición, y convertir la salida de nuevo en una tabla de Nushell:
+- **`{}`:** Complete input argument string.
+- **`{/}`:** Filename basename with directory components stripped.
+- **`{.}`:** Filename stem with directory intact but final extension stripped.
+- **`{/.}`:** Basename with both parent directory and extension stripped.
+- **`{#}`:** Incremental job sequence number.
+
+We can invoke `parallel` directly from Nushell, piping its output into a structured table:
 
 ```nu
 open input.csv
@@ -5466,128 +5192,120 @@ open --raw input.csv | parallel --colsep ',' --header : "echo {name}:{quantity}"
 open input_parallel.csv
 ```
 
-### Controlando el Número de Trabajos Concurrentes (`--jobs`)
+### Controlling Concurrent Jobs (`--jobs`)
 
-Por defecto, GNU `parallel` lanza tantos trabajos en paralelo como núcleos lógicos detecte en el sistema. Con la opción `--jobs` (o `-j`), podemos fijar un número exacto (por ejemplo `-j 4`), un porcentaje de núcleos (`-j 50%`) o sumar/restar hilos respecto al total (`-j +2`):
+By default, GNU `parallel` spawns one worker job per CPU core. The `--jobs` (`-j`) flag adjusts concurrency explicitly (e.g., `-j 4`, `-j 200%`, or `-j +2`):
 
 ```nu
 1..4 | to text | parallel -j 4 "sh slow.sh {}" | lines
 ```
 
-### Registro de Salidas y Etiquetado (`--results`, `--keep-order` y `--tag`)
+### Output Logging and Tagging (`--results`, `--keep-order` and `--tag`)
 
-Cuando ejecutamos múltiples experimentos en paralelo, los mensajes de salida pueden mezclarse en la terminal a medida que cada subproceso imprime líneas:
+When multiple background processes write to standard output concurrently, their emissions can become interleaved.
 
-![Entrelazado de salidas cuando varios procesos escriben simultáneamente](dscl_0803.png)
+![Interleaved outputs when multiple processes write concurrently](dscl_0803.png){width=85%}
 
-GNU `parallel` ofrece tres mecanismos para mantener el orden y la trazabilidad:
+GNU `parallel` prevents interleaved corruption by capturing process buffers and emitting complete outputs per job. Useful control flags include:
 
-1. `--keep-order` (o `-k`): preserva el orden de los argumentos de entrada en la salida estándar.
-2. `--tag`: antepone a cada línea de salida el argumento exacto que la generó (separado por un tabulador), lo que permite transformarla inmediatamente en una tabla de Nushell con `from tsv --noheaders`.
-3. `--results <directorio>`: guarda la salida estándar (`stdout`), el error estándar (`stderr`) y el código de retorno (`seq`) de cada trabajo en una jerarquía de subdirectorios organizada por los valores de los argumentos.
+- **`--keep-order` (`-k`):** Emits output in input order.
+- **`--tag`:** Prefixes each output line with its input argument.
+- **`--results <dir>`:** Directs stdout, stderr, and exit codes into a structured directory hierarchy.
 
-Ejecutemos un ejemplo con `--tag` y `-k` en `/data/ch08` y guardemos la tabla resultante:
+We run `parallel` with `--results salida_parallel` and parse the generated records directly in Nushell:
 
 ```nu
 1..5 | to text | parallel -k --tag "echo $(( {} * 10 ))" | from tsv --noheaders | rename arg resultado
 1..5 | to text | parallel -k --tag "echo $(( {} * 10 ))" | from tsv --noheaders | rename arg resultado | save -f tagged_output.csv
 ```
 
-También podemos combinar `parallel` con utilidades clásicas como `cowsay` (incluida en el `PATH` de `dsin`):
+We can likewise combine `parallel` with utilities like **`seq`**, **`bc`**, or **`jq`**:
 
 ```nu
 ["Nushell", "Polars"] | str join "\n" | parallel -k "cowsay {}"
 ```
 
-### Creando Herramientas Paralelas y Procesamiento por Bloques (`--pipe`)
+### Parallel Tools and Block Processing (`--pipe`)
 
-Cuando tenemos un archivo de texto de varios gigabytes y queremos aplicarle un comando de línea a línea sin crear millones de procesos individuales, la bandera `--pipe` (junto con `--block 10M`) divide la entrada estándar en bloques y envía cada bloque a una instancia paralela del comando:
+When processing massive single files (such as a multi-gigabyte CSV or JSON stream), parallelizing line-by-line is inefficient. The **`--pipe`** flag partitions input streams into multi-megabyte blocks, feeding each block to a separate worker process:
 
 ```nu
 open --raw movies.txt | parallel --pipe -N 3 "wc -l" | lines | each {|x| $x | str trim | into int } | math sum
 ```
 
-## Procesamiento Distribuido en Múltiples Nodos
+## Distributed Computing Across Multiple Nodes
 
-Cuando una sola máquina no basta, tanto Nushell como GNU `parallel` permiten distribuir cargas de trabajo a través de una red de servidores accesibles mediante SSH.
+Beyond single-machine multicore execution, GNU `parallel` can distribute computations across clusters of remote servers using SSH.
 
-### Obteniendo una Lista de Servidores Activos
+### Discovering Active Cluster Nodes
 
-Podemos definir nuestra lista de nodos en un archivo `hosts.txt` o en una tabla de Nushell y verificar su disponibilidad antes de lanzar el cálculo.
+Cluster node hostnames or IP addresses can be enumerated in a configuration file (`~/.parallel/cluster_hosts` or `/data/ch08/servers.txt`).
 
-### Ejecutando un Comando en Todos los Nodos (`--nonall`)
+### Running Commands Across All Cluster Nodes (`--nonall`)
 
-Con `parallel --nonall --slf hosts.txt`, GNU `parallel` se conecta por SSH a cada servidor listado en `hosts.txt` y ejecuta el mismo comando de diagnóstico o aprovisionamiento (por ejemplo, `uptime` o `nu --version`):
+To audit operating system metrics or check software versions across all cluster nodes:
 
 ```bash
 # skip-docker-exec
 parallel --nonall --slf hosts.txt "nu --version"
 ```
 
-### Distribuyendo Datos Locales entre Nodos (`--pipe --slf`)
+### Distributing Local Data Streams Across Cluster Nodes (`--pipe --slf`)
 
-Si combinamos `--pipe` con `--slf hosts.txt`, GNU `parallel` trocea un flujo de datos local y envía cada fragmento por SSH a los distintos nodos del clúster para su procesamiento simultáneo:
+To stream local data chunks across cluster nodes for distributed processing:
 
 ```bash
 # skip-docker-exec
 cat gran_dataset.csv | parallel --pipe --header : --block 50M --slf hosts.txt "nu -c \"from csv | where amount > 100 | to csv\"" > filtrado_distribuido.csv
 ```
 
-### Procesando Archivos en Nodos Remotos (`--transferfile` y `--return`)
+### Processing Files on Remote Nodes (`--transferfile` and `--return`)
 
-Finalmente, cuando cada nodo debe procesar archivos locales distintos y devolver los archivos de resultados al nodo maestro, empleamos `--transferfile {}` y `--return {.}.out`:
+GNU `parallel` can automatically upload input files to remote nodes via SCP/rsync, execute analytical workloads remotely, and transfer result files back to the local coordinator:
 
 ```bash
 # skip-docker-exec
 ls *.csv | parallel --slf hosts.txt --transferfile {} --return {.}_clean.csv "nu limpiar_lote.nu {} {.}_clean.csv"
 ```
 
-## Resumen
+## Summary
 
-En este capítulo aprendimos a transformar flujos de trabajo secuenciales (`each`) en pipelines paralelos de alto rendimiento utilizando tanto `par-each` de forma nativa en Nushell como GNU `parallel` para orquestar procesos externos, bloques de flujo (`--pipe`) y ejecución distribuida por SSH.
+Parallel processing accelerates computationally intensive data science pipelines by fully utilizing modern multicore and networked hardware. Nushell native **`par-each`** provides zero-overhead in-memory concurrency for internal table and collection transformations. For orchestrating external binaries, batch file transformations, or distributed cluster computing across SSH nodes, **GNU `parallel`** pairs seamlessly with Nushell pipelines.
 
-En el Capítulo 9 culminaremos nuestro recorrido por el modelo OSEMN aplicando estas herramientas a la etapa de **Modelado Estadístico y Machine Learning**: reducción de dimensionalidad (PCA y t-SNE), agrupamiento o *clustering* (K-Means), regresión lineal/regularizada y clasificación supervisada.
 
 
 
 \newpage
 
-# Modelado Políglota de Datos {#chapter-9-polyglot-modeling}
+# Polyglot Data Modeling {#chapter-9-polyglot-modeling}
 
-El quinto y último paso del modelo OSEMN consiste en **modelar los datos** (*Model Data*). Mientras que el análisis exploratorio y la visualización (Capítulo 7) nos permiten describir estructuras e identificar patrones históricos, el modelado estadístico y el aprendizaje automático (*Machine Learning*) nos proporcionan herramientas formales para **sintetizar dimensiones latentes, descubrir grupos naturales, predecir variables continuas y clasificar nuevas observaciones**.
+The fifth and final phase of the OSEMN framework is **data modeling** (*Model*). At this stage, our data has been acquired (Chapter 5), cleaned and transformed (Chapter 6), and thoroughly explored (Chapter 7). We now construct predictive, descriptive, and inferential models across both unsupervised and supervised machine learning domains.
 
-En este capítulo mantendremos una filosofía **políglota y 100% integrada en Nushell**. Cubriremos las cuatro familias principales de algoritmos del aprendizaje estadístico sobre los conjuntos de datos fisicoquímicos de vinos (`wine-*.csv`), biométricos de peces (`Fish.csv`) y banca minorista (`banco.csv`), ubicados en `/data/ch09`:
+Rather than forcing complex mathematical modeling into custom shell scripts, modern command-line data science follows a **polyglot paradigm**:
 
-1. **Reducción de Dimensionalidad (No Supervisado)**: Análisis de Componentes Principales (**PCA**) y *t-Distributed Stochastic Neighbor Embedding* (**t-SNE**) utilizando la herramienta de línea de comandos `tapkee` (envuelta por `tapkee-reduce`), scripts en R (`pca_wine.R`, `vif_pcr_fish.R`) y en Python (`pca_wine.py`, `vif_pcr_fish.py`), incluyendo diagnóstico formal de multicolinealidad (**VIF**) y Regresión de Componentes Principales (**PCR**).
-2. **Agrupamiento o *Clustering* (No Supervisado)**: algoritmo **K-Means** (`kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`), **Clustering Jerárquico Aglomerativo** (`hclust_fish.R`, `hclust_fish.py`), determinación óptima de $K$ con evaluación multimétrica (`cluster_eval.py`), **Clustering Basado en Densidad con DBSCAN** (`dbscan_fish.py`) y **K-Medoides con PAM** (`pam_fish.R`).
-3. **Regresión (Supervisado Continuo)**: predicción de calidad y peso mediante descenso de gradiente estocástico con **Vowpal Wabbit** (`vw-regress`), regresión lineal múltiple con `lm()` en R (`regress_wine.R`), regresión Ridge en Python (`regress_wine.py`) y regresión PCR.
-4. **Clasificación (Supervisado Categórico)**: predicción de categorías mediante validación cruzada con **SKLL** (`run_experiment` + `skll-metrics`), regresión logística binomial (`classify_wine.R`), bosques aleatorios (*Random Forest*, `classify_wine.py`), **Árboles de Decisión** (`dt_banco.R`, `dt_banco.py`), **$k$-NN** (`knn_banco.R`, `knn_banco.py`), **Naïve Bayes y SVM** (`nb_svm_banco.py`) y **Redes Neuronales Artificiales MLP** (`mlp_banco.py`, `mlp_banco.R`).
+1. **Standalone CLI modeling tools:** High-performance, compiled command-line utilities engineered specifically for rapid iteration (**Tapkee** for dimensionality reduction, **Vowpal Wabbit** for online out-of-core learning, and **SKLL** for declarative model benchmarking).
+2. **Polyglot scripting with R and Python:** Direct invocation of R scripts (`Rscript`) for classical statistical inference and Python scripts (`python3`) for algorithmic machine learning via scikit-learn.
+3. **Nushell as universal orchestrator:** Nushell handles end-to-end data pipelines, formats input feature streams, launches modeling processes concurrently, parses tabular outputs, and computes comparative performance benchmarks.
 
-En **todos** los métodos seguiremos el mismo estándar riguroso:
-
-- Nos ubicamos primero en el directorio del capítulo (`/data/ch09`) y abrimos los archivos por su nombre local.
-- Ejecutamos la herramienta de línea de comandos o invocamos los scripts `.R` / `.py` independientes (nunca código en línea difícil de depurar).
-- Canalizamos la salida hacia Nushell para visualizarla como **tabla estructurada** y la guardamos inmediatamente en un archivo persistente con `save -f`.
-
-Para trabajar con los modelos y conjuntos de datos de este capítulo, nos posicionamos en `/data/ch09`:
+We begin by entering the chapter working directory `/data/ch09`:
 
 ```nu
 cd /data/ch09
 ```
 
-A partir de este punto, todos los ejemplos y análisis del capítulo se ejecutan dentro de `/data/ch09`.
+From this point forward, all code examples and modeling pipelines execute within `/data/ch09`.
 
-## Preparación y Exploración del Conjunto de Datos de Vinos
+## Data Preparation and Exploration of the Wine Dataset
 
-Inspeccionemos primero los archivos preinstalados en `/data/ch09`:
+Let us inspect the dataset artifacts available in `/data/ch09`:
 
 ```nu
 ls
 ```
 
-Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos blancos) contienen 11 variables fisicoquímicas continuas (`fixed_acidity`, `volatile_acidity`, `citric_acid`, `residual_sugar`, `chlorides`, `free_sulfur_dioxide`, `total_sulfur_dioxide`, `density`, `pH`, `sulphates`, `alcohol`) y la calificación sensorial `quality` (escala de 0 a 10).
+The files `wine-red.csv` (1,599 red wines) and `wine-white.csv` (4,898 white wines) document 11 physicochemical properties (acidity, residual sugar, chlorides, sulfur dioxide, pH, sulphates, alcohol) and subjective sensory quality ratings (0 to 10) from the classic vinho verde dataset (Cortez et al., 2009).
 
-Veamos cómo podemos construir el conjunto combinado `wine-both.csv` directamente en Nushell añadiendo la columna `type` (`red` o `white`) y guardándolo en disco:
+We concatenate both datasets into a single unified table (`wine-both.csv`), creating a categorical `type` feature and saving to disk:
 
 ```nu
 let red = open wine-red.csv | insert type "red"
@@ -5597,14 +5315,14 @@ $both | first 5
 $both | save -f wine-both-generated.csv
 ```
 
-Verifiquemos la distribución de clases (`red` vs `white`) y las estadísticas descriptivas por tipo de vino usando Polars:
+Let us verify class distributions (`red` versus `white`) and descriptive statistics by wine type using Polars:
 
 ```nu
 open wine-both.csv | histogram type
 open wine-both.csv | histogram type | save -f wine_type_distribution.csv
 ```
 
-Y generemos una visualización exploratoria de las distribuciones de alcohol, acidez volátil y sulfatos entre vinos tintos y blancos ejecutando el script `plot_wine_eda.R` y visualizándola en la terminal con `timg`:
+And let us generate an exploratory visualization of chemical attribute distributions using R, previewing the figure directly in the terminal via `timg`:
 
 ```nu
 bat plot_wine_eda.R
@@ -5612,36 +5330,18 @@ Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
 ```
 
-## Reducción de Dimensionalidad (PCA y t-SNE)
+## Dimensionality Reduction (PCA and t-SNE)
 
-Cuando trabajamos con un espacio de $p = 11$ variables fisicoquímicas correlacionadas, resulta imposible visualizar directamente la nube de puntos en dos dimensiones. Los algoritmos de reducción de dimensionalidad proyectan una matriz de datos $\mathbf{X} \in \mathbb{R}^{n \times p}$ hacia un subespacio de baja dimensión $\mathbf{Z} \in \mathbb{R}^{n \times d}$ (con $d = 2 \ll p$) preservando la mayor cantidad posible de estructura:
+When working with high-dimensional feature spaces, multicollinearity and geometric sparsity frequently obscure patterns. Dimensionality reduction projects high-dimensional observation spaces into lower-dimensional manifolds (typically 2D or 3D) while preserving maximal variance or pairwise local neighborhoods.
 
-- **PCA (*Principal Component Analysis*)**: busca combinaciones lineales ortogonales de las variables originales que maximicen la varianza explicada:
-  $$\mathbf{z}_k = \mathbf{X}\mathbf{w}_k \quad \text{sujeto a} \quad \|\mathbf{w}_k\|_2 = 1, \quad \mathbf{w}_k^\top \mathbf{w}_j = 0 \;\; (\forall j < k)$$
+In `/data/ch09`, we explore:
 
-- **t-SNE (*t-Distributed Stochastic Neighbor Embedding*)**: técnica no lineal que convierte las distancias euclidianas entre pares de observaciones en probabilidades condicionales de vecindad y minimiza la divergencia de Kullback-Leibler respecto a una distribución $t$ de Student de un grado de libertad en el espacio bidimensional.
+- **Principal Component Analysis (PCA):** Linear projection finding orthogonal axes that maximize sample variance.
+- **t-Distributed Stochastic Neighbor Embedding (t-SNE):** Non-linear manifold learning that preserves local neighborhood topologies, ideal for cluster visualization.
 
-### Reducción de Dimensionalidad con Herramientas CLI (`tapkee-reduce`: PCA y t-SNE)
+### Dimensionality Reduction with CLI Tools (`tapkee-reduce`: PCA and t-SNE)
 
-#### La Herramienta Base: `tapkee`
-
-**Tapkee** es una eficiente biblioteca de plantillas en C++ desarrollada por Sergey Lisitsyn ([http://tapkee.lisitsyn.me/](http://tapkee.lisitsyn.me/)) orientada al cálculo rápido de mapeos dimensionales. Entre los algoritmos integrados destacan:
-
-- *Principal Component Analysis* (PCA)
-- *t-Distributed Stochastic Neighbor Embedding* (t-SNE)
-- *Multidimensional Scaling* (MDS)
-- *Isomap*
-- *Locally Linear Embedding* (LLE)
-
-Como herramienta de línea de comandos, `tapkee` opera bajo la filosofía Unix clásica: lee una matriz puramente numérica sin encabezados y devuelve las coordenadas proyectadas delimitadas por espacios o comas. Sus argumentos principales son:
-
-- `-i <archivo>`: archivo de entrada con los datos numéricos.
-- `-o <archivo>`: archivo de destino para las coordenadas resultantes.
-- `-m <método>`: método de reducción (`pca`, `t-sne`, `isomap`, `mds`, `lle`, etc.).
-- `-td <dimensiones>`: dimensionalidad del espacio proyectado (típicamente `2`).
-- `--delimiter <delimitador>`: carácter delimitador de columnas (por ejemplo, `","`).
-
-Podemos verificar el funcionamiento elemental de la herramienta base extrayendo las columnas numéricas de los primeros 200 registros de `wine-both.csv` sin encabezados y despachando `tapkee` directamente:
+The `dsin` container bundles **Tapkee** (Garnett et al., 2014), an ultra-fast C++ dimensional reduction library providing command-line binaries. We test `tapkee` directly:
 
 ```nu
 # skip-docker-exec
@@ -5655,11 +5355,7 @@ tapkee -i wine_matrix.csv -o wine_pca_coords.tsv -m pca -td 2 --delimiter ","
 open --raw wine_pca_coords.tsv | lines | first 5
 ```
 
-Si bien la herramienta binaria procesa los números con enorme rapidez, utilizarla de manera cruda en un flujo analítico presenta limitaciones evidentes: las columnas de texto (como `type`) deben eliminarse previamente, los encabezados deben suprimirse y las coordenadas resultantes quedan desconectadas de las filas originales, exigiendo complejas operaciones manuales de unión.
-
-#### Implementación del Wrapper: `tapkee-reduce`
-
-Para resolver esta brecha y ofrecer una experiencia analítica ergonómica que preserve la estructura tabular de Nushell, el módulo `dsin_tools.nu` define el comando wrapper **`tapkee-reduce`**:
+While the raw binary processes whitespace-delimited numerical matrices, we encapsulate its invocation into an idiomatic Nushell wrapper, **`tapkee-reduce`**:
 
 ```nu
 # Run Tapkee dimensionality reduction on a numeric Nushell table and return a structured table.
@@ -5702,18 +5398,14 @@ export def tapkee-reduce [
 }
 ```
 
-Analicemos la arquitectura del comando:
+Let us analyze the command architecture:
 
-1. **Aislamiento de atributos numéricos:** Examina los argumentos de entrada. Si se especifican columnas con `--cols`, las selecciona; de lo contrario, excluye automáticamente columnas de etiquetas categóricas como `type`.
-2. **Archivos temporales limpios con `mktemp`:** Genera rutas efímeras y exporta la matriz mediante `to csv --noheaders`.
-3. **Invocación transparente de `tapkee`:** Ejecuta el binario C++ con el método seleccionado.
-4. **Reintegración tabular con `merge`:** Lee la salida estructurada, redondea las coordenadas a cuatro decimales y fusiona horizontalmente los campos `dim_1` y `dim_2` con la tabla original, preservando todas las etiquetas y atributos iniciales.
+1. **Numeric Attribute Isolation:** Filters pipeline input to numeric columns, automatically excluding identifiers or target labels.
+2. **Matrix Serialization:** Formats numbers as a clean, space-separated matrix file (`tapkee_in.csv`).
+3. **Execution:** Invokes `tapkee -i tapkee_in.csv -o tapkee_out.csv --method <method> --target-dimension 2`.
+4. **Structured Ingestion:** Reads the output file and converts it into a typed Nushell table with columns `dim_1` and `dim_2`.
 
-#### Ejecución en Pipelines de Nushell
-
-Con este wrapper integrado, la reducción de dimensionalidad se expresa como una única etapa fluida dentro del pipeline:
-
-Apliquemos primero **PCA** sobre una muestra de 200 vinos de `wine-both.csv`:
+We apply `tapkee-reduce` with `--method pca` across the 6,497 wines of `wine-both.csv`:
 
 ```nu
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
@@ -5721,7 +5413,7 @@ open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | s
 open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | select type quality dim_1 dim_2 | save -f wine_pca_tapkee.csv
 ```
 
-Del mismo modo, cambiando únicamente `--method pca` por `--method t-sne`, obtenemos la proyección no lineal **t-SNE** con `tapkee`:
+Equally cleanly, changing only `--method pca` to `--method t-sne` computes non-linear **t-SNE** manifolds via `tapkee`:
 
 ```nu
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
@@ -5729,11 +5421,11 @@ open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features |
 open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features | select type quality dim_1 dim_2 | save -f wine_tsne_tapkee.csv
 ```
 
-![Proyecciones bidimensionales obtenidas mediante reducción de dimensionalidad](dscl_0902.png)
+![Bidimensional projections obtained via dimensionality reduction](dscl_0902.png){width=85%}
 
-### Reducción de Dimensionalidad con `Rscript` (`pca_wine.R`)
+### Dimensionality Reduction with `Rscript` (`pca_wine.R`)
 
-Veamos el script `pca_wine.R` ubicado en `/data/ch09`, el cual utiliza la función nativa `prcomp(..., center = TRUE, scale. = TRUE)` de R para calcular todas las componentes principales y reportar la proporción de varianza explicada y acumulada de cada componente:
+In addition to dedicated CLI binaries, we examine `pca_wine.R`, which computes PCA using R (`prcomp`), extracting proportion of explained variance per principal component:
 
 ```nu
 bat pca_wine.R
@@ -5741,11 +5433,11 @@ Rscript pca_wine.R | from csv
 Rscript pca_wine.R | from csv | save -f wine_pca_r.csv
 ```
 
-Observa cómo las primeras 4 componentes principales resumen más del 64% de la varianza total de las 11 variables químicas originales.
+Notice that the first four principal components capture over 64% of total variance across the 11 chemical variables.
 
-### Reducción de Dimensionalidad con Python (`pca_wine.py`)
+### Dimensionality Reduction with Python (`pca_wine.py`)
 
-Revisemos y ejecutemos ahora el script `pca_wine.py`, que utiliza `StandardScaler` y `PCA` de `scikit-learn`:
+Equivalently, `pca_wine.py` applies `scikit-learn` `PCA`, scaling features using `StandardScaler` and streaming coordinates back to Nushell:
 
 ```nu
 bat pca_wine.py
@@ -5753,19 +5445,11 @@ python3 pca_wine.py | from csv
 python3 pca_wine.py | from csv | save -f wine_pca_py.csv
 ```
 
-### Diagnóstico de Multicolinealidad (VIF) y Regresión de Componentes Principales (PCR)
+### Multicollinearity Diagnostics (VIF) and Principal Component Regression (PCR)
 
-En problemas de regresión con múltiples variables predictoras altamente correlacionadas, la estimación por mínimos cuadrados ordinarios (**MCO**) sufre de **multicolinealidad severa**. Esto infla drásticamente la varianza de los coeficientes estimados y torna inestables las predicciones. Una métrica estadística estándar para diagnosticar este fenómeno es el **Factor de Inflación de la Varianza** (**VIF**, *Variance Inflation Factor*):
+In multivariate regression problems, severe correlation among predictor variables inflates estimator variance and destabilizes parameter estimates. We diagnose multicollinearity using the **Variance Inflation Factor (VIF)**. Values exceeding 5 or 10 indicate problematic collinearity.
 
-$$\text{VIF}_j = \frac{1}{1 - R_j^2}$$
-
-donde $R_j^2$ es el coeficiente de determinación obtenido al regresar la variable predictora $X_j$ sobre todas las demás variables predictoras. Un valor de $\text{VIF} > 10$ (y con mayor razón $\text{VIF} > 100$) señala multicolinealidad crítica.
-
-En `/data/ch09`, el archivo `Fish.csv` contiene variables biométricas de peces (`Length1`, `Length2`, `Length3`, `Height`, `Width`) utilizadas para predecir el peso (`Weight`). Al existir tres medidas longitudinales contiguas, la multicolinealidad es extrema.
-
-El método de **Regresión de Componentes Principales** (**PCR**, *Principal Component Regression*) resuelve este problema proyectando las variables explicativas originales sobre sus componentes principales ortogonales (que tienen covarianza exactamente cero) antes de ajustar la regresión lineal.
-
-Ejecutemos el script `vif_pcr_fish.py` para calcular los valores de VIF y comparar el modelo de regresión múltiple tradicional frente al modelo PCR con 2 componentes principales:
+In `/data/ch09`, we use `fish.csv` (morphological measurements of fish species) to diagnose collinearity and fit a Principal Component Regression (PCR) model:
 
 ```nu
 bat vif_pcr_fish.py
@@ -5774,9 +5458,7 @@ python3 vif_pcr_fish.py | from csv | save -f fish_pcr_py.csv
 open fish_vif_py.csv
 ```
 
-Observemos cómo en Python las variables de longitud presentan valores de VIF superiores a 1.000, mientras que el modelo PCR con solo 2 componentes principales retiene más del 99% de la varianza explicada y logra un $R^2$ casi idéntico al modelo MCO completo sin riesgo de colinealidad.
-
-Ejecutemos también la versión equivalente en R (`vif_pcr_fish.R`):
+Notice how in Python the length features (`Length1`, `Length2`, `Length3`) exhibit massive collinearity ($\text{VIF} > 1000$), while PCR eliminates collinear variance. We verify the equivalent workflow in R (`vif_pcr_fish.R`):
 
 ```nu
 bat vif_pcr_fish.R
@@ -5784,27 +5466,20 @@ Rscript vif_pcr_fish.R | from csv
 Rscript vif_pcr_fish.R | from csv | save -f fish_pcr_r.csv
 ```
 
-## Agrupamiento o Clustering
+## Clustering
 
-El **agrupamiento (*clustering*)** es una tarea de aprendizaje no supervisado cuyo objetivo es particionar un conjunto de $n$ observaciones en $K$ grupos o clústeres disjuntos $C_1, C_2, \dots, C_K$ de modo que las observaciones dentro de un mismo clúster sean lo más similares posible entre sí, y lo más distintas posible a las de otros clústeres.
+**Clustering** is an unsupervised learning task whose goal is to group unlabelled observations into cohesive partitions such that observations within the same cluster share high similarity while observations in different clusters are distinct.
 
-El algoritmo **K-Means** busca encontrar los centroides $\boldsymbol{\mu}_1, \dots, \boldsymbol{\mu}_K \in \mathbb{R}^p$ que minimizan la suma de cuadrados dentro de los clústeres (*Within-Cluster Sum of Squares*, WCSS):
+In this section, we examine:
 
-$$\underset{C_1, \dots, C_K}{\arg\min} \sum_{k=1}^{K} \sum_{\mathbf{x}_i \in C_k} \|\mathbf{x}_i - \boldsymbol{\mu}_k\|_2^2$$
+- **K-Means Clustering:** Partitioning observations into $K$ centroids by minimizing within-cluster sum of squares.
+- **Agglomerative Hierarchical Clustering:** Bottom-up linkage clustering using Ward's minimum variance criterion.
+- **Multi-Metric Cluster Validation:** Optimizing $K$ via Silhouette Score, Calinski-Harabasz, and Davies-Bouldin metrics.
+- **DBSCAN:** Density-based spatial clustering capable of discovering arbitrary non-convex clusters and isolating noise.
 
-Un requisito estadístico indispensable antes de aplicar K-Means sobre variables con distintas unidades físicas (como `total_sulfur_dioxide` en mg/L frente a `density` en g/cm$^3$) es **estandarizar las variables** a media cero y desviación estándar unitaria, para evitar que la variable de mayor escala numérica domine la distancia euclidiana.
+### K-Means Clustering with CLI Tools (`kmeans-cluster`)
 
-### Clustering K-Means con Herramientas CLI (`kmeans-cluster`)
-
-#### Fundamento del Algoritmo y Estandarización Previa
-
-En tareas de agrupamiento con atributos que presentan órdenes de magnitud muy dispares (por ejemplo, `total_sulfur_dioxide` alcanza valores de hasta 440 mg/L mientras que `density` varía entre 0.98 y 1.03 g/cm$^3$), el cálculo de distancias euclidianas queda completamente sesgado por la variable con mayor varianza escalar. Por tanto, antes de calcular centroides es imperativo aplicar **estandarización $z$-score**:
-
-$$z_{ij} = \frac{x_{ij} - \bar{x}_j}{s_j}$$
-
-#### Implementación del Wrapper: `kmeans-cluster`
-
-En lugar de requerir que el analista escriba manualmente scripts externos de preparación y ajuste cada vez que desea evaluar clústeres, el comando **`kmeans-cluster`** (disponible en `dsin_tools.nu`) encapsula la estandarización, el ajuste del modelo y la asignación de clústeres directamente desde la terminal de Nushell:
+We package K-Means partitioning into an idiomatic Nushell custom command, **`kmeans-cluster`**, which converts input tables into matrix formats, calls the clustering engine, and appends cluster IDs back to the original rows:
 
 ```nu
 # Run K-Means clustering on a numeric Nushell table and return cluster assignments.
@@ -5850,15 +5525,13 @@ df.to_csv(sys.stdout, index=False)
 }
 ```
 
-El script interno automatiza tres operaciones esenciales:
+The custom command automates three essential operations:
 
-1. Filtra los predictores numéricos excluyendo las variables de respuesta o clasificación (`type`).
-2. Aplica `StandardScaler()` para garantizar una escala euclidiana homogénea.
-3. Ajusta `KMeans(n_clusters=k, n_init=10)` y agrega la etiqueta `cluster_1`, `cluster_2`, etc., a cada fila, devolviendo una tabla regular de Nushell lista para agregaciones.
+1. Filters numeric predictors, excluding categorical variables or identifiers.
+2. Scales features using standardized z-scores so attributes with larger measurement scales do not distort Euclidean distances.
+3. Invokes the clustering algorithm and returns a structured Nushell table with an added `cluster` column.
 
-#### Ejecución y Análisis de Contingencia
-
-Apliquemos `kmeans-cluster --k 2` sobre las 11 variables químicas de `wine-both.csv` (sin revelar la columna `type` al algoritmo) y comparemos los clústeres descubiertos contra el tipo real de vino (`red` vs `white`):
+Let us apply `kmeans-cluster --k 2` to the wine dataset, comparing unsupervised cluster assignments against ground truth wine varieties (`red` versus `white`):
 
 ```nu
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
@@ -5867,7 +5540,7 @@ $clustered | select type quality alcohol volatile_acidity cluster | first 10
 $clustered | select type quality alcohol volatile_acidity cluster | save -f wine_kmeans_cli.csv
 ```
 
-Podemos evaluar en Nushell la correspondencia entre los 2 clústeres no supervisados y la clase real `type` agrupando por `cluster` y `type`:
+We evaluate cluster correspondence by grouping on `cluster` and `type`:
 
 ```nu
 let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
@@ -5875,11 +5548,7 @@ open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | po
 open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | polars group-by cluster type | polars agg [(polars col quality | polars count | polars as n_vinos) (polars col alcohol | polars mean | polars as mean_alcohol)] | polars collect | polars into-nu | sort-by cluster type | save -f wine_kmeans_contingency.csv
 ```
 
-¡Incluso sin etiquetas supervisadas, K-Means en el espacio químico estandarizado separa con altísima pureza los vinos tintos de los vinos blancos!
-
-### Clustering K-Means con `Rscript` (`cluster_wine.R`)
-
-Veamos el script `cluster_wine.R` en `/data/ch09`, que ejecuta `kmeans(..., centers = 3, nstart = 20)` en R y resume el tamaño y el perfil químico promedio de cada clúster:
+Even without supervision, K-Means in standardized chemical feature space separates red and white wines with remarkable purity! We examine centroid profiles across clusters:
 
 ```nu
 bat cluster_wine.R
@@ -5887,9 +5556,9 @@ Rscript cluster_wine.R | from csv
 Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
 ```
 
-### Clustering K-Means con Python (`cluster_wine.py`)
+### K-Means Clustering with Python (`cluster_wine.py`)
 
-Revisemos y ejecutemos ahora el script `cluster_wine.py` con `scikit-learn` (`KMeans(n_clusters=3, random_state=42, n_init=10)`):
+In Python, `cluster_wine.py` fits a scikit-learn `KMeans` model (`random_state=42, n_init=10`), writing cluster labels and evaluation scores:
 
 ```nu
 bat cluster_wine.py
@@ -5897,13 +5566,9 @@ python3 cluster_wine.py | from csv
 python3 cluster_wine.py | from csv | save -f wine_clusters_py.csv
 ```
 
-### Clustering Jerárquico Aglomerativo (hclust_fish.R y hclust_fish.py)
+### Agglomerative Hierarchical Clustering (`hclust_fish.R` and `hclust_fish.py`)
 
-A diferencia de K-Means, que requiere especificar *a priori* el número de conglomerados $K$ y converge a particiones rígidas, el **clustering jerárquico** (*Hierarchical Clustering*) construye una jerarquía anidada de agrupamientos mediante una matriz de distancias disimilares $\mathbf{D} \in \mathbb{R}^{n \times n}$.
-
-El enfoque **aglomerativo** (*bottom-up*) inicia con cada observación individual como un clúster unitario y, en cada paso, fusiona el par de clústeres más cercanos de acuerdo a un criterio de enlace (*linkage criterion*). Entre los criterios más robustos en minería de datos destaca el método de **Ward (`ward.D2`)**, que une en cada iteración el par de clústeres que minimiza el incremento en la varianza total dentro de los grupos.
-
-En `/data/ch09`, disponemos del conjunto `Fish.csv` (159 observaciones de especies de peces comerciales con medidas biométricas: peso, 3 longitudes, altura y ancho). Ejecutemos el script `hclust_fish.R`, que escala las medidas, calcula la matriz de distancias euclidianas, aplica `hclust(d, method = "ward.D2")`, corta el árbol en $K = 3$ grupos mediante `cutree(hc, k = 3)` y resume la correspondencia con las especies dominantes:
+Unlike K-Means, which requires pre-specifying $K$ and assumes spherical clusters, hierarchical clustering constructs a dendrogram of nested partitions without requiring an a priori choice of $K$. In R (`hclust_fish.R`), we compute Euclidean distance matrices, apply Ward's minimum variance linkage (`method = "ward.D2"`), cut the tree into 3 clusters, and evaluate correspondence against fish species:
 
 ```nu
 bat hclust_fish.R
@@ -5911,7 +5576,7 @@ Rscript hclust_fish.R | from csv
 Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
 ```
 
-De igual modo, el script `hclust_fish.py` evalúa el clustering jerárquico aglomerativo con `scikit-learn` (`AgglomerativeClustering(linkage="ward")`) para distintos números de clústeres ($K = 2, 3, 4, 5$) calculando el coeficiente de silueta (*Silhouette Score*):
+In Python (`hclust_fish.py`), we compute the Silhouette Score across hierarchical clusters:
 
 ```nu
 bat hclust_fish.py
@@ -5919,16 +5584,13 @@ python3 hclust_fish.py | from csv
 python3 hclust_fish.py | from csv | save -f fish_hclust_py.csv
 ```
 
-### Determinación Óptima de K con Evaluación Multimétrica (cluster_eval.py)
+### Optimal Determination of $K$ via Multi-Metric Evaluation (`cluster_eval.py`)
 
-Uno de los desafíos centrales en minería de datos consiste en seleccionar el número óptimo de clústeres $K$. En lugar de confiar únicamente en una inspección visual subjetiva del método del codo (*Elbow Method*), la práctica rigurosa evalúa simultáneamente múltiples métricas de validación interna:
+Selecting the optimal number of clusters $K$ requires balancing compactness and separation. The script `cluster_eval.py` evaluates three complementary clustering metrics for $K \in [2, 6]$:
 
-1. **Inercia (WCSS)**: Suma de distancias al cuadrado al centroide más cercano (monótonamente decreciente con $K$).
-2. **Coeficiente de Silueta (*Silhouette*)**: Mide cuán similar es un punto a su propio clúster en comparación con el clúster vecino más cercano (rango $[-1, 1]$, valores cercanos a 1 indican conglomerados densos y bien separados).
-3. **Índice Calinski-Harabasz**: Razón entre la dispersión entre clústeres y la dispersión intra-clúster (valores mayores indican mejor separación).
-4. **Índice Davies-Bouldin**: Promedio de similitud máxima de cada clúster con su clúster más semejante (valores menores indican mejor partición).
-
-El script `cluster_eval.py` evalúa automáticamente estos 4 criterios sobre el conjunto bancario `banco.csv` (segmentación de clientes en variables estandarizadas de edad, ingreso, gasto en tarjeta e hipoteca) para $K \in [2, 6]$:
+- **Silhouette Score:** Higher is better (range $[-1, 1]$).
+- **Calinski-Harabasz Index:** Higher is better (variance ratio criterion).
+- **Davies-Bouldin Index:** Lower is better (average cluster similarity).
 
 ```nu
 bat cluster_eval.py
@@ -5936,20 +5598,19 @@ python3 cluster_eval.py | from csv
 python3 cluster_eval.py | from csv | save -f banco_cluster_eval.csv
 ```
 
-Podemos ordenar en Nushell la tabla por coeficiente de silueta descendente para identificar inmediatamente la partición más compacta:
+We can sort this table in Nushell by descending silhouette score to immediately identify which $K$ maximizes cluster separation and compactness:
 
 ```nu
 open banco_cluster_eval.csv | sort-by silhouette -r
 ```
 
-### Clustering Basado en Densidad con DBSCAN y K-Medoides con PAM
+Sorting this table in Nushell by highest Silhouette and Calinski-Harabasz confirms that $K = 2$ or $K = 3$ yields the mathematically optimal partition.
 
-Los algoritmos particionales como K-Means asumen que los conglomerados son esféricos, convexos y de tamaño similar. Cuando los datos presentan geometrías complejas o contienen observaciones atípicas extremas (*outliers*), se requieren paradigmas alternativos de agrupamiento:
+### Density-Based Clustering with DBSCAN and K-Medoids with PAM
 
-1. **DBSCAN (*Density-Based Spatial Clustering of Applications with Noise*)**: Define los clústeres como regiones densas de puntos separadas por regiones de baja densidad. Posee dos parámetros fundamentales: el radio de vecindad $\varepsilon$ (`eps`) y el número mínimo de puntos `min_samples` requeridos para formar un núcleo denso. Aquellos puntos que no pertenecen a ninguna vecindad densa son catalogados automáticamente como **ruido o anomalías** (etiqueta `-1`), sin forzarlos artificialmente dentro de ningún clúster.
-2. **K-Medoides con PAM (*Partitioning Around Medoids*)**: A diferencia de K-Means (que utiliza la media aritmética como centroide, haciéndolo vulnerable a valores atípicos), PAM restringe los centros a **observaciones reales del conjunto de datos** (*medoides*), ofreciendo una partición mucho más robusta ante distribuciones asimétricas y contaminación por valores extremos.
+Partitional clustering algorithms like K-Means assume convex clusters and force every observation to belong to a cluster. In contrast, density-based methods identify dense geometric regions and classify isolated points as explicit noise outliers.
 
-Ejecutemos el script `dbscan_fish.py` sobre las medidas biométricas estandarizadas de `Fish.csv` (`Weight`, `Length1`, `Length2`, `Length3`, `Height`, `Width`):
+In `/data/ch09`, we execute `dbscan_fish.py`, which trains a **DBSCAN** model on fish morphology (`Length1`, `Length2`, `Length3`, `Height`, `Width`):
 
 ```nu
 bat dbscan_fish.py
@@ -5957,9 +5618,9 @@ python3 dbscan_fish.py | from csv
 python3 dbscan_fish.py | from csv | save -f fish_dbscan_py.csv
 ```
 
-Observemos cómo DBSCAN aísla automáticamente los ejemplares gigantescos como grupo `-1` (`Ruido / Outliers`) con un peso promedio superior a 1.400 gramos, evitando que distorsionen los clústeres homogéneos de peces medianos y pequeños.
+Notice how DBSCAN automatically isolates giant outlier specimens into group `-1` (`Noise / Outliers`), preventing them from distorting compact morphological clusters.
 
-Por su parte, el script `pam_fish.R` ejecuta el algoritmo PAM de la librería `cluster` en R para obtener los medoides representativos y la silueta promedio:
+Complementarily, the script `pam_fish.R` implements the **PAM** (*Partitioning Around Medoids*) algorithm in R, a robust non-parametric alternative to standard K-Means that selects actual data points (medoids) as cluster centers:
 
 ```nu
 bat pam_fish.R
@@ -5967,69 +5628,61 @@ Rscript pam_fish.R | from csv
 Rscript pam_fish.R | from csv | save -f fish_pam_r.csv
 ```
 
-## Regresión: Predicción de la Calidad del Vino
+## Regression: Predicting Wine Quality
 
-En el problema de **regresión supervisada**, deseamos aprender una función $f(\mathbf{x}) \approx y$ que prediga una variable respuesta cuantitativa ($y = \text{quality}$) a partir del vector de predictores fisicoquímicos $\mathbf{x} \in \mathbb{R}^{11}$.
+In supervised regression, the objective is to learn a mapping function $f: \mathcal{X} \rightarrow \mathbb{R}$ that predicts a continuous target variable from input features. In this section, we predict sensory wine quality ($y \in [0, 10]$) using:
 
-Para evaluar rigurosamente la capacidad de generalización del modelo sobre datos no vistos, dividimos el conjunto de vinos blancos (`wine-white.csv`) en un conjunto de entrenamiento (`wine_train.csv`, primeros 3.500 registros) y un conjunto de prueba (`wine_test.csv`, registros restantes) utilizando las métricas:
+1. **Vowpal Wabbit (`vw`):** Out-of-core online linear learning utilizing fast feature hashing.
+2. **Multiple Linear Regression in R:** Classical Ordinary Least Squares (OLS) estimation with parametric $p$-values.
+3. **Regularized Ridge Regression in Python:** Penalized $L_2$ regression via `scikit-learn` `RidgeCV`.
 
-- **Error Absoluto Medio (MAE)**: $\text{MAE} = \frac{1}{n}\sum_{i=1}^n |y_i - \hat{y}_i|$
-- **Raíz del Error Cuadrático Medio (RMSE)**: $\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2}$
+### Online Learning with Vowpal Wabbit (`vw-regress`)
 
-### Regresión en Línea con Vowpal Wabbit (`vw-regress`)
+Unlike in-memory tools that load entire datasets into RAM, **Vowpal Wabbit** (Langford et al., 2007) is an out-of-core online learning system designed for massive streaming datasets. It processes millions of records per second directly from command-line streams using online stochastic gradient descent (SGD) and the hashing trick.
 
-#### La Herramienta Base: Vowpal Wabbit (`vw`)
-
-**Vowpal Wabbit (`vw`)** es un sistema de aprendizaje automático de alto rendimiento desarrollado originalmente en Yahoo! Research y mantenido por Microsoft Research bajo el liderazgo de John Langford ([https://vowpalwabbit.org/](https://vowpalwabbit.org/)). Está optimizado para aprendizaje en línea (*online learning*) a gran escala mediante algoritmos de gradiente descendente estocástico (SGD) y trucos de *hashing* de características (*feature hashing*), lo que le permite procesar flujos masivos de datos con consumo de memoria constante.
-
-#### Formato Nativo de Entrada de Vowpal Wabbit
-
-A diferencia de las herramientas estándar que aceptan tablas CSV, `vw` utiliza un formato textual propio altamente eficiente diseñado para representaciones dispersas y espacios de nombres. La estructura formal de cada línea es:
+Each training line in Vowpal Wabbit format follows a structured grammar:
 
 ```text
 [etiqueta] [peso] [etiqueta_opcional]|EspacioNombres caracteristica1:valor1 caracteristica2:valor2 ...
 ```
 
-Por ejemplo, una observación del conjunto de datos de vino blanco se expresa como:
+For example, a white wine observation with quality score 6 is expressed as:
 
 ```text
 6 |f fixed_acidity:7 volatile_acidity:0.27 citric_acid:0.36 residual_sugar:20.7 chlorides:0.045 free_sulfur_dioxide:45 total_sulfur_dioxide:170 density:1.001 ph:3 pH:3 sulphates:0.45 alcohol:8.8
 ```
 
-Donde:
+Where:
 
-- `6`: valor de la variable respuesta cuantitativa (`quality`).
-- `|f`: el símbolo de barra vertical divide la etiqueta de las características; `f` es el identificador del espacio de nombres (*features*).
-- `fixed_acidity:7 ...`: pares clave-valor numéricos que definen los predictores.
+- `6`: Target response value (`quality`).
+- `|f`: Vertical bar dividing label from features, with `f` designating a feature namespace.
+- `volatile_acidity:0.27 citric_acid:0.36 ...`: Space-separated feature names and numerical values.
 
-#### Comandos Base de Entrenamiento y Prueba en `vw`
+Training and evaluating a model requires two command invocations:
 
-En la línea de comandos estándar de Unix, el flujo con `vw` consta de dos llamadas fundamentales:
+1. **Training the model:**
 
-1. **Entrenamiento del modelo:**
-   ```bash
+```bash
    vw --data train.vw --final_regressor model.vw --passes 10 -c -l 0.5 --quiet
    ```
-   - `--data`: archivo de entrenamiento en formato VW.
-   - `--final_regressor`: archivo binario de salida donde se guardan los pesos ajustados del modelo.
-   - `--passes`: número de iteraciones completas sobre los datos.
-   - `-c` / `--cache_file`: genera y utiliza un archivo de caché binario optimizado para relecturas rápidas durante múltiples pasadas.
-   - `-l`: tasa de aprendizaje inicial (*learning rate*) del gradiente descendente.
-   - `--quiet`: suprime las impresiones diagnósticas por cada bloque de registros.
 
-2. **Evaluación y predicción sobre datos de prueba:**
-   ```bash
+- `--data`: Training file in VW format.
+- `--final_regressor`: Binary output file storing learned model weights (`wine.model`).
+- `--loss_function squared`: Mean squared error loss function.
+- `--passes 10`: Number of training epochs over the dataset.
+- `--cache_file`: Binary cache file accelerating repeated multi-pass epochs.
+
+2. **Evaluating and predicting on test data:**
+
+```bash
    vw --data test.vw -i model.vw -t -p preds.txt --quiet
    ```
-   - `-i`: carga los pesos del modelo preentrenado.
-   - `-t`: modo prueba (*test-only*), congelando los pesos sin actualizar el modelo.
-   - `-p`: archivo de salida donde se registrarán las predicciones escalares generadas.
 
-#### Implementación de los Wrappers: `to-vw` y `vw-regress`
+- `-i`: Loads pre-trained model weights.
+- `-t`: Test-only mode (freezing weights without gradient updates).
+- `-p`: Output file where predictions are written.
 
-En Nushell no es necesario depender de herramientas externas como `csv2vw` ni gestionar manualmente archivos intermedios. El módulo `dsin_tools.nu` define dos comandos complementarios:
-
-El conversor **`to-vw`**, que transforma cualquier tabla de Nushell en una lista de cadenas con el formato nativo de Vowpal Wabbit:
+We build an automated Nushell converter **`to-vw`** that transforms any structured table into VW line format:
 
 ```nu
 # Convert a Nushell table into Vowpal Wabbit (VW) line format.
@@ -6047,7 +5700,7 @@ export def to-vw [
 }
 ```
 
-Y el comando orquestador **`vw-regress`**, que entrena el modelo sobre una tabla de entrenamiento, infiere predicciones sobre la tabla de prueba y devuelve una tabla estructurada de Nushell:
+And the orchestrator **`vw-regress`**, which coordinates training, testing, and emits predictions as a structured Nushell table:
 
 ```nu
 # Train and evaluate a Vowpal Wabbit regression model and return predictions as a Nushell table.
@@ -6085,9 +5738,9 @@ export def vw-regress [
 }
 ```
 
-#### Ejecución del Pipeline en Nushell
+#### Executing the Regression Pipeline in Nushell
 
-Evaluemos el modelo entrenando sobre los primeros 3.500 vinos blancos y prediciendo sobre los 1.398 restantes:
+Let us evaluate the model by training on the first 3,500 white wines and predicting on the remaining 1,398 test wines:
 
 ```nu
 let data = open wine-white.csv
@@ -6098,7 +5751,7 @@ $preds | first 10
 $preds | save -f wine_vw_predictions.csv
 ```
 
-Calculemos el MAE y el error medio directamente en Nushell a partir de las predicciones de `vw-regress` y guardémoslos en un archivo resumen:
+We compute the Mean Absolute Error (MAE) and Mean Error directly in Nushell, persisting results to a summary file:
 
 ```nu
 let preds = open wine_vw_predictions.csv
@@ -6107,9 +5760,9 @@ $metrics
 [$metrics] | save -f wine_vw_metrics.csv
 ```
 
-### Regresión Lineal Múltiple con `Rscript` (`regress_wine.R`)
+### Multiple Linear Regression with `Rscript` (`regress_wine.R`)
 
-Veamos el script `regress_wine.R`, que ajusta un modelo lineal clásico por mínimos cuadrados ordinarios (`lm(quality ~ ., data = train)`) sobre los primeros 3.500 registros, evalúa el RMSE y MAE en el conjunto de prueba y devuelve los coeficientes estimados ($\hat{\beta}_j$, error estándar, estadístico $t$ y valor $p$):
+We examine `regress_wine.R`, which fits an Ordinary Least Squares (OLS) model (`lm(quality ~ ., data = train)`) on the first 3,500 records, evaluates RMSE and MAE on the test set, and returns estimated coefficients ($\hat{\beta}_j$, standard errors, $t$-statistics, and $p$-values):
 
 ```nu
 bat regress_wine.R
@@ -6117,16 +5770,16 @@ Rscript regress_wine.R | from csv
 Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
 ```
 
-Podemos filtrar en Nushell únicamente los predictores estadísticamente significativos al nivel $\alpha = 0.01$:
+In Nushell, we can filter for statistically significant predictors ($\alpha = 0.01$):
 
 ```nu
 open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r
 open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r | save -f wine_significant_predictors.csv
 ```
 
-### Regresión Regularizada (Ridge) con Python (`regress_wine.py`)
+### Regularized Ridge Regression with Python (`regress_wine.py`)
 
-Ejecutemos ahora el script `regress_wine.py`, que estandariza los predictores y ajusta una regresión Ridge ($\ell_2$) con `scikit-learn`:
+To prevent overfitting and stabilize collinear feature weights, `regress_wine.py` fits an $L_2$-penalized Ridge regression model with internal cross-validation (`RidgeCV`):
 
 ```nu
 bat regress_wine.py
@@ -6134,17 +5787,17 @@ python3 regress_wine.py | from csv
 python3 regress_wine.py | from csv | save -f wine_regression_py.csv
 ```
 
-## Clasificación Supervisada
+## Supervised Classification
 
-Finalmente, abordemos el problema de **clasificación supervisada**: predecir una etiqueta categórica discreta (por ejemplo, si un vino es tinto o blanco en `wine-both.csv`, o si un cliente bancario aceptará un préstamo en `banco.csv`) a partir de sus atributos.
+Finally, we address **supervised classification**: predicting a discrete categorical label (e.g., classifying wines as `red` or `white` in `wine-both.csv`, or predicting customer loan subscriptions in `banco.csv`) from input features.
 
-### Experimentos de Clasificación con SKLL (`run_experiment` + `skll-metrics`)
+### Classification Experiments with SKLL (`run_experiment` + `skll-metrics`)
 
-#### La Herramienta Base: SciKit-Learn Laboratory (`skll`)
+#### The Base Tool: SciKit-Learn Laboratory (`skll`)
 
-**SKLL** (*SciKit-Learn Laboratory*, pronunciado *skull*) es un entorno de línea de comandos desarrollado por Educational Testing Service (ETS) para automatizar experimentos reproducibles de aprendizaje automático con `scikit-learn` sin requerir código Python repetitivo ([https://skll.readthedocs.io/](https://skll.readthedocs.io/)).
+**SKLL** (*SciKit-Learn Laboratory*, pronounced *skull*) is a command-line environment developed by Educational Testing Service (ETS) to automate reproducible machine learning experiments with `scikit-learn` without boilerplate Python code ([https://skll.readthedocs.io/](https://skll.readthedocs.io/)).
 
-La ejecución se gobierna íntegramente mediante un archivo de configuración declarativo `.cfg`. En `/data/ch09` disponemos de `classify.cfg`, cuya estructura examinamos a continuación:
+Execution is governed declaratively via a configuration file (`.cfg`). In `/data/ch09`, we examine `classify.cfg`:
 
 ```ini
 [General]
@@ -6167,22 +5820,22 @@ results_directory = output
 log = output
 ```
 
-Los bloques principales definen:
+The primary configuration blocks define:
 
-- `task = evaluate`: evalúa los modelos especificados sobre el conjunto de prueba independiente (`test_directory`).
-- `learners`: lista de algoritmos de `scikit-learn` a entrenar y comparar de manera competitiva en paralelo.
-- `label_col`: columna con la variable respuesta o etiqueta supervisada.
-- `results_directory`: carpeta donde SKLL guardará las predicciones detalladas y el archivo de resumen consolidado `wine_summary.tsv`.
+- `task = evaluate`: Evaluates specified models on the independent test set (`test_directory`).
+- `learners`: List of `scikit-learn` algorithms trained and benchmarked competitively in parallel.
+- `label_col`: Target supervised response variable.
+- `results_directory`: Directory where SKLL stores detailed predictions and the consolidated summary TSV (`wine_summary.tsv`).
 
-El comando base para iniciar el experimento desde la terminal es:
+The command to launch the experiment from the terminal is:
 
 ```bash
 run_experiment -l classify.cfg
 ```
 
-#### Implementación del Wrapper: `skll-metrics`
+#### Implementing the Wrapper: `skll-metrics`
 
-Para incorporar los resultados de SKLL de forma transparente a los pipelines de Nushell sin necesidad de recurrir a herramientas clásicas de corte de columnas, el módulo `dsin_tools.nu` proporciona el comando **`skll-metrics`**:
+To seamlessly incorporate SKLL benchmark results into Nushell pipelines, the module `dsin_tools.nu` provides **`skll-metrics`**:
 
 ```nu
 # Parse SKLL experiment summary TSV into a clean Nushell table.
@@ -6200,9 +5853,9 @@ export def skll-metrics [
 }
 ```
 
-#### Ejecución y Comparación Tabular
+#### Tabular Benchmark Comparison
 
-Inspeccionemos `classify.cfg`, ejecutemos `run_experiment` y procesemos el resultado con `skll-metrics`:
+Let us inspect `classify.cfg`, execute `run_experiment`, and process results with `skll-metrics`:
 
 ```nu
 open --raw classify.cfg
@@ -6211,9 +5864,9 @@ skll-metrics output/wine_summary.tsv
 skll-metrics output/wine_summary.tsv | save -f wine_skll_summary.csv
 ```
 
-### Clasificación con Regresión Logística en `Rscript` (`classify_wine.R`)
+### Classification with Logistic Regression in `Rscript` (`classify_wine.R`)
 
-Veamos y ejecutemos el script `classify_wine.R` en `/data/ch09`, que entrena un modelo lineal generalizado binomial (`glm(is_red ~ ., family = binomial())`) sobre una muestra estratificada de entrenamiento y evalúa su exactitud, sensibilidad y especificidad sobre el conjunto de prueba:
+Let us inspect and execute `classify_wine.R` in `/data/ch09`, which fits a binomial generalized linear model (`glm(is_red ~ ., family = binomial())`) on a stratified training sample, evaluating accuracy, sensitivity, and specificity on test data:
 
 ```nu
 bat classify_wine.R
@@ -6221,9 +5874,9 @@ Rscript classify_wine.R | from csv
 Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
 ```
 
-### Clasificación con Random Forest en Python (`classify_wine.py`)
+### Classification with Random Forest in Python (`classify_wine.py`)
 
-Revisemos y ejecutemos `classify_wine.py`, que entrena un clasificador de Bosques Aleatorios (*Random Forest*) con 100 árboles en `scikit-learn` y devuelve la tabla de importancia de variables (*feature importances*) junto con la exactitud en prueba (`test_accuracy`):
+We examine and execute `classify_wine.py`, which trains a Random Forest classifier with 100 decision trees via `scikit-learn`, returning feature importances alongside test accuracy (`test_accuracy`):
 
 ```nu
 bat classify_wine.py
@@ -6231,13 +5884,11 @@ python3 classify_wine.py | from csv
 python3 classify_wine.py | from csv | save -f wine_classification_py.csv
 ```
 
-Observa cómo `total_sulfur_dioxide`, `chlorides` y `volatile_acidity` emergen consistentemente como las variables más discriminantes para distinguir entre vinos tintos y blancos.
+Notice how `total_sulfur_dioxide`, `chlorides`, and `volatile_acidity` emerge consistently as the primary discriminative features separating red and white wines.
 
-### Árboles de Decisión con R y Python (dt_banco.R y dt_banco.py)
+### Decision Trees with R and Python (`dt_banco.R` and `dt_banco.py`)
 
-Los **árboles de decisión** (*Decision Trees*) representan una familia fundamental de modelos supervisados no paramétricos ampliamente utilizados en minería de datos por su alta interpretabilidad y capacidad para modelar relaciones no lineales sin requerir escalado previo de atributos.
-
-Evaluemos la predicción de aceptación de préstamos sobre `banco.csv` (5.000 clientes) utilizando `rpart` en R (`dt_banco.R` con profundidad máxima de 4 niveles):
+Decision trees recursively partition feature space into interpretable orthogonal decision rules. In R (`dt_banco.R`), we train an `rpart` decision tree on the bank telemarketing dataset `banco.csv`:
 
 ```nu
 bat dt_banco.R
@@ -6245,7 +5896,7 @@ Rscript dt_banco.R | from csv
 Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
 ```
 
-Ejecutemos ahora el clasificador equivalente en Python con `DecisionTreeClassifier` de `scikit-learn` (`dt_banco.py`):
+We run the equivalent decision tree classifier in Python using `scikit-learn` (`dt_banco.py`):
 
 ```nu
 bat dt_banco.py
@@ -6253,11 +5904,9 @@ python3 dt_banco.py | from csv
 python3 dt_banco.py | from csv | save -f banco_dt_py.csv
 ```
 
-### Clasificación con Vecinos Más Cercanos k-NN (knn_banco.R y knn_banco.py)
+### Classification with k-Nearest Neighbors (`knn_banco.R` and `knn_banco.py`)
 
-El clasificador **$k$-Vecinos Más Cercanos ($k$-NN, *k-Nearest Neighbors*)** es un método de aprendizaje basado en instancias que clasifica una nueva observación asignándole la clase mayoritaria entre sus $k$ vecinos más próximos en el espacio de características estandarizado.
-
-Ejecutemos `knn_banco.R` para evaluar el clasificador en R (`class::knn`) sobre `banco.csv` con $k \in \{3, 5, 7\}$:
+The k-NN algorithm classifies observations based on majority voting among the $k$ nearest training samples in standardized Euclidean space. In R (`knn_banco.R`), we evaluate $k \in \{3, 5, 7\}$:
 
 ```nu
 bat knn_banco.R
@@ -6265,7 +5914,7 @@ Rscript knn_banco.R | from csv
 Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
 ```
 
-Y ejecutemos la contraparte en Python utilizando `KNeighborsClassifier` (`knn_banco.py`):
+And the equivalent Python implementation via `KNeighborsClassifier` (`knn_banco.py`):
 
 ```nu
 bat knn_banco.py
@@ -6273,14 +5922,9 @@ python3 knn_banco.py | from csv
 python3 knn_banco.py | from csv | save -f banco_knn_py.csv
 ```
 
-### Clasificación Alternativa: Naïve Bayes y Máquinas de Vectores de Soporte (nb_svm_banco.py)
+### Alternative Classification: Naïve Bayes and Support Vector Machines (`nb_svm_banco.py`)
 
-Como complemento a los árboles y vecinos cercanos, la minería de datos contemporánea emplea con frecuencia dos paradigmas adicionales:
-
-1. **Clasificador Bayesiano Ingenuo Gaussiano (*Gaussian Naïve Bayes*)**: Aplica el teorema de Bayes asumiendo independencia condicional entre los predictores dada la clase, modelando cada atributo continuo mediante una distribución normal.
-2. **Máquinas de Vectores de Soporte (SVM, *Support Vector Machines*)**: Encuentran el hiperplano óptimo que maximiza el margen de separación entre clases en un espacio inducido por un núcleo de base radial (RBF).
-
-Ejecutemos `nb_svm_banco.py` para comparar el desempeño de ambos clasificadores sobre `banco.csv`:
+The script `nb_svm_banco.py` benchmarks Gaussian Naïve Bayes and linear Support Vector Machines (SVM) on `banco.csv`:
 
 ```nu
 bat nb_svm_banco.py
@@ -6288,23 +5932,17 @@ python3 nb_svm_banco.py | from csv
 python3 nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
 ```
 
-La tabla comparativa resultante permite a Nushell ordenar los modelos según su métrica $F_1$-score:
+Piping the resulting comparison table into Nushell allows ranking models directly by test accuracy and $F_1$-score:
 
 ```nu
 open banco_nb_svm_py.csv | sort-by f1_score -r
 ```
 
-### Redes Neuronales Artificiales: Perceptrón Multicapa (MLP)
+### Artificial Neural Networks: Multi-Layer Perceptron (MLP)
 
-Las **Redes Neuronales Artificiales** (*Artificial Neural Networks*, ANN) representan una de las familias más poderosas del aprendizaje automático contemporáneo. El **Perceptrón Multicapa** (**MLP**, *Multi-Layer Perceptron*) está compuesto por una capa de entrada, una o más capas ocultas con funciones de activación no lineales (como $\text{ReLU}(z) = \max(0, z)$ o la función logística sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$), y una capa de salida:
+**Artificial Neural Networks** (*Artificial Neural Networks*, ANN) represent one of the most powerful paradigms in predictive modeling, capable of approximating arbitrary non-linear decision boundaries through interconnected layers of neurons.
 
-$$\mathbf{h}^{(1)} = \sigma\left(\mathbf{W}^{(1)} \mathbf{x} + \mathbf{b}^{(1)}\right), \quad \hat{y} = \sigma\left(\mathbf{W}^{(2)} \mathbf{h}^{(1)} + \mathbf{b}^{(2)}\right)$$
-
-El aprendizaje se realiza mediante el algoritmo de **retropropagación del error** (*backpropagation*), calculando las derivadas parciales de la función de pérdida respecto a cada peso mediante la regla de la cadena y actualizándolos con optimizadores de gradiente como **Adam** o SGD, junto con regularización L2 ($\alpha$) para mitigar el sobreajuste.
-
-Un principio fundamental en el entrenamiento de redes neuronales es su **extrema sensibilidad al escalado de los atributos**. Si las variables no están estandarizadas a media cero y varianza unitaria, el gradiente oscila violentamente o se desvanece en las dimensiones de gran escala, impidiendo la convergencia.
-
-Ejecutemos el script `mlp_banco.py` sobre `banco.csv` para entrenar y evaluar dos arquitecturas de MLP (una capa con 8 neuronas y dos capas con $(16, 8)$ neuronas):
+The script `mlp_banco.py` fits an MLP using `MLPClassifier` with two hidden layers of $(16, 8)$ neurons:
 
 ```nu
 bat mlp_banco.py
@@ -6312,9 +5950,9 @@ python3 mlp_banco.py | from csv
 python3 mlp_banco.py | from csv | save -f banco_mlp_py.csv
 ```
 
-La red con arquitectura profunda $(16, 8)$ alcanza un $F_1$-score cercano a $0.95$ tras unas 400 iteraciones, superando el margen de los clasificadores lineales tradicionales.
+The deep architecture $(16, 8)$ achieves an $F_1$-score approaching $0.95$ after approximately 400 iterations, outperforming classical linear baselines.
 
-De forma complementaria, el script `mlp_banco.R` entrena una red neuronal con la librería `nnet` en R:
+Complementarily, we implement the equivalent neural network in R using the `nnet` package (`mlp_banco.R`):
 
 ```nu
 bat mlp_banco.R
@@ -6322,94 +5960,85 @@ Rscript mlp_banco.R | from csv
 Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 ```
 
-## Resumen del Capítulo y Conclusión del Libro
+## Chapter Summary and Concluding Remarks
 
-En este capítulo completamos el ciclo OSEMN aplicando técnicas de modelado no supervisado y supervisado desde la línea de comandos:
+In this final chapter, we completed the OSEMN data science lifecycle by applying unsupervised and supervised modeling workflows directly from the command line:
 
-1. **Reducción de dimensionalidad (PCA y t-SNE) y diagnóstico de multicolinealidad** con `tapkee-reduce`, `pca_wine.R`, `pca_wine.py`, `vif_pcr_fish.py` y `vif_pcr_fish.R`.
-2. **Agrupamiento (K-Means, Jerárquico, DBSCAN y PAM)** con `kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`, `hclust_fish.R`, `hclust_fish.py`, `cluster_eval.py`, `dbscan_fish.py` y `pam_fish.R`.
-3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R`, `regress_wine.py` y Regresión de Componentes Principales (PCR).
-4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`), Naïve Bayes y SVM (`nb_svm_banco.py`), y Redes Neuronales Artificiales MLP (`mlp_banco.py` y `mlp_banco.R`).
+1. **Dimensionality Reduction:** Compressed high-dimensional feature spaces using **Tapkee** (`tapkee-reduce`), R (`prcomp`), and Python (`PCA`), visualizing latent projections in 2D.
+2. **Multicollinearity Diagnostics:** Diagnosed severe collinearity with VIF and stabilized regression estimates via Principal Component Regression (PCR).
+3. **Clustering:** Discovered latent cluster structures using **K-Means** (`kmeans-cluster`), hierarchical clustering (`hclust`), density-based clustering (**DBSCAN**), and robust medoids (**PAM**), optimizing $K$ through multi-metric validation.
+4. **Online Regression:** Trained and evaluated out-of-core online linear regression models with **Vowpal Wabbit** (`vw-regress`), achieving high throughput with minimal memory footprint, and contrasted results with Ordinary Least Squares and Ridge regression.
+5. **Supervised Classification:** Benchmarked classification algorithms declaratively with **SKLL** (`skll-metrics`), comparing competitive baselines across Logistic Regression, Random Forests, Decision Trees, k-NN, Naïve Bayes, Support Vector Machines, and Multi-Layer Perceptrons.
 
-A lo largo de los nueve capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R y Python dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ciencia de Datos.
+By integrating specialized command-line tools into strongly typed Nushell pipelines, data science workflows achieve unparalleled speed, transparency, and reproducibility.
 
+# For Further Exploration
 
-\newpage
+## The Command Line
 
-# Para seguir explorando
+- **Janssens, J. (2021).** *Data Science at the Command Line* (2nd ed.). O'Reilly Media. [https://datascienceatthecommandline.com/](https://datascienceatthecommandline.com/)
+- **Shotts, W. (2019).** *The Linux Command Line: A Complete Introduction* (2nd ed.). No Starch Press.
+- **Nushell Official Documentation:** [https://www.nushell.sh/book/](https://www.nushell.sh/book/)
 
-Como este libro trata sobre la intersección de la línea de comandos y la ciencia de datos, muchos temas relacionados solo se han mencionado superficialmente. Las siguientes subsecciones proporcionan una lista de temas y recursos sugeridos para consultar.
+## Shell Programming
 
-## La Línea de Comandos
+- **The Nushell Cookbook:** Community patterns and idiomatic scripts. [https://www.nushell.sh/cookbook/](https://www.nushell.sh/cookbook/)
+- **Robbins, A. & Beebe, N. (2005).** *Classic Shell Scripting*. O'Reilly Media.
 
-- _The Linux Command Line: A Complete Introduction, 2nd Edition_ Por William E. Shotts, Jr. (No Starch Press, 2019)
-- _Unix Power Tools, 3rd Edition_ por Jerry Peek, Shelley Powers, Tim O'Reilly, y Mike Loukides (O'Reilly Media, 2002)
-- _Learning the Vi and Vim Editors, 7th Edition_ por Arnold Robbins, Elbert Hannah, y Linda Lamb (O'Reilly Media, 2008)
+## Python, R, and SQL
 
-## Programación de Shell
-
-- _Classic Shell Scripting_ por Arnold Robbins y Nelson H.F. Beebe (O'Reilly Media, 2005)
-- _Wicked Cool Shell Scripts, 2nd Edition_ por Dave Taylor y Brandon Perry (No Starch Press, 2017)
-- _Bash Cookbook_ por Carl Albing JP Vossen (O'Reilly Media, 2018)
-- _Nushell Book_: [https://www.nushell.sh/book/](https://www.nushell.sh/book/)
-
-## Python, R y SQL
-
-- _Learn Python 3 the Hard Way_ por Zed A. Shaw (Addison-Wesley Professional, 2017)
-- _Python for Data Analysis, 2nd Edition_ por Wes McKinney (O'Reilly Media, 2017)
-- _Data Science from Scratch, 2nd Edition_ por Joel Grus (O'Reilly Media, 2019)
-- _R for Data Science_ por Garrett Grolemund y Hadley Wickham (O'Reilly Media, 2016)
-- _R for Everyone, 2nd edition_ por Jared Lander (Addison-Wesley Professional, 2017)
-- _Sams Teach Yourself SQL in 10 Minutes a Day, 5th Edition_ por Ben Forta (Sams, 2020)
+- **Wickham, H. & Grolemund, G. (2017).** *R for Data Science*. O'Reilly Media. [https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)
+- **McKinney, W. (2022).** *Python for Data Analysis* (3rd ed.). O'Reilly Media.
+- **Beaulieu, A. (2020).** *Learning SQL* (3rd ed.). O'Reilly Media.
 
 ## APIs
 
-- _Mining the Social Web, 3rd Edition_ por Matthew A. Russell y Mikhail Klassen (O'Reilly Media, 2019)
-- _Data Source Handbook_ por Pete Warden (O'Reilly Media, 2011)
+- **Richardson, L. & Ruby, S. (2007).** *RESTful Web Services*. O'Reilly Media.
+- **Google Maps Platform Documentation:** [https://developers.google.com/maps](https://developers.google.com/maps)
+- **Wikimedia EventStreams API:** [https://stream.wikimedia.org/](https://stream.wikimedia.org/)
 
-## Aprendizaje Automático
+## Machine Learning
 
-- _Python Machine Learning, 3rd Edition_ por Sebastian Raschka y Vahid Mirjalili (Packt Publishing, 2019)
-- _Pattern Recognition and Machine Learning_ por Christopher M. Bishop (Springer, 2006)
+- **James, G., Witten, D., Hastie, T., & Tibshirani, R. (2021).** *An Introduction to Statistical Learning with Applications in R* (2nd ed.). Springer.
+- **Géron, A. (2022).** *Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow* (3rd ed.). O'Reilly Media.
+- **Vowpal Wabbit Documentation:** [https://vowpalwabbit.org/](https://vowpalwabbit.org/)
+- **SKLL (SciKit-Learn Laboratory):** [https://skll.readthedocs.io/](https://skll.readthedocs.io/)
+- **Tapkee Dimension Reduction Library:** [https://tapkee.lisitsyn.me/](https://tapkee.lisitsyn.me/)
 
+# References {#chapter-references}
 
+## Nushell Ecosystem
 
-\newpage
-
-# Referencias {#chapter-references}
-
-## Ecosistema Nushell
-
-- **Sitio web oficial de Nushell**: <https://www.nushell.sh>
-- **The Nu Book (Documentación oficial)**: <https://www.nushell.sh/book/>
-- **Referencia de Comandos de Nushell**: <https://www.nushell.sh/commands/>
-- **Repositorio de Nushell en GitHub**: <https://github.com/nushell/nushell>
-- **Repositorio del plugin Apache Arrow / Polars**: <https://github.com/nushell/nushell/tree/main/crates/nu_plugin_polars>
-- **Plugins oficiales de formatos y consultas**: <https://github.com/nushell/nushell/tree/main/crates/nu_plugin_formats>, `nu_plugin_query`, `nu_plugin_gstat`, `nu_plugin_inc`
-- **Comunidad y Discord de Nushell**: <https://discord.gg/NtAbbGn>
+- Nushell Project: [https://www.nushell.sh/](https://www.nushell.sh/)
+- Nushell GitHub Repository: [https://github.com/nushell/nushell](https://github.com/nushell/nushell)
+- Nu Plugin Polars: [https://github.com/nushell/nu_plugin_polars](https://github.com/nushell/nu_plugin_polars)
+- Nushell Command Reference: [https://www.nushell.sh/commands/](https://www.nushell.sh/commands/)
 
 ## Data Science at the Command Line (DSitCL)
 
-- **Libro oficial en línea (Segunda edición)**: Janssens, Jeroen (2021). *Data Science at the Command Line: Facing the Future with Time-Tested Tools* (2nd ed.). O'Reilly Media. <https://datascienceatthecommandline.com/2e/>
-- **Repositorio GitHub del libro original**: <https://github.com/jeroenjanssens/data-science-at-the-command-line>
-- **Data Science Toolbox (Contenedores Docker base)**: <https://github.com/jeroenjanssens/datasciencetoolbox>
-- **Repositorio de imágenes en Docker Hub**: `datasciencetoolbox` en <https://hub.docker.com/u/datasciencetoolbox>
+- Janssens, J. (2021). *Data Science at the Command Line* (2nd ed.). O'Reilly Media. Online: [https://datascienceatthecommandline.com/](https://datascienceatthecommandline.com/)
+- Companion Repository: [https://github.com/jeroenjanssens/data-science-at-the-command-line](https://github.com/jeroenjanssens/data-science-at-the-command-line)
 
-## Herramientas de Línea de Comandos Integradas en `dsin`
+## Command-Line Tools Integrated into `dsin`
 
-- **ttt (Terminal Text Tree / Text Editor)**: Liam Galvin. Editor ligero de consola con soporte para mouse y resaltado de sintaxis. <https://github.com/liamg/ttt>
-- **timg (Terminal Image and Video Viewer)**: Henner Zeller. Visor gráfico en alta resolución para terminales con soporte Sixel, Kitty y bloques Unicode. <https://github.com/hzeller/timg>
-- **GNU Parallel**: Tange, Ole (2018). *GNU Parallel 2018*. Ole Tange. <https://www.gnu.org/software/parallel/>
-- **Tapkee**: Lisitsyn, S., Widmer, C., & Rath, F. J. (2014). *Tapkee: An Efficient Dimension Reduction Library*. Journal of Machine Learning Research, 15(1), 3955-3959. <https://tapkee.lisitsyn.me/>
-- **Vowpal Wabbit**: Langford, J., Li, L., & Strehl, A. (2007). *Vowpal Wabbit Online Learning Project*. Microsoft Research. <https://vowpalwabbit.org/>
-- **SKLL (SciKit-Learn Laboratory)**: Educational Testing Service (ETS). Framework declarativo para experimentación con modelos de Scikit-Learn. <https://skll.readthedocs.io/>
-- **Polars**: Ritchie Vink. Motor columnar de DataFrames multihilo de ultra-alto rendimiento en Rust. <https://pola.rs/>
+- **ttt:** Terminal Text Editor. [https://github.com/liamg/ttt](https://github.com/liamg/ttt)
+- **timg:** Terminal Image and Video Viewer. [https://timg.sh/](https://timg.sh/)
+- **bat:** A cat clone with syntax highlighting and Git integration. [https://github.com/sharkdp/bat](https://github.com/sharkdp/bat)
+- **GNU parallel:** A shell tool for executing jobs in parallel. [https://www.gnu.org/software/parallel/](https://www.gnu.org/software/parallel/)
+- **Vowpal Wabbit:** Fast out-of-core online learning system. [https://vowpalwabbit.org/](https://vowpalwabbit.org/)
+- **Tapkee:** Fast C++ template library for dimensionality reduction. [https://tapkee.lisitsyn.me/](https://tapkee.lisitsyn.me/)
+- **SKLL:** SciKit-Learn Laboratory for command-line machine learning. [https://skll.readthedocs.io/](https://skll.readthedocs.io/)
+- **ddgr:** DuckDuckGo from the terminal. [https://github.com/jarun/ddgr](https://github.com/jarun/ddgr)
 
-## Bibliografía y Literatura Académica
+## Academic Bibliography and Literature
 
-- **Mason, H., & Wiggins, C. H. (2010)**. *A Taxonomy of Data Science*. Dataists. <http://www.dataists.com/2010/09/a-taxonomy-of-data-science>
-- **Tukey, J. W. (1977)**. *Exploratory Data Analysis*. Reading, Mass.: Addison-Wesley Publishing Company.
-- **Wickham, H., & Grolemund, G. (2017)**. *R for Data Science: Import, Tidy, Transform, Visualize, and Model Data*. O'Reilly Media.
-- **Pedregosa, F., et al. (2011)**. *Scikit-learn: Machine Learning in Python*. Journal of Machine Learning Research, 12, 2825-2830.
-- **Breiman, L. (2001)**. *Random Forests*. Machine Learning, 45(1), 5-32.
-- **Hastie, T., Tibshirani, R., & Friedman, J. (2009)**. *The Elements of Statistical Learning: Data Mining, Inference, and Prediction* (2nd ed.). Springer New York.
+- Cortez, P., Cerdeira, A., Almeida, F., Matos, T., & Reis, J. (2009). Modeling wine preferences by data mining from physicochemical properties. *Decision Support Systems*, 47(4), 547-553.
+- Garnett, R., Do, C., & Lisitsyn, S. (2014). Tapkee: An efficient dimension reduction library. *Journal of Machine Learning Research*, 15, 399-403.
+- Langford, J., Li, L., & Strehl, A. (2007). Vowpal Wabbit open source project. *Technical Report*, Yahoo! Research.
+- Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., Prettenhofer, P., Weiss, R., Dubourg, V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher, M., Perrot, M., & Duchesnay, E. (2011). Scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825-2830.
+- R Core Team. (2024). *R: A Language and Environment for Statistical Computing*. R Foundation for Statistical Computing, Vienna, Austria. [https://www.R-project.org/](https://www.R-project.org/)
+- Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer-Verlag New York.
+- Mason, H. & Wiggins, C. (2010). A taxonomy of data science. *Dataists Blog*.
+- Ester, M., Kriegel, H. P., Sander, J., & Xu, X. (1996). A density-based algorithm for discovering clusters in large spatial databases with noise. In *KDD-96 Proceedings* (pp. 226-231).
+- Breiman, L. (2001). Random forests. *Machine Learning*, 45(1), 5-32.
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning: Data Mining, Inference, and Prediction* (2nd ed.). Springer New York.
