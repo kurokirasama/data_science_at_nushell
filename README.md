@@ -3,7 +3,7 @@
 > 🌐 **Course Web Portal & Direct PDF Serving:** [kurokirasama.github.io/data_science_at_nushell](https://kurokirasama.github.io/data_science_at_nushell/)
 >
 > [!NOTE]
-> This English documentation was translated with the assistance of AI from the original Spanish version. For the authoritative Spanish documentation, see [README.es.md](README.es.md).
+> This English documentation was translated with the assistance of AI from the original Spanish version. For the original Spanish documentation, see [README.es.md](README.es.md).
 
 # Data Science at Nushell
 
@@ -11,7 +11,7 @@
 
 - 📖 **Web Portal & Direct Downloads:** [https://kurokirasama.github.io/data_science_at_nushell/](https://kurokirasama.github.io/data_science_at_nushell/)
 - 📄 **English Edition PDF:** [DataScienceNushell.pdf](Files/DataScienceNushell.pdf) • [Direct Online Link](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.pdf)
-- 📄 **Spanish Edition PDF (Authoritative):** [DataScienceNushell.es.pdf](Files/DataScienceNushell.es.pdf) • [Direct Online Link](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)
+- 📄 **Spanish Edition PDF:** [DataScienceNushell.es.pdf](Files/DataScienceNushell.es.pdf) • [Direct Online Link](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)
 
 ## Description
 
@@ -97,7 +97,7 @@ pandoc --pdf-engine=xelatex \
 ```text
 ├── Files/
 │   ├── DataScienceNushell.md      # Primary English textbook (Pandoc Markdown)
-│   ├── DataScienceNushell.es.md   # Authoritative Spanish textbook (Pandoc Markdown)
+│   ├── DataScienceNushell.es.md   # Spanish textbook (Pandoc Markdown)
 │   ├── DataScienceNushell.pdf     # Compiled English PDF (XeLaTeX)
 │   ├── DataScienceNushell.es.pdf  # Compiled Spanish PDF (XeLaTeX)
 │   ├── *.png / *.jpg              # Course diagrams and figures
