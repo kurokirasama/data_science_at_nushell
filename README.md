@@ -108,7 +108,6 @@ pandoc --pdf-engine=xelatex \
 │   ├── config.nu                  # Custom Nushell configuration for dsin
 │   ├── dsin_tools.nu              # Nushell modeling commands (VW, Tapkee, K-Means)
 │   └── update-dsin-nushell.nu     # Updater script copy in docker/
-├── tests/                         # Automated verification test suite inside dsin
 ├── update-dsin-nushell.nu         # Primary Nushell upgrade automation script
 ├── README.md                      # Primary English documentation
 └── README.es.md                   # Spanish documentation

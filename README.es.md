@@ -105,7 +105,6 @@ pandoc --pdf-engine=xelatex \
 │   ├── config.nu                  # Configuración personalizada de Nushell para dsin
 │   ├── dsin_tools.nu              # Comandos Nushell para modelación (VW, Tapkee, K-Means)
 │   └── update-dsin-nushell.nu     # Copia del script actualizador en docker/
-├── tests/                         # Suite de verificación automatizada en contenedor dsin
 ├── update-dsin-nushell.nu         # Script principal para actualizar Nushell en dsin
 ├── README.md                      # Documentación principal en inglés
 └── README.es.md                   # Documentación en español
