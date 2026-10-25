@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ciencia de Datos en Nushell — Materiales del Curso y Currículo</title>
+  <meta name="description" content="Materiales y libro de Ciencia de Datos en Nushell para Ingeniería Estadística. Flujos estructurados en la terminal Linux.">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #243447;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --accent-secondary: #34d399;
+      --border: #334155;
+      --code-bg: #0b1120;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-accent {
+      color: var(--accent);
+    }
+
+    .lang-switcher {
+      display: inline-flex;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .lang-switcher .active {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .lang-switcher a {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      transition: color 0.2s, background-color 0.2s;
+    }
+
+    .lang-switcher a:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem 1.5rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    .lead {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 780px;
+      margin: 0 auto 2rem auto;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #0b1120;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      border-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-card-hover);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .card h2 {
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+      flex-grow: 1;
+    }
+
+    .card-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    .section-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .chapters-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 3.5rem 0;
+    }
+
+    .chapters-list li {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+
+    .chapter-num {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .chapter-title {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .citation-box {
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 2rem; }
+      .lead { font-size: 1.1rem; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="./" class="brand">
+        <span class="brand-accent">nu_</span> Ciencia de Datos
+      </a>
+      <div class="lang-switcher">
+        <a href="../" title="View in English">English</a>
+        <span>|</span>
+        <span class="active">Español</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="badge">Libro Abierto • Ingeniería Estadística</span>
+      <h1>Ciencia de Datos en Nushell</h1>
+      <p class="lead">
+        Currículo de pregrado riguroso, centrado en Nushell para el desarrollo integral de flujos de ciencia de datos en la terminal Linux. Integración políglota con Python, R y motores CLI de modelado automático dentro de un contenedor Docker reproducible.
+      </p>
+
+      <div class="btn-group">
+        <a href="../Files/DataScienceNushell.es.pdf" class="btn btn-primary" download target="_blank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Descargar PDF en Español (5.4 MB)
+        </a>
+        <a href="../Files/DataScienceNushell.pdf" class="btn btn-secondary" download target="_blank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Descargar PDF en Inglés (5.4 MB)
+        </a>
+      </div>
+    </section>
+
+    <div class="card-grid">
+      <div class="card">
+        <div>
+          <h2>Edición Oficial en Español</h2>
+          <p>Texto canónico de la obra. Incluye los 8 capítulos completos, notas teóricas, pipelines reproducibles y ejercicios prácticos.</p>
+        </div>
+        <div class="card-meta">PDF oficial • Monografía integrada de 8 capítulos • Motor XeLaTeX</div>
+        <a href="../Files/DataScienceNushell.es.pdf" class="btn btn-secondary" target="_blank">Ver / Descargar PDF (Español)</a>
+      </div>
+
+      <div class="card">
+        <div>
+          <h2>Edición en Inglés</h2>
+          <p>Edición traducida y adaptada a la nomenclatura computacional estándar internacional para divulgación académica y uso general.</p>
+        </div>
+        <div class="card-meta">English Edition • Single-part monograph • XeLaTeX engine</div>
+        <a href="../Files/DataScienceNushell.pdf" class="btn btn-secondary" target="_blank">View / Download PDF (English)</a>
+      </div>
+    </div>
+
+    <section>
+      <h2 class="section-title">Inicio Rápido con Docker (`dsin`)</h2>
+      <p style="color: var(--text-muted);">
+        Cada pipeline, script y bloque de código del currículo está verificado para ejecutarse de forma 100% reproducible dentro del contenedor Docker autónomo <code>kurokirasama/dsin:latest</code>, que incluye plugins de Nushell preconfigurados, rutas de montaje de datos y herramientas de modelado.
+      </p>
+
+      <div class="code-block">
+        docker run --rm -it -v "$(pwd)/Files:/data" kurokirasama/dsin:latest
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Estructura del Currículo</h2>
+      <ul class="chapters-list">
+        <li>
+          <div class="chapter-num">Capítulo 1</div>
+          <div class="chapter-title">Introducción a la Ciencia de Datos en la Terminal y Nushell</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 2</div>
+          <div class="chapter-title">El Entorno Nushell: Arquitectura, Tipos y Pipelines</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 3</div>
+          <div class="chapter-title">Ingestión de Datos: Formatos Delimitados, Estructurados y Bases de Datos</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 4</div>
+          <div class="chapter-title">Transformación, Filtrado y Resúmenes Estadísticos de Datos</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 5</div>
+          <div class="chapter-title">Analítica de Alto Rendimiento con el Complemento Polars</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 6</div>
+          <div class="chapter-title">Flujos Políglotas: Integración de Nushell con Python y R</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 7</div>
+          <div class="chapter-title">Aprendizaje Automático en la Terminal: Vowpal Wabbit, Tapkee y SKLL</div>
+        </li>
+        <li>
+          <div class="chapter-num">Capítulo 8</div>
+          <div class="chapter-title">Proyecto Integrador: Pipeline Completo de Ciencia de Datos</div>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="section-title">Cita Académica</h2>
+      <p style="color: var(--text-muted);">Si utiliza o cita estos materiales en investigaciones, cursos o proyectos docentes, por favor utilice la siguiente referencia bibliográfica:</p>
+      <div class="citation-box">
+        Gómez Guzmán, L. (2026). <em>Ciencia de datos en la terminal Linux con Nushell</em>. <a href="https://kurokirasama.github.io/data_science_at_nushell/es/">https://kurokirasama.github.io/data_science_at_nushell/es/</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      &copy; 2026 Luis Gómez Guzmán.
+    </p>
+    <p style="margin-top: 0.5rem;">
+      <a href="https://github.com/kurokirasama/data_science_at_nushell" target="_blank">Repositorio en GitHub</a> •
+      <a href="../">English Edition</a>
+    </p>
+  </footer>
+
+</body>
+</html>

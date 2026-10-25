@@ -1,8 +1,14 @@
 > **[ [English](README.md) | Español ]**
+>
+> 🌐 **Portal Web y Descarga Directa de PDFs:** [kurokirasama.github.io/data_science_at_nushell/es/](https://kurokirasama.github.io/data_science_at_nushell/es/)
 
 # Ciencia de Datos en Nushell (Data Science at Nushell)
 
 **Guía práctica y libro** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
+
+- 📖 **Portal Web y Descarga Directa:** [https://kurokirasama.github.io/data_science_at_nushell/es/](https://kurokirasama.github.io/data_science_at_nushell/es/)
+- 📄 **Edición Oficial en Español (PDF):** [DataScienceNushell.es.pdf](Files/DataScienceNushell.es.pdf) • [Enlace directo en línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)
+- 📄 **Edición en Inglés (PDF):** [DataScienceNushell.pdf](Files/DataScienceNushell.pdf) • [Enlace directo en línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.pdf)
 
 ## Descripción
 
