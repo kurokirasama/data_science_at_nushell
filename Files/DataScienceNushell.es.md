@@ -512,7 +512,7 @@ tutor bashisms
 - **Secuenciación con punto y coma (`;`):** Se permite encadenar múltiples instrucciones consecutivas separándolas mediante `;` (por ejemplo, `cd /data; ls`). A diferencia de bash, los operadores booleanos no son `&&` ni `||`, sino las palabras clave `and` y `or` (o bloques condicionales `if`).
 - **Invocación explícita de ejecutables externos (`^`):** Cuando un comando interno de Nushell coincide en nombre con un binario instalado en el sistema operativo (como `ls`, `ps` o `find`), anteponer el símbolo circunflejo `^` (`^ls`, `^ps`) fuerza la ejecución directa del binario del sistema operativo ubicado en `$env.PATH`.
 - **Variables de entorno por comando (*one-shot*):** Para definir una variable de entorno temporal asociada exclusivamente a una única ejecución externa, se antepone la asignación al comando (por ejemplo, `FOO=bar ^mi_script`).
-- **Redirecciones estándar para ejecutables externos:** Nushell dispone de operadores de redirección hacia archivos (`o>` para *stdout*, `e>` para *stderr*, `o+e>` para ambos flujos combinados y `e>|` para canalizar los errores hacia una tubería).
+- **Redirecciones estándar para ejecutables externos:** Nushell dispone de operadores de redirección hacia archivos (`o>` para *stdout*, `e>` para *stderr*, `o+e>` para ambos flujos combinados y `e>|` para canalizar los errores hacia un pipeline).
 
 
 
@@ -844,7 +844,7 @@ Esta directriz garantiza la robustez del sistema: los comandos integrados en pip
 La arquitectura interna de Nushell opera bajo una estricta separación en dos fases:
 
 1. **Fase de análisis sintáctico y compilación estática (*parse-time*):** El analizador de Nushell procesa el texto completo del script o bloque de instrucciones antes de que se ejecute la primera línea. En esta fase se verifica la validez gramatical, se determinan las firmas de los comandos, se resuelven las palabras clave y se cargan los módulos externos (`source`, `use`).
-2. **Fase de evaluación y ejecución dinámica (*runtime*):** Es la etapa en la que los datos fluyen a través de las tuberías (*pipelines*), se evalúan las expresiones, se escribe en el disco (`save`), se invocan procesos externos y se computan los resultados en memoria.
+2. **Fase de evaluación y ejecución dinámica (*runtime*):** Es la etapa en la que los datos fluyen a través de los pipelines, se evalúan las expresiones, se escribe en el disco (`save`), se invocan procesos externos y se computan los resultados en memoria.
 
 Comprender la frontera entre ambas etapas es esencial en Nushell. Consideremos, por ejemplo, la siguiente secuencia de instrucciones:
 
@@ -3178,7 +3178,7 @@ Flags:
 
 ### Cierres (Closures)
 
-Un **cierre** (*closure*) en Nushell es un bloque anónimo de código ejecutable que puede recibir argumentos, procesar el flujo de entrada de una tubería (`$in`) y capturar variables de su entorno léxico exterior. Los cierres constituyen ciudadanos de primera clase en el lenguaje: pueden almacenarse en variables, transferirse como argumentos hacia otros comandos y ejecutarse dinámicamente cuando sea requerido.
+Un **cierre** (*closure*) en Nushell es un bloque anónimo de código ejecutable que puede recibir argumentos, procesar el flujo de entrada de un pipeline (`$in`) y capturar variables de su entorno léxico exterior. Los cierres constituyen ciudadanos de primera clase en el lenguaje: pueden almacenarse en variables, transferirse como argumentos hacia otros comandos y ejecutarse dinámicamente cuando sea requerido.
 
 #### Sintaxis y Parámetros
 
@@ -3201,7 +3201,7 @@ do $duplicar 21
 do $ponderar 4.5 0.8
 ```
 
-#### Uso en Tuberías y Funciones de Orden Superior
+#### Uso en Pipelines y Funciones de Orden Superior
 
 El rol más relevante de los cierres en ciencia de datos tiene lugar al procesar colecciones y tablas en combinación con funciones de orden superior como `each`, `where`, `filter`, `reduce` y `par-each`:
 
@@ -3213,7 +3213,7 @@ El rol más relevante de los cierres en ciencia de datos tiene lugar al procesar
 [10 25 3 48 7] | where { |val| $val > 20 }
 ```
 
-Cuando un cierre no declara parámetros explícitos mediante `|...|`, puede consumir directamente el registro emitido por la etapa anterior de la tubería mediante la variable especial `$in`:
+Cuando un cierre no declara parámetros explícitos mediante `|...|`, puede consumir directamente el registro emitido por la etapa anterior del pipeline mediante la variable especial `$in`:
 
 ```nu
 [5 12 18] | each { $in * 10 }
@@ -3767,7 +3767,7 @@ bat top-words-3.nu
 
 ### Paso 4: Remover la Entrada Fija
 
-Al reemplazar la referencia fija a `alice.txt` por la variable especial `$in` dentro de una función `main` en `top-words-4.nu`, la herramienta queda desacoplada de cualquier archivo concreto y puede procesar cualquier flujo recibido a través de una tubería (`|`):
+Al reemplazar la referencia fija a `alice.txt` por la variable especial `$in` dentro de una función `main` en `top-words-4.nu`, la herramienta queda desacoplada de cualquier archivo concreto y puede procesar cualquier flujo recibido a través de un pipeline (`|`):
 
 ```nu
 # skip-docker-exec (código de top-words-4.nu)
@@ -4258,7 +4258,7 @@ export def trans [
 ] {
     let input_text = if ($text | is-empty) { $in } else { $text }
     if ($input_text | is-empty) {
-        error make -u { msg: "Debe proporcionar un texto para traducir (como argumento o mediante tubería)." }
+        error make -u { msg: "Debe proporcionar un texto para traducir (como argumento o mediante pipeline)." }
     }
 
     if ($api_key | is-not-empty) {
@@ -4296,7 +4296,7 @@ export def trans [
 }
 ```
 
-Importamos el comando `trans` y lo aplicamos en nuestras tuberías:
+Importamos el comando `trans` y lo aplicamos en nuestros pipelines:
 
 ```nu
 # skip-docker-exec
@@ -6322,77 +6322,57 @@ Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 
 ## Modelado Moderno Nativo de Pipelines
 
-Las utilidades clásicas de modelado en consola estudiadas en las secciones anteriores (`tapkee`, `vw` y `run_experiment`) fueron concebidas originalmente para *shells* POSIX orientadas a flujos planos de caracteres. Como las tuberías tradicionales de Unix carecen de esquemas tipados, cada herramienta histórica exige una capa adicional de formateo externo: `tapkee` requiere matrices numéricas sin encabezados y descarta las etiquetas de clase, `vw` obliga a serializar cada observación mediante gramáticas personalizadas de espacios de nombres (`to-vw`), y `skll` impone jerarquías rígidas de directorios (`train/`, `test/`, `output/`) gobernadas por archivos `.cfg` en disco.
+Las utilidades clásicas de modelado en consola estudiadas en las secciones anteriores (`tapkee`, `vw` y `run_experiment`) fueron concebidas originalmente para *shells* POSIX orientadas a flujos planos de caracteres. Como los pipelines tradicionales de Unix carecen de esquemas tipados, cada herramienta histórica exige una capa adicional de formateo externo: `tapkee` requiere matrices numéricas sin encabezados y descarta las etiquetas de clase, `vw` obliga a serializar cada observación mediante gramáticas personalizadas de espacios de nombres (`to-vw`), y `skll` impone jerarquías rígidas de directorios (`train/`, `test/`, `output/`) gobernadas por archivos `.cfg` en disco.
 
-En una *shell* tipada como Nushell, los motores de modelado pueden intercambiar tablas estructuradas (`table -> table`) directamente a través de flujos estándar sin configuraciones accesorias en disco. Dentro del contenedor `dsin`, los binarios autónomos compilados en C++ (`duckdb` y `lightgbm`) conviven junto a un entorno aislado de Python 3.12 en `/opt/modern-ml` (aprovisionado mediante el gestor estático `uv`), lo que permite integrar bibliotecas contemporáneas (`umap-learn`, `lightgbm` y `scikit-learn` 1.9+) preservando intactas las dependencias de Python 3.9 requeridas por `skll`. Verifiquemos las versiones disponibles directamente desde `/data/ch09`:
+En una *shell* tipada como Nushell, los motores de modelado pueden intercambiar tablas estructuradas (`table -> table`) directamente a través de flujos estándar sin configuraciones accesorias en disco. Dentro del contenedor `dsin`, los binarios autónomos compilados en C++ (`duckdb` y `lightgbm`) conviven junto a un entorno aislado de Python 3.12 en `/opt/modern-ml` (aprovisionado mediante el gestor estático `uv`). Para maximizar la ergonomía, el directorio `/opt/modern-ml/bin` se encuentra integrado al inicio de `$env.PATH`: de este modo, invocar `python` ejecuta directamente Python 3.12 con la suite contemporánea de modelado (`umap-learn`, `lightgbm`, `scikit-learn` 1.9+, `pandas` y `matplotlib`), mientras que las herramientas heredadas que requieren Python 3.9 (como SKLL) invocan su propio intérprete mediante su shebang original sin conflicto. Verifiquemos las versiones disponibles directamente desde `/data/ch09`:
 
 ```nu
 duckdb --version
 uv --version
-/opt/modern-ml/bin/python -c "import umap, lightgbm, sklearn; print(f'sklearn={sklearn.__version__}, lightgbm={lightgbm.__version__}')"
+python --version
+python -c "import umap, lightgbm, sklearn; print(f'sklearn={sklearn.__version__}, lightgbm={lightgbm.__version__}')"
 ```
 
 ### Proyección Topológica de Variedades con UMAP (`umap-reduce`)
 
 Mientras el Análisis de Componentes Principales restringe la proyección a combinaciones lineales ortogonales y t-SNE optimiza afinidades locales por pares con alto costo computacional sin conservar distancias globales entre conglomerados, **UMAP** (*Uniform Manifold Approximation and Projection*, McInnes et al., 2018) representa los datos de alta dimensión mediante un conjunto simplicial difuso ponderado sobre una variedad riemanniana localmente conexa. Al minimizar la entropía cruzada difusa entre los grafos topológicos de alta y baja dimensión, el algoritmo preserva simultáneamente la estructura vecinal fina (controlada por `--neighbors`) y la disposición global entre grupos (controlada por `--min-dist`).
 
-En `dsin_tools.nu`, el comando **`umap-reduce`** estandariza automáticamente las columnas numéricas, calcula la proyección en `/opt/modern-ml` y devuelve la tabla original de Nushell enriquecida con las coordenadas `umap_1` y `umap_2`:
+Siguiendo las buenas prácticas arquitectónicas del libro, la lógica matemática de reducción se encapsula en el script modular `umap_reduce.py` (en `/data/ch09`), mientras que el comando `umap-reduce` de `dsin_tools.nu` ofrece un wrapper limpio sobre tablas de Nushell sin incrustar código interpretado en línea:
+
+```nu
+bat umap_reduce.py
+```
+
+El wrapper en `dsin_tools.nu` delega la transformación numérica en el script auxiliar y devuelve una tabla enriquecida con las coordenadas `umap_1` y `umap_2`:
 
 ```nu
 # Compute UMAP manifold coordinates on a numeric Nushell table and return a structured table.
 export def umap-reduce [
-  --neighbors(-n): int = 15    # Size of local neighborhood
-  --min-dist(-m): float = 0.1  # Minimum effective distance between embedded points
-  --target-dim(-d): int = 2    # Number of embedding dimensions
-  --seed(-s): int = 42         # Random state for reproducibility
-  --label-col(-l): string      # Optional label column to exclude from features and preserve
-  --cols(-c): list<string>     # Optional explicit list of numeric feature columns
+  --neighbors(-n): int = 15
+  --min-dist(-m): float = 0.1
+  --target-dim(-d): int = 2
+  --seed(-s): int = 42
+  --label-col(-l): string = "type"
+  --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let cols_flag = if ($cols != null) and (($cols | length) > 0) {
+    ["--cols" ($cols | str join ",")]
+  } else { [] }
+
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = $label_col | default "type"
-  let cols_csv = if ($cols != null) and (($cols | length) > 0) {
-    $cols | str join ","
-  } else { "" }
+  let res = (python umap_reduce.py
+    --input $tmp_in
+    --neighbors $neighbors
+    --min-dist $min_dist
+    --target-dim $target_dim
+    --seed $seed
+    --label-col $label_col
+    ...$cols_flag | from csv)
 
-  r#'import os, sys, warnings
-os.environ.setdefault("NUMBA_CACHE_DIR", "/tmp/numba_cache")
-warnings.filterwarnings("ignore")
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
-import umap
-
-df = pd.read_csv(sys.argv[1])
-n_neighbors = int(sys.argv[2])
-min_dist = float(sys.argv[3])
-n_components = int(sys.argv[4])
-seed = int(sys.argv[5])
-lbl = sys.argv[6]
-cols_arg = sys.argv[7]
-
-if cols_arg:
-    num_cols = [c for c in cols_arg.split(",") if c in df.columns]
-else:
-    num_cols = [c for c in df.columns if c != lbl and pd.api.types.is_numeric_dtype(df[c])]
-
-X = StandardScaler().fit_transform(df[num_cols])
-reducer = umap.UMAP(
-    n_neighbors=min(n_neighbors, max(2, len(df) - 1)),
-    min_dist=min_dist,
-    n_components=n_components,
-    random_state=seed,
-)
-emb = reducer.fit_transform(X)
-for idx in range(n_components):
-    df[f"umap_{idx + 1}"] = emb[:, idx].round(4)
-df.to_csv(sys.stdout, index=False)
-'# | save -f $tmp_py
-
-  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in ($neighbors | into string) ($min_dist | into string) ($target_dim | into string) ($seed | into string) $lbl $cols_csv | from csv
-  rm -f $tmp_in $tmp_py
+  rm -f $tmp_in
   $res
 }
 ```
@@ -6409,7 +6389,7 @@ Para contrastar geométricamente la maximización lineal de varianza, la atracci
 
 ```nu
 bat plot_umap_comparison.py
-/opt/modern-ml/bin/python plot_umap_comparison.py
+python plot_umap_comparison.py
 timg -g 80x25 umap_comparison.png
 ```
 
@@ -6419,10 +6399,16 @@ timg -g 80x25 umap_comparison.png
 
 Vowpal Wabbit sobresale al procesar millones de indicadores dispersos de texto que exceden la memoria principal, pero en tablas densas con una docena de predictores continuos el *hashing* lineal pierde interacciones no lineales y umbrales de partición. **LightGBM** (Ke et al., 2017) compila en un ejecutable C++ autónomo (`/usr/local/bin/lightgbm`) que agrupa variables continuas en histogramas discretos y expande los árboles de regresión por hoja (*leaf-wise*) según la mayor reducción de pérdida cuadrática. Para el trabajo en consola, `lightgbm` lee archivos CSV con encabezados de forma nativa (`header=true` y `label_column=name:quality`), eliminando por completo codificadores manuales por línea como `to-vw`.
 
-El comando **`lgbm-regress`** en `dsin_tools.nu` coordina el entrenamiento, la predicción fuera de muestra y el cálculo de importancia por ganancia de partición directamente sobre tablas de entrenamiento y prueba de Nushell:
+El script auxiliar `lgbm_importance.py` en `/data/ch09` extrae las frecuencias de partición y las ganancias de varianza del modelo binario de LightGBM, devolviendo un arreglo JSON estructurado:
 
 ```nu
-# Train and evaluate standalone LightGBM C++ CLI regression on train/test Nushell tables.
+bat lgbm_importance.py
+```
+
+El comando **`lgbm-regress`** en `dsin_tools.nu` coordina el entrenamiento, la predicción fuera de muestra y la importancia de variables sobre tablas regulares de Nushell con argumentos formateados limpiamente:
+
+```nu
+# Train and evaluate LightGBM C++ CLI regression on Nushell tables.
 export def lgbm-regress [
   train_tbl: table
   test_tbl: table
@@ -6430,57 +6416,62 @@ export def lgbm-regress [
   --num-trees(-n): int = 100
   --learning-rate(-l): float = 0.05
   --num-leaves: int = 31
-  --importance(-i)             # Return sorted feature-gain importance table instead of test predictions
+  --importance(-i)
 ]: nothing -> table {
-  let tmp_dir = mktemp -d
+  let tmp_dir = (mktemp -d)
   let train_csv = $"($tmp_dir)/train.csv"
   let test_csv = $"($tmp_dir)/test_features.csv"
   let model_file = $"($tmp_dir)/model.txt"
   let pred_file = $"($tmp_dir)/preds.txt"
 
-  let feat_cols = $train_tbl | columns | where $it != $target
+  let feat_cols = ($train_tbl | columns | where $it != $target)
   $train_tbl | select ...($feat_cols | append $target) | to csv | save -f $train_csv
   $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
 
-  ^lightgbm task=train objective=regression $"data=($train_csv)" header=true $"label_column=name:($target)" $"num_trees=($num_trees)" $"learning_rate=($learning_rate)" $"num_leaves=($num_leaves)" seed=42 deterministic=true force_col_wise=true $"output_model=($model_file)" verbosity=-1 out+err> /dev/null
+  let lgbm_train_args = [
+    "task=train"
+    "objective=regression"
+    $"data=($train_csv)"
+    "header=true"
+    $"label_column=name:($target)"
+    $"num_trees=($num_trees)"
+    $"learning_rate=($learning_rate)"
+    $"num_leaves=($num_leaves)"
+    "seed=42"
+    "force_col_wise=true"
+    $"output_model=($model_file)"
+    "verbosity=-1"
+  ]
+  ^lightgbm ...$lgbm_train_args out+err> /dev/null
 
   if $importance {
-    let imp_py = $"($tmp_dir)/imp.py"
-    r#'import json, sys, lightgbm as lgb
-booster = lgb.Booster(model_file=sys.argv[1])
-names = booster.feature_name()
-splits = booster.feature_importance(importance_type="split")
-gains = booster.feature_importance(importance_type="gain")
-total_gain = float(gains.sum()) if float(gains.sum()) > 0 else 1.0
-rows = [
-    {
-        "feature": str(n),
-        "splits": int(s),
-        "gain": round(float(g), 4),
-        "gain_pct": round(float(g) * 100.0 / total_gain, 2),
-    }
-    for n, s, g in zip(names, splits, gains)
-]
-rows.sort(key=lambda r: r["gain"], reverse=True)
-print(json.dumps(rows))
-'# | save -f $imp_py
-    let imp_tbl = ^/opt/modern-ml/bin/python $imp_py $model_file | from json
+    let imp_tbl = (python lgbm_importance.py $model_file | from json)
     rm -rf $tmp_dir
     return $imp_tbl
   }
 
-  ^lightgbm task=predict $"data=($test_csv)" header=true $"input_model=($model_file)" $"output_result=($pred_file)" verbosity=-1 out+err> /dev/null
+  let lgbm_pred_args = [
+    "task=predict"
+    $"data=($test_csv)"
+    "header=true"
+    $"input_model=($model_file)"
+    $"output_result=($pred_file)"
+    "verbosity=-1"
+  ]
+  ^lightgbm ...$lgbm_pred_args out+err> /dev/null
 
-  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
-  let actuals = $test_tbl | get $target | each { |x| $x | into float }
+  let preds = (open --raw $pred_file | lines |
+    where ($it | str trim | is-not-empty) | each { into float })
+  let actuals = ($test_tbl | get $target | each { into float })
   rm -rf $tmp_dir
 
   $actuals | zip $preds | each { |pair|
     let obs = $pair.0
-    let pred = $pair.1 | math round -p 4
-    let signed_err = ($pred - $obs) | math round -p 4
-    let abs_err = ($obs - $pred) | math abs | math round -p 4
-    { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $abs_err }
+    let pred = ($pair.1 | math round -p 4)
+    let signed_err = (($pred - $obs) | math round -p 4)
+    let abs_err = (($obs - $pred) | math abs | math round -p 4)
+    { actual: $obs, observed: $obs, predicted: $pred,
+      error: $signed_err, abs_error: $abs_err }
   }
 }
 ```
@@ -6507,28 +6498,40 @@ El comando **`duckdb-ols`** envía cualquier tabla de Nushell hacia `duckdb -jso
 ```nu
 # Compute vectorized Ordinary Least Squares regression diagnostics via DuckDB CLI.
 export def duckdb-ols [
-  --target(-y): string = "quality" # Dependent response column
-  --predictor(-x): string = ""     # Optional single predictor column (omit to rank all numeric predictors)
+  --target(-y): string = "quality"
+  --predictor(-x): string = ""
 ]: table -> table {
   let tbl = $in
-  let first_row = $tbl | first
+  let first_row = ($tbl | first)
   let candidate_cols = if ($predictor | is-not-empty) {
     [$predictor]
   } else {
     $tbl | columns | where { |c|
-      ($c != $target) and ((($first_row | get $c | describe) == "int") or (($first_row | get $c | describe) == "float"))
+      let val_type = ($first_row | get $c | describe)
+      ($c != $target) and (($val_type == "int") or ($val_type == "float"))
     }
   }
 
-  let tmp_csv = mktemp --suffix ".csv"
+  let tmp_csv = (mktemp --suffix ".csv")
   $tbl | select ...($candidate_cols | append $target) | to csv | save -f $tmp_csv
 
-  let unions = $candidate_cols | each { |col|
-    $"SELECT '($col)' AS predictor, ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
-  } | str join " UNION ALL "
+  let unions = ($candidate_cols | each { |col|
+    [
+      $"SELECT '($col)' AS predictor, "
+      $"ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, "
+      $"ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, "
+      $"ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, "
+      $"ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, "
+      $"CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
+    ] | str join ""
+  } | str join " UNION ALL ")
 
-  let sql = $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
-  let res = ^duckdb -json -c $sql | from json
+  let sql = [
+    $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); "
+    $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
+  ] | str join ""
+
+  let res = (^duckdb -json -c $sql | from json)
   rm -f $tmp_csv
   $res
 }
@@ -6547,7 +6550,7 @@ En términos lineales simples, `alcohol` presenta el mayor poder explicativo ind
 
 En la sección dedicada a SKLL (`run_experiment`), comparar una Regresión Logística frente a un Bosque Aleatorio requirió poblar carpetas `train/` y `test/`, redactar un archivo declarativo `classify.cfg` y extraer métricas desde archivos tabulados en `output/`. Un diseño nativo para pipelines prescinde por completo de ese andamiaje en disco.
 
-El comando **`ml-benchmark`** recibe cualquier tabla de Nushell mediante `$in`, ejecuta una partición estratificada de entrenamiento y prueba, aplica preprocesamiento diferenciado por tipo de columna (`StandardScaler` y `OneHotEncoder` para algoritmos sensibles a la escala, paso directo de variables numéricas para árboles) y compara cinco familias de modelos en una sola instrucción:
+La lógica de evaluación multimodelo reside en el script `ml_benchmark.py` ubicado en `/data/ch09`. Este script recibe datos por entrada estándar, realiza una partición estratificada con semilla fija, aplica estandarización por columnas y entrena cinco familias de modelos con métricas de exactitud, precisión, exhaustividad y puntuación $F_1$:
 
 1. **Regresión Logística (`logistic`):** Clasificador lineal penalizado en escala *log-odds*.
 2. **Máquina de Soporte Vectorial Lineal (`linear_svc`):** Hiperplano de margen máximo con pérdida bisagra (*hinge loss*).
@@ -6555,8 +6558,16 @@ El comando **`ml-benchmark`** recibe cualquier tabla de Nushell mediante `$in`, 
 4. **Bosque Aleatorio (`rf`):** Ensamble *bagging* de árboles de decisión descorrelacionados.
 5. **LightGBM (`lgbm`):** Árboles de decisión potenciados por gradiente basados en histogramas.
 
+Inspeccionemos el script modular antes de invocarlo:
+
 ```nu
-# Benchmark multiple classification architectures (including MLP) on a Nushell table in one streaming pipeline.
+bat ml_benchmark.py
+```
+
+El comando orquestador **`ml-benchmark`** en `dsin_tools.nu` actúa como un wrapper limpio sobre el script:
+
+```nu
+# Benchmark multiple classification architectures on streaming Nushell tables.
 export def ml-benchmark [
   --target(-t): string = "type"
   --models(-m): list<string> = ["logistic", "rf", "lgbm", "linear_svc", "mlp"]
@@ -6564,89 +6575,18 @@ export def ml-benchmark [
   --seed(-s): int = 42
 ]: table -> table {
   let tbl = $in
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let models_csv = ($models | str join ",")
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
-  let models_csv = $models | str join ","
 
-  r#'import json, sys, time, warnings
-warnings.filterwarnings("ignore")
-import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
-from sklearn.svm import LinearSVC
-from lightgbm import LGBMClassifier
+  let res = (python ml_benchmark.py
+    --input $tmp_in
+    --target $target
+    --models $models_csv
+    --test-size $test_size
+    --seed $seed | from json)
 
-df = pd.read_csv(sys.argv[1])
-target = sys.argv[2]
-models = [m.strip() for m in sys.argv[3].split(",") if m.strip()]
-test_size = float(sys.argv[4])
-seed = int(sys.argv[5])
-
-X = df.drop(columns=[target])
-le = LabelEncoder()
-y = le.fit_transform(df[target].astype(str))
-
-num_cols = [c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])]
-cat_cols = [c for c in X.columns if c not in num_cols]
-
-prep_scaled = ColumnTransformer(
-    transformers=[
-        ("num", StandardScaler(), num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
-    ],
-    remainder="drop",
-)
-prep_tree = ColumnTransformer(
-    transformers=[
-        ("num", "passthrough", num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-    ],
-    remainder="drop",
-)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=seed, stratify=y
-)
-
-registry = {
-    "logistic": Pipeline([("prep", prep_scaled), ("clf", LogisticRegression(max_iter=500, random_state=seed))]),
-    "rf": Pipeline([("prep", prep_tree), ("clf", RandomForestClassifier(n_estimators=150, random_state=seed, n_jobs=-1))]),
-    "lgbm": Pipeline([("prep", prep_tree), ("clf", LGBMClassifier(n_estimators=150, learning_rate=0.05, random_state=seed, verbose=-1, n_jobs=-1))]),
-    "linear_svc": Pipeline([("prep", prep_scaled), ("clf", LinearSVC(random_state=seed, max_iter=2000))]),
-    "mlp": Pipeline([("prep", prep_scaled), ("clf", MLPClassifier(hidden_layer_sizes=(64, 32), activation="relu", early_stopping=True, max_iter=300, random_state=seed))]),
-}
-
-rows = []
-for name in models:
-    if name not in registry:
-        raise ValueError(f"Unsupported model key: {name}")
-    pipe = registry[name]
-    t0 = time.perf_counter()
-    pipe.fit(X_train, y_train)
-    elapsed_ms = (time.perf_counter() - t0) * 1000.0
-    preds = pipe.predict(X_test)
-    rows.append({
-        "model": name,
-        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
-        "precision": round(float(precision_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "recall": round(float(recall_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "f1_score": round(float(f1_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "train_time_ms": round(elapsed_ms, 2),
-    })
-
-rows.sort(key=lambda r: r["f1_score"], reverse=True)
-print(json.dumps(rows))
-'# | save -f $tmp_py
-
-  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in $target $models_csv ($test_size | into string) ($seed | into string) | from json
-  rm -f $tmp_in $tmp_py
+  rm -f $tmp_in
   $res
 }
 ```
@@ -6662,13 +6602,45 @@ En `banco.csv`, donde la aceptación del crédito personal depende de umbrales m
 
 ### La Frontera del Aprendizaje Automático Nativo en Rust
 
-Dado que tanto el núcleo de Nushell como `nu_plugin_polars` están implementados en Rust sobre el formato columnar en memoria Apache Arrow, la evolución natural del modelado en terminal apunta hacia complementos compilados en Rust que consuman lotes Arrow sin serialización intermedia a CSV o JSON. Cuatro desarrollos activos ilustran esta dirección técnica:
+Dado que tanto el núcleo de Nushell como `nu_plugin_polars` están implementados en Rust sobre el formato columnar en memoria Apache Arrow, la evolución natural del modelado en terminal apunta hacia herramientas y complementos compilados en Rust que operen sobre lotes Arrow sin serialización intermedia a CSV o JSON. Cuatro ecosistemas activos ilustran esta transición:
 
-- **`linfa` y `smartcore`:** Bibliotecas de aprendizaje estadístico en Rust puro que implementan PCA, K-Means, DBSCAN, modelos lineales penalizados, máquinas de soporte vectorial y bosques aleatorios con verificación estricta de tipos en compilación.
-- **`candle` y `burn`:** Motores minimalistas de cálculo tensorial y aprendizaje profundo en Rust capaces de compilar redes prealimentadas (`MLP`) y arquitecturas modernas en binarios autónomos con aceleración opcional por GPU y sin depender del intérprete de Python.
-- **`nutorch`:** Complemento para Nushell que expone tensores de LibTorch como valores nativos dentro de los pipelines interactivos de la consola.
+1. **`linfa` y `smartcore`:** Bibliotecas de aprendizaje estadístico en Rust puro que compilan en binarios CLI autónomos de alto rendimiento, implementando PCA, K-Means, DBSCAN, modelos lineales penalizados, máquinas de soporte vectorial y bosques aleatorios con verificación estricta de tipos.
+2. **`candle` y `burn`:** Motores minimalistas de cálculo tensorial y aprendizaje profundo en Rust capaces de compilar redes prealimentadas (`MLP`) y arquitecturas complejas en ejecutables estáticos con aceleración opcional por GPU, sin requerir el intérprete de Python ni dependencias dinámicas.
+3. **`nutorch`:** Complemento experimental para Nushell que expone tensores de cálculo como valores nativos dentro de los pipelines interactivos de la terminal.
 
-Aunque Python (`scikit-learn`, `umap-learn`) y C++ (`lightgbm`, `duckdb`) constituyen hoy los motores numéricos más maduros para el trabajo tabular cotidiano, conocer la arquitectura de plugins de Nushell prepara al ingeniero estadístico para adoptar flujos de modelado de copia cero (*zero-copy*) conforme madure el ecosistema científico en Rust.
+Para ilustrar cómo se manifiesta este paradigma en la práctica, consideremos dos flujos de trabajo análogos a los estudiados con Python y C++:
+
+#### Clasificación Supervisada en Rust Puro con Herramientas CLI
+
+Un binario compilado en Rust (como un ejecutable generado con `smartcore`) lee datos estructurados desde un pipeline de Nushell, ajusta un ensamble de árboles en paralelo aprovechando todos los núcleos del procesador sin sobrecarga de intérprete, y devuelve una tabla estructurada directamente a la consola:
+
+```nu
+# skip-docker-exec (ejemplo ilustrativo de clasificación supervisada en Rust puro)
+open wine-both.csv |
+  first 500 |
+  smartcore-cli fit-predict --model random-forest --target type --trees 100 |
+  polars into-df |
+  polars group-by actual predicted |
+  polars agg [(polars col actual | polars count | polars as frecuencia)] |
+  polars collect |
+  polars into-nu
+```
+
+#### Operaciones Tensoriales de Copia Cero con Plugins de Rust
+
+Mediante complementos como `nutorch` o extensiones directas de Apache Arrow, las tablas de Nushell pueden convertirse instantáneamente en matrices tensoriales sin serializar a texto plano:
+
+```nu
+# skip-docker-exec (ejemplo ilustrativo de operaciones tensoriales en memoria)
+open wine-both.csv |
+  select fixed_acidity volatile_acidity citric_acid alcohol |
+  first 5 |
+  tensor from-table |
+  tensor matmul (tensor eye 4) |
+  tensor into-table
+```
+
+Aunque Python (`scikit-learn`, `umap-learn`) y C++ (`lightgbm`, `duckdb`) constituyen hoy los motores numéricos más maduros para el trabajo tabular cotidiano, la arquitectura modular de plugins en Nushell prepara al ingeniero estadístico para adoptar flujos de modelado de copia cero (*zero-copy*) conforme madure el ecosistema científico en Rust.
 
 ## Resumen del Capítulo y Conclusión del Libro
 

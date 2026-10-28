@@ -5962,75 +5962,55 @@ Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 
 The classical command-line modeling utilities explored earlier in this chapter (`tapkee`, `vw`, and `run_experiment`) were designed for traditional POSIX text shells. Because standard Unix pipes transmit untyped byte streams rather than structured schemas, each legacy tool imposes an external serialization tax: `tapkee` expects headerless numeric matrices and strips class labels, `vw` requires custom row-by-row namespace formatting via `to-vw`, and `skll` demands rigid directory trees (`train/`, `test/`, `output/`) paired with `.cfg` configuration files on disk.
 
-In a typed shell like Nushell, modeling tools can instead exchange structured tables (`table -> table`) directly across standard streams with minimal disk ceremony. Inside the `dsin` container, standalone compiled C++ engines (`duckdb` and `lightgbm`) sit alongside an isolated Python 3.12 environment at `/opt/modern-ml` (provisioned via the static `uv` package manager) so modern libraries (`umap-learn`, `lightgbm`, and `scikit-learn` 1.9+) coexist cleanly without disturbing legacy Python 3.9 dependencies required by `skll`. Let us inspect these binary versions directly from `/data/ch09`:
+In a typed shell like Nushell, modeling engines can exchange structured tables (`table -> table`) directly across standard streams with minimal disk ceremony. Inside the `dsin` container, standalone compiled C++ engines (`duckdb` and `lightgbm`) sit alongside an isolated Python 3.12 environment at `/opt/modern-ml` (provisioned via the static `uv` package manager). To ensure seamless ergonomics, `/opt/modern-ml/bin` is prepended to `$env.PATH`: invoking `python` directly runs Python 3.12 with modern tools (`umap-learn`, `lightgbm`, `scikit-learn` 1.9+, `pandas`, and `matplotlib`), while legacy utilities requiring Python 3.9 (such as SKLL) invoke their dedicated interpreter via shebang without collision. Let us verify the active versions directly from `/data/ch09`:
 
 ```nu
 duckdb --version
 uv --version
-/opt/modern-ml/bin/python -c "import umap, lightgbm, sklearn; print(f'sklearn={sklearn.__version__}, lightgbm={lightgbm.__version__}')"
+python --version
+python -c "import umap, lightgbm, sklearn; print(f'sklearn={sklearn.__version__}, lightgbm={lightgbm.__version__}')"
 ```
 
 ### Topological Manifold Projection with UMAP (`umap-reduce`)
 
 While Principal Component Analysis restricts embeddings to orthogonal linear subspaces and classical t-SNE optimizes local pairwise affinities at steep computational cost without preserving global inter-cluster distances, **Uniform Manifold Approximation and Projection** (**UMAP**, McInnes et al., 2018) models high-dimensional observations as a weighted fuzzy simplicial set over a locally connected Riemannian manifold. Minimizing fuzzy cross-entropy between high-dimensional and low-dimensional topological graphs preserves both fine-grained local neighborhoods (controlled by `--neighbors`) and macro-scale separation across distinct regimes (controlled by `--min-dist`).
 
-In `dsin_tools.nu`, the custom command **`umap-reduce`** standardizes numeric predictors automatically, computes the manifold projection in `/opt/modern-ml`, and returns the original Nushell table enriched with `umap_1` and `umap_2` coordinates:
+Following the architectural standards established throughout this text, mathematical reduction logic is cleanly separated into the modular script `umap_reduce.py` (in `/data/ch09`), while the `umap-reduce` command in `dsin_tools.nu` provides a typed Nushell wrapper without embedding inline interpreted code:
+
+```nu
+bat umap_reduce.py
+```
+
+The wrapper in `dsin_tools.nu` delegates numerical transformation to the helper script and returns a structured table enriched with `umap_1` and `umap_2` coordinates:
 
 ```nu
 # Compute UMAP manifold coordinates on a numeric Nushell table and return a structured table.
 export def umap-reduce [
-  --neighbors(-n): int = 15    # Size of local neighborhood
-  --min-dist(-m): float = 0.1  # Minimum effective distance between embedded points
-  --target-dim(-d): int = 2    # Number of embedding dimensions
-  --seed(-s): int = 42         # Random state for reproducibility
-  --label-col(-l): string      # Optional label column to exclude from features and preserve
-  --cols(-c): list<string>     # Optional explicit list of numeric feature columns
+  --neighbors(-n): int = 15
+  --min-dist(-m): float = 0.1
+  --target-dim(-d): int = 2
+  --seed(-s): int = 42
+  --label-col(-l): string = "type"
+  --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let cols_flag = if ($cols != null) and (($cols | length) > 0) {
+    ["--cols" ($cols | str join ",")]
+  } else { [] }
+
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = $label_col | default "type"
-  let cols_csv = if ($cols != null) and (($cols | length) > 0) {
-    $cols | str join ","
-  } else { "" }
+  let res = (python umap_reduce.py
+    --input $tmp_in
+    --neighbors $neighbors
+    --min-dist $min_dist
+    --target-dim $target_dim
+    --seed $seed
+    --label-col $label_col
+    ...$cols_flag | from csv)
 
-  r#'import os, sys, warnings
-os.environ.setdefault("NUMBA_CACHE_DIR", "/tmp/numba_cache")
-warnings.filterwarnings("ignore")
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
-import umap
-
-df = pd.read_csv(sys.argv[1])
-n_neighbors = int(sys.argv[2])
-min_dist = float(sys.argv[3])
-n_components = int(sys.argv[4])
-seed = int(sys.argv[5])
-lbl = sys.argv[6]
-cols_arg = sys.argv[7]
-
-if cols_arg:
-    num_cols = [c for c in cols_arg.split(",") if c in df.columns]
-else:
-    num_cols = [c for c in df.columns if c != lbl and pd.api.types.is_numeric_dtype(df[c])]
-
-X = StandardScaler().fit_transform(df[num_cols])
-reducer = umap.UMAP(
-    n_neighbors=min(n_neighbors, max(2, len(df) - 1)),
-    min_dist=min_dist,
-    n_components=n_components,
-    random_state=seed,
-)
-emb = reducer.fit_transform(X)
-for idx in range(n_components):
-    df[f"umap_{idx + 1}"] = emb[:, idx].round(4)
-df.to_csv(sys.stdout, index=False)
-'# | save -f $tmp_py
-
-  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in ($neighbors | into string) ($min_dist | into string) ($target_dim | into string) ($seed | into string) $lbl $cols_csv | from csv
-  rm -f $tmp_in $tmp_py
+  rm -f $tmp_in
   $res
 }
 ```
@@ -6047,7 +6027,7 @@ To inspect how linear variance maximization, local neighborhood attraction, and 
 
 ```nu
 bat plot_umap_comparison.py
-/opt/modern-ml/bin/python plot_umap_comparison.py
+python plot_umap_comparison.py
 timg -g 80x25 umap_comparison.png
 ```
 
@@ -6057,10 +6037,16 @@ timg -g 80x25 umap_comparison.png
 
 Vowpal Wabbit excels when streaming millions of sparse text or click-through indicators that cannot fit in memory, yet dense tabular benchmarks with a dozen continuous predictors rarely benefit from feature hashing or purely additive linear weights. **LightGBM** (Ke et al., 2017) compiles to a standalone C++ CLI binary (`/usr/local/bin/lightgbm`) that discretizes continuous columns into fast histograms and grows regression trees leaf-wise (*best-first*) rather than level-wise. Crucially for command-line workflows, the `lightgbm` binary parses headered CSV files natively (`header=true` and `label_column=name:quality`), removing any need for custom text-line encoders like `to-vw`.
 
-The command **`lgbm-regress`** in `dsin_tools.nu` orchestrates training, out-of-sample prediction, and split-gain feature attribution directly over Nushell train and test tables:
+The helper script `lgbm_importance.py` in `/data/ch09` extracts split counts and variance gains from the binary model file, returning a structured JSON array:
 
 ```nu
-# Train and evaluate standalone LightGBM C++ CLI regression on train/test Nushell tables.
+bat lgbm_importance.py
+```
+
+The command **`lgbm-regress`** in `dsin_tools.nu` coordinates training, out-of-sample prediction, and split-gain feature attribution directly over Nushell tables using clean parameter formatting:
+
+```nu
+# Train and evaluate LightGBM C++ CLI regression on Nushell tables.
 export def lgbm-regress [
   train_tbl: table
   test_tbl: table
@@ -6068,57 +6054,62 @@ export def lgbm-regress [
   --num-trees(-n): int = 100
   --learning-rate(-l): float = 0.05
   --num-leaves: int = 31
-  --importance(-i)             # Return sorted feature-gain importance table instead of test predictions
+  --importance(-i)
 ]: nothing -> table {
-  let tmp_dir = mktemp -d
+  let tmp_dir = (mktemp -d)
   let train_csv = $"($tmp_dir)/train.csv"
   let test_csv = $"($tmp_dir)/test_features.csv"
   let model_file = $"($tmp_dir)/model.txt"
   let pred_file = $"($tmp_dir)/preds.txt"
 
-  let feat_cols = $train_tbl | columns | where $it != $target
+  let feat_cols = ($train_tbl | columns | where $it != $target)
   $train_tbl | select ...($feat_cols | append $target) | to csv | save -f $train_csv
   $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
 
-  ^lightgbm task=train objective=regression $"data=($train_csv)" header=true $"label_column=name:($target)" $"num_trees=($num_trees)" $"learning_rate=($learning_rate)" $"num_leaves=($num_leaves)" seed=42 deterministic=true force_col_wise=true $"output_model=($model_file)" verbosity=-1 out+err> /dev/null
+  let lgbm_train_args = [
+    "task=train"
+    "objective=regression"
+    $"data=($train_csv)"
+    "header=true"
+    $"label_column=name:($target)"
+    $"num_trees=($num_trees)"
+    $"learning_rate=($learning_rate)"
+    $"num_leaves=($num_leaves)"
+    "seed=42"
+    "force_col_wise=true"
+    $"output_model=($model_file)"
+    "verbosity=-1"
+  ]
+  ^lightgbm ...$lgbm_train_args out+err> /dev/null
 
   if $importance {
-    let imp_py = $"($tmp_dir)/imp.py"
-    r#'import json, sys, lightgbm as lgb
-booster = lgb.Booster(model_file=sys.argv[1])
-names = booster.feature_name()
-splits = booster.feature_importance(importance_type="split")
-gains = booster.feature_importance(importance_type="gain")
-total_gain = float(gains.sum()) if float(gains.sum()) > 0 else 1.0
-rows = [
-    {
-        "feature": str(n),
-        "splits": int(s),
-        "gain": round(float(g), 4),
-        "gain_pct": round(float(g) * 100.0 / total_gain, 2),
-    }
-    for n, s, g in zip(names, splits, gains)
-]
-rows.sort(key=lambda r: r["gain"], reverse=True)
-print(json.dumps(rows))
-'# | save -f $imp_py
-    let imp_tbl = ^/opt/modern-ml/bin/python $imp_py $model_file | from json
+    let imp_tbl = (python lgbm_importance.py $model_file | from json)
     rm -rf $tmp_dir
     return $imp_tbl
   }
 
-  ^lightgbm task=predict $"data=($test_csv)" header=true $"input_model=($model_file)" $"output_result=($pred_file)" verbosity=-1 out+err> /dev/null
+  let lgbm_pred_args = [
+    "task=predict"
+    $"data=($test_csv)"
+    "header=true"
+    $"input_model=($model_file)"
+    $"output_result=($pred_file)"
+    "verbosity=-1"
+  ]
+  ^lightgbm ...$lgbm_pred_args out+err> /dev/null
 
-  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
-  let actuals = $test_tbl | get $target | each { |x| $x | into float }
+  let preds = (open --raw $pred_file | lines |
+    where ($it | str trim | is-not-empty) | each { into float })
+  let actuals = ($test_tbl | get $target | each { into float })
   rm -rf $tmp_dir
 
   $actuals | zip $preds | each { |pair|
     let obs = $pair.0
-    let pred = $pair.1 | math round -p 4
-    let signed_err = ($pred - $obs) | math round -p 4
-    let abs_err = ($obs - $pred) | math abs | math round -p 4
-    { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $abs_err }
+    let pred = ($pair.1 | math round -p 4)
+    let signed_err = (($pred - $obs) | math round -p 4)
+    let abs_err = (($obs - $pred) | math abs | math round -p 4)
+    { actual: $obs, observed: $obs, predicted: $pred,
+      error: $signed_err, abs_error: $abs_err }
   }
 }
 ```
@@ -6145,28 +6136,40 @@ The command **`duckdb-ols`** pipes any Nushell table into `duckdb -json` and par
 ```nu
 # Compute vectorized Ordinary Least Squares regression diagnostics via DuckDB CLI.
 export def duckdb-ols [
-  --target(-y): string = "quality" # Dependent response column
-  --predictor(-x): string = ""     # Optional single predictor column (omit to rank all numeric predictors)
+  --target(-y): string = "quality"
+  --predictor(-x): string = ""
 ]: table -> table {
   let tbl = $in
-  let first_row = $tbl | first
+  let first_row = ($tbl | first)
   let candidate_cols = if ($predictor | is-not-empty) {
     [$predictor]
   } else {
     $tbl | columns | where { |c|
-      ($c != $target) and ((($first_row | get $c | describe) == "int") or (($first_row | get $c | describe) == "float"))
+      let val_type = ($first_row | get $c | describe)
+      ($c != $target) and (($val_type == "int") or ($val_type == "float"))
     }
   }
 
-  let tmp_csv = mktemp --suffix ".csv"
+  let tmp_csv = (mktemp --suffix ".csv")
   $tbl | select ...($candidate_cols | append $target) | to csv | save -f $tmp_csv
 
-  let unions = $candidate_cols | each { |col|
-    $"SELECT '($col)' AS predictor, ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
-  } | str join " UNION ALL "
+  let unions = ($candidate_cols | each { |col|
+    [
+      $"SELECT '($col)' AS predictor, "
+      $"ROUND\(regr_slope\("($target)", "($col)"\), 4\) AS slope, "
+      $"ROUND\(regr_intercept\("($target)", "($col)"\), 4\) AS intercept, "
+      $"ROUND\(corr\("($target)", "($col)"\), 4\) AS pearson_r, "
+      $"ROUND\(regr_r2\("($target)", "($col)"\), 4\) AS r_squared, "
+      $"CAST\(regr_count\("($target)", "($col)"\) AS BIGINT\) AS n FROM tbl"
+    ] | str join ""
+  } | str join " UNION ALL ")
 
-  let sql = $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
-  let res = ^duckdb -json -c $sql | from json
+  let sql = [
+    $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); "
+    $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
+  ] | str join ""
+
+  let res = (^duckdb -json -c $sql | from json)
   rm -f $tmp_csv
   $res
 }
@@ -6185,7 +6188,7 @@ Marginally, `alcohol` exhibits the strongest linear association with perceived q
 
 Earlier in this chapter, benchmarking Logistic Regression against a Random Forest via SKLL (`run_experiment`) required creating `train/` and `test/` directories, writing an INI-style `classify.cfg` specification, and parsing tab-separated summary files from `output/`. Modern pipeline design eliminates that boilerplate completely.
 
-The command **`ml-benchmark`** accepts any Nushell table via `$in`, constructs a stratified train/test split, applies column-appropriate preprocessing (`StandardScaler` and `OneHotEncoder` for metric-sensitive learners, native numeric pass-through for tree ensembles), and benchmarks five distinct inductive biases in one call:
+The evaluation logic resides in the standalone script `ml_benchmark.py` located in `/data/ch09`. This script consumes data from standard input or temporary files, constructs a stratified train/test split with a fixed random seed, applies column-wise standardization, and evaluates five distinct architectural families with accuracy, precision, recall, and weighted $F_1$ metrics:
 
 1. **Logistic Regression (`logistic`):** Penalized linear log-odds baseline.
 2. **Linear Support Vector Classifier (`linear_svc`):** Maximum-margin hyperplane under hinge loss.
@@ -6193,8 +6196,16 @@ The command **`ml-benchmark`** accepts any Nushell table via `$in`, constructs a
 4. **Random Forest (`rf`):** Bagged ensemble of decorrelated decision trees.
 5. **LightGBM (`lgbm`):** Histogram-accelerated gradient boosted decision trees.
 
+We inspect the modular script before invoking it:
+
 ```nu
-# Benchmark multiple classification architectures (including MLP) on a Nushell table in one streaming pipeline.
+bat ml_benchmark.py
+```
+
+The orchestrator command **`ml-benchmark`** in `dsin_tools.nu` acts as a clean Nushell wrapper over the script:
+
+```nu
+# Benchmark multiple classification architectures on streaming Nushell tables.
 export def ml-benchmark [
   --target(-t): string = "type"
   --models(-m): list<string> = ["logistic", "rf", "lgbm", "linear_svc", "mlp"]
@@ -6202,89 +6213,18 @@ export def ml-benchmark [
   --seed(-s): int = 42
 ]: table -> table {
   let tbl = $in
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let models_csv = ($models | str join ",")
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
-  let models_csv = $models | str join ","
 
-  r#'import json, sys, time, warnings
-warnings.filterwarnings("ignore")
-import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
-from sklearn.svm import LinearSVC
-from lightgbm import LGBMClassifier
+  let res = (python ml_benchmark.py
+    --input $tmp_in
+    --target $target
+    --models $models_csv
+    --test-size $test_size
+    --seed $seed | from json)
 
-df = pd.read_csv(sys.argv[1])
-target = sys.argv[2]
-models = [m.strip() for m in sys.argv[3].split(",") if m.strip()]
-test_size = float(sys.argv[4])
-seed = int(sys.argv[5])
-
-X = df.drop(columns=[target])
-le = LabelEncoder()
-y = le.fit_transform(df[target].astype(str))
-
-num_cols = [c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])]
-cat_cols = [c for c in X.columns if c not in num_cols]
-
-prep_scaled = ColumnTransformer(
-    transformers=[
-        ("num", StandardScaler(), num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
-    ],
-    remainder="drop",
-)
-prep_tree = ColumnTransformer(
-    transformers=[
-        ("num", "passthrough", num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-    ],
-    remainder="drop",
-)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=seed, stratify=y
-)
-
-registry = {
-    "logistic": Pipeline([("prep", prep_scaled), ("clf", LogisticRegression(max_iter=500, random_state=seed))]),
-    "rf": Pipeline([("prep", prep_tree), ("clf", RandomForestClassifier(n_estimators=150, random_state=seed, n_jobs=-1))]),
-    "lgbm": Pipeline([("prep", prep_tree), ("clf", LGBMClassifier(n_estimators=150, learning_rate=0.05, random_state=seed, verbose=-1, n_jobs=-1))]),
-    "linear_svc": Pipeline([("prep", prep_scaled), ("clf", LinearSVC(random_state=seed, max_iter=2000))]),
-    "mlp": Pipeline([("prep", prep_scaled), ("clf", MLPClassifier(hidden_layer_sizes=(64, 32), activation="relu", early_stopping=True, max_iter=300, random_state=seed))]),
-}
-
-rows = []
-for name in models:
-    if name not in registry:
-        raise ValueError(f"Unsupported model key: {name}")
-    pipe = registry[name]
-    t0 = time.perf_counter()
-    pipe.fit(X_train, y_train)
-    elapsed_ms = (time.perf_counter() - t0) * 1000.0
-    preds = pipe.predict(X_test)
-    rows.append({
-        "model": name,
-        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
-        "precision": round(float(precision_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "recall": round(float(recall_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "f1_score": round(float(f1_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "train_time_ms": round(elapsed_ms, 2),
-    })
-
-rows.sort(key=lambda r: r["f1_score"], reverse=True)
-print(json.dumps(rows))
-'# | save -f $tmp_py
-
-  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in $target $models_csv ($test_size | into string) ($seed | into string) | from json
-  rm -f $tmp_in $tmp_py
+  rm -f $tmp_in
   $res
 }
 ```
@@ -6302,9 +6242,41 @@ On `banco.csv`, where loan acceptance depends on sharp income, education, and fa
 
 Because Nushell itself and `nu_plugin_polars` are written in Rust on top of the Apache Arrow columnar memory specification, the long-term trajectory of command-line modeling points toward native Rust plugins that read Arrow record batches without CSV or JSON serialization. Four active projects illustrate this architectural direction:
 
-- **`linfa` and `smartcore`:** Pure-Rust statistical learning libraries implementing PCA, K-Means, DBSCAN, elastic-net linear models, SVMs, and random forests with strong compile-time type guarantees.
-- **`candle` and `burn`:** Minimalist Rust tensor and deep learning frameworks capable of compiling feedforward neural networks (`MLP`) and modern architectures into self-contained native binaries with optional GPU acceleration and no Python runtime dependency.
-- **`nutorch`:** A Nushell plugin exposing LibTorch tensor operations directly inside Nushell pipelines, demonstrating how neural computation can participate as first-class shell values.
+1. **`linfa` and `smartcore`:** Pure-Rust statistical learning libraries implementing PCA, K-Means, DBSCAN, elastic-net linear models, SVMs, and random forests with strong compile-time type guarantees.
+2. **`candle` and `burn`:** Minimalist Rust tensor and deep learning frameworks capable of compiling feedforward neural networks (`MLP`) and modern architectures into self-contained native binaries with optional GPU acceleration and no Python runtime dependency.
+3. **`nutorch`:** A Nushell plugin exposing LibTorch tensor operations directly inside Nushell pipelines, demonstrating how neural computation can participate as first-class shell values.
+
+To illustrate how this paradigm manifests in practice, consider two representative workflows analogous to those studied with Python and C++:
+
+#### Pure-Rust Supervised Classification with CLI Tools
+
+A standalone binary compiled with Rust (such as an executable built on `smartcore`) reads structured data from a Nushell pipeline, fits an ensemble in parallel across all CPU cores without interpreter overhead, and emits a structured table directly to the console:
+
+```nu
+# skip-docker-exec (illustrative pure-Rust supervised classification workflow)
+open wine-both.csv |
+  first 500 |
+  smartcore-cli fit-predict --model random-forest --target type --trees 100 |
+  polars into-df |
+  polars group-by actual predicted |
+  polars agg [(polars col actual | polars count | polars as frequency)] |
+  polars collect |
+  polars into-nu
+```
+
+#### Zero-Copy In-Memory Tensor Operations with Rust Plugins
+
+Using plugins like `nutorch` or native Apache Arrow extensions, Nushell tables can be mapped instantly into tensor buffers without flattening to plain text:
+
+```nu
+# skip-docker-exec (illustrative in-memory tensor operations workflow)
+open wine-both.csv |
+  select fixed_acidity volatile_acidity citric_acid alcohol |
+  first 5 |
+  tensor from-table |
+  tensor matmul (tensor eye 4) |
+  tensor into-table
+```
 
 While Python (`scikit-learn`, `umap-learn`) and C++ (`lightgbm`, `duckdb`) remain the most battle-tested numerical engines for day-to-day tabular modeling today, understanding Nushell's plugin architecture prepares practitioners for zero-copy Arrow modeling pipelines as the Rust scientific ecosystem matures.
 

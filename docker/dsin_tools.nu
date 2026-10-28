@@ -151,62 +151,43 @@ export def skll-metrics [
 
 # Compute UMAP manifold coordinates on a numeric Nushell table and return a structured table.
 export def umap-reduce [
-  --neighbors(-n): int = 15    # Size of local neighborhood
-  --min-dist(-m): float = 0.1  # Minimum effective distance between embedded points
-  --target-dim(-d): int = 2    # Number of embedding dimensions
-  --seed(-s): int = 42         # Random state for reproducibility
-  --label-col(-l): string      # Optional label column to exclude from features and preserve
-  --cols(-c): list<string>     # Optional explicit list of numeric feature columns
+  --neighbors(-n): int = 15
+  --min-dist(-m): float = 0.1
+  --target-dim(-d): int = 2
+  --seed(-s): int = 42
+  --label-col(-l): string = "type"
+  --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let cols_flag = if ($cols != null) and (($cols | length) > 0) {
+    ["--cols" ($cols | str join ",")]
+  } else { [] }
+
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = $label_col | default "type"
-  let cols_csv = if ($cols != null) and (($cols | length) > 0) {
-    $cols | str join ","
-  } else { "" }
+  let py_script = if ("/usr/local/bin/umap-reduce-py" | path exists) {
+    "/usr/local/bin/umap-reduce-py"
+  } else if ("/data/ch09/umap_reduce.py" | path exists) {
+    "/data/ch09/umap_reduce.py"
+  } else {
+    "umap_reduce.py"
+  }
 
-  r#'import os, sys, warnings
-os.environ.setdefault("NUMBA_CACHE_DIR", "/tmp/numba_cache")
-warnings.filterwarnings("ignore")
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
-import umap
+  let res = (python $py_script
+    --input $tmp_in
+    --neighbors $neighbors
+    --min-dist $min_dist
+    --target-dim $target_dim
+    --seed $seed
+    --label-col $label_col
+    ...$cols_flag | from csv)
 
-df = pd.read_csv(sys.argv[1])
-n_neighbors = int(sys.argv[2])
-min_dist = float(sys.argv[3])
-n_components = int(sys.argv[4])
-seed = int(sys.argv[5])
-lbl = sys.argv[6]
-cols_arg = sys.argv[7]
-
-if cols_arg:
-    num_cols = [c for c in cols_arg.split(",") if c in df.columns]
-else:
-    num_cols = [c for c in df.columns if c != lbl and pd.api.types.is_numeric_dtype(df[c])]
-
-X = StandardScaler().fit_transform(df[num_cols])
-reducer = umap.UMAP(
-    n_neighbors=min(n_neighbors, max(2, len(df) - 1)),
-    min_dist=min_dist,
-    n_components=n_components,
-    random_state=seed,
-)
-emb = reducer.fit_transform(X)
-for idx in range(n_components):
-    df[f"umap_{idx + 1}"] = emb[:, idx].round(4)
-df.to_csv(sys.stdout, index=False)
-'# | save -f $tmp_py
-
-  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in ($neighbors | into string) ($min_dist | into string) ($target_dim | into string) ($seed | into string) $lbl $cols_csv | from csv
-  rm -f $tmp_in $tmp_py
+  rm -f $tmp_in
   $res
 }
 
-# Train and evaluate standalone LightGBM C++ CLI regression on train/test Nushell tables.
+# Train and evaluate LightGBM C++ CLI regression on Nushell tables.
 export def lgbm-regress [
   train_tbl: table
   test_tbl: table
@@ -214,89 +195,113 @@ export def lgbm-regress [
   --num-trees(-n): int = 100
   --learning-rate(-l): float = 0.05
   --num-leaves: int = 31
-  --importance(-i)             # Return sorted feature-gain importance table instead of test predictions
+  --importance(-i)
 ]: nothing -> table {
-  let tmp_dir = mktemp -d
+  let tmp_dir = (mktemp -d)
   let train_csv = $"($tmp_dir)/train.csv"
   let test_csv = $"($tmp_dir)/test_features.csv"
   let model_file = $"($tmp_dir)/model.txt"
   let pred_file = $"($tmp_dir)/preds.txt"
 
-  let feat_cols = $train_tbl | columns | where $it != $target
+  let feat_cols = ($train_tbl | columns | where $it != $target)
   $train_tbl | select ...($feat_cols | append $target) | to csv | save -f $train_csv
   $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
 
-  ^lightgbm task=train objective=regression $"data=($train_csv)" header=true $"label_column=name:($target)" $"num_trees=($num_trees)" $"learning_rate=($learning_rate)" $"num_leaves=($num_leaves)" seed=42 deterministic=true force_col_wise=true $"output_model=($model_file)" verbosity=-1 out+err> /dev/null
+  let lgbm_train_args = [
+    "task=train"
+    "objective=regression"
+    $"data=($train_csv)"
+    "header=true"
+    $"label_column=name:($target)"
+    $"num_trees=($num_trees)"
+    $"learning_rate=($learning_rate)"
+    $"num_leaves=($num_leaves)"
+    "seed=42"
+    "force_col_wise=true"
+    $"output_model=($model_file)"
+    "verbosity=-1"
+  ]
+  ^lightgbm ...$lgbm_train_args out+err> /dev/null
 
   if $importance {
-    let imp_py = $"($tmp_dir)/imp.py"
-    r#'import json, sys, lightgbm as lgb
-booster = lgb.Booster(model_file=sys.argv[1])
-names = booster.feature_name()
-splits = booster.feature_importance(importance_type="split")
-gains = booster.feature_importance(importance_type="gain")
-total_gain = float(gains.sum()) if float(gains.sum()) > 0 else 1.0
-rows = [
-    {
-        "feature": str(n),
-        "splits": int(s),
-        "gain": round(float(g), 4),
-        "gain_pct": round(float(g) * 100.0 / total_gain, 2),
+    let py_imp = if ("/usr/local/bin/lgbm-importance" | path exists) {
+      "/usr/local/bin/lgbm-importance"
+    } else if ("/data/ch09/lgbm_importance.py" | path exists) {
+      "/data/ch09/lgbm_importance.py"
+    } else {
+      "lgbm_importance.py"
     }
-    for n, s, g in zip(names, splits, gains)
-]
-rows.sort(key=lambda r: r["gain"], reverse=True)
-print(json.dumps(rows))
-'# | save -f $imp_py
-    let imp_tbl = ^/opt/modern-ml/bin/python $imp_py $model_file | from json
+    let imp_tbl = (python $py_imp $model_file | from json)
     rm -rf $tmp_dir
     return $imp_tbl
   }
 
-  ^lightgbm task=predict $"data=($test_csv)" header=true $"input_model=($model_file)" $"output_result=($pred_file)" verbosity=-1 out+err> /dev/null
+  let lgbm_pred_args = [
+    "task=predict"
+    $"data=($test_csv)"
+    "header=true"
+    $"input_model=($model_file)"
+    $"output_result=($pred_file)"
+    "verbosity=-1"
+  ]
+  ^lightgbm ...$lgbm_pred_args out+err> /dev/null
 
-  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
-  let actuals = $test_tbl | get $target | each { |x| $x | into float }
+  let preds = (open --raw $pred_file | lines |
+    where ($it | str trim | is-not-empty) | each { into float })
+  let actuals = ($test_tbl | get $target | each { into float })
   rm -rf $tmp_dir
 
   $actuals | zip $preds | each { |pair|
     let obs = $pair.0
-    let pred = $pair.1 | math round -p 4
-    let signed_err = ($pred - $obs) | math round -p 4
-    let abs_err = ($obs - $pred) | math abs | math round -p 4
-    { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $abs_err }
+    let pred = ($pair.1 | math round -p 4)
+    let signed_err = (($pred - $obs) | math round -p 4)
+    let abs_err = (($obs - $pred) | math abs | math round -p 4)
+    { actual: $obs, observed: $obs, predicted: $pred,
+      error: $signed_err, abs_error: $abs_err }
   }
 }
 
 # Compute vectorized Ordinary Least Squares regression diagnostics via DuckDB CLI.
 export def duckdb-ols [
-  --target(-y): string = "quality" # Dependent response column
-  --predictor(-x): string = ""     # Optional single predictor column (omit to rank all numeric predictors)
+  --target(-y): string = "quality"
+  --predictor(-x): string = ""
 ]: table -> table {
   let tbl = $in
-  let first_row = $tbl | first
+  let first_row = ($tbl | first)
   let candidate_cols = if ($predictor | is-not-empty) {
     [$predictor]
   } else {
     $tbl | columns | where { |c|
-      ($c != $target) and ((($first_row | get $c | describe) == "int") or (($first_row | get $c | describe) == "float"))
+      let val_type = ($first_row | get $c | describe)
+      ($c != $target) and (($val_type == "int") or ($val_type == "float"))
     }
   }
 
-  let tmp_csv = mktemp --suffix ".csv"
+  let tmp_csv = (mktemp --suffix ".csv")
   $tbl | select ...($candidate_cols | append $target) | to csv | save -f $tmp_csv
 
-  let unions = $candidate_cols | each { |col|
-    $"SELECT '($col)' AS predictor, ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
-  } | str join " UNION ALL "
+  let unions = ($candidate_cols | each { |col|
+    [
+      $"SELECT '($col)' AS predictor, "
+      $"ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, "
+      $"ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, "
+      $"ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, "
+      $"ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, "
+      $"CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
+    ] | str join ""
+  } | str join " UNION ALL ")
 
-  let sql = $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
-  let res = ^duckdb -json -c $sql | from json
+  let sql = [
+    $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); "
+    $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
+  ] | str join ""
+
+  let res = (^duckdb -json -c $sql | from json)
   rm -f $tmp_csv
   $res
 }
 
-# Benchmark multiple classification architectures (including MLP) on a Nushell table in one streaming pipeline.
+# Benchmark multiple classification architectures on streaming Nushell tables.
 export def ml-benchmark [
   --target(-t): string = "type"
   --models(-m): list<string> = ["logistic", "rf", "lgbm", "linear_svc", "mlp"]
@@ -304,89 +309,26 @@ export def ml-benchmark [
   --seed(-s): int = 42
 ]: table -> table {
   let tbl = $in
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let models_csv = ($models | str join ",")
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
-  let models_csv = $models | str join ","
 
-  r#'import json, sys, time, warnings
-warnings.filterwarnings("ignore")
-import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
-from sklearn.svm import LinearSVC
-from lightgbm import LGBMClassifier
+  let py_bench = if ("/usr/local/bin/ml-benchmark-py" | path exists) {
+    "/usr/local/bin/ml-benchmark-py"
+  } else if ("/data/ch09/ml_benchmark.py" | path exists) {
+    "/data/ch09/ml_benchmark.py"
+  } else {
+    "ml_benchmark.py"
+  }
 
-df = pd.read_csv(sys.argv[1])
-target = sys.argv[2]
-models = [m.strip() for m in sys.argv[3].split(",") if m.strip()]
-test_size = float(sys.argv[4])
-seed = int(sys.argv[5])
+  let res = (python $py_bench
+    --input $tmp_in
+    --target $target
+    --models $models_csv
+    --test-size $test_size
+    --seed $seed | from json)
 
-X = df.drop(columns=[target])
-le = LabelEncoder()
-y = le.fit_transform(df[target].astype(str))
-
-num_cols = [c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])]
-cat_cols = [c for c in X.columns if c not in num_cols]
-
-prep_scaled = ColumnTransformer(
-    transformers=[
-        ("num", StandardScaler(), num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
-    ],
-    remainder="drop",
-)
-prep_tree = ColumnTransformer(
-    transformers=[
-        ("num", "passthrough", num_cols),
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
-    ],
-    remainder="drop",
-)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=test_size, random_state=seed, stratify=y
-)
-
-registry = {
-    "logistic": Pipeline([("prep", prep_scaled), ("clf", LogisticRegression(max_iter=500, random_state=seed))]),
-    "rf": Pipeline([("prep", prep_tree), ("clf", RandomForestClassifier(n_estimators=150, random_state=seed, n_jobs=-1))]),
-    "lgbm": Pipeline([("prep", prep_tree), ("clf", LGBMClassifier(n_estimators=150, learning_rate=0.05, random_state=seed, verbose=-1, n_jobs=-1))]),
-    "linear_svc": Pipeline([("prep", prep_scaled), ("clf", LinearSVC(random_state=seed, max_iter=2000))]),
-    "mlp": Pipeline([("prep", prep_scaled), ("clf", MLPClassifier(hidden_layer_sizes=(64, 32), activation="relu", early_stopping=True, max_iter=300, random_state=seed))]),
-}
-
-rows = []
-for name in models:
-    if name not in registry:
-        raise ValueError(f"Unsupported model key: {name}")
-    pipe = registry[name]
-    t0 = time.perf_counter()
-    pipe.fit(X_train, y_train)
-    elapsed_ms = (time.perf_counter() - t0) * 1000.0
-    preds = pipe.predict(X_test)
-    rows.append({
-        "model": name,
-        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
-        "precision": round(float(precision_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "recall": round(float(recall_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "f1_score": round(float(f1_score(y_test, preds, average="weighted", zero_division=0)), 4),
-        "train_time_ms": round(elapsed_ms, 2),
-    })
-
-rows.sort(key=lambda r: r["f1_score"], reverse=True)
-print(json.dumps(rows))
-'# | save -f $tmp_py
-
-  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in $target $models_csv ($test_size | into string) ($seed | into string) | from json
-  rm -f $tmp_in $tmp_py
+  rm -f $tmp_in
   $res
 }
 
