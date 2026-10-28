@@ -20,7 +20,7 @@ Esta obra aborda desde la comparación con shells tradicionales (`bash`, `zsh` y
 - **Depuración y Transformación:** Nushell nativo + plugin `polars` (`nu_plugin_polars`).
 - **Exploración y Visualización en Terminal:** Estadísticas descriptivas nativas (`math`, `polars summary`) y políglotas (`Rscript`, `python3`) junto con visualización gráfica en terminal mediante **`timg`**.
 - **Paralelización:** Ejecución concurrente nativa con **`par-each`** y paralelización de procesos externos con **GNU `parallel`** desde Nushell.
-- **Modelación Políglota:** Reducción de Dimensionalidad (PCA y t-SNE), Clustering (K-Means), Regresión y Clasificación integrando herramientas CLI (**`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) junto con **`Rscript`** y **`python3`** hacia tablas estructuradas de Nushell.
+- **Modelación Políglota:** Reducción de Dimensionalidad (PCA, t-SNE y UMAP), Clustering (K-Means, Jerárquico, DBSCAN y PAM), Regresión y Clasificación Supervisada (incluyendo Perceptrón Multicapa) integrando herramientas CLI (**`umap-reduce`**, **`lgbm-regress`**, **`duckdb-ols`**, **`ml-benchmark`**, **`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) junto con **`Rscript`** y **`python3`** hacia tablas estructuradas de Nushell.
 
 ## Origen y Relación con la Obra Original de Jeroen Janssens
 
@@ -43,17 +43,17 @@ La obra original de Janssens sentó las bases del uso de la consola Unix para fl
 6. **Capítulo 6:** Depuración y Transformación de Datos (Nushell nativo + plugin `polars`)
 7. **Capítulo 7:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
 8. **Capítulo 8:** Procesamiento en Serie y Pipelines Paralelos (`each`, `par-each` y GNU `parallel`)
-9. **Capítulo 9:** Modelado Políglota de Datos (Reducción de Dimensionalidad, Clustering K-Means / Jerárquico / DBSCAN / PAM, Regresión y Clasificación en CLI + `Rscript` + `python3` → Tablas Nushell)
+9. **Capítulo 9:** Modelado Políglota de Datos (Reducción de Dimensionalidad con PCA/t-SNE/UMAP, Clustering K-Means / Jerárquico / DBSCAN / PAM, Regresión con VW/LightGBM/DuckDB OLS y Clasificación Supervisada incluyendo MLP en CLI + `Rscript` + `python3` → Tablas Nushell)
 
 ## Imagen Docker (`dsin`)
 
 La imagen oficial del entorno (`ghcr.io/kurokirasama/dsin:latest`) incluye:
 
-- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`) y plugins oficiales (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`) pre-registrados.
+- **Nushell (`nu`)** como shell por defecto con configuración personalizada (`config.nu`), módulo `dsin_tools.nu` (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`, `umap-reduce`, `lgbm-regress`, `duckdb-ols`, `ml-benchmark`) y plugins oficiales (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`) pre-registrados.
 - **Directorio `/data` integrado por defecto:** Contiene las carpetas por capítulo (`/data/ch03` a `/data/ch09`) listas para usar sin necesidad de descargas adicionales.
 - **`ttt`**: Editor de texto en terminal preconfigurado en `$env.PATH`.
 - **`timg`**: Visor de imágenes y gráficos directamente en la terminal en `$env.PATH`.
-- **Motores de modelación, paralelización y análisis:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee` y `run_experiment` (SKLL).
+- **Motores de modelación, paralelización y análisis:** `Rscript` (`tidyverse`, `ggplot2`), `python3` y entorno aislado `/opt/modern-ml` con Python 3.12 vía `uv` (`umap-learn`, `lightgbm`, `scikit-learn`, `pandas`, `matplotlib`), binarios C++ autónomos `duckdb` y `lightgbm`, `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee` y `run_experiment` (SKLL).
 
 ```bash
 docker pull ghcr.io/kurokirasama/dsin:latest

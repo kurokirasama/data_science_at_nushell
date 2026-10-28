@@ -4,8 +4,10 @@
 FROM datasciencetoolbox/dsatcl2e:latest
 
 ARG NUSHELL_VERSION="0.116.1"
+ARG DUCKDB_VERSION="1.2.1"
+ARG LIGHTGBM_VERSION="4.6.0"
 LABEL maintainer="Luis Gómez <lgomez@ubiobio.cl>"
-LABEL description="Data Science at Nushell (dsin) — Integrated Nushell, Polars, R, Python, VW, Tapkee, SKLL, ttt, and timg environment"
+LABEL description="Data Science at Nushell (dsin) — Integrated Nushell, Polars, R, Python, DuckDB, LightGBM, UMAP, VW, Tapkee, SKLL, ttt, and timg environment"
 LABEL org.opencontainers.image.source="https://github.com/kurokirasama/data_science_at_nushell"
 
 USER root
@@ -71,6 +73,31 @@ RUN chmod +x /usr/local/bin/ttt && \
     7z x /tmp/ttt_config.7z -o/home/dsin/.config/ -y && \
     rm -f /tmp/ttt_config.7z
 
+# 3b. Install standalone DuckDB CLI, static uv, isolated Python 3.12 (/opt/modern-ml), and standalone LightGBM C++ CLI
+RUN curl -fsSL "https://github.com/duckdb/duckdb/releases/download/v${DUCKDB_VERSION}/duckdb_cli-linux-amd64.zip" -o /tmp/duckdb.zip && \
+    unzip -q /tmp/duckdb.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/duckdb && \
+    rm -f /tmp/duckdb.zip && \
+    mkdir -p /tmp/uv-install && \
+    curl -fsSL "https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-unknown-linux-musl.tar.gz" -o /tmp/uv-install/uv.tar.gz && \
+    tar -xzf /tmp/uv-install/uv.tar.gz -C /tmp/uv-install --strip-components=1 && \
+    cp /tmp/uv-install/uv /tmp/uv-install/uvx /usr/local/bin/ && \
+    chmod +x /usr/local/bin/uv /usr/local/bin/uvx && \
+    rm -rf /tmp/uv-install && \
+    UV_PYTHON_INSTALL_DIR="/opt/uv-python" /usr/local/bin/uv venv /opt/modern-ml --python 3.12 && \
+    /usr/local/bin/uv pip install --no-cache --python /opt/modern-ml/bin/python \
+      cmake umap-learn lightgbm scikit-learn pandas numpy matplotlib && \
+    git clone --recursive --branch "v${LIGHTGBM_VERSION}" --depth 1 https://github.com/microsoft/LightGBM.git /tmp/LightGBM && \
+    /opt/modern-ml/bin/cmake -B /tmp/LightGBM/build -S /tmp/LightGBM -DCMAKE_BUILD_TYPE=Release && \
+    /opt/modern-ml/bin/cmake --build /tmp/LightGBM/build -j$(nproc) && \
+    cp /tmp/LightGBM/lightgbm /usr/local/bin/lightgbm && \
+    cp /tmp/LightGBM/lib_lightgbm.so /usr/local/lib/ && \
+    ldconfig && \
+    chmod +x /usr/local/bin/lightgbm && \
+    /usr/local/bin/uv pip uninstall --python /opt/modern-ml/bin/python cmake && \
+    chmod -R a+rX /opt/uv-python /opt/modern-ml && \
+    rm -rf /tmp/LightGBM /root/.cache
+
 # 4. Install custom Nushell configuration, course helper module, l command, extra plugins, and pre-populated /data (ch03..ch09)
 COPY config.nu /home/dsin/.config/nushell/config.nu
 COPY env.nu /home/dsin/.config/nushell/env.nu
@@ -83,12 +110,17 @@ RUN cp /data/ch08/pbc /usr/local/bin/pbc && \
     chmod +x /usr/local/bin/pbc /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
     chown -R dsin:dsin /home/dsin /data
 
-# 5. Register all Nushell plugins for user dsin
+# 5. Register all Nushell plugins for user dsin and pre-warm Numba/Matplotlib caches
 USER dsin
 WORKDIR /home/dsin
+ENV NUMBA_CACHE_DIR="/home/dsin/.cache/numba"
+ENV MPLCONFIGDIR="/home/dsin/.cache/matplotlib"
 RUN for p in polars formats gstat inc query file plot port_extension; do \
       /usr/local/bin/nu -c "plugin add /usr/local/bin/nu_plugin_${p}"; \
-    done
+    done && \
+    mkdir -p /home/dsin/.cache/numba /home/dsin/.cache/matplotlib && \
+    /opt/modern-ml/bin/python -c "import numpy as np, matplotlib.pyplot as plt, umap; X = np.random.RandomState(42).randn(40, 6); umap.UMAP(n_neighbors=10, random_state=42).fit_transform(X)" && \
+    chmod -R a+rwX /home/dsin/.cache
 
 ENV HOSTNAME="dsin"
 ENV HOME="/home/dsin"

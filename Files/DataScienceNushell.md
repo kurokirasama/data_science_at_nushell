@@ -5958,6 +5958,356 @@ Rscript mlp_banco.R | from csv
 Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 ```
 
+## Modern Pipeline-Native Modeling
+
+The classical command-line modeling utilities explored earlier in this chapter (`tapkee`, `vw`, and `run_experiment`) were designed for traditional POSIX text shells. Because standard Unix pipes transmit untyped byte streams rather than structured schemas, each legacy tool imposes an external serialization tax: `tapkee` expects headerless numeric matrices and strips class labels, `vw` requires custom row-by-row namespace formatting via `to-vw`, and `skll` demands rigid directory trees (`train/`, `test/`, `output/`) paired with `.cfg` configuration files on disk.
+
+In a typed shell like Nushell, modeling tools can instead exchange structured tables (`table -> table`) directly across standard streams with minimal disk ceremony. Inside the `dsin` container, standalone compiled C++ engines (`duckdb` and `lightgbm`) sit alongside an isolated Python 3.12 environment at `/opt/modern-ml` (provisioned via the static `uv` package manager) so modern libraries (`umap-learn`, `lightgbm`, and `scikit-learn` 1.9+) coexist cleanly without disturbing legacy Python 3.9 dependencies required by `skll`. Let us inspect these binary versions directly from `/data/ch09`:
+
+```nu
+duckdb --version
+uv --version
+/opt/modern-ml/bin/python -c "import umap, lightgbm, sklearn; print(f'sklearn={sklearn.__version__}, lightgbm={lightgbm.__version__}')"
+```
+
+### Topological Manifold Projection with UMAP (`umap-reduce`)
+
+While Principal Component Analysis restricts embeddings to orthogonal linear subspaces and classical t-SNE optimizes local pairwise affinities at steep computational cost without preserving global inter-cluster distances, **Uniform Manifold Approximation and Projection** (**UMAP**, McInnes et al., 2018) models high-dimensional observations as a weighted fuzzy simplicial set over a locally connected Riemannian manifold. Minimizing fuzzy cross-entropy between high-dimensional and low-dimensional topological graphs preserves both fine-grained local neighborhoods (controlled by `--neighbors`) and macro-scale separation across distinct regimes (controlled by `--min-dist`).
+
+In `dsin_tools.nu`, the custom command **`umap-reduce`** standardizes numeric predictors automatically, computes the manifold projection in `/opt/modern-ml`, and returns the original Nushell table enriched with `umap_1` and `umap_2` coordinates:
+
+```nu
+# Compute UMAP manifold coordinates on a numeric Nushell table and return a structured table.
+export def umap-reduce [
+  --neighbors(-n): int = 15    # Size of local neighborhood
+  --min-dist(-m): float = 0.1  # Minimum effective distance between embedded points
+  --target-dim(-d): int = 2    # Number of embedding dimensions
+  --seed(-s): int = 42         # Random state for reproducibility
+  --label-col(-l): string      # Optional label column to exclude from features and preserve
+  --cols(-c): list<string>     # Optional explicit list of numeric feature columns
+]: table -> table {
+  let tbl = $in
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_py = mktemp --suffix ".py"
+  $tbl | to csv | save -f $tmp_in
+
+  let lbl = $label_col | default "type"
+  let cols_csv = if ($cols != null) and (($cols | length) > 0) {
+    $cols | str join ","
+  } else { "" }
+
+  r#'import os, sys, warnings
+os.environ.setdefault("NUMBA_CACHE_DIR", "/tmp/numba_cache")
+warnings.filterwarnings("ignore")
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import umap
+
+df = pd.read_csv(sys.argv[1])
+n_neighbors = int(sys.argv[2])
+min_dist = float(sys.argv[3])
+n_components = int(sys.argv[4])
+seed = int(sys.argv[5])
+lbl = sys.argv[6]
+cols_arg = sys.argv[7]
+
+if cols_arg:
+    num_cols = [c for c in cols_arg.split(",") if c in df.columns]
+else:
+    num_cols = [c for c in df.columns if c != lbl and pd.api.types.is_numeric_dtype(df[c])]
+
+X = StandardScaler().fit_transform(df[num_cols])
+reducer = umap.UMAP(
+    n_neighbors=min(n_neighbors, max(2, len(df) - 1)),
+    min_dist=min_dist,
+    n_components=n_components,
+    random_state=seed,
+)
+emb = reducer.fit_transform(X)
+for idx in range(n_components):
+    df[f"umap_{idx + 1}"] = emb[:, idx].round(4)
+df.to_csv(sys.stdout, index=False)
+'# | save -f $tmp_py
+
+  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in ($neighbors | into string) ($min_dist | into string) ($target_dim | into string) ($seed | into string) $lbl $cols_csv | from csv
+  rm -f $tmp_in $tmp_py
+  $res
+}
+```
+
+Unlike `tapkee`, which drops categorical metadata unless manually rejoined by row index, `umap-reduce` keeps `type` and `quality` aligned inside a single pipeline:
+
+```nu
+let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
+open wine-both.csv | first 200 | umap-reduce --label-col type --cols $features | select type quality umap_1 umap_2 | first 10
+open wine-both.csv | first 200 | umap-reduce --label-col type --cols $features | select type quality umap_1 umap_2 | save -f wine_umap.csv
+```
+
+To inspect how linear variance maximization, local neighborhood attraction, and topological manifold projection differ geometrically on identical physicochemical measurements, `/data/ch09/plot_umap_comparison.py` projects a balanced 800-wine sample across PCA, t-SNE, and UMAP side by side for direct terminal preview with `timg`:
+
+```nu
+bat plot_umap_comparison.py
+/opt/modern-ml/bin/python plot_umap_comparison.py
+timg -g 80x25 umap_comparison.png
+```
+
+![Comparison of bidimensional projections across PCA, t-SNE, and UMAP on wine attributes](umap_comparison.png){width=95%}
+
+### Gradient Boosted Decision Trees from the CLI with LightGBM (`lgbm-regress`)
+
+Vowpal Wabbit excels when streaming millions of sparse text or click-through indicators that cannot fit in memory, yet dense tabular benchmarks with a dozen continuous predictors rarely benefit from feature hashing or purely additive linear weights. **LightGBM** (Ke et al., 2017) compiles to a standalone C++ CLI binary (`/usr/local/bin/lightgbm`) that discretizes continuous columns into fast histograms and grows regression trees leaf-wise (*best-first*) rather than level-wise. Crucially for command-line workflows, the `lightgbm` binary parses headered CSV files natively (`header=true` and `label_column=name:quality`), removing any need for custom text-line encoders like `to-vw`.
+
+The command **`lgbm-regress`** in `dsin_tools.nu` orchestrates training, out-of-sample prediction, and split-gain feature attribution directly over Nushell train and test tables:
+
+```nu
+# Train and evaluate standalone LightGBM C++ CLI regression on train/test Nushell tables.
+export def lgbm-regress [
+  train_tbl: table
+  test_tbl: table
+  --target(-t): string = "quality"
+  --num-trees(-n): int = 100
+  --learning-rate(-l): float = 0.05
+  --num-leaves: int = 31
+  --importance(-i)             # Return sorted feature-gain importance table instead of test predictions
+]: nothing -> table {
+  let tmp_dir = mktemp -d
+  let train_csv = $"($tmp_dir)/train.csv"
+  let test_csv = $"($tmp_dir)/test_features.csv"
+  let model_file = $"($tmp_dir)/model.txt"
+  let pred_file = $"($tmp_dir)/preds.txt"
+
+  let feat_cols = $train_tbl | columns | where $it != $target
+  $train_tbl | select ...($feat_cols | append $target) | to csv | save -f $train_csv
+  $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
+
+  ^lightgbm task=train objective=regression $"data=($train_csv)" header=true $"label_column=name:($target)" $"num_trees=($num_trees)" $"learning_rate=($learning_rate)" $"num_leaves=($num_leaves)" seed=42 deterministic=true force_col_wise=true $"output_model=($model_file)" verbosity=-1 out+err> /dev/null
+
+  if $importance {
+    let imp_py = $"($tmp_dir)/imp.py"
+    r#'import json, sys, lightgbm as lgb
+booster = lgb.Booster(model_file=sys.argv[1])
+names = booster.feature_name()
+splits = booster.feature_importance(importance_type="split")
+gains = booster.feature_importance(importance_type="gain")
+total_gain = float(gains.sum()) if float(gains.sum()) > 0 else 1.0
+rows = [
+    {
+        "feature": str(n),
+        "splits": int(s),
+        "gain": round(float(g), 4),
+        "gain_pct": round(float(g) * 100.0 / total_gain, 2),
+    }
+    for n, s, g in zip(names, splits, gains)
+]
+rows.sort(key=lambda r: r["gain"], reverse=True)
+print(json.dumps(rows))
+'# | save -f $imp_py
+    let imp_tbl = ^/opt/modern-ml/bin/python $imp_py $model_file | from json
+    rm -rf $tmp_dir
+    return $imp_tbl
+  }
+
+  ^lightgbm task=predict $"data=($test_csv)" header=true $"input_model=($model_file)" $"output_result=($pred_file)" verbosity=-1 out+err> /dev/null
+
+  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
+  let actuals = $test_tbl | get $target | each { |x| $x | into float }
+  rm -rf $tmp_dir
+
+  $actuals | zip $preds | each { |pair|
+    let obs = $pair.0
+    let pred = $pair.1 | math round -p 4
+    let signed_err = ($pred - $obs) | math round -p 4
+    let abs_err = ($obs - $pred) | math abs | math round -p 4
+    { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $abs_err }
+  }
+}
+```
+
+Evaluating `lgbm-regress` on the exact same 3,500-row training and 1,398-row test split of `wine-white.csv` used earlier for Vowpal Wabbit lowers out-of-sample Mean Absolute Error from `0.5693` (`vw-regress`) to `0.5429`, while `--importance` exposes the exact non-linear split gains across predictors:
+
+```nu
+let white = open wine-white.csv
+let train_w = $white | first 3500
+let test_w = $white | skip 3500
+let preds_lgbm = lgbm-regress $train_w $test_w --target quality
+$preds_lgbm | get abs_error | math avg | math round -p 4
+lgbm-regress $train_w $test_w --target quality --importance
+```
+
+Alcohol concentration dominates tree splits (`33.54%` of total squared-error reduction), followed by `volatile_acidity` (`12.17%`), `free_sulfur_dioxide` (`11.07%`), and `residual_sugar` (`7.85%`).
+
+### Vectorized In-Process Analytical Regression with DuckDB (`duckdb-ols`)
+
+Before fitting multi-parameter ensembles, statistical practice calls for fast marginal linear diagnostics across candidate predictors. **DuckDB** (Raasveldt & Mühleisen, 2019) embeds a vectorized, columnar analytical SQL engine inside a single portable binary (`/usr/local/bin/duckdb`) with native JSON output (`duckdb -json`). Its built-in SQL:2003 statistical aggregates (`regr_slope`, `regr_intercept`, `corr`, `regr_r2`, and `regr_count`) evaluate Ordinary Least Squares parameters in single-pass SIMD loops in under 200 milliseconds.
+
+The command **`duckdb-ols`** pipes any Nushell table into `duckdb -json` and parses the result directly back into typed Nushell records ranked by coefficient of determination ($R^2$):
+
+```nu
+# Compute vectorized Ordinary Least Squares regression diagnostics via DuckDB CLI.
+export def duckdb-ols [
+  --target(-y): string = "quality" # Dependent response column
+  --predictor(-x): string = ""     # Optional single predictor column (omit to rank all numeric predictors)
+]: table -> table {
+  let tbl = $in
+  let first_row = $tbl | first
+  let candidate_cols = if ($predictor | is-not-empty) {
+    [$predictor]
+  } else {
+    $tbl | columns | where { |c|
+      ($c != $target) and ((($first_row | get $c | describe) == "int") or (($first_row | get $c | describe) == "float"))
+    }
+  }
+
+  let tmp_csv = mktemp --suffix ".csv"
+  $tbl | select ...($candidate_cols | append $target) | to csv | save -f $tmp_csv
+
+  let unions = $candidate_cols | each { |col|
+    $"SELECT '($col)' AS predictor, ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
+  } | str join " UNION ALL "
+
+  let sql = $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
+  let res = ^duckdb -json -c $sql | from json
+  rm -f $tmp_csv
+  $res
+}
+```
+
+Scanning all 11 physicochemical predictors across the 4,898 observations of `wine-white.csv` clarifies why non-linear trees outperform additive linear scores on sensory ratings:
+
+```nu
+open wine-white.csv | duckdb-ols --target quality
+open wine-white.csv | duckdb-ols --target quality --predictor alcohol
+```
+
+Marginally, `alcohol` exhibits the strongest linear association with perceived quality ($\hat{\beta}_1 = 0.3135$, $r = 0.4356$, $R^2 = 0.1897$), followed by `density` ($r = -0.3071$, $R^2 = 0.0943$) and `chlorides` ($r = -0.2099$, $R^2 = 0.0441$). By contrast, `free_sulfur_dioxide` and `residual_sugar` show near-zero marginal $R^2$ under linear OLS yet rank third and fourth in LightGBM split gain, confirming that their influence operates through non-linear threshold interactions (insufficient sulfur dioxide permits oxidation, whereas excess levels produce pungent aromas).
+
+### Streaming Multi-Model Classification and Neural Networks (`ml-benchmark`)
+
+Earlier in this chapter, benchmarking Logistic Regression against a Random Forest via SKLL (`run_experiment`) required creating `train/` and `test/` directories, writing an INI-style `classify.cfg` specification, and parsing tab-separated summary files from `output/`. Modern pipeline design eliminates that boilerplate completely.
+
+The command **`ml-benchmark`** accepts any Nushell table via `$in`, constructs a stratified train/test split, applies column-appropriate preprocessing (`StandardScaler` and `OneHotEncoder` for metric-sensitive learners, native numeric pass-through for tree ensembles), and benchmarks five distinct inductive biases in one call:
+
+1. **Logistic Regression (`logistic`):** Penalized linear log-odds baseline.
+2. **Linear Support Vector Classifier (`linear_svc`):** Maximum-margin hyperplane under hinge loss.
+3. **Multi-Layer Perceptron (`mlp`):** Feedforward neural network (`MLPClassifier`) with two ReLU hidden layers of $(64, 32)$ units, Adam optimization, and validation-based early stopping.
+4. **Random Forest (`rf`):** Bagged ensemble of decorrelated decision trees.
+5. **LightGBM (`lgbm`):** Histogram-accelerated gradient boosted decision trees.
+
+```nu
+# Benchmark multiple classification architectures (including MLP) on a Nushell table in one streaming pipeline.
+export def ml-benchmark [
+  --target(-t): string = "type"
+  --models(-m): list<string> = ["logistic", "rf", "lgbm", "linear_svc", "mlp"]
+  --test-size: float = 0.25
+  --seed(-s): int = 42
+]: table -> table {
+  let tbl = $in
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_py = mktemp --suffix ".py"
+  $tbl | to csv | save -f $tmp_in
+  let models_csv = $models | str join ","
+
+  r#'import json, sys, time, warnings
+warnings.filterwarnings("ignore")
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.svm import LinearSVC
+from lightgbm import LGBMClassifier
+
+df = pd.read_csv(sys.argv[1])
+target = sys.argv[2]
+models = [m.strip() for m in sys.argv[3].split(",") if m.strip()]
+test_size = float(sys.argv[4])
+seed = int(sys.argv[5])
+
+X = df.drop(columns=[target])
+le = LabelEncoder()
+y = le.fit_transform(df[target].astype(str))
+
+num_cols = [c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])]
+cat_cols = [c for c in X.columns if c not in num_cols]
+
+prep_scaled = ColumnTransformer(
+    transformers=[
+        ("num", StandardScaler(), num_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
+    ],
+    remainder="drop",
+)
+prep_tree = ColumnTransformer(
+    transformers=[
+        ("num", "passthrough", num_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols),
+    ],
+    remainder="drop",
+)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=test_size, random_state=seed, stratify=y
+)
+
+registry = {
+    "logistic": Pipeline([("prep", prep_scaled), ("clf", LogisticRegression(max_iter=500, random_state=seed))]),
+    "rf": Pipeline([("prep", prep_tree), ("clf", RandomForestClassifier(n_estimators=150, random_state=seed, n_jobs=-1))]),
+    "lgbm": Pipeline([("prep", prep_tree), ("clf", LGBMClassifier(n_estimators=150, learning_rate=0.05, random_state=seed, verbose=-1, n_jobs=-1))]),
+    "linear_svc": Pipeline([("prep", prep_scaled), ("clf", LinearSVC(random_state=seed, max_iter=2000))]),
+    "mlp": Pipeline([("prep", prep_scaled), ("clf", MLPClassifier(hidden_layer_sizes=(64, 32), activation="relu", early_stopping=True, max_iter=300, random_state=seed))]),
+}
+
+rows = []
+for name in models:
+    if name not in registry:
+        raise ValueError(f"Unsupported model key: {name}")
+    pipe = registry[name]
+    t0 = time.perf_counter()
+    pipe.fit(X_train, y_train)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    preds = pipe.predict(X_test)
+    rows.append({
+        "model": name,
+        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+        "precision": round(float(precision_score(y_test, preds, average="weighted", zero_division=0)), 4),
+        "recall": round(float(recall_score(y_test, preds, average="weighted", zero_division=0)), 4),
+        "f1_score": round(float(f1_score(y_test, preds, average="weighted", zero_division=0)), 4),
+        "train_time_ms": round(elapsed_ms, 2),
+    })
+
+rows.sort(key=lambda r: r["f1_score"], reverse=True)
+print(json.dumps(rows))
+'# | save -f $tmp_py
+
+  let res = ^/opt/modern-ml/bin/python $tmp_py $tmp_in $target $models_csv ($test_size | into string) ($seed | into string) | from json
+  rm -f $tmp_in $tmp_py
+  $res
+}
+```
+
+Benchmarking all five architectures on `wine-both.csv` and on the retail banking campaign dataset `banco.csv` requires only clean one-line Nushell pipelines, leaving zero `.cfg` files or temporary directories behind:
+
+```nu
+open wine-both.csv | ml-benchmark --target type
+open banco.csv | reject ID ZIP_cod | ml-benchmark --target prestamo
+```
+
+On `banco.csv`, where loan acceptance depends on sharp income, education, and family-size thresholds, linear classifiers plateau near $F_1 \approx 0.95$ (`logistic` at `0.9484` and `linear_svc` at `0.9511`). Introducing non-linear hidden representations via the Multi-Layer Perceptron (`mlp`) lifts weighted $F_1$ to `0.9797` in under half a second of training, while axis-aligned tree ensembles (`rf` at `0.9895` and `lgbm` at `0.9919`) achieve the highest discrimination, matching empirical findings on medium-sized tabular benchmarks (Grinsztajn et al., 2022). Because `ml-benchmark` emits a standard Nushell table, downstream filtering (`where train_time_ms < 500` or `first 3`) composes naturally with every operator learned in earlier chapters.
+
+### The Pure-Rust Machine Learning Frontier
+
+Because Nushell itself and `nu_plugin_polars` are written in Rust on top of the Apache Arrow columnar memory specification, the long-term trajectory of command-line modeling points toward native Rust plugins that read Arrow record batches without CSV or JSON serialization. Four active projects illustrate this architectural direction:
+
+- **`linfa` and `smartcore`:** Pure-Rust statistical learning libraries implementing PCA, K-Means, DBSCAN, elastic-net linear models, SVMs, and random forests with strong compile-time type guarantees.
+- **`candle` and `burn`:** Minimalist Rust tensor and deep learning frameworks capable of compiling feedforward neural networks (`MLP`) and modern architectures into self-contained native binaries with optional GPU acceleration and no Python runtime dependency.
+- **`nutorch`:** A Nushell plugin exposing LibTorch tensor operations directly inside Nushell pipelines, demonstrating how neural computation can participate as first-class shell values.
+
+While Python (`scikit-learn`, `umap-learn`) and C++ (`lightgbm`, `duckdb`) remain the most battle-tested numerical engines for day-to-day tabular modeling today, understanding Nushell's plugin architecture prepares practitioners for zero-copy Arrow modeling pipelines as the Rust scientific ecosystem matures.
+
 ## Chapter Summary and Concluding Remarks
 
 In this final chapter, we completed the OSEMN data science lifecycle by applying unsupervised and supervised modeling workflows directly from the command line:
@@ -5967,6 +6317,7 @@ In this final chapter, we completed the OSEMN data science lifecycle by applying
 3. **Clustering:** Discovered latent cluster structures using **K-Means** (`kmeans-cluster`), hierarchical clustering (`hclust`), density-based clustering (**DBSCAN**), and robust medoids (**PAM**), optimizing $K$ through multi-metric validation.
 4. **Online Regression:** Trained and evaluated out-of-core online linear regression models with **Vowpal Wabbit** (`vw-regress`), achieving high throughput with minimal memory footprint, and contrasted results with Ordinary Least Squares and Ridge regression.
 5. **Supervised Classification:** Benchmarked classification algorithms declaratively with **SKLL** (`skll-metrics`), comparing competitive baselines across Logistic Regression, Random Forests, Decision Trees, k-NN, Naïve Bayes, Support Vector Machines, and Multi-Layer Perceptrons.
+6. **Modern Pipeline-Native Modeling:** Replaced text-serialization and `.cfg` boilerplate with tabular-native workflows across topological manifold projection (**UMAP** via `umap-reduce`), histogram-binned Gradient Boosted Decision Trees (**LightGBM** via `lgbm-regress`), vectorized analytical SQL regression (**DuckDB** via `duckdb-ols`), and single-command multi-model benchmarking including neural networks (`ml-benchmark`).
 
 By integrating specialized command-line tools into strongly typed Nushell pipelines, data science workflows achieve unparalleled speed, transparency, and reproducibility.
 
@@ -5999,6 +6350,9 @@ By integrating specialized command-line tools into strongly typed Nushell pipeli
 
 - **James, G., Witten, D., Hastie, T., & Tibshirani, R. (2021).** *An Introduction to Statistical Learning with Applications in R* (2nd ed.). Springer.
 - **Géron, A. (2022).** *Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow* (3rd ed.). O'Reilly Media.
+- **LightGBM Documentation:** [https://lightgbm.readthedocs.io/](https://lightgbm.readthedocs.io/)
+- **DuckDB Documentation:** [https://duckdb.org/docs/](https://duckdb.org/docs/)
+- **UMAP Documentation:** [https://umap-learn.readthedocs.io/](https://umap-learn.readthedocs.io/)
 - **Vowpal Wabbit Documentation:** [https://vowpalwabbit.org/](https://vowpalwabbit.org/)
 - **SKLL (SciKit-Learn Laboratory):** [https://skll.readthedocs.io/](https://skll.readthedocs.io/)
 - **Tapkee Dimension Reduction Library:** [https://tapkee.lisitsyn.me/](https://tapkee.lisitsyn.me/)
@@ -6023,6 +6377,10 @@ By integrating specialized command-line tools into strongly typed Nushell pipeli
 - **timg:** Terminal Image and Video Viewer. [https://timg.sh/](https://timg.sh/)
 - **bat:** A cat clone with syntax highlighting and Git integration. [https://github.com/sharkdp/bat](https://github.com/sharkdp/bat)
 - **GNU parallel:** A shell tool for executing jobs in parallel. [https://www.gnu.org/software/parallel/](https://www.gnu.org/software/parallel/)
+- **DuckDB:** Fast in-process analytical SQL database management system. [https://duckdb.org/](https://duckdb.org/)
+- **LightGBM:** Fast, distributed, high-performance gradient boosting framework based on decision tree algorithms. [https://github.com/microsoft/LightGBM](https://github.com/microsoft/LightGBM)
+- **UMAP (`umap-learn`):** Uniform Manifold Approximation and Projection for dimension reduction. [https://github.com/lmcinnes/umap](https://github.com/lmcinnes/umap)
+- **uv:** Fast Rust-based Python package and environment manager. [https://github.com/astral-sh/uv](https://github.com/astral-sh/uv)
 - **Vowpal Wabbit:** Fast out-of-core online learning system. [https://vowpalwabbit.org/](https://vowpalwabbit.org/)
 - **Tapkee:** Fast C++ template library for dimensionality reduction. [https://tapkee.lisitsyn.me/](https://tapkee.lisitsyn.me/)
 - **SKLL:** SciKit-Learn Laboratory for command-line machine learning. [https://skll.readthedocs.io/](https://skll.readthedocs.io/)
@@ -6032,9 +6390,13 @@ By integrating specialized command-line tools into strongly typed Nushell pipeli
 
 - Cortez, P., Cerdeira, A., Almeida, F., Matos, T., & Reis, J. (2009). Modeling wine preferences by data mining from physicochemical properties. *Decision Support Systems*, 47(4), 547-553.
 - Garnett, R., Do, C., & Lisitsyn, S. (2014). Tapkee: An efficient dimension reduction library. *Journal of Machine Learning Research*, 15, 399-403.
+- Grinsztajn, L., Oyallon, E., & Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? *Advances in Neural Information Processing Systems*, 35, 507-520.
+- Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q., & Liu, T. Y. (2017). LightGBM: A highly efficient gradient boosting decision tree. *Advances in Neural Information Processing Systems*, 30, 3146-3154.
 - Langford, J., Li, L., & Strehl, A. (2007). Vowpal Wabbit open source project. *Technical Report*, Yahoo! Research.
+- McInnes, L., Healy, J., & Melville, J. (2018). UMAP: Uniform Manifold Approximation and Projection for dimension reduction. *arXiv preprint arXiv:1802.03426*.
 - Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., Prettenhofer, P., Weiss, R., Dubourg, V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher, M., Perrot, M., & Duchesnay, E. (2011). Scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825-2830.
 - R Core Team. (2024). *R: A Language and Environment for Statistical Computing*. R Foundation for Statistical Computing, Vienna, Austria. [https://www.R-project.org/](https://www.R-project.org/)
+- Raasveldt, M., & Mühleisen, H. (2019). DuckDB: An embeddable analytical database. In *Proceedings of the 2019 International Conference on Management of Data (SIGMOD '19)* (pp. 1981-1984).
 - Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer-Verlag New York.
 - Mason, H. & Wiggins, C. (2010). A taxonomy of data science. *Dataists Blog*.
 - Ester, M., Kriegel, H. P., Sander, J., & Xu, X. (1996). A density-based algorithm for discovering clusters in large spatial databases with noise. In *KDD-96 Proceedings* (pp. 226-231).

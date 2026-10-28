@@ -23,7 +23,7 @@ This work covers everything from comparing traditional shells (`bash`, `zsh`, an
 - **Scrubbing and Transforming:** Native Nushell pipelines + the high-performance `polars` plugin (`nu_plugin_polars`).
 - **Exploring and In-Terminal Visualization:** Descriptive statistics using native commands (`math`, `polars summary`) and polyglot integration (`Rscript`, `python3`), alongside direct in-terminal graphical visualization using **`timg`**.
 - **Parallelization:** Native concurrent execution via **`par-each`** and external process parallelization with **GNU `parallel`** orchestrated from Nushell.
-- **Polyglot Modeling:** Dimensionality Reduction (PCA and t-SNE), Clustering (K-Means, Hierarchical, DBSCAN, PAM), Regression, and Supervised Classification integrating command-line tools (**`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) alongside **`Rscript`** and **`python3`** streaming directly into structured Nushell tables.
+- **Polyglot Modeling:** Dimensionality Reduction (PCA, t-SNE, and UMAP), Clustering (K-Means, Hierarchical, DBSCAN, PAM), Regression, and Supervised Classification (including Multi-Layer Perceptrons) integrating command-line tools (**`umap-reduce`**, **`lgbm-regress`**, **`duckdb-ols`**, **`ml-benchmark`**, **`tapkee`**, **`kmeans-cluster`**, **`vw`**, **`run_experiment`**) alongside **`Rscript`** and **`python3`** streaming directly into structured Nushell tables.
 
 ## Origins and Relationship to the Original Work by Jeroen Janssens
 
@@ -46,17 +46,17 @@ Janssens' original work established the foundation for using the Unix console fo
 6. **Chapter 6: Scrubbing and Transforming Data** (Native Nushell + `polars` plugin)
 7. **Chapter 7: Exploring Data and In-Terminal Visualization** (`describe`, `math`, `polars`, `.R`/`.py` scripts, and plotting with `timg`)
 8. **Chapter 8: Serial Processing and Parallel Pipelines** (`each`, `par-each`, and GNU `parallel`)
-9. **Chapter 9: Polyglot Data Modeling** (Dimensionality Reduction, K-Means / Hierarchical / DBSCAN / PAM Clustering, Regression, and Supervised Classification via CLI + `Rscript` + `python3` → Nushell Tables)
+9. **Chapter 9: Polyglot Data Modeling** (Dimensionality Reduction with PCA/t-SNE/UMAP, K-Means / Hierarchical / DBSCAN / PAM Clustering, Regression with VW/LightGBM/DuckDB OLS, and Supervised Classification including MLP via CLI + `Rscript` + `python3` → Nushell Tables)
 
 ## Docker Image (`dsin`)
 
 The official environment image (`ghcr.io/kurokirasama/dsin:latest`) includes:
 
-- **Nushell (`nu`)** as the default shell with custom configuration (`config.nu`), `dsin_tools.nu` module (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`), and pre-registered official plugins (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`).
+- **Nushell (`nu`)** as the default shell with custom configuration (`config.nu`), `dsin_tools.nu` module (`to-vw`, `vw-regress`, `tapkee-reduce`, `kmeans-cluster`, `umap-reduce`, `lgbm-regress`, `duckdb-ols`, `ml-benchmark`), and pre-registered official plugins (`nu_plugin_polars`, `formats`, `query`, `gstat`, `inc`, `file`, `plot`, `port_extension`).
 - **Integrated `/data` Directory:** Contains all chapter data folders (`/data/ch03` to `/data/ch09`) ready for immediate use without additional downloads.
 - **`ttt`**: Terminal text editor pre-configured in `$env.PATH`.
 - **`timg`**: In-terminal image and plot viewer available directly in `$env.PATH`.
-- **Modeling, Parallelization, and Statistical Engines:** `Rscript` (`tidyverse`, `ggplot2`), `python3` (`scikit-learn`, `polars`, `pandas`, `matplotlib`), `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee`, and `run_experiment` (SKLL).
+- **Modeling, Parallelization, and Statistical Engines:** `Rscript` (`tidyverse`, `ggplot2`), `python3` and isolated `/opt/modern-ml` Python 3.12 via `uv` (`umap-learn`, `lightgbm`, `scikit-learn`, `pandas`, `matplotlib`), standalone `duckdb` and `lightgbm` C++ CLIs, `parallel` (GNU Parallel), `vw` (Vowpal Wabbit), `tapkee`, and `run_experiment` (SKLL).
 
 ```bash
 docker pull ghcr.io/kurokirasama/dsin:latest
