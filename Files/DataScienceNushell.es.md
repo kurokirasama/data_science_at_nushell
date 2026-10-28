@@ -923,13 +923,11 @@ En la práctica, los patrones clásicos que en otros lenguajes demandan acumulac
 - **Generación dinámica de flujos continuos:** Para consumir datos de fuentes externas o secuencias que se producen bajo demanda, se emplea `generate`:
   ```nu
   # skip-docker-exec (generación funcional de secuencias)
-  generate 0 { |contador|
+  generate { |contador|
     if $contador < 5 {
       { out: ($contador * 10), next: ($contador + 1) }
-    } else {
-      null
     }
-  }
+  } 0
   ```
 
 ##### Consideraciones de Rendimiento
@@ -5049,7 +5047,7 @@ $df_aggregated | polars sort-by developer | polars collect
 Se hace el pivoteo:
 
 ```nu
-let df_pivoted = $df_aggregated | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect
+let df_pivoted = ($df_aggregated | polars sort-by year | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect)
 $df_pivoted | polars first 5 | polars into-nu
 $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 ```

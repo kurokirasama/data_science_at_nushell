@@ -877,13 +877,11 @@ Common accumulation patterns that require mutable variables in imperative langua
 - **Dynamic sequence generation:** To consume data from generators or streams on demand, use `generate`:
   ```nu
   # skip-docker-exec (functional sequence generation)
-  generate 0 { |counter|
+  generate { |counter|
     if $counter < 5 {
       { out: ($counter * 10), next: ($counter + 1) }
-    } else {
-      null
     }
-  }
+  } 0
   ```
 
 ##### Performance Implications
@@ -4813,7 +4811,7 @@ $df_aggregated | polars sort-by developer | polars collect
 We then perform the relational pivot operation:
 
 ```nu
-let df_pivoted = $df_aggregated | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect
+let df_pivoted = ($df_aggregated | polars sort-by year | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect)
 $df_pivoted | polars first 5 | polars into-nu
 $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 ```
