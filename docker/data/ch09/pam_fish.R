@@ -1,7 +1,9 @@
 #!/usr/bin/env Rscript
 suppressPackageStartupMessages(library(cluster))
 df <- read.csv("Fish.csv")
-num_cols <- c("Weight", "Length1", "Length2", "Length3", "Height", "Width")
+num_cols <- c(
+  "Weight", "Length1", "Length2", "Length3", "Height", "Width"
+)
 X <- scale(df[, num_cols])
 
 fit_pam <- pam(X, k = 3, metric = "euclidean")
@@ -16,5 +18,7 @@ out <- data.frame(
   cluster_2_size = fit_pam$clusinfo[2, 1],
   cluster_3_size = fit_pam$clusinfo[3, 1]
 )
-write.csv(out, "fish_pam_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(
+  out, "fish_pam_r.csv", row.names = FALSE, quote = FALSE
+)
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)

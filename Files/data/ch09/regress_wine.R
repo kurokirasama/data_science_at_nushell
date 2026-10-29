@@ -15,7 +15,10 @@ res_df <- data.frame(
   predicted = round(preds, 4),
   abs_error = round(abs(test$quality - preds), 4)
 )
-write.csv(res_df, "wine_lm_predictions_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(
+  res_df, "wine_lm_predictions_r.csv",
+  row.names = FALSE, quote = FALSE
+)
 
 # Output model coefficients to stdout as CSV
 coefs <- summary(fit)$coefficients

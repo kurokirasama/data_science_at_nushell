@@ -75,7 +75,7 @@ Omitir las salidas en los ejemplos responde a tres objetivos prácticos: primero
 
 Para garantizar que cada experiencia práctica se ejecute en condiciones rigurosamente reproducibles e inmunes a divergencias de configuración local, el texto se apoya en un entorno unificado denominado `dsin` (Data Science in Nushell), distribuido como imagen pública de Docker en `ghcr.io/kurokirasama/dsin:latest`. Dicho contenedor constituye una estación analítica completa. Encapsula la versión más reciente de Nushell con un perfil afinado para el procesamiento de datos, su ecosistema de complementos (con soporte nativo para Polars, manipulación de formatos estructurados, consultas relacionales avanzadas, control de versiones y graficación en terminal), entornos robustos de Python y R configurados con sus bibliotecas científicas indispensables, algoritmos de alto rendimiento para modelado predictivo (como Vowpal Wabbit, Tapkee y SKLL), herramientas modernas de línea de comandos (entre las que destacan el editor interactivo `ttt` y el visor gráfico de alta fidelidad `timg`), así como la totalidad de los conjuntos de datos del curso, organizados meticulosamente por capítulos en el directorio `/data`.
 
-Este libro está organizado siguiendo las etapas del ciclo clásico OSEMN (*Obtain*, *Scrub*, *Explore*, *Model* e *iNterpret*), propuesto originalmente por Hilary Mason y Chris Wiggins. El recorrido comienza en el [capítulo 2](#chapter-2-installation) con la instalación del software y la preparación del entorno de trabajo reproducible mediante Docker y el contenedor `dsin`. A continuación, el [capítulo 3](#chapter-3-nushell-fundamentals) establece las bases operativas de la línea de comandos y el sistema de tipos de datos en Nushell, mientras que el [capítulo 4](#chapter-4-programming-cli-tools) profundiza en la programación estructurada y la creación de herramientas modulares reutilizables. El [capítulo 5](#chapter-5-data-acquisition) aborda las estrategias de obtención e ingesta de datos desde la web, APIs, archivos estructurados y bases de datos relacionales. Posteriormente, el [capítulo 6](#chapter-6-data-cleaning) introduce la limpieza y transformación de datos junto a la analítica columnar con Polars. La exploración estadística y la visualización gráfica en la terminal se desarrollan en el [capítulo 7](#chapter-7-data-exploration), dando paso en el [capítulo 8](#chapter-8-parallel-pipelines) a la orquestación de flujos de trabajo, procesamiento en serie y pipelines paralelos. Finalmente, el [capítulo 9](#chapter-9-polyglot-modeling) aborda el modelado predictivo políglota, integrando reducción de dimensionalidad, agrupamiento no supervisado, regresión y clasificación supervisada.
+Este libro está organizado siguiendo las etapas del ciclo clásico OSEMN (*Obtain*, *Scrub*, *Explore*, *Model* e *iNterpret*), propuesto originalmente por Hilary Mason y Chris Wiggins. El recorrido comienza en el [capítulo 2](#chapter-2-installation) con la instalación del software y la preparación del entorno de trabajo reproducible mediante Docker y el contenedor `dsin`. A continuación, el [capítulo 3](#chapter-3-nushell-fundamentals) establece las bases operativas de la línea de comandos y el sistema de tipos de datos en Nushell, mientras que el [capítulo 4](#chapter-4-programming-cli-tools) profundiza en la programación estructurada y la creación de herramientas modulares reutilizables. El [capítulo 5](#chapter-5-data-acquisition) aborda las estrategias de obtención e ingesta de datos desde la web, APIs, archivos estructurados y bases de datos relacionales. Posteriormente, el [capítulo 6](#chapter-6-data-cleaning) introduce la limpieza y transformación de datos junto a la analítica columnar con Polars. La exploración estadística y la visualización gráfica en la terminal se desarrollan en el [capítulo 7](#chapter-7-data-exploration), dando paso en el [capítulo 8](#chapter-8-parallel-pipelines) a la orquestación de flujos de trabajo, procesamiento en serie y pipelines paralelos. El [capítulo 9](#chapter-9-polyglot-modeling) aborda el modelado predictivo políglota, integrando reducción de dimensionalidad, agrupamiento no supervisado, regresión y clasificación supervisada. Finalmente, el [capítulo 10](#chapter-conclusion) sintetiza los principios arquitectónicos, computacionales y metodológicos que transforman la línea de comandos en un riguroso laboratorio de inteligencia de datos.
 
 
 \newpage
@@ -5552,40 +5552,33 @@ En el Capítulo 9 culminaremos nuestro recorrido por el modelo OSEMN aplicando e
 
 # Modelado Políglota de Datos {#chapter-9-polyglot-modeling}
 
-El quinto y último paso del modelo OSEMN consiste en **modelar los datos** (*Model Data*). Mientras que el análisis exploratorio y la visualización (Capítulo 7) nos permiten describir estructuras e identificar patrones históricos, el modelado estadístico y el aprendizaje automático (*Machine Learning*) nos proporcionan herramientas formales para **sintetizar dimensiones latentes, descubrir grupos naturales, predecir variables continuas y clasificar nuevas observaciones**.
+La cuarta etapa del ciclo OSEMN corresponde al **modelado de datos** (*Model*), estrechamente vinculada con la evaluación empírica (*iNterpret*). En esta instancia, los datos han sido obtenidos (Capítulo 5), depurados y transformados (Capítulo 6), y explorados analíticamente (Capítulo 7). Abordamos ahora la construcción de modelos predictivos, descriptivos e inferenciales en los dominios del aprendizaje automático supervisado y no supervisado.
 
-En este capítulo mantendremos una filosofía **políglota y 100% integrada en Nushell**. Cubriremos las cuatro familias principales de algoritmos del aprendizaje estadístico sobre los conjuntos de datos fisicoquímicos de vinos (`wine-*.csv`), biométricos de peces (`Fish.csv`) y banca minorista (`banco.csv`), ubicados en `/data/ch09`:
+En lugar de forzar cálculos matemáticos complejos dentro de scripts de shell convencionales, la ciencia de datos contemporánea en la terminal adopta una **arquitectura políglota**:
 
-1. **Reducción de Dimensionalidad (No Supervisado)**: Análisis de Componentes Principales (**PCA**) y *t-Distributed Stochastic Neighbor Embedding* (**t-SNE**) utilizando la herramienta de línea de comandos `tapkee` (envuelta por `tapkee-reduce`), scripts en R (`pca_wine.R`, `vif_pcr_fish.R`) y en Python (`pca_wine.py`, `vif_pcr_fish.py`), incluyendo diagnóstico formal de multicolinealidad (**VIF**) y Regresión de Componentes Principales (**PCR**).
-2. **Agrupamiento o *Clustering* (No Supervisado)**: algoritmo **K-Means** (`kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`), **Clustering Jerárquico Aglomerativo** (`hclust_fish.R`, `hclust_fish.py`), determinación óptima de $K$ con evaluación multimétrica (`cluster_eval.py`), **Clustering Basado en Densidad con DBSCAN** (`dbscan_fish.py`) y **K-Medoides con PAM** (`pam_fish.R`).
-3. **Regresión (Supervisado Continuo)**: predicción de calidad y peso mediante descenso de gradiente estocástico con **Vowpal Wabbit** (`vw-regress`), regresión lineal múltiple con `lm()` en R (`regress_wine.R`), regresión Ridge en Python (`regress_wine.py`) y regresión PCR.
-4. **Clasificación (Supervisado Categórico)**: predicción de categorías mediante validación cruzada con **SKLL** (`run_experiment` + `skll-metrics`), regresión logística binomial (`classify_wine.R`), bosques aleatorios (*Random Forest*, `classify_wine.py`), **Árboles de Decisión** (`dt_banco.R`, `dt_banco.py`), **$k$-NN** (`knn_banco.R`, `knn_banco.py`), **Naïve Bayes y SVM** (`nb_svm_banco.py`) y **Redes Neuronales Artificiales MLP** (`mlp_banco.py`, `mlp_banco.R`).
+1. **Herramientas de modelado CLI independientes:** Utilidades compiladas de alto rendimiento, diseñadas específicamente para iterar con rapidez (**Tapkee** para reducción de dimensionalidad, **Vowpal Wabbit** para aprendizaje en línea fuera de memoria principal y **SKLL** para evaluación comparativa declarativa de modelos).
+2. **Scripts políglotas con R y Python:** Invocación directa de scripts en R (`Rscript`) para inferencia estadística clásica y scripts en Python (`python3`) para aprendizaje automático algorítmico mediante scikit-learn.
+3. **Nushell como orquestador universal:** Nushell gestiona los pipelines de datos de extremo a extremo, estructura los flujos de variables predictoras, ejecuta procesos de modelado de forma concurrente, procesa las salidas tabulares y calcula métricas comparativas de rendimiento.
 
-En **todos** los métodos seguiremos el mismo estándar riguroso:
-
-- Nos ubicamos primero en el directorio del capítulo (`/data/ch09`) y abrimos los archivos por su nombre local.
-- Ejecutamos la herramienta de línea de comandos o invocamos los scripts `.R` / `.py` independientes (nunca código en línea difícil de depurar).
-- Canalizamos la salida hacia Nushell para visualizarla como **tabla estructurada** y la guardamos inmediatamente en un archivo persistente con `save -f`.
-
-Para trabajar con los modelos y conjuntos de datos de este capítulo, nos posicionamos en `/data/ch09`:
+Comenzamos posicionándonos en el directorio de trabajo del capítulo `/data/ch09`:
 
 ```nu
 cd /data/ch09
 ```
 
-A partir de este punto, todos los ejemplos y análisis del capítulo se ejecutan dentro de `/data/ch09`.
+A partir de este punto, todos los ejemplos de código y pipelines de modelado se ejecutan dentro de `/data/ch09`.
 
 ## Preparación y Exploración del Conjunto de Datos de Vinos
 
-Inspeccionemos primero los archivos preinstalados en `/data/ch09`:
+Primero, revise los archivos de datos disponibles en `/data/ch09`:
 
 ```nu
 ls
 ```
 
-Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos blancos) contienen 11 variables fisicoquímicas continuas (`fixed_acidity`, `volatile_acidity`, `citric_acid`, `residual_sugar`, `chlorides`, `free_sulfur_dioxide`, `total_sulfur_dioxide`, `density`, `pH`, `sulphates`, `alcohol`) y la calificación sensorial `quality` (escala de 0 a 10).
+Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos blancos) registran 11 propiedades fisicoquímicas (acidez fija, acidez volátil, ácido cítrico, azúcar residual, cloruros, dióxido de azufre libre, dióxido de azufre total, densidad, pH, sulfatos y alcohol) junto con evaluaciones sensoriales de calidad de 0 a 10 provenientes del conjunto de datos clásico de vinho verde (Cortez et al., 2009).
 
-Veamos cómo podemos construir el conjunto combinado `wine-both.csv` directamente en Nushell añadiendo la columna `type` (`red` o `white`) y guardándolo en disco:
+Concatenamos ambos conjuntos en una única tabla unificada (`wine-both.csv`), creando la columna categórica `type` y guardando el resultado en disco:
 
 ```nu
 let red = open wine-red.csv | insert type "red"
@@ -5595,460 +5588,1204 @@ $both | first 5
 $both | save -f wine-both-generated.csv
 ```
 
-Verifiquemos la distribución de clases (`red` vs `white`) y las estadísticas descriptivas por tipo de vino usando Polars:
+A continuación, verifique el balance de clases (`red` frente a `white`) con `histogram`:
 
 ```nu
 open wine-both.csv | histogram type
-open wine-both.csv | histogram type | save -f wine_type_distribution.csv
+open wine-both.csv
+| histogram type
+| save -f wine_type_distribution.csv
 ```
 
-Y generemos una visualización exploratoria de las distribuciones de alcohol, acidez volátil y sulfatos entre vinos tintos y blancos ejecutando el script `plot_wine_eda.R` y visualizándola en la terminal con `timg`:
+Antes de ajustar cualquier modelo estadístico, graficamos las distribuciones empíricas de calidad sensorial y concentración de alcohol entre variedades de vino mediante `plot_wine_eda.R`. Mostramos su código fuente en la terminal:
 
 ```nu
 bat plot_wine_eda.R
+```
+
+```r
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(ggplot2))
+df <- read.csv("wine.csv")
+
+p1 <- ggplot(df, aes(x = quality, fill = type)) +
+  geom_density(adjust = 3, alpha = 0.5) +
+  labs(
+    title = "Quality Distribution by Wine Type",
+    x = "Sensory Quality", y = "Density"
+  ) +
+  theme_minimal()
+ggsave(
+  "wine-quality.png",
+  plot = p1, width = 6, height = 4, dpi = 120
+)
+ggsave(
+  "wine_eda.png",
+  plot = p1, width = 6, height = 4, dpi = 120
+)
+
+p2 <- ggplot(df, aes(x = alcohol, y = quality, color = type)) +
+  geom_smooth(method = "loess", formula = y ~ x) +
+  labs(
+    title = "Alcohol vs. Quality by Wine Type",
+    x = "Alcohol (%)", y = "Sensory Quality"
+  ) +
+  theme_minimal()
+ggsave(
+  "wine-alcohol-vs-quality.png",
+  plot = p2, width = 6, height = 4, dpi = 120
+)
+```
+
+Tres componentes estructuran `plot_wine_eda.R`:
+
+1. **Carga limpia de paquetes e ingesta:** `suppressPackageStartupMessages` mantiene la salida estándar libre de mensajes iniciales antes de que `read.csv("wine.csv")` cargue las 6.497 observaciones.
+2. **Densidad condicional suavizada (`p1`):** `geom_density(adjust = 3, alpha = 0.5)` amplía el ancho de banda del núcleo gaussiano para suavizar las puntuaciones discretas de calidad entre vinos tintos y blancos.
+3. **Estimación no paramétrica de tendencias (`p2`):** `geom_smooth(method = "loess", formula = y ~ x)` ajusta regresiones polinomiales locales de la calidad sensorial en función del porcentaje de alcohol para cada variedad, exportando gráficos rasterizados mediante `ggsave`.
+
+Ejecutamos el script y renderizamos `wine_eda.png` directamente en la terminal con `timg`:
+
+```nu
 Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
 ```
 
 ## Reducción de Dimensionalidad (PCA y t-SNE)
 
-Cuando trabajamos con un espacio de $p = 11$ variables fisicoquímicas correlacionadas, resulta imposible visualizar directamente la nube de puntos en dos dimensiones. Los algoritmos de reducción de dimensionalidad proyectan una matriz de datos $\mathbf{X} \in \mathbb{R}^{n \times p}$ hacia un subespacio de baja dimensión $\mathbf{Z} \in \mathbb{R}^{n \times d}$ (con $d = 2 \ll p$) preservando la mayor cantidad posible de estructura:
+Las tablas con alta dimensionalidad sufren frecuentemente de colinealidad pronunciada y dispersión geométrica. La reducción de dimensionalidad proyecta $p$ variables correlacionadas hacia un subespacio de baja dimensión (habitualmente dos o tres coordenadas) que retiene la varianza global o la estructura de vecindad local:
 
-- **PCA (*Principal Component Analysis*)**: busca combinaciones lineales ortogonales de las variables originales que maximicen la varianza explicada:
-  $$\mathbf{z}_k = \mathbf{X}\mathbf{w}_k \quad \text{sujeto a} \quad \|\mathbf{w}_k\|_2 = 1, \quad \mathbf{w}_k^\top \mathbf{w}_j = 0 \;\; (\forall j < k)$$
+- **Análisis de Componentes Principales (PCA):** Proyección lineal ortogonal alineada con las direcciones de máxima varianza muestral.
+- **t-Distributed Stochastic Neighbor Embedding (t-SNE):** Incrustación no lineal de variedades que convierte distancias euclidianas entre pares en probabilidades condicionales para preservar vecindades locales.
 
-- **t-SNE (*t-Distributed Stochastic Neighbor Embedding*)**: técnica no lineal que convierte las distancias euclidianas entre pares de observaciones en probabilidades condicionales de vecindad y minimiza la divergencia de Kullback-Leibler respecto a una distribución $t$ de Student de un grado de libertad en el espacio bidimensional.
+### Reducción de Dimensionalidad con Herramientas CLI (`tapkee` y `tapkee-reduce`)
 
-### Reducción de Dimensionalidad con Herramientas CLI (`tapkee-reduce`: PCA y t-SNE)
+El contenedor `dsin` incorpora **Tapkee** (Lisitsyn et al., 2013), una biblioteca de plantillas en C++ compilada para cálculos rápidos de reducción dimensional espectral y sobre variedades. Al igual que la mayoría de los ejecutables numéricos en C++, `tapkee` no procesa esquemas de Nushell, nombres de columnas ni etiquetas de texto. Requiere un archivo sin encabezados compuesto por números en punto flotante separados por un delimitador explícito (`--delimiter ","`) y genera un archivo de salida con coordenadas sin nombres de fila.
 
-#### La Herramienta Base: `tapkee`
-
-**Tapkee** es una eficiente biblioteca de plantillas en C++ desarrollada por Sergey Lisitsyn ([http://tapkee.lisitsyn.me/](http://tapkee.lisitsyn.me/)) orientada al cálculo rápido de mapeos dimensionales. Entre los algoritmos integrados destacan:
-
-- *Principal Component Analysis* (PCA)
-- *t-Distributed Stochastic Neighbor Embedding* (t-SNE)
-- *Multidimensional Scaling* (MDS)
-- *Isomap*
-- *Locally Linear Embedding* (LLE)
-
-Como herramienta de línea de comandos, `tapkee` opera bajo la filosofía Unix clásica: lee una matriz puramente numérica sin encabezados y devuelve las coordenadas proyectadas delimitadas por espacios o comas. Sus argumentos principales son:
-
-- `-i <archivo>`: archivo de entrada con los datos numéricos.
-- `-o <archivo>`: archivo de destino para las coordenadas resultantes.
-- `-m <método>`: método de reducción (`pca`, `t-sne`, `isomap`, `mds`, `lle`, etc.).
-- `-td <dimensiones>`: dimensionalidad del espacio proyectado (típicamente `2`).
-- `--delimiter <delimitador>`: carácter delimitador de columnas (por ejemplo, `","`).
-
-Podemos verificar el funcionamiento elemental de la herramienta base extrayendo las columnas numéricas de los primeros 200 registros de `wine-both.csv` sin encabezados y despachando `tapkee` directamente:
+Ejecutar `tapkee` directamente exige un pipeline de tres etapas en Nushell: preprocesar la matriz de entrada, invocar el ejecutable nativo y posprocesar el flujo resultante de coordenadas. En primer lugar, seleccionamos 200 observaciones de `wine-both.csv`, descartamos `type` y `quality` para conservar únicamente las 11 mediciones continuas, serializamos una matriz CSV sin encabezados y llamamos a `^tapkee`:
 
 ```nu
-# skip-docker-exec
-open wine-both.csv
-    | first 200
-    | select fixed_acidity volatile_acidity citric_acid residual_sugar chlorides free_sulfur_dioxide total_sulfur_dioxide density ph sulphates alcohol
-    | to csv --noheaders
-    | save -f wine_matrix.csv
+let sample_w = (open wine-both.csv | first 200)
+$sample_w
+  | reject type quality
+  | to csv --noheaders
+  | save -f wine_matrix.csv
 
-tapkee -i wine_matrix.csv -o wine_pca_coords.tsv -m pca -td 2 --delimiter ","
-open --raw wine_pca_coords.tsv | lines | first 5
+let tk_cmd = [
+  "-i" "wine_matrix.csv" "-o" "wine_pca_raw.csv"
+  "-m" "pca" "-td" "2" "--delimiter" ","
+]
+^tapkee ...$tk_cmd
+open --raw wine_pca_raw.csv | lines | first 5
 ```
 
-Si bien la herramienta binaria procesa los números con enorme rapidez, utilizarla de manera cruda en un flujo analítico presenta limitaciones evidentes: las columnas de texto (como `type`) deben eliminarse previamente, los encabezados deben suprimirse y las coordenadas resultantes quedan desconectadas de las filas originales, exigiendo complejas operaciones manuales de unión.
-
-#### Implementación del Wrapper: `tapkee-reduce`
-
-Para resolver esta brecha y ofrecer una experiencia analítica ergonómica que preserve la estructura tabular de Nushell, el módulo `dsin_tools.nu` define el comando wrapper **`tapkee-reduce`**:
+Al examinar la salida sin procesar observamos pares de coordenadas separados por comas (`-1.67715,-16.4492`) sin encabezados ni identificadores de fila. Dado que `tapkee` preserva el orden secuencial de entrada, convertimos el archivo de vuelta a una tabla de Nushell, asignamos nombres descriptivos de columna (`dim_1`, `dim_2`), redondeamos cada valor a cuatro decimales y unimos horizontalmente la proyección sobre `$sample_w`:
 
 ```nu
-# Run Tapkee dimensionality reduction on a numeric Nushell table and return a structured table.
+let coords = (
+  open --raw wine_pca_raw.csv
+  | from csv --noheaders
+  | rename dim_1 dim_2
+  | update dim_1 { into float | math round -p 4 }
+  | update dim_2 { into float | math round -p 4 }
+)
+let direct_pca = (
+  $sample_w | merge $coords | select type quality dim_1 dim_2
+)
+$direct_pca | first 5
+rm -f wine_matrix.csv wine_pca_raw.csv
+```
+
+Repetir manualmente esta secuencia (aislar variables, crear el CSV temporal, ejecutar el binario externo, convertir a tipos flotantes, unir tablas y eliminar archivos) en cada exploración sobrecarga las sesiones interactivas. En `dsin_tools.nu`, el comando personalizado **`tapkee-reduce`** encapsula estas operaciones bajo una firma tipada `table -> table`:
+
+```nu
+# Run Tapkee dimensionality reduction on a numeric table.
 export def tapkee-reduce [
-  --method(-m): string = "pca" # Tapkee method: pca, ltsa, isomap, mds, tsne, t-sne, lle
-  --target-dim(-d): int = 2    # Number of output dimensions
-  --label-col(-l): string      # Optional label column to preserve alongside coordinates
-  --cols(-c): list<string>     # Optional explicit list of feature columns
+  --method(-m): string = "pca"
+  --target-dim(-d): int = 2
+  --label-col(-l): string
+  --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
-  let norm_method = if $method == "tsne" { "t-sne" } else { $method }
-  let num_tbl = if ($cols != null) and (($cols | length) > 0) {
+  let norm_m = if $method == "tsne" { "t-sne" } else { $method }
+  let has_cols = ($cols != null) and (($cols | length) > 0)
+  let has_lbl = (
+    ($label_col != null)
+    and ($label_col | is-not-empty)
+    and ($label_col in ($tbl | columns))
+  )
+  let num_tbl = if $has_cols {
     $tbl | select ...$cols
-  } else if ($label_col != null) and ($label_col | is-not-empty) and ($label_col in ($tbl | columns)) {
+  } else if $has_lbl {
     $tbl | reject $label_col
   } else {
-    let non_num = ["type"] | where {|c| $c in ($tbl | columns)}
-    if ($non_num | is-not-empty) { $tbl | reject ...$non_num } else { $tbl }
+    let non_num = (
+      ["type"] | where { |c| $c in ($tbl | columns) }
+    )
+    if ($non_num | is-not-empty) {
+      $tbl | reject ...$non_num
+    } else {
+      $tbl
+    }
   }
 
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_out = mktemp --suffix ".tsv"
+  let tmp_in = (mktemp --suffix ".csv")
+  let tmp_out = (mktemp --suffix ".tsv")
   $num_tbl | to csv --noheaders | save -f $tmp_in
 
-  tapkee -i $tmp_in -o $tmp_out -m $norm_method -td $target_dim --delimiter ","
-  let raw_coords = open --raw $tmp_out | lines | where ($it | str trim | is-not-empty)
+  let tk_args = [
+    "-i" $tmp_in "-o" $tmp_out
+    "-m" $norm_m "-td" ($target_dim | into string)
+    "--delimiter" ","
+  ]
+  ^tapkee ...$tk_args
+  let raw_coords = (
+    open --raw $tmp_out
+    | lines
+    | where ($it | str trim | is-not-empty)
+  )
   rm -f $tmp_in $tmp_out
 
-  let coords_tbl = $raw_coords | each { |line|
-    let parts = $line | split row "," | each { |v| $v | str trim | into float | math round -p 4 }
+  let coords_tbl = ($raw_coords | each { |line|
+    let parts = (
+      $line
+      | split row ","
+      | each { |v| $v | str trim | into float | math round -p 4 }
+    )
     mut rec = {}
     for idx in 0..<($parts | length) {
-      let val = $parts | get $idx
-      $rec = ($rec | insert $"dim($idx + 1)" $val | insert $"dim_($idx + 1)" $val)
+      let val = ($parts | get $idx)
+      let k1 = $"dim($idx + 1)"
+      let k2 = $"dim_($idx + 1)"
+      $rec = ($rec | insert $k1 $val | insert $k2 $val)
     }
     $rec
-  }
+  })
 
   $tbl | merge $coords_tbl
 }
 ```
 
-Analicemos la arquitectura del comando:
+Cuatro decisiones de diseño transforman el binario de C++ en un operador componible de la shell:
 
-1. **Aislamiento de atributos numéricos:** Examina los argumentos de entrada. Si se especifican columnas con `--cols`, las selecciona; de lo contrario, excluye automáticamente columnas de etiquetas categóricas como `type`.
-2. **Archivos temporales limpios con `mktemp`:** Genera rutas efímeras y exporta la matriz mediante `to csv --noheaders`.
-3. **Invocación transparente de `tapkee`:** Ejecuta el binario C++ con el método seleccionado.
-4. **Reintegración tabular con `merge`:** Lee la salida estructurada, redondea las coordenadas a cuatro decimales y fusiona horizontalmente los campos `dim_1` y `dim_2` con la tabla original, preservando todas las etiquetas y atributos iniciales.
+1. **Filtrado flexible del esquema:** Permite indicar columnas explícitas (`--cols`), excluir una etiqueta objetivo (`--label-col`) o descartar automáticamente columnas categóricas como `type`, conservando todas las columnas originales en `$tbl` para la unión final.
+2. **Normalización de alias:** Convierte `--method tsne` en el identificador canónico `"t-sne"` de Tapkee para evitar fallos por variaciones tipográficas en la consola.
+3. **Gestión higiénica de archivos efímeros:** Asigna rutas temporales mediante `mktemp` y las elimina inmediatamente después de leer `$tmp_out`, impidiendo la acumulación de archivos residuales en `/data/ch09`.
+4. **Reconstrucción dimensional arbitraria:** Genera registros dinámicos `dim_1`, `dim_2`, ..., `dim_d` para cualquier valor indicado en `--target-dim` antes de ejecutar `$tbl | merge $coords_tbl`.
 
-#### Ejecución en Pipelines de Nushell
-
-Con este wrapper integrado, la reducción de dimensionalidad se expresa como una única etapa fluida dentro del pipeline:
-
-Apliquemos primero **PCA** sobre una muestra de 200 vinos de `wine-both.csv`:
+Replicamos ahora la misma proyección PCA sobre 200 observaciones utilizando `tapkee-reduce`, obteniendo exactamente las mismas coordenadas en una sola instrucción:
 
 ```nu
-let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
-open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | select type quality dim_1 dim_2 | first 10
-open wine-both.csv | first 200 | tapkee-reduce --method pca --cols $features | select type quality dim_1 dim_2 | save -f wine_pca_tapkee.csv
+let features = [
+  "fixed_acidity" "volatile_acidity" "citric_acid"
+  "residual_sugar" "chlorides" "free_sulfur_dioxide"
+  "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"
+]
+let pca_res = (
+  open wine-both.csv
+  | first 200
+  | tapkee-reduce --method pca --cols $features
+  | select type quality dim_1 dim_2
+)
+$pca_res | first 5
+$pca_res | save -f wine_pca_tapkee.csv
 ```
 
-Del mismo modo, cambiando únicamente `--method pca` por `--method t-sne`, obtenemos la proyección no lineal **t-SNE** con `tapkee`:
+Cambiando `--method pca` por `--method t-sne` calculamos una incrustación no lineal bidimensional a través de la misma interfaz:
 
 ```nu
-let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
-open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features | select type quality dim_1 dim_2 | first 10
-open wine-both.csv | first 150 | tapkee-reduce --method t-sne --cols $features | select type quality dim_1 dim_2 | save -f wine_tsne_tapkee.csv
+let tsne_res = (
+  open wine-both.csv
+  | first 150
+  | tapkee-reduce --method t-sne --cols $features
+  | select type quality dim_1 dim_2
+)
+$tsne_res | first 5
+$tsne_res | save -f wine_tsne_tapkee.csv
 ```
 
-![Proyecciones bidimensionales obtenidas mediante reducción de dimensionalidad](dscl_0902.png)
+![Proyecciones bidimensionales obtenidas mediante reducción de dimensionalidad](dscl_0902.png){width=85%}
 
 ### Reducción de Dimensionalidad con `Rscript` (`pca_wine.R`)
 
-Veamos el script `pca_wine.R` ubicado en `/data/ch09`, el cual utiliza la función nativa `prcomp(..., center = TRUE, scale. = TRUE)` de R para calcular todas las componentes principales y reportar la proporción de varianza explicada y acumulada de cada componente:
+Mientras que `tapkee` destaca por su velocidad de proyección, el diagnóstico estadístico formal requiere examinar los valores propios y la proporción acumulada de varianza explicada. El script `pca_wine.R` realiza una descomposición en valores singulares estandarizada en R (`prcomp`) y emite el resumen de varianza directamente hacia la salida estándar:
 
 ```nu
 bat pca_wine.R
-Rscript pca_wine.R | from csv
-Rscript pca_wine.R | from csv | save -f wine_pca_r.csv
 ```
 
-Observa cómo las primeras 4 componentes principales resumen más del 64% de la varianza total de las 11 variables químicas originales.
+```r
+#!/usr/bin/env Rscript
+df <- read.csv("wine.csv", stringsAsFactors = FALSE)
+num_cols <- setdiff(names(df), c("type", "quality"))
+pca <- prcomp(df[, num_cols], center = TRUE, scale. = TRUE)
+var_exp <- (pca$sdev^2) / sum(pca$sdev^2) * 100
+
+# Save loadings summary to stdout as CSV
+out <- data.frame(
+  component = paste0("PC", 1:5),
+  std_dev = round(pca$sdev[1:5], 4),
+  pct_variance = round(var_exp[1:5], 2),
+  cum_variance = round(cumsum(var_exp)[1:5], 2)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+
+# Also save 2D coordinates to wine_pca_r.csv
+coords <- data.frame(
+  pc1 = round(pca$x[, 1], 4),
+  pc2 = round(pca$x[, 2], 4),
+  type = df$type,
+  quality = df$quality
+)
+write.csv(coords, "wine_pca_r.csv", row.names = FALSE, quote = FALSE)
+```
+
+Observe las tres etapas estadísticas y de entrada/salida en `pca_wine.R`:
+
+1. **Aislamiento de variables y estandarización z-score:** `setdiff` excluye `type` y `quality`, mientras que `prcomp(..., center = TRUE, scale. = TRUE)` escala las 11 variables a varianza unitaria para evitar que predictores con magnitudes elevadas (como `total_sulfur_dioxide`) dominen artificialmente `PC1`.
+2. **Descomposición espectral de varianza:** Elevar al cuadrado los valores singulares (`pca$sdev^2`) produce los valores propios de cada componente, a partir de los cuales se derivan los porcentajes de varianza marginal (`var_exp`) y acumulada (`cumsum(var_exp)`).
+3. **Doble salida tabular:** `write.csv(out, stdout(), ...)` emite el resumen de 5 componentes hacia la salida estándar para el lector `from csv` de Nushell, mientras almacena las coordenadas bidimensionales completas (`pca$x[, 1:2]`) en `wine_pca_r.csv`.
+
+Ejecutar `Rscript pca_wine.R | from csv` convierte la salida de R en una tabla estructurada de Nushell:
+
+```nu
+let pca_r = (Rscript pca_wine.R | from csv)
+$pca_r
+$pca_r | save -f wine_pca_summary_r.csv
+```
+
+Los primeros cuatro componentes principales explican el 73,37% de la varianza fisicoquímica total entre los 11 predictores (`PC1` por sí solo captura el 27,54%, impulsado por el contraste entre los niveles de dióxido de azufre en vinos blancos y la acidez volátil en tintos).
 
 ### Reducción de Dimensionalidad con Python (`pca_wine.py`)
 
-Revisemos y ejecutemos ahora el script `pca_wine.py`, que utiliza `StandardScaler` y `PCA` de `scikit-learn`:
+El script complementario `pca_wine.py` replica la misma descomposición ortogonal utilizando `scikit-learn`:
 
 ```nu
 bat pca_wine.py
-python3 pca_wine.py | from csv
-python3 pca_wine.py | from csv | save -f wine_pca_py.csv
+```
+
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv("wine.csv")
+feat_cols = [c for c in df.columns if c not in ("type", "quality")]
+X = StandardScaler().fit_transform(df[feat_cols])
+
+pca = PCA(n_components=5, random_state=42)
+coords = pca.fit_transform(X)
+
+proj = pd.DataFrame({
+    "pc1": coords[:, 0].round(4),
+    "pc2": coords[:, 1].round(4),
+    "type": df["type"],
+    "quality": df["quality"],
+})
+proj.to_csv("wine_pca_py.csv", index=False)
+
+pct = pca.explained_variance_ratio_ * 100.0
+summary = pd.DataFrame({
+    "component": [f"PC{i + 1}" for i in range(5)],
+    "explained_variance": pca.explained_variance_.round(4),
+    "pct_variance": pct.round(2),
+    "cum_variance": pct.cumsum().round(2),
+})
+summary.to_csv(sys.stdout, index=False)
+```
+
+Tres elementos clave alinean `pca_wine.py` con su versión en R:
+
+1. **Escalamiento explícito de la matriz:** A diferencia de `prcomp(scale. = TRUE)` en R, la clase `PCA` de `scikit-learn` centra las variables sin escalarlas; aplicar `StandardScaler().fit_transform` con anterioridad asegura una estructura idéntica de autovalores sobre la matriz de correlaciones.
+2. **Proyección por SVD truncada:** `PCA(n_components=5, random_state=42)` extrae los cinco primeros componentes ortogonales y guarda las proyecciones individuales (`pc1`, `pc2`) en `wine_pca_py.csv`.
+3. **Serialización a la salida estándar:** Escribir `summary.to_csv(sys.stdout, index=False)` permite que Nushell capture `explained_variance`, `pct_variance` y `cum_variance` directamente mediante `from csv`.
+
+Ejecutamos `pca_wine.py` y comprobamos que Python y R coinciden con dos decimales de precisión tanto en la varianza marginal como en la acumulada:
+
+```nu
+let pca_py = (python3 pca_wine.py | from csv)
+$pca_py
 ```
 
 ### Diagnóstico de Multicolinealidad (VIF) y Regresión de Componentes Principales (PCR)
 
-En problemas de regresión con múltiples variables predictoras altamente correlacionadas, la estimación por mínimos cuadrados ordinarios (**MCO**) sufre de **multicolinealidad severa**. Esto infla drásticamente la varianza de los coeficientes estimados y torna inestables las predicciones. Una métrica estadística estándar para diagnosticar este fenómeno es el **Factor de Inflación de la Varianza** (**VIF**, *Variance Inflation Factor*):
+La correlación severa entre variables predictoras infla la varianza de las pendientes estimadas por Mínimos Cuadrados Ordinarios (OLS), volviendo los coeficientes inestables ante perturbaciones menores en la muestra. Para cada variable $X_j$, el **Factor de Inflación de la Varianza** se define como $\text{VIF}_j = 1 / (1 - R_j^2)$, donde $R_j^2$ es el coeficiente de determinación obtenido al efectuar la regresión de $X_j$ sobre todas las demás variables predictoras. Valores superiores a 10 indican colinealidad aguda.
 
-$$\text{VIF}_j = \frac{1}{1 - R_j^2}$$
-
-donde $R_j^2$ es el coeficiente de determinación obtenido al regresar la variable predictora $X_j$ sobre todas las demás variables predictoras. Un valor de $\text{VIF} > 10$ (y con mayor razón $\text{VIF} > 100$) señala multicolinealidad crítica.
-
-En `/data/ch09`, el archivo `Fish.csv` contiene variables biométricas de peces (`Length1`, `Length2`, `Length3`, `Height`, `Width`) utilizadas para predecir el peso (`Weight`). Al existir tres medidas longitudinales contiguas, la multicolinealidad es extrema.
-
-El método de **Regresión de Componentes Principales** (**PCR**, *Principal Component Regression*) resuelve este problema proyectando las variables explicativas originales sobre sus componentes principales ortogonales (que tienen covarianza exactamente cero) antes de ajustar la regresión lineal.
-
-Ejecutemos el script `vif_pcr_fish.py` para calcular los valores de VIF y comparar el modelo de regresión múltiple tradicional frente al modelo PCR con 2 componentes principales:
+Utilizando las mediciones morfométricas de 159 peces en `Fish.csv`, el script `vif_pcr_fish.py` calcula los valores exactos de VIF y compara el modelo OLS completo de 5 predictores frente a una **Regresión de Componentes Principales (PCR)** sobre los dos primeros componentes ortogonales:
 
 ```nu
 bat vif_pcr_fish.py
-python3 vif_pcr_fish.py | from csv
-python3 vif_pcr_fish.py | from csv | save -f fish_pcr_py.csv
-open fish_vif_py.csv
 ```
 
-Observemos cómo en Python las variables de longitud presentan valores de VIF superiores a 1.000, mientras que el modelo PCR con solo 2 componentes principales retiene más del 99% de la varianza explicada y logra un $R^2$ casi idéntico al modelo MCO completo sin riesgo de colinealidad.
+```python
+#!/usr/bin/env python3
+import sys
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 
-Ejecutemos también la versión equivalente en R (`vif_pcr_fish.R`):
+df = pd.read_csv("Fish.csv")
+pred_cols = ["Length1", "Length2", "Length3", "Height", "Width"]
+X = df[pred_cols]
+y = df["Weight"]
+
+vif_rows = []
+for col in pred_cols:
+    X_other = X.drop(columns=[col])
+    reg = LinearRegression().fit(X_other, X[col])
+    r2_i = reg.score(X_other, X[col])
+    vif = 1.0 / (1.0 - r2_i) if r2_i < 0.99999 else 9999.0
+    vif_rows.append({"feature": col, "vif": round(float(vif), 2)})
+
+pd.DataFrame(vif_rows).to_csv("fish_vif_py.csv", index=False)
+
+ols = LinearRegression().fit(X, y)
+ols_p = ols.predict(X)
+ols_r2 = r2_score(y, ols_p)
+ols_rmse = np.sqrt(mean_squared_error(y, ols_p))
+
+X_pca = PCA(n_components=2).fit_transform(X)
+pcr = LinearRegression().fit(X_pca, y)
+pcr_p = pcr.predict(X_pca)
+pcr_r2 = r2_score(y, pcr_p)
+pcr_rmse = np.sqrt(mean_squared_error(y, pcr_p))
+
+comp_df = pd.DataFrame([
+    {
+        "model": "Python_OLS_Multiple_Regression",
+        "components": 5,
+        "r2": round(float(ols_r2), 4),
+        "rmse": round(float(ols_rmse), 2),
+    },
+    {
+        "model": "Python_PCR_Principal_Components",
+        "components": 2,
+        "r2": round(float(pcr_r2), 4),
+        "rmse": round(float(pcr_rmse), 2),
+    },
+])
+comp_df.to_csv("fish_pcr_py.csv", index=False)
+comp_df.to_csv(sys.stdout, index=False)
+```
+
+Tres bloques algorítmicos componen `vif_pcr_fish.py`:
+
+1. **Regresiones auxiliares de predictores (`vif_rows`):** Itera sobre los cinco predictores morfométricos, ajustando `X[col]` contra `X_other` para calcular $1 / (1 - R_i^2)$ y exportar la tabla de diagnóstico hacia `fish_vif_py.csv`.
+2. **Ajuste OLS de referencia:** Estima la regresión lineal múltiple sin restricciones sobre las cinco variables correlacionadas, registrando el $R^2$ muestral y la raíz del error cuadrático medio (`ols_rmse`).
+3. **Reducción ortogonal con PCR:** Proyecta `X` en dos ejes principales no correlacionados (`PCA(n_components=2)`) antes de ajustar `LinearRegression`, escribiendo las métricas comparativas en `fish_pcr_py.csv` y `sys.stdout`.
+
+Ejecutar el script en Nushell evidencia una colinealidad extrema entre las tres medidas de longitud (`Length1`, `Length2` y `Length3` superan $\text{VIF} > 1.200$), mientras que dos componentes ortogonales preservan $R^2 \approx 0,87$:
+
+```nu
+python3 vif_pcr_fish.py | from csv
+open fish_vif_py.csv | sort-by vif -r
+```
+
+Validamos la misma comparación de PCR en R mediante `vif_pcr_fish.R`:
 
 ```nu
 bat vif_pcr_fish.R
+```
+
+```r
+#!/usr/bin/env Rscript
+df <- read.csv("Fish.csv")
+pred_cols <- c("Length1", "Length2", "Length3", "Height", "Width")
+X <- df[, pred_cols]
+y <- df$Weight
+
+fit_ols <- lm(Weight ~ ., data = df[, c(pred_cols, "Weight")])
+r2_ols <- summary(fit_ols)$r.squared
+rmse_ols <- sqrt(mean(residuals(fit_ols)^2))
+
+pca <- prcomp(X, scale. = TRUE)
+fit_pcr <- lm(y ~ pca$x[, 1:2])
+r2_pcr <- summary(fit_pcr)$r.squared
+rmse_pcr <- sqrt(mean(residuals(fit_pcr)^2))
+
+out_comp <- data.frame(
+  model = c(
+    "R_OLS_Multiple_Regression", "R_PCR_Principal_Components"
+  ),
+  components = c(5, 2),
+  r2 = round(c(r2_ols, r2_pcr), 4),
+  rmse = round(c(rmse_ols, rmse_pcr), 2)
+)
+write.csv(
+  out_comp, "fish_pcr_r.csv", row.names = FALSE, quote = FALSE
+)
+write.csv(out_comp, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+En `vif_pcr_fish.R`, `lm(Weight ~ .)` ajusta el modelo lineal completo de cinco variables, `prcomp(X, scale. = TRUE)` genera los componentes principales estandarizados (`pca$x[, 1:2]`) y `lm(y ~ pca$x[, 1:2])` efectúa la regresión del peso de los peces sobre esas dos puntuaciones ortogonales antes de emitir la tabla comparativa hacia `stdout()`:
+
+```nu
 Rscript vif_pcr_fish.R | from csv
-Rscript vif_pcr_fish.R | from csv | save -f fish_pcr_r.csv
 ```
 
 ## Agrupamiento o Clustering
 
-El **agrupamiento (*clustering*)** es una tarea de aprendizaje no supervisado cuyo objetivo es particionar un conjunto de $n$ observaciones en $K$ grupos o clústeres disjuntos $C_1, C_2, \dots, C_K$ de modo que las observaciones dentro de un mismo clúster sean lo más similares posible entre sí, y lo más distintas posible a las de otros clústeres.
+El **agrupamiento (*clustering*)** particiona observaciones sin etiquetar en grupos cohesivos, de modo que los registros dentro de un mismo clúster compartan perfiles de atributos similares mientras que las observaciones entre distintos clústeres permanezcan claramente diferenciadas. Debido a que no existe una etiqueta de respuesta supervisada que guíe la optimización, el escalamiento geométrico y la validación estadística posterior determinan si las particiones descubiertas reflejan una estructura empírica genuina o simples artificios numéricos.
 
-El algoritmo **K-Means** busca encontrar los centroides $\boldsymbol{\mu}_1, \dots, \boldsymbol{\mu}_K \in \mathbb{R}^p$ que minimizan la suma de cuadrados dentro de los clústeres (*Within-Cluster Sum of Squares*, WCSS):
+Esta sección examina cuatro familias complementarias de agrupamiento:
 
-$$\underset{C_1, \dots, C_K}{\arg\min} \sum_{k=1}^{K} \sum_{\mathbf{x}_i \in C_k} \|\mathbf{x}_i - \boldsymbol{\mu}_k\|_2^2$$
+- **Clustering K-Means:** Reubicación iterativa de centroides minimizando la suma de cuadrados dentro de los grupos (WCSS).
+- **Clustering Jerárquico Aglomerativo:** Construcción ascendente de dendrogramas mediante el enlace de varianza mínima de Ward.
+- **Validación Multimétrica y Visual de Clústeres:** Selección conjunta de $K$ a través de curvas de codo de inercia, coeficientes de silueta, índices de varianza de Calinski-Harabasz y puntuaciones de Davies-Bouldin.
+- **Métodos Basados en Densidad y Medoides (DBSCAN y PAM):** Aislamiento de valores atípicos morfológicos como ruido explícito y sustitución de promedios aritméticos sensibles por medoides muestrales observados.
 
-Un requisito estadístico indispensable antes de aplicar K-Means sobre variables con distintas unidades físicas (como `total_sulfur_dioxide` en mg/L frente a `density` en g/cm$^3$) es **estandarizar las variables** a media cero y desviación estándar unitaria, para evitar que la variable de mayor escala numérica domine la distancia euclidiana.
+### Clustering K-Means (`kmeans_cluster.py` y `kmeans-cluster`)
 
-### Clustering K-Means con Herramientas CLI (`kmeans-cluster`)
+A diferencia de `tapkee`, compilado como un binario nativo en C++, nuestro pipeline tabular de K-Means delega la optimización numérica en un script auxiliar en Python (`kmeans_cluster.py`) basado en `scikit-learn` y preparado para flujos de datos. Mantener el núcleo computacional en un script `.py` explícito en lugar de incrustar código interpretado dentro de funciones de shell permite inspeccionar, probar y ejecutar la lógica de agrupamiento de forma autónoma antes de integrarla en Nushell.
 
-#### Fundamento del Algoritmo y Estandarización Previa
-
-En tareas de agrupamiento con atributos que presentan órdenes de magnitud muy dispares (por ejemplo, `total_sulfur_dioxide` alcanza valores de hasta 440 mg/L mientras que `density` varía entre 0.98 y 1.03 g/cm$^3$), el cálculo de distancias euclidianas queda completamente sesgado por la variable con mayor varianza escalar. Por tanto, antes de calcular centroides es imperativo aplicar **estandarización $z$-score**:
-
-$$z_{ij} = \frac{x_{ij} - \bar{x}_j}{s_j}$$
-
-#### Implementación del Wrapper: `kmeans-cluster`
-
-En lugar de requerir que el analista escriba manualmente scripts externos de preparación y ajuste cada vez que desea evaluar clústeres, el comando **`kmeans-cluster`** (disponible en `dsin_tools.nu`) encapsula la estandarización, el ajuste del modelo y la asignación de clústeres directamente desde la terminal de Nushell:
+Abra `kmeans_cluster.py` en `/data/ch09` con `bat`:
 
 ```nu
-# Run K-Means clustering on a numeric Nushell table and return cluster assignments.
+bat kmeans_cluster.py
+```
+
+```python
+#!/usr/bin/env python3
+"""Partition numeric columns via standardized K-Means clustering."""
+import argparse
+import sys
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+
+def main():
+    p = argparse.ArgumentParser(description="K-Means CLI helper.")
+    p.add_argument("--input", "-i", default="-")
+    p.add_argument("--k", "-k", type=int, default=2)
+    p.add_argument("--exclude", "-e", default="type")
+    p.add_argument("--cols", "-c", default="")
+    args = p.parse_args()
+
+    src = sys.stdin if args.input == "-" else args.input
+    df = pd.read_csv(src)
+
+    if args.cols:
+        num_cols = [
+            c for c in args.cols.split(",") if c in df.columns
+        ]
+    else:
+        excl = set(
+            x.strip() for x in args.exclude.split(",") if x.strip()
+        )
+        excl.add("type")
+        num_cols = [
+            c for c in df.columns
+            if c not in excl and pd.api.types.is_numeric_dtype(df[c])
+        ]
+
+    X = StandardScaler().fit_transform(df[num_cols])
+    km = KMeans(n_clusters=args.k, n_init=10, random_state=42)
+    labels = km.fit_predict(X)
+    df["cluster"] = [f"cluster_{c + 1}" for c in labels]
+    df.to_csv(sys.stdout, index=False)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Tres decisiones de diseño permiten que `kmeans_cluster.py` opere como un filtro Unix tradicional:
+
+1. **Ingesta desde flujo estándar o archivo (`--input -`):** Leer desde `sys.stdin` cuando `--input` toma el valor predeterminado `"-"` permite que tablas de Nushell serializadas con `to csv` ingresen directamente a Python sin necesidad de archivos intermedios, mientras que `--cols` y `--exclude` evitan que variables de respuesta (`quality`, `type`) contaminen la matriz de atributos.
+2. **Estandarización $z$-score indispensable:** La distancia euclidiana no es invariante ante cambios de escala; sin `StandardScaler()`, la variable `total_sulfur_dioxide` (con valores entre 6 y 440 mg/L) eclipsaría a `chlorides` (entre 0.009 y 0.611 g/L).
+3. **Iteraciones Lloyd multi-inicio deterministas:** La configuración `KMeans(n_clusters=args.k, n_init=10, random_state=42)` ejecuta diez inicializaciones independientes de centroides (`k-means++`), conserva la solución con menor inercia, añade etiquetas legibles (`cluster_1`, ..., `cluster_K`) y canaliza la salida CSV hacia `sys.stdout`.
+
+Antes de utilizar cualquier función envoltorio en Nushell, ejecutamos `kmeans_cluster.py` directamente en un pipeline básico: Nushell serializa `wine-both.csv` a formato CSV sobre la salida estándar, Python calcula dos clústeres estandarizados excluyendo `type` y `quality`, y Nushell procesa el flujo retornado mediante `from csv` para tabular los clústeres frente a las variedades reales en Polars:
+
+```nu
+let raw_km = (
+  open wine-both.csv
+  | to csv
+  | ^python3 kmeans_cluster.py --k 2 --exclude "type,quality"
+  | from csv
+)
+$raw_km
+  | select type quality alcohol volatile_acidity cluster
+  | first 5
+
+$raw_km
+  | polars into-df
+  | polars group-by cluster type
+  | polars agg [
+      (polars col quality | polars count | polars as n_wines)
+      (polars col alcohol | polars mean | polars as mean_alcohol)
+    ]
+  | polars collect
+  | polars into-nu
+  | sort-by cluster type
+```
+
+Observe los resultados en la tabla de contingencia: sin haber accedido jamás a la columna `type`, la partición euclidiana no supervisada en el espacio químico estandarizado de once dimensiones asigna más del 98.5% de los vinos tintos a un grupo y más del 98.5% de los vinos blancos al otro.
+
+Para evitar la serialización manual con `to csv` y `from csv` y aprovechar el autocompletado nativo de argumentos en la terminal, `dsin_tools.nu` define el comando **`kmeans-cluster`**:
+
+```nu
+# Partition numeric columns via standardized K-Means clustering.
 export def kmeans-cluster [
-  --k(-k): int = 2             # Number of clusters K
-  --clusters: int = 0          # Alias for --k
-  --label-col(-l): string      # Optional label column to exclude from features
-  --cols(-c): list<string>     # Optional explicit list of feature columns
+  --k(-k): int = 2
+  --clusters: int = 0
+  --label-col(-l): string
+  --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
-  let n_clusters = if $clusters > 0 { $clusters } else { $k }
-  let tmp_in = mktemp --suffix ".csv"
-  let tmp_py = mktemp --suffix ".py"
+  let n_k = if $clusters > 0 { $clusters } else { $k }
+
+  let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = $label_col | default "type"
-  let cols_csv = if ($cols != null) and (($cols | length) > 0) {
-    $cols | str join ","
-  } else { "" }
+  let lbl = ($label_col | default "type")
+  let cols_flag = if ($cols != null) and (($cols | length) > 0) {
+    ["--cols" ($cols | str join ",")]
+  } else { [] }
 
-  'import sys, pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
+  let bin_p = "/usr/local/bin/kmeans-cluster-py"
+  let py_km = if ($bin_p | path exists) {
+    $bin_p
+  } else if ("/data/ch09/kmeans_cluster.py" | path exists) {
+    "/data/ch09/kmeans_cluster.py"
+  } else {
+    "kmeans_cluster.py"
+  }
 
-df = pd.read_csv(sys.argv[1])
-k = int(sys.argv[2])
-lbl = sys.argv[3]
-cols_arg = sys.argv[4]
-if cols_arg:
-    num_cols = [c for c in cols_arg.split(",") if c in df.columns]
-else:
-    num_cols = [c for c in df.columns if c not in (lbl, "type") and pd.api.types.is_numeric_dtype(df[c])]
-X = StandardScaler().fit_transform(df[num_cols])
-km = KMeans(n_clusters=k, n_init=10, random_state=42)
-clusters = km.fit_predict(X)
-df["cluster"] = [f"cluster_{c+1}" for c in clusters]
-df.to_csv(sys.stdout, index=False)
-' | save -f $tmp_py
-
-  let res = python3 $tmp_py $tmp_in ($n_clusters | into string) $lbl $cols_csv | from csv
-  rm -f $tmp_in $tmp_py
+  let res = (
+    python3 $py_km
+      --input $tmp_in
+      --k $n_k
+      --exclude $lbl
+      ...$cols_flag
+    | from csv
+  )
+  rm -f $tmp_in
   $res
 }
 ```
 
-El script interno automatiza tres operaciones esenciales:
+Dentro de `kmeans-cluster`, Nushell convierte el parámetro `--cols` desde una lista tipada `list<string>` hacia un indicador delimitado por comas mediante expansión de argumentos (`...$cols_flag`), localiza el script instalado (`/usr/local/bin/kmeans-cluster-py`) para permitir su invocación desde cualquier directorio y elimina `$tmp_in` antes de retornar la tabla enriquecida.
 
-1. Filtra los predictores numéricos excluyendo las variables de respuesta o clasificación (`type`).
-2. Aplica `StandardScaler()` para garantizar una escala euclidiana homogénea.
-3. Ajusta `KMeans(n_clusters=k, n_init=10)` y agrega la etiqueta `cluster_1`, `cluster_2`, etc., a cada fila, devolviendo una tabla regular de Nushell lista para agregaciones.
-
-#### Ejecución y Análisis de Contingencia
-
-Apliquemos `kmeans-cluster --k 2` sobre las 11 variables químicas de `wine-both.csv` (sin revelar la columna `type` al algoritmo) y comparemos los clústeres descubiertos contra el tipo real de vino (`red` vs `white`):
+Ejecutar este mismo procedimiento con `kmeans-cluster` reduce la tarea a un pipeline conciso y fuertemente tipado:
 
 ```nu
-let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
-let clustered = open wine-both.csv | kmeans-cluster --k 2 --cols $features
-$clustered | select type quality alcohol volatile_acidity cluster | first 10
-$clustered | select type quality alcohol volatile_acidity cluster | save -f wine_kmeans_cli.csv
+let features = [
+  "fixed_acidity" "volatile_acidity" "citric_acid"
+  "residual_sugar" "chlorides" "free_sulfur_dioxide"
+  "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"
+]
+let clustered = (
+  open wine-both.csv | kmeans-cluster --k 2 --cols $features
+)
+$clustered
+  | select type quality alcohol volatile_acidity cluster
+  | first 5
+$clustered
+  | select type quality alcohol volatile_acidity cluster
+  | save -f wine_kmeans_cli.csv
+
+$clustered
+  | polars into-df
+  | polars group-by cluster type
+  | polars agg [
+      (polars col quality | polars count | polars as n_vinos)
+      (polars col alcohol | polars mean | polars as mean_alcohol)
+    ]
+  | polars collect
+  | polars into-nu
+  | sort-by cluster type
+  | tee { save -f wine_kmeans_contingency.csv }
 ```
 
-Podemos evaluar en Nushell la correspondencia entre los 2 clústeres no supervisados y la clase real `type` agrupando por `cluster` y `type`:
+### Diagnósticos de K-Means en R (`cluster_wine.R`) y Python (`cluster_wine.py`)
 
-```nu
-let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
-open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | polars group-by cluster type | polars agg [(polars col quality | polars count | polars as n_vinos) (polars col alcohol | polars mean | polars as mean_alcohol)] | polars collect | polars into-nu | sort-by cluster type
-open wine-both.csv | kmeans-cluster --k 2 --cols $features | polars into-df | polars group-by cluster type | polars agg [(polars col quality | polars count | polars as n_vinos) (polars col alcohol | polars mean | polars as mean_alcohol)] | polars collect | polars into-nu | sort-by cluster type | save -f wine_kmeans_contingency.csv
-```
-
-¡Incluso sin etiquetas supervisadas, K-Means en el espacio químico estandarizado separa con altísima pureza los vinos tintos de los vinos blancos!
-
-### Clustering K-Means con `Rscript` (`cluster_wine.R`)
-
-Veamos el script `cluster_wine.R` en `/data/ch09`, que ejecuta `kmeans(..., centers = 3, nstart = 20)` en R y resume el tamaño y el perfil químico promedio de cada clúster:
+Al documentar particiones en estudios estadísticos formales, resulta indispensable reportar la suma de cuadrados intra-clúster (`withinss`) y diagnosticar la estabilidad de las soluciones obtenidas. En R, el script `cluster_wine.R` ajusta un modelo K-Means con 20 reinicios aleatorios (`nstart = 20`) y evalúa la pureza de los grupos directamente:
 
 ```nu
 bat cluster_wine.R
-Rscript cluster_wine.R | from csv
-Rscript cluster_wine.R | from csv | save -f wine_clusters_r.csv
 ```
 
-### Clustering K-Means con Python (`cluster_wine.py`)
+```r
+#!/usr/bin/env Rscript
+set.seed(42)
+df <- read.csv("wine.csv", stringsAsFactors = FALSE)
+num_cols <- setdiff(names(df), c("type", "quality"))
+X <- scale(df[, num_cols])
 
-Revisemos y ejecutemos ahora el script `cluster_wine.py` con `scikit-learn` (`KMeans(n_clusters=3, random_state=42, n_init=10)`):
+km <- kmeans(X, centers = 2, nstart = 20)
+df$cluster <- paste0("cluster_", km$cluster)
+
+keep_cols <- c(
+  "type", "quality", "alcohol", "volatile_acidity", "cluster"
+)
+write.csv(
+  df[, keep_cols], "wine_kmeans_r.csv",
+  row.names = FALSE, quote = FALSE
+)
+
+tab <- as.data.frame.matrix(table(df$cluster, df$type))
+out <- data.frame(
+  cluster = rownames(tab),
+  size = as.integer(km$size),
+  withinss = round(km$withinss, 2),
+  red_count = tab$red,
+  white_count = tab$white,
+  dominant_type = ifelse(tab$red > tab$white, "red", "white")
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+Observe cómo `cluster_wine.R` estandariza los predictores mediante `scale()`, ejecuta el algoritmo de Hartigan-Wong sobre 20 inicios independientes (`kmeans(X, centers = 2, nstart = 20)`) y consolida los tamaños muestrales (`km$size`), la dispersión interna (`km$withinss`) y las frecuencias de contingencia (`table(df$cluster, df$type)`) en una tabla CSV emitida directamente a `stdout()`:
+
+```nu
+let km_r = (Rscript cluster_wine.R | from csv)
+$km_r
+$km_r | save -f wine_clusters_r.csv
+```
+
+En Python, el script `cluster_wine.py` explora valores de $K \in \{2, 3, 4, 5\}$ para examinar cómo evolucionan la inercia, el ancho promedio de silueta y las iteraciones de convergencia a medida que se subdividen las observaciones:
 
 ```nu
 bat cluster_wine.py
-python3 cluster_wine.py | from csv
-python3 cluster_wine.py | from csv | save -f wine_clusters_py.csv
 ```
 
-### Clustering Jerárquico Aglomerativo (hclust_fish.R y hclust_fish.py)
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
 
-A diferencia de K-Means, que requiere especificar *a priori* el número de conglomerados $K$ y converge a particiones rígidas, el **clustering jerárquico** (*Hierarchical Clustering*) construye una jerarquía anidada de agrupamientos mediante una matriz de distancias disimilares $\mathbf{D} \in \mathbb{R}^{n \times n}$.
+df = pd.read_csv("wine.csv")
+feat_cols = [c for c in df.columns if c not in ("type", "quality")]
+X = StandardScaler().fit_transform(df[feat_cols])
 
-El enfoque **aglomerativo** (*bottom-up*) inicia con cada observación individual como un clúster unitario y, en cada paso, fusiona el par de clústeres más cercanos de acuerdo a un criterio de enlace (*linkage criterion*). Entre los criterios más robustos en minería de datos destaca el método de **Ward (`ward.D2`)**, que une en cada iteración el par de clústeres que minimiza el incremento en la varianza total dentro de los grupos.
+rows = []
+for k in [2, 3, 4, 5]:
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    labels = km.fit_predict(X)
+    sil = silhouette_score(
+        X, labels, sample_size=1500, random_state=42
+    )
+    if k == 2:
+        keep = ["type", "quality", "alcohol", "volatile_acidity"]
+        df_out = df[keep].copy()
+        df_out["cluster"] = [f"cluster_{c + 1}" for c in labels]
+        df_out.to_csv("wine_kmeans_py.csv", index=False)
+    rows.append({
+        "k_clusters": k,
+        "inertia": round(float(km.inertia_), 2),
+        "silhouette": round(float(sil), 4),
+        "iterations": int(km.n_iter_),
+    })
 
-En `/data/ch09`, disponemos del conjunto `Fish.csv` (159 observaciones de especies de peces comerciales con medidas biométricas: peso, 3 longitudes, altura y ancho). Ejecutemos el script `hclust_fish.R`, que escala las medidas, calcula la matriz de distancias euclidianas, aplica `hclust(d, method = "ward.D2")`, corta el árbol en $K = 3$ grupos mediante `cutree(hc, k = 3)` y resume la correspondencia con las especies dominantes:
+pd.DataFrame(rows).to_csv(sys.stdout, index=False)
+```
+
+Dentro del ciclo, `silhouette_score(..., sample_size=1500, random_state=42)` estima el contraste cohesión-separación en tiempo $O(m^2)$ sobre una submuestra fija para evitar el costo cuadrático de $6{,}497^2$ distancias por pares, guardando las asignaciones para $K = 2$ y transmitiendo la tabla métrica hacia `sys.stdout`:
+
+```nu
+let km_py = (python3 cluster_wine.py | from csv)
+$km_py
+$km_py | save -f wine_clusters_py.csv
+```
+
+### Clustering Jerárquico Aglomerativo (`hclust_fish.R` y `hclust_fish.py`)
+
+A diferencia de K-Means, que requiere prefijar $K$ antes del ajuste, el agrupamiento jerárquico aglomerativo construye un árbol binario completo de uniones (dendrograma) desde $n$ hojas individuales hasta una raíz unificada. El criterio de mínima varianza de Ward (`ward.D2`) fusiona en cada etapa el par de grupos que genera el menor incremento en la suma total de cuadrados intra-clúster.
+
+Comenzamos con la implementación en R contenida en `hclust_fish.R`:
 
 ```nu
 bat hclust_fish.R
-Rscript hclust_fish.R | from csv
-Rscript hclust_fish.R | from csv | save -f fish_hclust_r.csv
 ```
 
-De igual modo, el script `hclust_fish.py` evalúa el clustering jerárquico aglomerativo con `scikit-learn` (`AgglomerativeClustering(linkage="ward")`) para distintos números de clústeres ($K = 2, 3, 4, 5$) calculando el coeficiente de silueta (*Silhouette Score*):
+```r
+#!/usr/bin/env Rscript
+df <- read.csv("Fish.csv", stringsAsFactors = FALSE)
+num_cols <- c(
+  "Weight", "Length1", "Length2", "Length3", "Height", "Width"
+)
+X <- scale(df[, num_cols])
+
+d <- dist(X, method = "euclidean")
+hc <- hclust(d, method = "ward.D2")
+df$cluster <- paste0("cluster_", cutree(hc, k = 3))
+
+keep <- c("Species", "Weight", "Height", "Width", "cluster")
+write.csv(
+  df[, keep], "fish_hclust_r.csv", row.names = FALSE, quote = FALSE
+)
+
+tab <- as.data.frame.matrix(table(df$cluster, df$Species))
+dom_idx <- max.col(tab, ties.method = "first")
+out <- data.frame(
+  cluster = rownames(tab),
+  total_samples = as.integer(rowSums(tab)),
+  dominant_species = colnames(tab)[dom_idx],
+  dominant_count = apply(tab, 1, max)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+Tres operaciones definen `hclust_fish.R`: `dist(X, method = "euclidean")` calcula la matriz de distancias por pares de $159 \times 159$ sobre las variables morfométricas estandarizadas, `hclust(d, method = "ward.D2")` genera el dendrograma de varianza mínima y `cutree(hc, k = 3)` divide el árbol en tres grupos morfológicos cuyas especies biológicas predominantes se resumen mediante `max.col(tab)`:
+
+```nu
+let hc_r = (Rscript hclust_fish.R | from csv)
+$hc_r
+$hc_r | save -f fish_hclust_r.csv
+```
+
+El script complementario `hclust_fish.py` evalúa los coeficientes de silueta a través de cortes de árbol con $K \in \{2, 3, 4, 5\}$ utilizando `AgglomerativeClustering`:
 
 ```nu
 bat hclust_fish.py
-python3 hclust_fish.py | from csv
-python3 hclust_fish.py | from csv | save -f fish_hclust_py.csv
 ```
 
-### Determinación Óptima de K con Evaluación Multimétrica (cluster_eval.py)
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
 
-Uno de los desafíos centrales en minería de datos consiste en seleccionar el número óptimo de clústeres $K$. En lugar de confiar únicamente en una inspección visual subjetiva del método del codo (*Elbow Method*), la práctica rigurosa evalúa simultáneamente múltiples métricas de validación interna:
+df = pd.read_csv("Fish.csv")
+num_cols = [
+    "Weight", "Length1", "Length2", "Length3", "Height", "Width"
+]
+X = StandardScaler().fit_transform(df[num_cols])
 
-1. **Inercia (WCSS)**: Suma de distancias al cuadrado al centroide más cercano (monótonamente decreciente con $K$).
-2. **Coeficiente de Silueta (*Silhouette*)**: Mide cuán similar es un punto a su propio clúster en comparación con el clúster vecino más cercano (rango $[-1, 1]$, valores cercanos a 1 indican conglomerados densos y bien separados).
-3. **Índice Calinski-Harabasz**: Razón entre la dispersión entre clústeres y la dispersión intra-clúster (valores mayores indican mejor separación).
-4. **Índice Davies-Bouldin**: Promedio de similitud máxima de cada clúster con su clúster más semejante (valores menores indican mejor partición).
+rows = []
+for k in [2, 3, 4, 5]:
+    model = AgglomerativeClustering(n_clusters=k, linkage="ward")
+    labels = model.fit_predict(X)
+    sil = silhouette_score(X, labels)
+    if k == 3:
+        df_out = df[["Species", "Weight", "Height", "Width"]].copy()
+        df_out["cluster"] = [f"cluster_{c + 1}" for c in labels]
+        df_out.to_csv("fish_hclust_py.csv", index=False)
+    rows.append({
+        "linkage": "ward",
+        "n_clusters": k,
+        "silhouette": round(float(sil), 4),
+    })
 
-El script `cluster_eval.py` evalúa automáticamente estos 4 criterios sobre el conjunto bancario `banco.csv` (segmentación de clientes en variables estandarizadas de edad, ingreso, gasto en tarjeta e hipoteca) para $K \in [2, 6]$:
+pd.DataFrame(rows).to_csv(sys.stdout, index=False)
+```
+
+Tras el escalamiento $z$-score (`StandardScaler`), `AgglomerativeClustering(n_clusters=k, linkage="ward")` calcula las uniones deterministas de Ward, almacena las asignaciones con $K = 3$ y canaliza las puntuaciones de silueta para cada nivel de corte hacia `sys.stdout`:
+
+```nu
+let hc_py = (python3 hclust_fish.py | from csv)
+$hc_py
+```
+
+### Validación Multimétrica y Diagnóstico Visual del Codo (`cluster_eval.py` y `plot_kmeans_elbow.py`)
+
+Seleccionar la cantidad de grupos $K$ examinando únicamente el decrecimiento monótono de la inercia WCSS puede resultar subjetivo cuando la curvatura del codo es gradual. Una validación rigurosa combina la inercia con criterios analíticos internos de separación:
+
+- **Coeficiente de Silueta ($[-1, 1]$, mayor es mejor):** Contrasta la distancia media intra-clúster $a(i)$ frente a la distancia hacia el clúster vecino más próximo $b(i)$ mediante $(b(i) - a(i)) / \max\{a(i), b(i)\}$.
+- **Índice Calinski-Harabasz (mayor es mejor):** Razón entre la dispersión inter-clúster y la dispersión intra-clúster, ajustada por sus respectivos grados de libertad.
+- **Índice Davies-Bouldin (menor es mejor):** Razón promedio de similitud en el peor de los casos entre cada clúster y su competidor más cercano.
+
+Sobre el conjunto de datos bancarios `banco.csv`, el script `cluster_eval.py` calcula las cuatro métricas para $K \in \{2, \dots, 6\}$ considerando edad, ingresos, gasto en tarjeta y saldo hipotecario de los clientes:
 
 ```nu
 bat cluster_eval.py
-python3 cluster_eval.py | from csv
-python3 cluster_eval.py | from csv | save -f banco_cluster_eval.csv
 ```
 
-Podemos ordenar en Nushell la tabla por coeficiente de silueta descendente para identificar inmediatamente la partición más compacta:
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import (
+    calinski_harabasz_score,
+    davies_bouldin_score,
+    silhouette_score,
+)
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv("banco.csv")
+features = ["edad", "ingreso", "gasto_tarjeta", "hipoteca"]
+X = StandardScaler().fit_transform(df[features])
+
+rows = []
+for k in range(2, 7):
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    labels = km.fit_predict(X)
+    sil = silhouette_score(
+        X, labels, sample_size=1000, random_state=42
+    )
+    ch = calinski_harabasz_score(X, labels)
+    db = davies_bouldin_score(X, labels)
+    rows.append({
+        "k": k,
+        "inertia": round(float(km.inertia_), 2),
+        "silhouette": round(float(sil), 4),
+        "calinski_harabasz": round(float(ch), 2),
+        "davies_bouldin": round(float(db), 4),
+    })
+
+pd.DataFrame(rows).to_csv(sys.stdout, index=False)
+```
+
+En `cluster_eval.py`, `StandardScaler` homogeniza las escalas monetarias y etarias, el ciclo `range(2, 7)` evalúa cada modelo ajustado sobre los tres índices simultáneamente y la exportación `pd.DataFrame(rows).to_csv(sys.stdout, index=False)` emite una tabla de evaluación ordenada directamente en Nushell:
 
 ```nu
-open banco_cluster_eval.csv | sort-by silhouette -r
+let eval_b = (python3 cluster_eval.py | from csv)
+$eval_b | save -f banco_cluster_eval.csv
+$eval_b | sort-by silhouette -r
 ```
 
-### Clustering Basado en Densidad con DBSCAN y K-Medoides con PAM
+Para visualizar la curvatura de la inercia y los puntos máximos de silueta en una exploración más amplia ($K = 2 \dots 10$) sobre `wine-both.csv`, utilizamos el script de diagnóstico gráfico `plot_kmeans_elbow.py`:
 
-Los algoritmos particionales como K-Means asumen que los conglomerados son esféricos, convexos y de tamaño similar. Cuando los datos presentan geometrías complejas o contienen observaciones atípicas extremas (*outliers*), se requieren paradigmas alternativos de agrupamiento:
+```nu
+bat plot_kmeans_elbow.py
+```
 
-1. **DBSCAN (*Density-Based Spatial Clustering of Applications with Noise*)**: Define los clústeres como regiones densas de puntos separadas por regiones de baja densidad. Posee dos parámetros fundamentales: el radio de vecindad $\varepsilon$ (`eps`) y el número mínimo de puntos `min_samples` requeridos para formar un núcleo denso. Aquellos puntos que no pertenecen a ninguna vecindad densa son catalogados automáticamente como **ruido o anomalías** (etiqueta `-1`), sin forzarlos artificialmente dentro de ningún clúster.
-2. **K-Medoides con PAM (*Partitioning Around Medoids*)**: A diferencia de K-Means (que utiliza la media aritmética como centroide, haciéndolo vulnerable a valores atípicos), PAM restringe los centros a **observaciones reales del conjunto de datos** (*medoides*), ofreciendo una partición mucho más robusta ante distribuciones asimétricas y contaminación por valores extremos.
+```python
+#!/opt/modern-ml/bin/python
+"""Render K-Means inertia and silhouette curves (k = 2..10)."""
+import os
+import sys
+import warnings
 
-Ejecutemos el script `dbscan_fish.py` sobre las medidas biométricas estandarizadas de `Fish.csv` (`Weight`, `Length1`, `Length2`, `Length3`, `Height`, `Width`):
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib_cache")
+warnings.filterwarnings("ignore")
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+
+
+def main():
+    csv_in = sys.argv[1] if len(sys.argv) > 1 else "wine-both.csv"
+    png_out = (
+        sys.argv[2] if len(sys.argv) > 2 else "kmeans_elbow.png"
+    )
+
+    df = pd.read_csv(csv_in)
+    drop_c = [c for c in ("type", "quality") if c in df.columns]
+    num_df = df.drop(columns=drop_c).select_dtypes(
+        include=[np.number]
+    )
+    X = StandardScaler().fit_transform(num_df)
+
+    ks = list(range(2, 11))
+    inertias, sils = [], []
+    for k in ks:
+        km = KMeans(n_clusters=k, n_init=10, random_state=42)
+        labels = km.fit_predict(X)
+        inertias.append(km.inertia_)
+        sil = silhouette_score(
+            X, labels, sample_size=1500, random_state=42
+        )
+        sils.append(sil)
+
+    best_k = ks[int(np.argmax(sils))]
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(10.5, 4.2), dpi=130
+    )
+
+    ax1.plot(ks, inertias, "o-", color="#0284c7", lw=2, ms=6)
+    ax1.axvline(best_k, color="#be123c", ls="--", lw=1.2)
+    ax1.set_title("Within-Cluster Inertia", fontweight="bold")
+    ax1.set_xlabel("Number of Clusters (k)")
+    ax1.set_ylabel("Inertia (WCSS)")
+    ax1.set_xticks(ks)
+    ax1.grid(True, ls="--", lw=0.4, alpha=0.5)
+
+    ax2.plot(ks, sils, "s-", color="#0f766e", lw=2, ms=6)
+    ax2.axvline(
+        best_k, color="#be123c", ls="--", lw=1.2,
+        label=f"Optimal k = {best_k}"
+    )
+    ax2.set_title("Mean Silhouette Score", fontweight="bold")
+    ax2.set_xlabel("Number of Clusters (k)")
+    ax2.set_ylabel("Silhouette Score")
+    ax2.set_xticks(ks)
+    ax2.legend(loc="best", frameon=True)
+    ax2.grid(True, ls="--", lw=0.4, alpha=0.5)
+
+    fig.suptitle(
+        f"K-Means Cluster Validation ({csv_in})",
+        fontsize=11.5, fontweight="bold", y=1.01
+    )
+    fig.tight_layout()
+    fig.savefig(png_out, bbox_inches="tight", dpi=130)
+    print(f"Saved {png_out} (optimal k={best_k})")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Observe la estructura de `plot_kmeans_elbow.py`: toma los archivos de entrada y salida mediante argumentos de línea de comandos, estandariza los atributos fisicoquímicos continuos, calcula iteraciones de K-Means con diez reinicios deterministas para cada $K$ y dibuja un panel comparativo dual (curva WCSS en el panel izquierdo y silueta promedio en el panel derecho con una línea vertical destacando el óptimo $K = 2$). Genere `kmeans_elbow.png` y examine el resultado gráfico en la terminal mediante `timg`:
+
+```nu
+python plot_kmeans_elbow.py wine-both.csv kmeans_elbow.png
+timg -g 80x25 kmeans_elbow.png
+```
+
+![Evaluación de clústeres K-Means: curvas de inercia WCSS y coeficiente de silueta](kmeans_elbow.png){width=92%}
+
+### Clustering Basado en Densidad con DBSCAN (`dbscan_fish.py`) y K-Medoides con PAM (`pam_fish.R`)
+
+Los algoritmos K-Means y jerárquicos de Ward asumen implícitamente grupos de morfología esférica y dimensiones similares, lo que los vuelve vulnerables a valores atípicos aislados. **DBSCAN** (*Density-Based Spatial Clustering of Applications with Noise*, Ester et al., 1996) supera estas restricciones descubriendo densidades continuas de geometría arbitraria y marcando de forma explícita las observaciones periféricas como ruido estadístico (etiqueta `-1`).
+
+Examine `dbscan_fish.py` en `/data/ch09`:
 
 ```nu
 bat dbscan_fish.py
-python3 dbscan_fish.py | from csv
-python3 dbscan_fish.py | from csv | save -f fish_dbscan_py.csv
 ```
 
-Observemos cómo DBSCAN aísla automáticamente los ejemplares gigantescos como grupo `-1` (`Ruido / Outliers`) con un peso promedio superior a 1.400 gramos, evitando que distorsionen los clústeres homogéneos de peces medianos y pequeños.
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
 
-Por su parte, el script `pam_fish.R` ejecuta el algoritmo PAM de la librería `cluster` en R para obtener los medoides representativos y la silueta promedio:
+df = pd.read_csv("Fish.csv")
+num_cols = [
+    "Weight", "Length1", "Length2", "Length3", "Height", "Width"
+]
+X = StandardScaler().fit_transform(df[num_cols])
+
+db = DBSCAN(eps=0.9, min_samples=4)
+df["cluster"] = db.fit_predict(X)
+
+grouped = df.groupby("cluster").agg(
+    n_samples=("Species", "count"),
+    avg_weight=("Weight", "mean"),
+    avg_length=("Length1", "mean"),
+    avg_height=("Height", "mean"),
+    avg_width=("Width", "mean"),
+).reset_index()
+
+grouped["cluster_type"] = grouped["cluster"].apply(
+    lambda c: "Noise / Outliers" if c == -1 else f"Cluster {c}"
+)
+cols_out = [
+    "cluster", "cluster_type", "n_samples",
+    "avg_weight", "avg_length", "avg_height", "avg_width",
+]
+out = grouped[cols_out]
+out.to_csv("fish_dbscan_py.csv", index=False)
+out.to_csv(sys.stdout, index=False)
+```
+
+En `dbscan_fish.py`, `StandardScaler` normaliza las seis dimensiones morfométricas para que el radio esférico `eps=0.9` opere uniformemente sobre pesos y longitudes, `DBSCAN(eps=0.9, min_samples=4).fit_predict` asigna puntos centrales a identificadores no negativos y valores anómalos a `-1`, y `groupby("cluster").agg(...)` calcula los promedios morfológicos canalizados hacia `sys.stdout`:
+
+```nu
+python3 dbscan_fish.py | from csv
+```
+
+Observe cómo los especímenes atípicos de gran tamaño (`avg_weight` superior a 1.000 g) quedan aislados en el clúster `-1` (`Noise / Outliers`) en lugar de distorsionar la partición morfológica principal.
+
+Cuando se requiere un número fijo de grupos $K$ pero se necesita robustez ante valores extremos, **Partitioning Around Medoids (PAM)** restringe los centros de los clústeres a observaciones reales de la muestra (*medoides*) y minimiza las disimilitudes por pares en lugar de desviaciones cuadráticas. Su implementación en R se encuentra en `pam_fish.R`:
 
 ```nu
 bat pam_fish.R
+```
+
+```r
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(cluster))
+df <- read.csv("Fish.csv")
+num_cols <- c(
+  "Weight", "Length1", "Length2", "Length3", "Height", "Width"
+)
+X <- scale(df[, num_cols])
+
+fit_pam <- pam(X, k = 3, metric = "euclidean")
+sil <- silhouette(fit_pam)
+avg_sil <- mean(sil[, 3])
+
+out <- data.frame(
+  model = "R_cluster_pam_kmedoids",
+  k_clusters = 3,
+  avg_silhouette = round(avg_sil, 4),
+  cluster_1_size = fit_pam$clusinfo[1, 1],
+  cluster_2_size = fit_pam$clusinfo[2, 1],
+  cluster_3_size = fit_pam$clusinfo[3, 1]
+)
+write.csv(
+  out, "fish_pam_r.csv", row.names = FALSE, quote = FALSE
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+Utilizando la biblioteca `cluster` de R, la función `pam(X, k = 3, metric = "euclidean")` ejecuta las fases BUILD y SWAP sobre atributos estandarizados, `silhouette(fit_pam)` obtiene los anchos de silueta individuales (`sil[, 3]`) y `fit_pam$clusinfo[, 1]` reporta los tamaños de cada clúster hacia la salida estándar:
+
+```nu
 Rscript pam_fish.R | from csv
-Rscript pam_fish.R | from csv | save -f fish_pam_r.csv
 ```
 
 ## Regresión: Predicción de la Calidad del Vino
 
-En el problema de **regresión supervisada**, deseamos aprender una función $f(\mathbf{x}) \approx y$ que prediga una variable respuesta cuantitativa ($y = \text{quality}$) a partir del vector de predictores fisicoquímicos $\mathbf{x} \in \mathbb{R}^{11}$.
+La regresión supervisada aprende una función $f: \mathcal{X} \rightarrow \mathbb{R}$ que predice una respuesta continua a partir de covariables observadas. Para estimar la calidad sensorial del vino ($y \in [0, 10]$) sobre las 4.898 muestras de vino blanco en `wine-white.csv`, contrastamos tres arquitecturas computacionales:
 
-Para evaluar rigurosamente la capacidad de generalización del modelo sobre datos no vistos, dividimos el conjunto de vinos blancos (`wine-white.csv`) en un conjunto de entrenamiento (`wine_train.csv`, primeros 3.500 registros) y un conjunto de prueba (`wine_test.csv`, registros restantes) utilizando las métricas:
+1. **Vowpal Wabbit (`vw`):** Optimización lineal en línea fuera de memoria principal impulsada por descenso de gradiente estocástico y dispersión de atributos mediante hashing.
+2. **Regresión Lineal Múltiple en R (`regress_wine.R`):** Estimación clásica de Mínimos Cuadrados Ordinarios (OLS) con pruebas $t$ paramétricas y valores $p$.
+3. **Regresión Regularizada y Ensambles en Python (`regress_wine.py`):** Regresión Ridge estandarizada ($L_2$) contrastada frente a ensambles no lineales de Random Forest.
 
-- **Error Absoluto Medio (MAE)**: $\text{MAE} = \frac{1}{n}\sum_{i=1}^n |y_i - \hat{y}_i|$
-- **Raíz del Error Cuadrático Medio (RMSE)**: $\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2}$
+### Aprendizaje en Línea con Vowpal Wabbit (`to-vw` y `vw-regress`)
 
-### Regresión en Línea con Vowpal Wabbit (`vw-regress`)
+Los paquetes estadísticos tradicionales alojan matrices densas en memoria RAM antes de calcular un solo paso de gradiente. **Vowpal Wabbit** (Langford et al., 2007) invierte ese diseño: procesa observaciones línea por línea desde la entrada estándar o desde archivos binarios en caché, proyectando nombres arbitrarios de atributos hacia un vector de pesos de tamaño fijo mediante la técnica de hashing y actualizando los coeficientes en tiempo real con descenso de gradiente estocástico (SGD).
 
-#### La Herramienta Base: Vowpal Wabbit (`vw`)
-
-**Vowpal Wabbit (`vw`)** es un sistema de aprendizaje automático de alto rendimiento desarrollado originalmente en Yahoo! Research y mantenido por Microsoft Research bajo el liderazgo de John Langford ([https://vowpalwabbit.org/](https://vowpalwabbit.org/)). Está optimizado para aprendizaje en línea (*online learning*) a gran escala mediante algoritmos de gradiente descendente estocástico (SGD) y trucos de *hashing* de características (*feature hashing*), lo que le permite procesar flujos masivos de datos con consumo de memoria constante.
-
-#### Formato Nativo de Entrada de Vowpal Wabbit
-
-A diferencia de las herramientas estándar que aceptan tablas CSV, `vw` utiliza un formato textual propio altamente eficiente diseñado para representaciones dispersas y espacios de nombres. La estructura formal de cada línea es:
+Cada registro de entrada en Vowpal Wabbit sigue una sintaxis estricta en texto plano:
 
 ```text
-[etiqueta] [peso] [etiqueta_opcional]|EspacioNombres caracteristica1:valor1 caracteristica2:valor2 ...
+[label] [weight] [tag]|Namespace feat1:val1 feat2:val2 ...
 ```
 
-Por ejemplo, una observación del conjunto de datos de vino blanco se expresa como:
+Un registro de vino blanco con calidad sensorial `6`, por ejemplo, serializa sus once variables fisicoquímicas detrás del espacio de nombres `|f` (dividido en dos líneas para mayor claridad visual, aunque registrado en una sola línea en disco):
 
 ```text
-6 |f fixed_acidity:7 volatile_acidity:0.27 citric_acid:0.36 residual_sugar:20.7 chlorides:0.045 free_sulfur_dioxide:45 total_sulfur_dioxide:170 density:1.001 ph:3 pH:3 sulphates:0.45 alcohol:8.8
+6 |f fixed_acidity:7 volatile_acidity:0.27 citric_acid:0.36
+  residual_sugar:20.7 chlorides:0.045 alcohol:8.8 ...
 ```
 
-Donde:
+Tres componentes sintácticos definen el formato de `vw`:
 
-- `6`: valor de la variable respuesta cuantitativa (`quality`).
-- `|f`: el símbolo de barra vertical divide la etiqueta de las características; `f` es el identificador del espacio de nombres (*features*).
-- `fixed_acidity:7 ...`: pares clave-valor numéricos que definen los predictores.
+- `6`: Variable objetivo continua (`quality`).
+- `|f`: Barra vertical que separa la respuesta de los atributos, donde `f` identifica el grupo o espacio de nombres (lo que permite interacciones polinomiales rápidas si se requieren).
+- `fixed_acidity:7 volatile_acidity:0.27 ...`: Pares `nombre:valor` separados por espacios, procesados directamente mediante funciones hash enteras sin necesidad de diccionarios previos de vocabulario.
 
-#### Comandos Base de Entrenamiento y Prueba en `vw`
+#### Preprocesamiento Directo en la Terminal, Ejecución y Pospocesamiento
 
-En la línea de comandos estándar de Unix, el flujo con `vw` consta de dos llamadas fundamentales:
-
-1. **Entrenamiento del modelo:**
-   ```bash
-   vw --data train.vw --final_regressor model.vw --passes 10 -c -l 0.5 --quiet
-   ```
-   - `--data`: archivo de entrenamiento en formato VW.
-   - `--final_regressor`: archivo binario de salida donde se guardan los pesos ajustados del modelo.
-   - `--passes`: número de iteraciones completas sobre los datos.
-   - `-c` / `--cache_file`: genera y utiliza un archivo de caché binario optimizado para relecturas rápidas durante múltiples pasadas.
-   - `-l`: tasa de aprendizaje inicial (*learning rate*) del gradiente descendente.
-   - `--quiet`: suprime las impresiones diagnósticas por cada bloque de registros.
-
-2. **Evaluación y predicción sobre datos de prueba:**
-   ```bash
-   vw --data test.vw -i model.vw -t -p preds.txt --quiet
-   ```
-   - `-i`: carga los pesos del modelo preentrenado.
-   - `-t`: modo prueba (*test-only*), congelando los pesos sin actualizar el modelo.
-   - `-p`: archivo de salida donde se registrarán las predicciones escalares generadas.
-
-#### Implementación de los Wrappers: `to-vw` y `vw-regress`
-
-En Nushell no es necesario depender de herramientas externas como `csv2vw` ni gestionar manualmente archivos intermedios. El módulo `dsin_tools.nu` define dos comandos complementarios:
-
-El conversor **`to-vw`**, que transforma cualquier tabla de Nushell en una lista de cadenas con el formato nativo de Vowpal Wabbit:
+Antes de recurrir a cualquier comando envoltorio, implementamos el flujo completo de Vowpal Wabbit directamente desde Nushell. En primer lugar, dividimos `wine-white.csv` en 3.500 filas de entrenamiento y 1.398 filas de prueba, transformamos cada fila al formato `<quality> |f <col>:<val>` y verificamos la estructura resultante:
 
 ```nu
-# Convert a Nushell table into Vowpal Wabbit (VW) line format.
+let data = open wine-white.csv
+let train = ($data | first 3500)
+let test = ($data | skip 3500)
+let fcols = ($data | columns | where $it != "quality")
+
+$train
+| each { |r|
+    let kv = (
+      $fcols
+      | each { |c| $"($c):($r | get $c)" }
+      | str join " "
+    )
+    $"($r.quality) |f ($kv)"
+  }
+| str join "\n"
+| save -f /tmp/direct_train.vw
+
+$test
+| each { |r|
+    let kv = (
+      $fcols
+      | each { |c| $"($c):($r | get $c)" }
+      | str join " "
+    )
+    $"($r.quality) |f ($kv)"
+  }
+| str join "\n"
+| save -f /tmp/direct_test.vw
+
+open --raw /tmp/direct_train.vw
+| lines
+| first 2
+| each { str substring 0..64 }
+```
+
+Con ambos archivos `.vw` en disco, invocamos el binario en C++ `^vw` en dos pasos: primero para optimizar los coeficientes bajo pérdida cuadrática a lo largo de 15 pasadas (almacenando los atributos procesados en `/tmp/direct.cache` para acelerar iteraciones sucesivas), y luego en modo de evaluación congelada (`-t`) para emitir predicciones continuas hacia `/tmp/direct_preds.txt`:
+
+```nu
+(
+  ^vw --data /tmp/direct_train.vw
+    --final_regressor /tmp/direct_model.vw
+    --passes 15 -l 0.5
+    --cache_file /tmp/direct.cache --quiet
+)
+(
+  ^vw --data /tmp/direct_test.vw
+    -i /tmp/direct_model.vw -t
+    -p /tmp/direct_preds.txt --quiet
+)
+```
+
+Cinco parámetros gobiernan esta interacción:
+
+- `--final_regressor`: Guarda los pesos calculados en un archivo binario compacto.
+- `--passes 15` y `--cache_file`: Lee 15 épocas sobre la caché binaria evitando reprocesar el texto ASCII en cada pasada.
+- `-l 0.5`: Define la tasa de aprendizaje base para el descenso estocástico.
+- `-i` y `-t`: Carga el regresor entrenado y desactiva las actualizaciones de gradiente durante la evaluación sobre la muestra de prueba.
+- `-p`: Registra una predicción numérica por muestra en el archivo de texto.
+
+Dado que `vw` emite valores numéricos simples sin encabezados ni referencias originales, procesamos `/tmp/direct_preds.txt` en Nushell, vinculamos cada predicción con `$test.quality` mediante `zip`, calculamos residuos con signo y absolutos, y eliminamos los archivos temporales:
+
+```nu
+let raw_p = (
+  open --raw /tmp/direct_preds.txt
+  | lines
+  | where ($it | str trim | is-not-empty)
+  | each { into float }
+)
+let obs_y = ($test.quality | each { into float })
+
+let direct_vw = (
+  $obs_y | zip $raw_p | each { |pair|
+    let obs = $pair.0
+    let pred = ($pair.1 | math round -p 4)
+    {
+      observed: $obs
+      predicted: $pred
+      error: (($pred - $obs) | math round -p 4)
+      abs_error: (($obs - $pred) | math abs | math round -p 4)
+    }
+  }
+)
+rm -rf /tmp/direct_train.vw /tmp/direct_test.vw
+rm -rf /tmp/direct_model.vw /tmp/direct_preds.txt /tmp/direct.cache
+$direct_vw | first 5
+```
+
+#### Encapsulando el Flujo de Trabajo en `to-vw` y `vw-regress`
+
+Reescribir manualmente ciclos de interpolación de cadenas, rutas de caché y operaciones `zip` entre experimentos propicia inconsistencias. En `dsin_tools.nu`, dos comandos modulares automatizan estas etapas. Primero, **`to-vw`** estandariza la serialización de registros para cualquier variable objetivo y espacio de nombres:
+
+```nu
+# Convert a Nushell table into Vowpal Wabbit line format.
 export def to-vw [
-  --target(-t): string = "quality" # Name of target column
-  --namespace(-n): string = "f"    # Feature namespace label
+  --target(-t): string = "quality"
+  --namespace(-n): string = "f"
 ]: table -> list<string> {
   let tbl = $in
-  let cols = $tbl | columns | where $it != $target
+  let cols = ($tbl | columns | where $it != $target)
   $tbl | each { |row|
-    let y = $row | get $target
-    let feats = $cols | each { |c| $"($c):($row | get $c)" } | str join " "
+    let y = ($row | get $target)
+    let feats = (
+      $cols
+      | each { |c| $"($c):($row | get $c)" }
+      | str join " "
+    )
     $"($y) |($namespace) ($feats)"
   }
 }
 ```
 
-Y el comando orquestador **`vw-regress`**, que entrena el modelo sobre una tabla de entrenamiento, infiere predicciones sobre la tabla de prueba y devuelve una tabla estructurada de Nushell:
+En segundo lugar, **`vw-regress`** aplica `to-vw` sobre ambas tablas dentro de un directorio aislado generado con `mktemp -d`, ejecuta las dos fases con `^vw`, reconstruye la tabla tipada de residuos mediante `zip` y elimina todos los archivos binarios intermedios antes de retornar:
 
 ```nu
-# Train and evaluate a Vowpal Wabbit regression model and return predictions as a Nushell table.
+# Train and evaluate a Vowpal Wabbit regression model.
 export def vw-regress [
   train_tbl: table
   test_tbl: table
@@ -6056,93 +6793,255 @@ export def vw-regress [
   --passes(-p): int = 10
   --learning-rate(-l): float = 0.5
 ]: nothing -> table {
-  let tmp_dir = mktemp -d
+  let tmp_dir = (mktemp -d)
   let train_vw = $"($tmp_dir)/train.vw"
   let test_vw = $"($tmp_dir)/test.vw"
   let model_file = $"($tmp_dir)/model.vw"
   let pred_file = $"($tmp_dir)/preds.txt"
+  let cache_file = $"($tmp_dir)/train.cache"
 
-  $train_tbl | to-vw --target $target | str join "\n" | save -f $train_vw
-  $test_tbl | to-vw --target $target | str join "\n" | save -f $test_vw
+  $train_tbl
+    | to-vw --target $target
+    | str join "\n"
+    | save -f $train_vw
+  $test_tbl
+    | to-vw --target $target
+    | str join "\n"
+    | save -f $test_vw
 
-  vw --data $train_vw --final_regressor $model_file --passes $passes -l $learning_rate --cache_file $"($tmp_dir)/train.cache" --quiet
-  vw --data $test_vw -i $model_file -t -p $pred_file --quiet
+  let train_args = [
+    "--data" $train_vw
+    "--final_regressor" $model_file
+    "--passes" ($passes | into string)
+    "-l" ($learning_rate | into string)
+    "--cache_file" $cache_file
+    "--quiet"
+  ]
+  ^vw ...$train_args
+  ^vw --data $test_vw -i $model_file -t -p $pred_file --quiet
 
-  let preds = open --raw $pred_file | lines | where ($it | str trim | is-not-empty) | each { |x| $x | into float }
-  let actuals = $test_tbl | get $target | each { |x| $x | into float }
+  let preds = (
+    open --raw $pred_file
+    | lines
+    | where ($it | str trim | is-not-empty)
+    | each { |x| $x | into float }
+  )
+  let actuals = (
+    $test_tbl | get $target | each { |x| $x | into float }
+  )
+
+  let rows = (
+    $actuals | zip $preds | each { |pair|
+      let obs = $pair.0
+      let pr = ($pair.1 | math round -p 4)
+      {
+        observed: $obs
+        predicted: $pr
+        error: (($pr - $obs) | math round -p 4)
+        abs_error: (($obs - $pr) | math abs | math round -p 4)
+      }
+    }
+  )
 
   rm -rf $tmp_dir
-
-  $actuals | zip $preds | each { |pair|
-    let obs = $pair.0
-    let pred = $pair.1 | math round -p 4
-    let signed_err = (($pred - $obs) | math round -p 4)
-    let err = (($obs - $pred) | math abs | math round -p 4)
-    { actual: $obs, observed: $obs, predicted: $pred, error: $signed_err, abs_error: $err }
-  }
+  $rows
 }
 ```
 
-#### Ejecución del Pipeline en Nushell
+#### Reejecución Comparativa con `to-vw` y `vw-regress`
 
-Evaluemos el modelo entrenando sobre los primeros 3.500 vinos blancos y prediciendo sobre los 1.398 restantes:
+Con estos comandos disponibles en la shell, el procedimiento completo se reduce a una sola llamada reproducible:
 
 ```nu
 let data = open wine-white.csv
-let train = $data | first 3500
-let test = $data | skip 3500
-let preds = vw-regress $train $test --target quality --passes 15
-$preds | first 10
+let train = ($data | first 3500)
+let test = ($data | skip 3500)
+
+let preds = (vw-regress $train $test --passes 15 --learning-rate 0.5)
+$preds | first 5
 $preds | save -f wine_vw_predictions.csv
-```
 
-Calculemos el MAE y el error medio directamente en Nushell a partir de las predicciones de `vw-regress` y guardémoslos en un archivo resumen:
-
-```nu
-let preds = open wine_vw_predictions.csv
-let metrics = {model: "Vowpal Wabbit (SGD)", n_test: ($preds | length), mae: ($preds.abs_error | math avg | math round --precision 4), bias: ($preds.error | math avg | math round --precision 4)}
-$metrics
-[$metrics] | save -f wine_vw_metrics.csv
+let mae = ($preds.abs_error | math avg | math round -p 4)
+$"VW Test MAE: ($mae)"
 ```
 
 ### Regresión Lineal Múltiple con `Rscript` (`regress_wine.R`)
 
-Veamos el script `regress_wine.R`, que ajusta un modelo lineal clásico por mínimos cuadrados ordinarios (`lm(quality ~ ., data = train)`) sobre los primeros 3.500 registros, evalúa el RMSE y MAE en el conjunto de prueba y devuelve los coeficientes estimados ($\hat{\beta}_j$, error estándar, estadístico $t$ y valor $p$):
+Para contrastar el descenso de gradiente estocástico de `vw` frente a la inferencia analítica exacta de Mínimos Cuadrados Ordinarios, examine `regress_wine.R` en `/data/ch09`:
 
 ```nu
 bat regress_wine.R
-Rscript regress_wine.R | from csv
-Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
 ```
 
-Podemos filtrar en Nushell únicamente los predictores estadísticamente significativos al nivel $\alpha = 0.01$:
+```r
+#!/usr/bin/env Rscript
+set.seed(42)
+df <- read.csv("wine-white.csv", stringsAsFactors = FALSE)
+
+n <- nrow(df)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train <- df[train_idx, ]
+test  <- df[-train_idx, ]
+
+fit <- lm(quality ~ ., data = train)
+preds <- predict(fit, newdata = test)
+
+# Save predictions vs observed
+out_preds <- data.frame(
+  observed = test$quality,
+  predicted = round(preds, 4),
+  abs_error = round(abs(test$quality - preds), 4)
+)
+write.csv(
+  out_preds, "wine_lm_predictions_r.csv",
+  row.names = FALSE, quote = FALSE
+)
+
+# Output model coefficients to stdout as CSV
+coefs <- summary(fit)$coefficients
+out <- data.frame(
+  term = rownames(coefs),
+  estimate = round(coefs[, "Estimate"], 5),
+  std_error = round(coefs[, "Std. Error"], 5),
+  t_value = round(coefs[, "t value"], 3),
+  t_stat = round(coefs[, "t value"], 3),
+  p_value = signif(coefs[, "Pr(>|t|)"], 4)
+)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+Tres etapas analíticas articulan `regress_wine.R`:
+
+1. **Partición sembrada 80/20 y ajuste OLS mediante descomposición QR:** Fijar `set.seed(42)` extrae una muestra de entrenamiento del 80% (`idx`) antes de que `lm(quality ~ ., data = train)` resuelva las ecuaciones normales vía descomposición QR considerando los once predictores fisicoquímicos.
+2. **Registro de residuos fuera de muestra:** `predict(fit, newdata = test)` evalúa las muestras de prueba y almacena las predicciones puntuales junto con sus errores absolutos en `wine_lm_predictions_r.csv` (en la Sección 9.5 analizaremos visualmente la geometría completa de los residuos OLS).
+3. **Tabla de inferencia paramétrica hacia `stdout()`:** Extraer `summary(fit)$coefficients` expone $\hat{\beta}_j$, $\text{SE}(\hat{\beta}_j)$, estadísticos $t$ y valores $p$ bilaterales como texto CSV limpio para su ingesta directa en Nushell.
+
+Ejecutar `regress_wine.R` y procesar su salida estándar con `from csv` permite clasificar los predictores estadísticamente significativos ($\alpha = 0.01$) según la magnitud de su efecto:
 
 ```nu
-open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r
-open wine_regression_r.csv | where p_value < 0.01 | sort-by t_stat -r | save -f wine_significant_predictors.csv
+Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
+let sig = (
+  open wine_regression_r.csv
+  | where p_value < 0.01
+  | sort-by t_stat -r
+)
+$sig
+$sig | save -f wine_significant_predictors.csv
 ```
 
-### Regresión Regularizada (Ridge) con Python (`regress_wine.py`)
+### Regresión Regularizada (Ridge) y Ensambles en Python (`regress_wine.py`)
 
-Ejecutemos ahora el script `regress_wine.py`, que estandariza los predictores y ajusta una regresión Ridge ($\ell_2$) con `scikit-learn`:
+Dado que densidad, azúcar residual y alcohol muestran una marcada colinealidad en los vinos blancos, los coeficientes de Mínimos Cuadrados Ordinarios sin penalización pueden sufrir de varianza inflada, mientras que los modelos puramente lineales no capturan interacciones complejas de umbral. El script `regress_wine.py` evalúa un modelo lineal regularizado $L_2$ (`Ridge`) frente a un ensamble no lineal de 100 árboles mediante `RandomForestRegressor` sobre una partición 80/20 idéntica:
 
 ```nu
 bat regress_wine.py
-python3 regress_wine.py | from csv
-python3 regress_wine.py | from csv | save -f wine_regression_py.csv
+```
+
+```python
+#!/usr/bin/env python3
+import sys
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv("wine-white.csv")
+X = df.drop(columns=["quality"])
+y = df["quality"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+models = {
+    "Ridge(alpha=1.0)": make_pipeline(
+        StandardScaler(), Ridge(alpha=1.0)
+    ),
+    "RandomForest(n=100)": RandomForestRegressor(
+        n_estimators=100, random_state=42, n_jobs=4
+    ),
+}
+
+rows = []
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+    mae = mean_absolute_error(y_test, preds)
+    rmse = np.sqrt(mean_squared_error(y_test, preds))
+    r2 = r2_score(y_test, preds)
+    rows.append({
+        "model": name,
+        "mae": round(float(mae), 4),
+        "rmse": round(float(rmse), 4),
+        "r2": round(float(r2), 4),
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("wine_reg_metrics_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+```
+
+Tres elecciones de diseño aportan solidez a `regress_wine.py` dentro de un pipeline de shell:
+
+1. **Estandarización sin fuga de datos (`make_pipeline`):** Integrar `StandardScaler()` y `Ridge(alpha=1.0)` dentro de un mismo pipeline asegura que las medias y desviaciones de las covariables se calculen estrictamente sobre `X_train` antes de contraer los pesos colineales bajo la penalización $L_2$ $\alpha \|\beta\|_2^2$.
+2. **Referencia no lineal de ensamble (`RandomForestRegressor`):** Ajustar 100 árboles de decisión generados por remuestreo con reemplazo (`n_jobs=4`) captura interacciones de orden superior entre alcohol, acidez volátil y dióxido de azufre libre sin ingeniería manual de atributos.
+3. **Emisión dual en CSV:** Escribir las métricas en muestra de prueba (`mae`, `rmse` y `r2`) tanto en `wine_reg_metrics_py.csv` como en `sys.stdout` permite a Nushell comparar la generalización paramétrica y no paramétrica en una sola línea de comandos:
+
+```nu
+python regress_wine.py | from csv
+python regress_wine.py | from csv | save -f wine_regression_py.csv
 ```
 
 ## Clasificación Supervisada
 
-Finalmente, abordemos el problema de **clasificación supervisada**: predecir una etiqueta categórica discreta (por ejemplo, si un vino es tinto o blanco en `wine-both.csv`, o si un cliente bancario aceptará un préstamo en `banco.csv`) a partir de sus atributos.
+La clasificación supervisada aprende una regla de decisión discreta $f: \mathcal{X} \rightarrow \{1, \dots, C\}$ que separa clases categóricas, tales como vinos tintos (`red`) frente a blancos (`white`) en `wine-both.csv` o suscriptores de créditos personales (`prestamo` $\in \{0, 1\}$) en el conjunto de datos de telemarketing bancario `banco.csv`. A lo largo de las siguientes subsecciones, avanzamos desde ejecutores declarativos de experimentos en la línea de comandos hacia clasificadores paramétricos, no paramétricos, de núcleos (*kernels*) y redes neuronales en R y Python.
 
-### Experimentos de Clasificación con SKLL (`run_experiment` + `skll-metrics`)
+### Experimentos de Clasificación con SKLL (`run_experiment` y `skll-metrics`)
 
-#### La Herramienta Base: SciKit-Learn Laboratory (`skll`)
+#### Experimentación Declarativa con SciKit-Learn Laboratory (`skll`)
 
-**SKLL** (*SciKit-Learn Laboratory*, pronunciado *skull*) es un entorno de línea de comandos desarrollado por Educational Testing Service (ETS) para automatizar experimentos reproducibles de aprendizaje automático con `scikit-learn` sin requerir código Python repetitivo ([https://skll.readthedocs.io/](https://skll.readthedocs.io/)).
+**SKLL** (*SciKit-Learn Laboratory*, pronunciado *skull*) es un entorno de línea de comandos desarrollado por Educational Testing Service (ETS) para ejecutar comparaciones reproducibles entre múltiples algoritmos de `scikit-learn` a partir de archivos de configuración `.cfg` en texto plano, sin necesidad de escribir scripts repetitivos de soporte ([https://skll.readthedocs.io/](https://skll.readthedocs.io/)).
 
-La ejecución se gobierna íntegramente mediante un archivo de configuración declarativo `.cfg`. En `/data/ch09` disponemos de `classify.cfg`, cuya estructura examinamos a continuación:
+En lugar de leer un único archivo arbitrario, SKLL requiere directorios separados `train/` y `test/` que contengan tablas de atributos alineadas con un identificador unívoco de muestra (`id`) y una columna objetivo (`type`). En `/data/ch09`, las carpetas `train/features.csv` y `test/features.csv` ya están preparadas; sin embargo, construir esa partición balanceada desde cero en Nushell toma una sola expresión. Creamos una réplica en `/tmp/skll_demo` para examinar cada etapa de preprocesamiento e inspeccionamos el esquema de `train/features.csv`:
+
+```nu
+mkdir /tmp/skll_demo/train /tmp/skll_demo/test
+let red = (open wine-red.csv | insert type "red")
+let n_red = ($red | length)
+let white_s = (
+  open wine-white.csv
+  | insert type "white"
+  | first $n_red
+)
+let bal = (
+  $red
+  | append $white_s
+  | enumerate
+  | each { |r| $r.item | insert id $r.index }
+)
+let n_test = (($bal | length) * 0.2 | into int)
+$bal | first $n_test | save -f /tmp/skll_demo/test/features.csv
+$bal | skip $n_test | save -f /tmp/skll_demo/train/features.csv
+rm -rf /tmp/skll_demo
+
+open train/features.csv
+| select id type alcohol volatile_acidity chlorides
+| first 3
+```
+
+Ahora examine `classify.cfg` en `/data/ch09` mediante `bat`:
+
+```nu
+bat classify.cfg
+```
 
 ```ini
 [General]
@@ -6152,35 +7051,55 @@ task = evaluate
 [Input]
 train_directory = train
 test_directory = test
-featuresets = [["features.csv"]]
-learners = ["LogisticRegression", "RandomForestClassifier", "LinearSVC"]
+featuresets = [["features"]]
+feature_scaling = both
 label_col = type
+id_col = id
+shuffle = true
+learners = [
+    "KNeighborsClassifier",
+    "LogisticRegression",
+    "DecisionTreeClassifier",
+    "RandomForestClassifier"
+  ]
+suffix = .csv
 
 [Tuning]
 grid_search = false
-objectives = ['accuracy']
+objectives = ["accuracy"]
+param_grids = [{}, {}, {}, {}]
 
 [Output]
-results_directory = output
-log = output
+logs = output
+results = output
+predictions = output
+models = output
 ```
 
-Los bloques principales definen:
+Cuatro secciones INI estructuran el experimento:
 
-- `task = evaluate`: evalúa los modelos especificados sobre el conjunto de prueba independiente (`test_directory`).
-- `learners`: lista de algoritmos de `scikit-learn` a entrenar y comparar de manera competitiva en paralelo.
-- `label_col`: columna con la variable respuesta o etiqueta supervisada.
-- `results_directory`: carpeta donde SKLL guardará las predicciones detalladas y el archivo de resumen consolidado `wine_summary.tsv`.
+1. **`[General]`:** Asigna el nombre del estudio (`wine`) y define `task = evaluate` para que SKLL entrene cada clasificador sobre `train_directory` y lo evalúe una sola vez sobre `test_directory`.
+2. **`[Input]`:** Especifica las rutas hacia `train/features.csv` y `test/features.csv` (`featuresets` + `suffix`), aplica estandarización $z$-score sobre las covariables (`feature_scaling = both`), define `id` y `type`, e indica cuatro clasificadores de `scikit-learn`.
+3. **`[Tuning]`:** Desactiva la búsqueda en malla de hiperparámetros (`grid_search = false`) para garantizar una comparación base determinista mientras optimiza la exactitud (`accuracy`).
+4. **`[Output]`:** Canaliza modelos serializados, predicciones individuales, archivos JSON y el informe consolidado `output/wine_summary.tsv` hacia la carpeta `output/`.
 
-El comando base para iniciar el experimento desde la terminal es:
+#### Ejecución Directa en CLI y Pospocesamiento de TSV en Nushell
 
-```bash
-run_experiment -l classify.cfg
+Invoque el binario nativo `^run_experiment` directamente, revise los archivos generados en `output/` y procese `output/wine_summary.tsv` con el lector TSV integrado de Nushell:
+
+```nu
+^run_experiment -l classify.cfg out+err> /dev/null
+ls output/wine* | select name size | first 5
+open output/wine_summary.tsv
+| select learner_name feature_scaling accuracy
+| sort-by accuracy -r
 ```
 
-#### Implementación del Wrapper: `skll-metrics`
+Dado que SKLL genera más de treinta columnas de diagnóstico en `wine_summary.tsv` (marcas de tiempo, identificadores de pliegues, matrices de confusión y metadatos de ejecución), comparar modelos interactivamente exige proyectar `learner_name` y `accuracy` tras cada ejecución.
 
-Para incorporar los resultados de SKLL de forma transparente a los pipelines de Nushell sin necesidad de recurrir a herramientas clásicas de corte de columnas, el módulo `dsin_tools.nu` proporciona el comando **`skll-metrics`**:
+#### Encapsulando la Proyección de Métricas en `skll-metrics`
+
+En `dsin_tools.nu`, la función **`skll-metrics`** encapsula la resolución de rutas por defecto y la selección de columnas en un comando directo:
 
 ```nu
 # Parse SKLL experiment summary TSV into a clean Nushell table.
@@ -6198,155 +7117,723 @@ export def skll-metrics [
 }
 ```
 
-#### Ejecución y Comparación Tabular
+#### Reejecución Comparativa con `skll-metrics`
 
-Inspeccionemos `classify.cfg`, ejecutemos `run_experiment` y procesemos el resultado con `skll-metrics`:
+Invocar `skll-metrics` después de `run_experiment` extrae la tabla de rendimiento de los cuatro clasificadores directamente hacia Nushell, lista para su exportación a CSV:
 
 ```nu
-open --raw classify.cfg
-run_experiment -l classify.cfg
+^run_experiment -l classify.cfg out+err> /dev/null
 skll-metrics output/wine_summary.tsv
-skll-metrics output/wine_summary.tsv | save -f wine_skll_summary.csv
+skll-metrics output/wine_summary.tsv
+| save -f wine_skll_summary.csv
 ```
 
-### Clasificación con Regresión Logística en `Rscript` (`classify_wine.R`)
+### Regresión Logística Binomial con `Rscript` (`classify_wine.R`)
 
-Veamos y ejecutemos el script `classify_wine.R` en `/data/ch09`, que entrena un modelo lineal generalizado binomial (`glm(is_red ~ ., family = binomial())`) sobre una muestra estratificada de entrenamiento y evalúa su exactitud, sensibilidad y especificidad sobre el conjunto de prueba:
+Para complementar el análisis declarativo de SKLL con un modelo lineal generalizado (GLM) paramétrico sobre las mismas particiones `train/features.csv` y `test/features.csv`, examine `classify_wine.R`:
 
 ```nu
 bat classify_wine.R
-Rscript classify_wine.R | from csv
-Rscript classify_wine.R | from csv | save -f wine_classification_r.csv
 ```
 
-### Clasificación con Random Forest en Python (`classify_wine.py`)
+```r
+#!/usr/bin/env Rscript
+train <- read.csv("train/features.csv", stringsAsFactors = FALSE)
+test  <- read.csv("test/features.csv", stringsAsFactors = FALSE)
 
-Revisemos y ejecutemos `classify_wine.py`, que entrena un clasificador de Bosques Aleatorios (*Random Forest*) con 100 árboles en `scikit-learn` y devuelve la tabla de importancia de variables (*feature importances*) junto con la exactitud en prueba (`test_accuracy`):
+train$target <- ifelse(train$type == "red", 1, 0)
+test$target  <- ifelse(test$type == "red", 1, 0)
+
+predictors <- setdiff(names(train), c("id", "type", "target"))
+formula_str <- paste(
+  "target ~", paste(predictors, collapse = " + ")
+)
+
+fit <- glm(
+  as.formula(formula_str),
+  data = train,
+  family = binomial(link = "logit")
+)
+probs <- predict(fit, newdata = test, type = "response")
+preds <- ifelse(probs >= 0.5, 1, 0)
+
+tp <- sum(preds == 1 & test$target == 1)
+tn <- sum(preds == 0 & test$target == 0)
+fp <- sum(preds == 1 & test$target == 0)
+fn <- sum(preds == 0 & test$target == 1)
+
+acc <- (tp + tn) / nrow(test)
+prec <- tp / (tp + fp)
+rec <- tp / (tp + fn)
+f1 <- 2 * prec * rec / (prec + rec)
+
+out <- data.frame(
+  model = "R_glm_binomial",
+  accuracy = round(acc, 4),
+  precision_red = round(prec, 4),
+  recall_red = round(rec, 4),
+  f1_red = round(f1, 4),
+  tp = tp, tn = tn, fp = fp, fn = fn
+)
+write.csv(out, "wine_clf_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+Tres etapas articulan `classify_wine.R`:
+
+1. **Construcción programática de la fórmula:** La función `setdiff` excluye identificadores no predictivos (`id`, `type`, `target`) antes de que `paste` ensamble la especificación aditiva completa `target ~ fixed_acidity + ...`.
+2. **Estimación de máxima verosimilitud vía IRLS:** `glm(..., family = binomial(link = "logit"))` estima los coeficientes en escala log-odds mediante mínimos cuadrados ponderados iterativos, mientras que `predict(..., type = "response")` proyecta las predicciones lineales a través de la función sigmoide logística $\sigma(\eta) = (1 + e^{-\eta})^{-1}$ y clasifica con un umbral de $0.5$.
+3. **Descomposición de la matriz de confusión:** Conteos explícitos de verdaderos positivos (`tp`), verdaderos negativos (`tn`), falsos positivos (`fp`) y falsos negativos (`fn`) acompañan a las métricas de precisión, sensibilidad y valor $F_1$ sobre la salida estándar:
+
+```nu
+Rscript classify_wine.R | from csv
+Rscript classify_wine.R
+| from csv
+| save -f wine_classification_r.csv
+```
+
+### Clasificación con Regresión Logística y Random Forest en Python (`classify_wine.py`)
+
+En Python, el script `classify_wine.py` evalúa un pipeline de `LogisticRegression` regularizado con norma $L_2$ junto con un clasificador `RandomForestClassifier` de 100 árboles sobre las particiones idénticas de entrenamiento y prueba:
 
 ```nu
 bat classify_wine.py
-python3 classify_wine.py | from csv
-python3 classify_wine.py | from csv | save -f wine_classification_py.csv
 ```
 
-Observa cómo `total_sulfur_dioxide`, `chlorides` y `volatile_acidity` emergen consistentemente como las variables más discriminantes para distinguir entre vinos tintos y blancos.
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
-### Árboles de Decisión con R y Python (dt_banco.R y dt_banco.py)
+train = pd.read_csv("train/features.csv")
+test = pd.read_csv("test/features.csv")
 
-Los **árboles de decisión** (*Decision Trees*) representan una familia fundamental de modelos supervisados no paramétricos ampliamente utilizados en minería de datos por su alta interpretabilidad y capacidad para modelar relaciones no lineales sin requerir escalado previo de atributos.
+features = [c for c in train.columns if c not in ("id", "type")]
+X_train = train[features]
+y_train = (train["type"] == "red").astype(int)
+X_test = test[features]
+y_test = (test["type"] == "red").astype(int)
 
-Evaluemos la predicción de aceptación de préstamos sobre `banco.csv` (5.000 clientes) utilizando `rpart` en R (`dt_banco.R` con profundidad máxima de 4 niveles):
+models = {
+    "Python_LogisticRegression": make_pipeline(
+        StandardScaler(),
+        LogisticRegression(max_iter=500, random_state=42),
+    ),
+    "Python_RandomForestClassifier": RandomForestClassifier(
+        n_estimators=100, random_state=42, n_jobs=4
+    ),
+}
+
+rows = []
+for name, clf in models.items():
+    clf.fit(X_train, y_train)
+    preds = clf.predict(X_test)
+    rows.append({
+        "model": name,
+        "accuracy": round(float(accuracy_score(y_test, preds)), 4),
+        "precision_red": round(
+            float(precision_score(y_test, preds)), 4
+        ),
+        "recall_red": round(float(recall_score(y_test, preds)), 4),
+        "f1_red": round(float(f1_score(y_test, preds)), 4),
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("wine_clf_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+```
+
+Excluir `id` y `type` reproduce la especificación utilizada en R, `make_pipeline(StandardScaler(), LogisticRegression(...))` evita fugas de escala hacia el conjunto de prueba, e iterar sobre `models.items()` emite filas comparables con `accuracy`, `precision_red`, `recall_red` y `f1_red` hacia `sys.stdout`:
+
+```nu
+python classify_wine.py | from csv
+python classify_wine.py
+| from csv
+| save -f wine_classification_py.csv
+```
+
+### Árboles de Decisión sobre Datos Bancarios Desbalanceados (`dt_banco.R` y `dt_banco.py`)
+
+Los árboles de decisión dividen el espacio de atributos recursivamente mediante umbrales ortogonales a los ejes coordenados que minimizan la impureza de los nodos (índice de Gini o entropía de Shannon), generando reglas de clasificación legibles. En `banco.csv`, donde la aceptación de préstamos personales (`prestamo == 1`) representa una clase minoritaria, evaluar únicamente la exactitud global puede ocultar una baja sensibilidad en la clase positiva. Revise la implementación en R contenida en `dt_banco.R`:
 
 ```nu
 bat dt_banco.R
+```
+
+```r
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(rpart))
+set.seed(42)
+df <- read.csv("banco.csv")
+features <- c(
+  "edad", "ingreso", "familia",
+  "gasto_tarjeta", "educacion", "hipoteca", "prestamo"
+)
+df_sub <- df[, features]
+
+n <- nrow(df_sub)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train <- df_sub[train_idx, ]
+test  <- df_sub[-train_idx, ]
+
+fit <- rpart(
+  prestamo ~ ., data = train, method = "class",
+  control = rpart.control(maxdepth = 4)
+)
+preds <- predict(fit, newdata = test, type = "class")
+
+tbl <- table(test$prestamo, preds)
+acc <- sum(diag(tbl)) / sum(tbl)
+has_r1 <- "1" %in% rownames(tbl)
+has_r0 <- "0" %in% rownames(tbl)
+has_c1 <- "1" %in% colnames(tbl)
+has_c0 <- "0" %in% colnames(tbl)
+tp <- if (has_r1 && has_c1) tbl["1", "1"] else 0
+fp <- if (has_r0 && has_c1) tbl["0", "1"] else 0
+fn <- if (has_r1 && has_c0) tbl["1", "0"] else 0
+prec <- if (tp + fp > 0) tp / (tp + fp) else 0
+rec <- if (tp + fn > 0) tp / (tp + fn) else 0
+f1 <- if (prec + rec > 0) 2 * prec * rec / (prec + rec) else 0
+
+out <- data.frame(
+  model = "R_rpart_decision_tree",
+  max_depth = 4,
+  accuracy = round(acc, 4),
+  precision = round(prec, 4),
+  recall = round(rec, 4),
+  f1_score = round(f1, 4)
+)
+write.csv(out, "banco_dt_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+En `dt_banco.R`, la configuración `rpart(..., method = "class", control = rpart.control(maxdepth = 4))` limita la profundidad del árbol a cuatro niveles para evitar memorización sobre los seis predictores demográficos y financieros, mientras que las condiciones `has_r1`/`has_c1` previenen fallos de indexación en la matriz de confusión si una partición no genera predicciones para alguna clase:
+
+```nu
 Rscript dt_banco.R | from csv
 Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
 ```
 
-Ejecutemos ahora el clasificador equivalente en Python con `DecisionTreeClassifier` de `scikit-learn` (`dt_banco.py`):
+Ahora examine la implementación correspondiente con `scikit-learn` en `dt_banco.py`:
 
 ```nu
 bat dt_banco.py
-python3 dt_banco.py | from csv
-python3 dt_banco.py | from csv | save -f banco_dt_py.csv
 ```
 
-### Clasificación con Vecinos Más Cercanos k-NN (knn_banco.R y knn_banco.py)
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
 
-El clasificador **$k$-Vecinos Más Cercanos ($k$-NN, *k-Nearest Neighbors*)** es un método de aprendizaje basado en instancias que clasifica una nueva observación asignándole la clase mayoritaria entre sus $k$ vecinos más próximos en el espacio de características estandarizado.
+df = pd.read_csv("banco.csv")
+features = [
+    "edad", "ingreso", "familia",
+    "gasto_tarjeta", "educacion", "hipoteca",
+]
+X = df[features]
+y = df["prestamo"]
 
-Ejecutemos `knn_banco.R` para evaluar el clasificador en R (`class::knn`) sobre `banco.csv` con $k \in \{3, 5, 7\}$:
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+clf = DecisionTreeClassifier(max_depth=4, random_state=42)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)
+
+acc = accuracy_score(y_test, preds)
+prec = precision_score(y_test, preds, zero_division=0)
+rec = recall_score(y_test, preds, zero_division=0)
+f1 = f1_score(y_test, preds, zero_division=0)
+
+out = pd.DataFrame([{
+    "model": "Python_DecisionTreeClassifier",
+    "max_depth": 4,
+    "accuracy": round(float(acc), 4),
+    "precision": round(float(prec), 4),
+    "recall": round(float(rec), 4),
+    "f1_score": round(float(f1), 4),
+}])
+out.to_csv("banco_dt_py.csv", index=False)
+out.to_csv(sys.stdout, index=False)
+```
+
+Utilizando el criterio de impureza Gini de CART con `max_depth=4` y protección `zero_division=0`, `dt_banco.py` emite columnas de evaluación idénticas para comparar árboles de R y Python en Nushell:
+
+```nu
+python dt_banco.py | from csv
+python dt_banco.py | from csv | save -f banco_dt_py.csv
+```
+
+### Clasificación con k-Vecinos Más Cercanos (`knn_banco.R` y `knn_banco.py`)
+
+A diferencia de los árboles de decisión, que son invariantes ante reescalamientos monótonos de atributos, el algoritmo de $k$-Vecinos Más Cercanos ($k$-NN) clasifica observaciones mediante votación mayoritaria entre los $k$ puntos de entrenamiento más próximos en el espacio euclidiano. Sin estandarización previa, ingresos anuales (`ingreso`) y saldos hipotecarios (`hipoteca`) dominarían por completo sobre el tamaño del grupo familiar (`familia`) y el nivel educativo (`educacion`). Abra `knn_banco.R`:
 
 ```nu
 bat knn_banco.R
+```
+
+```r
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(class))
+set.seed(42)
+df <- read.csv("banco.csv")
+features <- c(
+  "edad", "ingreso", "familia",
+  "gasto_tarjeta", "educacion", "hipoteca"
+)
+X <- scale(df[, features])
+y <- df$prestamo
+
+n <- nrow(X)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train_x <- X[train_idx, ]
+test_x  <- X[-train_idx, ]
+train_y <- y[train_idx]
+test_y  <- y[-train_idx]
+
+rows <- list()
+for (k in c(3, 5, 7)) {
+  preds <- knn(
+    train = train_x, test = test_x, cl = train_y, k = k
+  )
+  tbl <- table(test_y, preds)
+  acc <- sum(diag(tbl)) / sum(tbl)
+  has_r1 <- "1" %in% rownames(tbl)
+  has_r0 <- "0" %in% rownames(tbl)
+  has_c1 <- "1" %in% colnames(tbl)
+  has_c0 <- "0" %in% colnames(tbl)
+  tp <- if (has_r1 && has_c1) tbl["1", "1"] else 0
+  fp <- if (has_r0 && has_c1) tbl["0", "1"] else 0
+  fn <- if (has_r1 && has_c0) tbl["1", "0"] else 0
+  prec <- if (tp + fp > 0) tp / (tp + fp) else 0
+  rec <- if (tp + fn > 0) tp / (tp + fn) else 0
+  f1 <- if (prec + rec > 0) 2 * prec * rec / (prec + rec) else 0
+  rows[[length(rows) + 1]] <- data.frame(
+    model = "R_knn",
+    k_neighbors = k,
+    accuracy = round(acc, 4),
+    precision = round(prec, 4),
+    recall = round(rec, 4),
+    f1_score = round(f1, 4)
+  )
+}
+out <- do.call(rbind, rows)
+write.csv(out, "banco_knn_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+Tras centrar y escalar los seis predictores (`scale(df[, features])`), `knn_banco.R` evalúa entornos impares $k \in \{3, 5, 7\}$ (evitando empates en votación binaria) mediante `class::knn` y apila las métricas con `do.call(rbind, rows)`:
+
+```nu
 Rscript knn_banco.R | from csv
 Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
 ```
 
-Y ejecutemos la contraparte en Python utilizando `KNeighborsClassifier` (`knn_banco.py`):
+Compare esta estructura con `knn_banco.py`, que ajusta `StandardScaler()` estrictamente sobre `X_train` antes de transformar `X_test`:
 
 ```nu
 bat knn_banco.py
-python3 knn_banco.py | from csv
-python3 knn_banco.py | from csv | save -f banco_knn_py.csv
 ```
 
-### Clasificación Alternativa: Naïve Bayes y Máquinas de Vectores de Soporte (nb_svm_banco.py)
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
 
-Como complemento a los árboles y vecinos cercanos, la minería de datos contemporánea emplea con frecuencia dos paradigmas adicionales:
+df = pd.read_csv("banco.csv")
+features = [
+    "edad", "ingreso", "familia",
+    "gasto_tarjeta", "educacion", "hipoteca",
+]
+X = df[features]
+y = df["prestamo"]
 
-1. **Clasificador Bayesiano Ingenuo Gaussiano (*Gaussian Naïve Bayes*)**: Aplica el teorema de Bayes asumiendo independencia condicional entre los predictores dada la clase, modelando cada atributo continuo mediante una distribución normal.
-2. **Máquinas de Vectores de Soporte (SVM, *Support Vector Machines*)**: Encuentran el hiperplano óptimo que maximiza el margen de separación entre clases en un espacio inducido por un núcleo de base radial (RBF).
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
 
-Ejecutemos `nb_svm_banco.py` para comparar el desempeño de ambos clasificadores sobre `banco.csv`:
+rows = []
+for k in [3, 5, 7]:
+    clf = KNeighborsClassifier(n_neighbors=k)
+    clf.fit(X_train_s, y_train)
+    preds = clf.predict(X_test_s)
+    acc = accuracy_score(y_test, preds)
+    prec = precision_score(y_test, preds, zero_division=0)
+    rec = recall_score(y_test, preds, zero_division=0)
+    f1 = f1_score(y_test, preds, zero_division=0)
+    rows.append({
+        "model": "Python_KNeighborsClassifier",
+        "k_neighbors": k,
+        "accuracy": round(float(acc), 4),
+        "precision": round(float(prec), 4),
+        "recall": round(float(rec), 4),
+        "f1_score": round(float(f1), 4),
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("banco_knn_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+```
+
+Ejecutar `knn_banco.py` desde Nushell permite constatar la sensibilidad de las votaciones espaciales ante el radio de vecindad $k$:
+
+```nu
+python knn_banco.py | from csv
+python knn_banco.py | from csv | save -f banco_knn_py.csv
+```
+
+### Naïve Bayes Generativo frente a SVMs con Núcleo RBF (`nb_svm_banco.py`)
+
+Para contrastar un clasificador generativo veloz que asume independencia condicional entre covariables frente a una frontera de margen máximo en espacios proyectados por núcleos, examine `nb_svm_banco.py`:
 
 ```nu
 bat nb_svm_banco.py
-python3 nb_svm_banco.py | from csv
-python3 nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
 ```
 
-La tabla comparativa resultante permite a Nushell ordenar los modelos según su métrica $F_1$-score:
+```python
+#!/usr/bin/env python3
+import sys
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+
+df = pd.read_csv("banco.csv")
+features = [
+    "edad", "ingreso", "familia",
+    "gasto_tarjeta", "educacion", "hipoteca",
+]
+X = df[features]
+y = df["prestamo"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
+
+models = {
+    "GaussianNB": GaussianNB(),
+    "SVC(kernel=rbf)": SVC(kernel="rbf", C=1.0, random_state=42),
+}
+
+rows = []
+for name, clf in models.items():
+    clf.fit(X_train_s, y_train)
+    preds = clf.predict(X_test_s)
+    acc = accuracy_score(y_test, preds)
+    prec = precision_score(y_test, preds, zero_division=0)
+    rec = recall_score(y_test, preds, zero_division=0)
+    f1 = f1_score(y_test, preds, zero_division=0)
+    rows.append({
+        "model": name,
+        "accuracy": round(float(acc), 4),
+        "precision": round(float(prec), 4),
+        "recall": round(float(rec), 4),
+        "f1_score": round(float(f1), 4),
+    })
+
+out_df = pd.DataFrame(rows)
+out_df.to_csv("banco_nb_svm_py.csv", index=False)
+out_df.to_csv(sys.stdout, index=False)
+```
+
+En este script, `GaussianNB` ajusta densidades gaussianas univariadas condicionales $\mathcal{N}(\mu_{jc}, \sigma_{jc}^2)$ sobre cada atributo bancario, mientras que `SVC(kernel="rbf", C=1.0)` proyecta los datos a un espacio de funciones de base radial gaussiana $K(x, x') = \exp(-\gamma \|x - x'\|^2)$ para aislar segmentos no lineales de prestatarios:
 
 ```nu
+python nb_svm_banco.py | from csv
+python nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
 open banco_nb_svm_py.csv | sort-by f1_score -r
 ```
 
-### Redes Neuronales Artificiales: Perceptrón Multicapa (MLP)
+### Redes Neuronales Prealimentadas: Perceptrón Multicapa (`mlp_banco.py` y `mlp_banco.R`)
 
-Las **Redes Neuronales Artificiales** (*Artificial Neural Networks*, ANN) representan una de las familias más poderosas del aprendizaje automático contemporáneo. El **Perceptrón Multicapa** (**MLP**, *Multi-Layer Perceptron*) está compuesto por una capa de entrada, una o más capas ocultas con funciones de activación no lineales (como $\text{ReLU}(z) = \max(0, z)$ o la función logística sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$), y una capa de salida:
-
-$$\mathbf{h}^{(1)} = \sigma\left(\mathbf{W}^{(1)} \mathbf{x} + \mathbf{b}^{(1)}\right), \quad \hat{y} = \sigma\left(\mathbf{W}^{(2)} \mathbf{h}^{(1)} + \mathbf{b}^{(2)}\right)$$
-
-El aprendizaje se realiza mediante el algoritmo de **retropropagación del error** (*backpropagation*), calculando las derivadas parciales de la función de pérdida respecto a cada peso mediante la regla de la cadena y actualizándolos con optimizadores de gradiente como **Adam** o SGD, junto con regularización L2 ($\alpha$) para mitigar el sobreajuste.
-
-Un principio fundamental en el entrenamiento de redes neuronales es su **extrema sensibilidad al escalado de los atributos**. Si las variables no están estandarizadas a media cero y varianza unitaria, el gradiente oscila violentamente o se desvanece en las dimensiones de gran escala, impidiendo la convergencia.
-
-Ejecutemos el script `mlp_banco.py` sobre `banco.csv` para entrenar y evaluar dos arquitecturas de MLP (una capa con 8 neuronas y dos capas con $(16, 8)$ neuronas):
+Los **Perceptrones Multicapa** (MLP) componen matrices de pesos afines con funciones de activación no lineales a lo largo de capas ocultas, aproximando superficies complejas de decisión mediante retropropagación de gradientes (*backpropagation*). Inspeccione `mlp_banco.py`, que compara una red de una capa `(8,)` frente a una arquitectura ReLU de dos capas `(16, 8)`:
 
 ```nu
 bat mlp_banco.py
-python3 mlp_banco.py | from csv
-python3 mlp_banco.py | from csv | save -f banco_mlp_py.csv
 ```
 
-La red con arquitectura profunda $(16, 8)$ alcanza un $F_1$-score cercano a $0.95$ tras unas 400 iteraciones, superando el margen de los clasificadores lineales tradicionales.
+```python
+#!/usr/bin/env python3
+import sys
+import warnings
+warnings.filterwarnings("ignore")
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
 
-De forma complementaria, el script `mlp_banco.R` entrena una red neuronal con la librería `nnet` en R:
+df = pd.read_csv("banco.csv")
+features = [
+    "edad", "ingreso", "familia",
+    "gasto_tarjeta", "educacion", "hipoteca",
+]
+X = df[features]
+y = df["prestamo"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
+
+rows = []
+for hidden in [(8,), (16, 8)]:
+    clf = MLPClassifier(
+        hidden_layer_sizes=hidden, max_iter=500, random_state=42
+    )
+    clf.fit(X_train_s, y_train)
+    preds = clf.predict(X_test_s)
+    acc = accuracy_score(y_test, preds)
+    prec = precision_score(y_test, preds, zero_division=0)
+    rec = recall_score(y_test, preds, zero_division=0)
+    f1 = f1_score(y_test, preds, zero_division=0)
+    rows.append({
+        "model": f"Python_MLP_{hidden}",
+        "accuracy": round(float(acc), 4),
+        "precision": round(float(prec), 4),
+        "recall": round(float(rec), 4),
+        "f1_score": round(float(f1), 4),
+        "iterations": int(clf.n_iter_),
+    })
+
+out = pd.DataFrame(rows)
+out.to_csv("banco_mlp_py.csv", index=False)
+out.to_csv(sys.stdout, index=False)
+```
+
+Tres detalles destacan en `mlp_banco.py`: la estandarización de entrada evita que los gradientes iniciales caigan en zonas de saturación, `MLPClassifier(..., max_iter=500)` optimiza la entropía cruzada mediante el optimizador Adam, y registrar `int(clf.n_iter_)` junto al puntaje $F_1$ permite a Nushell auditar el costo computacional de convergencia:
+
+```nu
+python mlp_banco.py | from csv
+python mlp_banco.py | from csv | save -f banco_mlp_py.csv
+```
+
+La red de dos capas `(16, 8)` alcanza un puntaje $F_1$ cercano a $0.90+$ sobre la clase minoritaria de créditos. Finalmente, examine la implementación de una capa oculta cuasi-Newton en R dentro de `mlp_banco.R`:
 
 ```nu
 bat mlp_banco.R
+```
+
+```r
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages(library(nnet))
+set.seed(42)
+df <- read.csv("banco.csv")
+features <- c(
+  "edad", "ingreso", "familia",
+  "gasto_tarjeta", "educacion", "hipoteca"
+)
+df[features] <- scale(df[features])
+
+n <- nrow(df)
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train <- df[train_idx, c(features, "prestamo")]
+test  <- df[-train_idx, c(features, "prestamo")]
+
+fit <- nnet(
+  prestamo ~ ., data = train,
+  size = 6, decay = 0.01, maxit = 400, trace = FALSE
+)
+preds_prob <- predict(fit, newdata = test, type = "raw")
+preds <- ifelse(preds_prob > 0.5, 1, 0)
+
+tbl <- table(test[["prestamo"]], preds)
+acc <- sum(diag(tbl)) / sum(tbl)
+has_r1 <- "1" %in% rownames(tbl)
+has_r0 <- "0" %in% rownames(tbl)
+has_c1 <- "1" %in% colnames(tbl)
+has_c0 <- "0" %in% colnames(tbl)
+tp <- if (has_r1 && has_c1) tbl["1", "1"] else 0
+fp <- if (has_r0 && has_c1) tbl["0", "1"] else 0
+fn <- if (has_r1 && has_c0) tbl["1", "0"] else 0
+prec <- if (tp + fp > 0) tp / (tp + fp) else 0
+rec <- if (tp + fn > 0) tp / (tp + fn) else 0
+f1 <- if (prec + rec > 0) 2 * prec * rec / (prec + rec) else 0
+
+out <- data.frame(
+  model = "R_nnet_neural_network",
+  hidden_units = 6,
+  accuracy = round(acc, 4),
+  precision = round(prec, 4),
+  recall = round(rec, 4),
+  f1_score = round(f1, 4)
+)
+write.csv(out, "banco_mlp_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
+```
+
+En `mlp_banco.R`, la llamada `nnet(..., size = 6, decay = 0.01, maxit = 400, trace = FALSE)` ajusta seis unidades logísticas ocultas mediante optimización BFGS con decaimiento de pesos $L_2$ (`0.01`) suprimiendo registros de iteración (`trace = FALSE`) para emitir texto CSV puro hacia `stdout()`:
+
+```nu
 Rscript mlp_banco.R | from csv
 Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 ```
 
 ## Modelado Moderno Nativo de Pipelines
 
-Las utilidades clásicas de modelado en consola estudiadas en las secciones anteriores (`tapkee`, `vw` y `run_experiment`) fueron concebidas originalmente para *shells* POSIX orientadas a flujos planos de caracteres. Como los pipelines tradicionales de Unix carecen de esquemas tipados, cada herramienta histórica exige una capa adicional de formateo externo: `tapkee` requiere matrices numéricas sin encabezados y descarta las etiquetas de clase, `vw` obliga a serializar cada observación mediante gramáticas personalizadas de espacios de nombres (`to-vw`), y `skll` impone jerarquías rígidas de directorios (`train/`, `test/`, `output/`) gobernadas por archivos `.cfg` en disco.
+Las herramientas clásicas de modelado en línea de comandos estudiadas previamente en este capítulo (`tapkee`, `vw` y `run_experiment`) fueron diseñadas para shells de texto tradicionales bajo el estándar POSIX. Dado que los pipes estándar de Unix transmiten flujos de bytes sin tipos de datos en lugar de esquemas estructurados, cada herramienta clásica impone una penalización de serialización externa: `tapkee` exige matrices numéricas sin encabezados y descarta las etiquetas de clase, `vw` requiere formatear cada registro línea por línea mediante espacios de nombres con `to-vw`, y `skll` demanda estructuras rígidas de carpetas en disco (`train/`, `test/`, `output/`) junto con archivos de configuración `.cfg`.
 
-En una *shell* tipada como Nushell, los motores de modelado pueden intercambiar tablas estructuradas (`table -> table`) directamente a través de flujos estándar sin configuraciones accesorias en disco. Dentro del contenedor `dsin`, los binarios autónomos compilados en C++ (`duckdb` y `lightgbm`) conviven junto a un entorno aislado de Python 3.12 en `/opt/modern-ml` (aprovisionado mediante el gestor estático `uv`). Para maximizar la ergonomía, el directorio `/opt/modern-ml/bin` se encuentra integrado al inicio de `$env.PATH`: de este modo, invocar `python` ejecuta directamente Python 3.12 con la suite contemporánea de modelado (`umap-learn`, `lightgbm`, `scikit-learn` 1.9+, `pandas` y `matplotlib`), mientras que las herramientas heredadas que requieren Python 3.9 (como SKLL) invocan su propio intérprete mediante su shebang original sin conflicto. Verifiquemos las versiones disponibles directamente desde `/data/ch09`:
+En una shell tipada como Nushell, los motores de modelado pueden intercambiar tablas estructuradas (`table -> table`) directamente a través de flujos estándar con una mínima sobrecarga en disco. Dentro del contenedor `dsin`, utilidades nativas compiladas en C++ (`duckdb` y `lightgbm`) conviven con un entorno aislado de Python 3.12 ubicado en `/opt/modern-ml` (gestionado mediante el administrador estático `uv`). Para garantizar una experiencia de uso fluida, la ruta `/opt/modern-ml/bin` se encuentra antepuesta en `$env.PATH`: invocar `python` ejecuta directamente Python 3.12 con bibliotecas contemporáneas (`umap-learn`, `lightgbm`, `scikit-learn` 1.9+, `pandas` y `matplotlib`), mientras que las herramientas que dependen de Python 3.9 (como SKLL) invocan su intérprete correspondiente mediante su respectivo shebang sin conflictos. Verifique las versiones activas directamente desde `/data/ch09`:
 
 ```nu
 duckdb --version
 uv --version
 python --version
-python -c "import umap, lightgbm, sklearn; print(f'sklearn={sklearn.__version__}, lightgbm={lightgbm.__version__}')"
+let py_chk = "import umap, lightgbm as g; print(g.__version__)"
+python -c $py_chk
 ```
 
 ### Proyección Topológica de Variedades con UMAP (`umap-reduce`)
 
-Mientras el Análisis de Componentes Principales restringe la proyección a combinaciones lineales ortogonales y t-SNE optimiza afinidades locales por pares con alto costo computacional sin conservar distancias globales entre conglomerados, **UMAP** (*Uniform Manifold Approximation and Projection*, McInnes et al., 2018) representa los datos de alta dimensión mediante un conjunto simplicial difuso ponderado sobre una variedad riemanniana localmente conexa. Al minimizar la entropía cruzada difusa entre los grafos topológicos de alta y baja dimensión, el algoritmo preserva simultáneamente la estructura vecinal fina (controlada por `--neighbors`) y la disposición global entre grupos (controlada por `--min-dist`).
+El análisis de componentes principales (PCA) restringe sus proyecciones a subespacios lineales ortogonales, mientras que t-SNE clásico optimiza afinidades locales por pares con un alto costo computacional y sin preservar las distancias globales entre grupos. El algoritmo **Uniform Manifold Approximation and Projection** (**UMAP**, McInnes et al., 2018) combina ambas perspectivas modelando observaciones de alta dimensión como un conjunto simplicial difuso ponderado sobre una variedad riemanniana localmente conexa. Minimizar la entropía cruzada difusa entre los grafos topológicos de alta y baja dimensión preserva la estructura de vecindad fina (controlada por `--neighbors`) junto con la separación macroscópica entre subpoblaciones (controlada por `--min-dist`).
 
-Siguiendo las buenas prácticas arquitectónicas del libro, la lógica matemática de reducción se encapsula en el script modular `umap_reduce.py` (en `/data/ch09`), mientras que el comando `umap-reduce` de `dsin_tools.nu` ofrece un wrapper limpio sobre tablas de Nushell sin incrustar código interpretado en línea:
+#### Inspeccionando y Ejecutando `umap_reduce.py` Directamente
+
+Siguiendo el diseño modular de nuestros pipelines, los cálculos topológicos residen en el script independiente en Python `umap_reduce.py` en `/data/ch09`. Muestre su código fuente con `bat`:
 
 ```nu
 bat umap_reduce.py
 ```
 
-El wrapper en `dsin_tools.nu` delega la transformación numérica en el script auxiliar y devuelve una tabla enriquecida con las coordenadas `umap_1` y `umap_2`:
+```python
+#!/usr/bin/env python
+"""UMAP manifold projection helper reading CSV from file or stdin."""
+import argparse
+import os
+import sys
+import warnings
+
+os.environ.setdefault("NUMBA_CACHE_DIR", "/tmp/numba_cache")
+warnings.filterwarnings("ignore")
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import umap
+
+
+def main():
+    p = argparse.ArgumentParser(
+        description="UMAP reduction on CSV input."
+    )
+    p.add_argument("--input", "-i", type=str, default="-")
+    p.add_argument("--neighbors", "-n", type=int, default=15)
+    p.add_argument("--min-dist", "-m", type=float, default=0.1)
+    p.add_argument("--target-dim", "-d", type=int, default=2)
+    p.add_argument("--seed", "-s", type=int, default=42)
+    p.add_argument("--label-col", "-l", type=str, default="type")
+    p.add_argument("--cols", "-c", type=str, default="")
+    args = p.parse_args()
+
+    src = sys.stdin if args.input == "-" else args.input
+    df = pd.read_csv(src)
+
+    if args.cols:
+        raw_c = [c.strip() for c in args.cols.split(",")]
+        num_cols = [c for c in raw_c if c in df.columns]
+    else:
+        num_cols = [
+            c for c in df.columns
+            if c != args.label_col
+            and pd.api.types.is_numeric_dtype(df[c])
+        ]
+
+    if not num_cols:
+        sys.stderr.write("Error: No numeric columns found.\n")
+        sys.exit(1)
+
+    X = StandardScaler().fit_transform(df[num_cols])
+    n_nb = min(args.neighbors, max(2, len(df) - 1))
+    reducer = umap.UMAP(
+        n_neighbors=n_nb,
+        min_dist=args.min_dist,
+        n_components=args.target_dim,
+        random_state=args.seed,
+    )
+    emb = reducer.fit_transform(X)
+
+    for idx in range(args.target_dim):
+        df[f"umap_{idx + 1}"] = emb[:, idx].round(4)
+
+    df.to_csv(sys.stdout, index=False)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Tres elementos arquitectónicos facilitan el procesamiento en flujos en `umap_reduce.py`:
+
+1. **Contrato CLI dual para flujo y archivo (`argparse`):** Fijar `--input` por defecto en `"-"` permite que `pd.read_csv(sys.stdin)` procese flujos CSV directamente desde Nushell sin tocar el disco, mientras que `--cols` y `--label-col` aíslan los atributos numéricos de los metadatos categóricos.
+2. **Construcción estandarizada del grafo simplicial:** `StandardScaler().fit_transform` normaliza las escalas de las variables antes de que `umap.UMAP` compute distancias difusas, y `n_nb = min(args.neighbors, max(2, len(df) - 1))` previene excepciones por vecindarios excesivos sobre muestras reducidas.
+3. **Preservación del esquema de entrada:** En lugar de emitir exclusivamente coordenadas proyectadas, el script añade `umap_1`, `umap_2`, etc., como columnas numéricas a la tabla original y emite el resultado consolidado hacia `sys.stdout`.
+
+Pruebe `umap_reduce.py` directamente sobre un subconjunto de 200 observaciones de `wine-both.csv` a través de un pipeline básico:
 
 ```nu
-# Compute UMAP manifold coordinates on a numeric Nushell table and return a structured table.
+let raw_umap = (
+  open wine-both.csv
+  | first 200
+  | to csv
+  | ^python umap_reduce.py --label-col type --cols "alcohol,density"
+  | from csv
+)
+$raw_umap | select type quality umap_1 umap_2 | first 3
+```
+
+#### Encapsulando el Pipeline en `umap-reduce`
+
+En `dsin_tools.nu`, la función envoltorio **`umap-reduce`** automatiza la gestión de archivos temporales mediante `mktemp` y resuelve las rutas instaladas:
+
+```nu
+# Compute UMAP manifold coordinates on a numeric Nushell table.
 export def umap-reduce [
   --neighbors(-n): int = 15
   --min-dist(-m): float = 0.1
@@ -6356,59 +7843,265 @@ export def umap-reduce [
   --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
+  let tmp_in = (mktemp --suffix ".csv")
+  $tbl | to csv | save -f $tmp_in
+
   let cols_flag = if ($cols != null) and (($cols | length) > 0) {
     ["--cols" ($cols | str join ",")]
   } else { [] }
 
-  let tmp_in = (mktemp --suffix ".csv")
-  $tbl | to csv | save -f $tmp_in
+  let bin_p = "/usr/local/bin/umap-reduce"
+  let py_script = if ($bin_p | path exists) {
+    $bin_p
+  } else if ("/data/ch09/umap_reduce.py" | path exists) {
+    "/data/ch09/umap_reduce.py"
+  } else {
+    "umap_reduce.py"
+  }
 
-  let res = (python umap_reduce.py
-    --input $tmp_in
-    --neighbors $neighbors
-    --min-dist $min_dist
-    --target-dim $target_dim
-    --seed $seed
-    --label-col $label_col
-    ...$cols_flag | from csv)
-
+  let res = (
+    python $py_script
+      --input $tmp_in
+      --neighbors $neighbors
+      --min-dist $min_dist
+      --target-dim $target_dim
+      --seed $seed
+      --label-col $label_col
+      ...$cols_flag
+    | from csv
+  )
   rm -f $tmp_in
   $res
 }
 ```
 
-A diferencia de `tapkee`, que omite los metadatos categóricos salvo que se reintegren por posición de fila, `umap-reduce` conserva `type` y `quality` alineados dentro de un único pipeline:
+#### Reejecución Comparativa y Comparación Visual de Variedades
+
+Repetir la proyección de 200 vinos con `umap-reduce` produce coordenadas idénticas en una sola llamada declarativa:
 
 ```nu
-let features = ["fixed_acidity" "volatile_acidity" "citric_acid" "residual_sugar" "chlorides" "free_sulfur_dioxide" "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"]
-open wine-both.csv | first 200 | umap-reduce --label-col type --cols $features | select type quality umap_1 umap_2 | first 10
-open wine-both.csv | first 200 | umap-reduce --label-col type --cols $features | select type quality umap_1 umap_2 | save -f wine_umap.csv
+let features = (
+  open wine-both.csv
+  | columns
+  | where $it not-in ["type" "quality"]
+)
+let umap_tbl = (
+  open wine-both.csv
+  | first 200
+  | umap-reduce --label-col type --cols $features
+  | select type quality umap_1 umap_2
+)
+$umap_tbl | first 5
+$umap_tbl | save -f wine_umap.csv
 ```
 
-Para contrastar geométricamente la maximización lineal de varianza, la atracción de vecindarios locales y la proyección topológica sobre las mismas mediciones fisicoquímicas, el script `/data/ch09/plot_umap_comparison.py` genera un panel triple con PCA, t-SNE y UMAP sobre una muestra balanceada de 800 vinos, inspeccionable directamente en consola mediante `timg`:
+Para apreciar geométricamente cómo la maximización lineal de varianza (PCA), la atracción local de vecindades (t-SNE) y la proyección topológica (UMAP) ordenan el mismo espacio fisicoquímico, inspeccione y ejecute `plot_umap_comparison.py`:
 
 ```nu
 bat plot_umap_comparison.py
+```
+
+```python
+#!/opt/modern-ml/bin/python
+"""Compare PCA, t-SNE, and UMAP projections on 800 wines."""
+import os
+import warnings
+
+os.environ.setdefault("NUMBA_CACHE_DIR", "/tmp/numba_cache")
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib_cache")
+warnings.filterwarnings("ignore")
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.preprocessing import StandardScaler
+import umap
+
+df = pd.read_csv("wine-both.csv")
+red = df[df["type"] == "red"].sample(n=400, random_state=42)
+white = df[df["type"] == "white"].sample(n=400, random_state=42)
+sub = pd.concat([red, white], ignore_index=True)
+
+feat_cols = [c for c in sub.columns if c not in ("type", "quality")]
+X = StandardScaler().fit_transform(sub[feat_cols])
+
+c_pca = PCA(n_components=2, random_state=42).fit_transform(X)
+c_tsne = TSNE(
+    n_components=2, perplexity=30, random_state=42, init="pca"
+).fit_transform(X)
+c_umap = umap.UMAP(
+    n_neighbors=15, min_dist=0.1, n_components=2, random_state=42
+).fit_transform(X)
+
+fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.2), dpi=130)
+panels = [
+    (c_pca, "PCA (Linear Variance)", "PC 1", "PC 2"),
+    (c_tsne, "t-SNE (Local Neighborhoods)", "Dim 1", "Dim 2"),
+    (c_umap, "UMAP (Local + Global Topology)", "UMAP 1", "UMAP 2"),
+]
+palette = {"red": "#be123c", "white": "#0284c7"}
+
+for ax, (emb, title, xlabel, ylabel) in zip(axes, panels):
+    for label, color in palette.items():
+        mask = (sub["type"] == label).to_numpy()
+        ax.scatter(
+            emb[mask, 0], emb[mask, 1],
+            c=color, label=label.capitalize(),
+            s=14, alpha=0.72, edgecolors="none",
+        )
+    ax.set_title(title, fontsize=10.5, fontweight="bold")
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_ylabel(ylabel, fontsize=9)
+    ax.grid(True, linestyle="--", linewidth=0.4, alpha=0.45)
+
+axes[2].legend(
+    title="Wine Type", loc="best", frameon=True, fontsize=8.5
+)
+fig.suptitle(
+    "Manifold Projection Comparison on Wine Attributes (n = 800)",
+    fontsize=12, fontweight="bold", y=1.01,
+)
+fig.tight_layout()
+fig.savefig("umap_comparison.png", bbox_inches="tight", dpi=130)
+print("Saved umap_comparison.png")
+```
+
+Muestrear 400 vinos tintos y 400 blancos (`random_state=42`), estandarizar los once predictores continuos y renderizar un gráfico de tres paneles en formato headless `Agg` (`umap_comparison.png`) permite contrastar las tres proyecciones en la terminal mediante `timg`:
+
+```nu
 python plot_umap_comparison.py
 timg -g 80x25 umap_comparison.png
 ```
 
-![Comparación de proyecciones bidimensionales mediante PCA, t-SNE y UMAP sobre atributos fisicoquímicos del vino](umap_comparison.png){width=95%}
+![Comparación de proyecciones bidimensionales entre PCA, t-SNE y UMAP sobre atributos del vino](umap_comparison.png){width=95%}
 
-### Árboles Potenciados por Gradiente desde CLI con LightGBM (`lgbm-regress`)
+### Árboles Potenciados por Gradiente desde la CLI con LightGBM (`lgbm-regress`)
 
-Vowpal Wabbit sobresale al procesar millones de indicadores dispersos de texto que exceden la memoria principal, pero en tablas densas con una docena de predictores continuos el *hashing* lineal pierde interacciones no lineales y umbrales de partición. **LightGBM** (Ke et al., 2017) compila en un ejecutable C++ autónomo (`/usr/local/bin/lightgbm`) que agrupa variables continuas en histogramas discretos y expande los árboles de regresión por hoja (*leaf-wise*) según la mayor reducción de pérdida cuadrática. Para el trabajo en consola, `lightgbm` lee archivos CSV con encabezados de forma nativa (`header=true` y `label_column=name:quality`), eliminando por completo codificadores manuales por línea como `to-vw`.
+Vowpal Wabbit destaca al procesar flujos masivos de millones de variables dispersas de texto que superan la memoria RAM, pero los conjuntos tabulares densos con una docena de variables continuas raramente se benefician del hashing de atributos o de pesos lineales puramente aditivos. **LightGBM** (Ke et al., 2017) compila como un binario nativo independiente en C++ (`/usr/local/bin/lightgbm`) que discretiza predictores continuos en 256 intervalos o histogramas y construye árboles de regresión priorizando las hojas con mayor ganancia (*best-first* o *leaf-wise*) en lugar del crecimiento tradicional por niveles. Puesto que `lightgbm` procesa encabezados CSV directamente (`header=true` y `label_column=name:quality`), elimina por completo la necesidad de formateadores de texto especializados.
 
-El script auxiliar `lgbm_importance.py` en `/data/ch09` extrae las frecuencias de partición y las ganancias de varianza del modelo binario de LightGBM, devolviendo un arreglo JSON estructurado:
+#### Preprocesamiento Directo en CLI, Entrenamiento, Predicción y Atribución de Variables
+
+Controlamos `/usr/local/bin/lightgbm` directamente desde Nushell sobre las mismas 3.500 observaciones de entrenamiento y 1.398 de prueba de `wine-white.csv` evaluadas previamente con Vowpal Wabbit. Tenga en cuenta un requisito clave de la CLI de LightGBM: mientras que el archivo de entrenamiento contiene tanto las covariables como `quality`, el archivo de prueba suministrado a `task=predict` debe contener estrictamente las once columnas de variables independientes en idéntico orden:
+
+```nu
+let white = open wine-white.csv
+let train_w = ($white | first 3500)
+let test_w = ($white | skip 3500)
+let fcols = ($white | columns | where $it != "quality")
+
+$train_w
+| select ...($fcols | append "quality")
+| to csv
+| save -f /tmp/lgb_train.csv
+$test_w | select ...$fcols | to csv | save -f /tmp/lgb_test.csv
+
+(
+  ^lightgbm task=train objective=regression
+    data=/tmp/lgb_train.csv header=true
+    label_column=name:quality num_trees=100
+    learning_rate=0.05 num_leaves=31 seed=42
+    num_threads=4 force_col_wise=true
+    output_model=/tmp/lgb_model.txt verbosity=-1
+  out+err> /dev/null
+)
+(
+  ^lightgbm task=predict data=/tmp/lgb_test.csv
+    header=true input_model=/tmp/lgb_model.txt
+    output_result=/tmp/lgb_preds.txt verbosity=-1
+  out+err> /dev/null
+)
+```
+
+Posteriormente, procesamos `/tmp/lgb_preds.txt` como números decimales, los emparejamos con `$test_w.quality` mediante `zip` y calculamos el Error Absoluto Medio (MAE) directamente en Nushell:
+
+```nu
+let p_raw = (
+  open --raw /tmp/lgb_preds.txt
+  | lines
+  | where ($it | str trim | is-not-empty)
+  | each { into float }
+)
+let direct_lgb = (
+  $test_w.quality
+  | each { into float }
+  | zip $p_raw
+  | each { |p|
+      let obs = $p.0
+      let pred = ($p.1 | math round -p 4)
+      {
+        observed: $obs
+        predicted: $pred
+        abs_error: (($obs - $pred) | math abs | math round -p 4)
+      }
+    }
+)
+$direct_lgb | first 4
+$direct_lgb.abs_error | math avg | math round -p 4
+```
+
+Para determinar cuáles de las variables fisicoquímicas impulsaron las divisiones en esos 100 árboles, `/data/ch09/lgbm_importance.py` examina el modelo en texto plano (`/tmp/lgb_model.txt`) y genera una tabla en formato JSON con la frecuencia de divisiones y la reducción cuadrática de error (ganancia). Revise su implementación y ejecútela directamente antes de limpiar los archivos temporales:
 
 ```nu
 bat lgbm_importance.py
 ```
 
-El comando **`lgbm-regress`** en `dsin_tools.nu` coordina el entrenamiento, la predicción fuera de muestra y la importancia de variables sobre tablas regulares de Nushell con argumentos formateados limpiamente:
+```python
+#!/usr/bin/env python
+"""Extract split-count and gain importance from a LightGBM model."""
+import json
+import sys
+import lightgbm as lgb
+
+
+def main():
+    if len(sys.argv) < 2:
+        sys.stderr.write(
+            "Usage: lgbm_importance.py <model_file.txt>\n"
+        )
+        sys.exit(1)
+
+    model_file = sys.argv[1]
+    booster = lgb.Booster(model_file=model_file)
+    names = booster.feature_name()
+    splits = booster.feature_importance(importance_type="split")
+    gains = booster.feature_importance(importance_type="gain")
+    tot = float(gains.sum())
+    total_gain = tot if tot > 0 else 1.0
+
+    rows = [
+        {
+            "feature": str(n),
+            "splits": int(s),
+            "gain": round(float(g), 4),
+            "gain_pct": round(float(g) * 100.0 / total_gain, 2),
+        }
+        for n, s, g in zip(names, splits, gains)
+    ]
+    rows.sort(key=lambda r: r["gain"], reverse=True)
+    print(json.dumps(rows))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Cargar el modelo mediante `lgb.Booster(model_file=...)` recupera los nombres exactos de las columnas almacenados desde el encabezado CSV, extrae frecuencias de corte (`"split"`) y reducciones de error (`"gain"`), normaliza el porcentaje relativo `gain_pct` al 100% y escribe registros JSON ordenados hacia la salida estándar:
 
 ```nu
-# Train and evaluate LightGBM C++ CLI regression on Nushell tables.
+python lgbm_importance.py /tmp/lgb_model.txt | from json | first 5
+rm -f /tmp/lgb_train.csv /tmp/lgb_test.csv
+rm -f /tmp/lgb_model.txt /tmp/lgb_preds.txt
+```
+
+#### Encapsulando Entrenamiento e Importancia en `lgbm-regress`
+
+En `dsin_tools.nu`, la función **`lgbm-regress`** unifica la alineación de columnas, la gestión de directorios de trabajo temporales, la invocación de `^lightgbm` y la extracción opcional de variables influyentes con `--importance`:
+
+```nu
+# Train and evaluate LightGBM C++ CLI regression on tables.
 export def lgbm-regress [
   train_tbl: table
   test_tbl: table
@@ -6424,8 +8117,11 @@ export def lgbm-regress [
   let model_file = $"($tmp_dir)/model.txt"
   let pred_file = $"($tmp_dir)/preds.txt"
 
-  let feat_cols = ($train_tbl | columns | where $it != $target)
-  $train_tbl | select ...($feat_cols | append $target) | to csv | save -f $train_csv
+  let feat_cols = (
+    $train_tbl | columns | where $it != $target
+  )
+  let train_cols = ($feat_cols | append $target)
+  $train_tbl | select ...$train_cols | to csv | save -f $train_csv
   $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
 
   let lgbm_train_args = [
@@ -6438,6 +8134,7 @@ export def lgbm-regress [
     $"learning_rate=($learning_rate)"
     $"num_leaves=($num_leaves)"
     "seed=42"
+    "num_threads=4"
     "force_col_wise=true"
     $"output_model=($model_file)"
     "verbosity=-1"
@@ -6445,7 +8142,15 @@ export def lgbm-regress [
   ^lightgbm ...$lgbm_train_args out+err> /dev/null
 
   if $importance {
-    let imp_tbl = (python lgbm_importance.py $model_file | from json)
+    let bin_p = "/usr/local/bin/lgbm-importance"
+    let py_imp = if ($bin_p | path exists) {
+      $bin_p
+    } else if ("/data/ch09/lgbm_importance.py" | path exists) {
+      "/data/ch09/lgbm_importance.py"
+    } else {
+      "lgbm_importance.py"
+    }
+    let imp_tbl = (python $py_imp $model_file | from json)
     rm -rf $tmp_dir
     return $imp_tbl
   }
@@ -6460,43 +8165,216 @@ export def lgbm-regress [
   ]
   ^lightgbm ...$lgbm_pred_args out+err> /dev/null
 
-  let preds = (open --raw $pred_file | lines |
-    where ($it | str trim | is-not-empty) | each { into float })
-  let actuals = ($test_tbl | get $target | each { into float })
-  rm -rf $tmp_dir
+  let raw_preds = (
+    open --raw $pred_file
+    | lines
+    | where ($it | str trim | is-not-empty)
+    | each { |x| $x | into float }
+  )
+  let actuals = (
+    $test_tbl | get $target | each { |x| $x | into float }
+  )
 
-  $actuals | zip $preds | each { |pair|
-    let obs = $pair.0
-    let pred = ($pair.1 | math round -p 4)
-    let signed_err = (($pred - $obs) | math round -p 4)
-    let abs_err = (($obs - $pred) | math abs | math round -p 4)
-    { actual: $obs, observed: $obs, predicted: $pred,
-      error: $signed_err, abs_error: $abs_err }
-  }
+  let rows = (
+    $actuals | zip $raw_preds | each { |pair|
+      let obs = $pair.0
+      let pr = ($pair.1 | math round -p 4)
+      {
+        observed: $obs
+        predicted: $pr
+        error: (($pr - $obs) | math round -p 4)
+        abs_error: (($obs - $pr) | math abs | math round -p 4)
+      }
+    }
+  )
+
+  rm -rf $tmp_dir
+  $rows
 }
 ```
 
-Al evaluar `lgbm-regress` sobre la misma partición de 3,500 filas de entrenamiento y 1,398 de prueba en `wine-white.csv` empleada antes con Vowpal Wabbit, el Error Absoluto Medio (MAE) en validación desciende de `0.5693` (`vw-regress`) a `0.5429`, mientras que el modificador `--importance` cuantifica el aporte estructural de cada predictor:
+#### Reejecución Comparativa y Diagnóstico Visual de Ganancia de Variables
+
+Al invocar `lgbm-regress`, evaluamos el modelo y extraemos la jerarquía de variables explicativas en pasos concisos:
 
 ```nu
 let white = open wine-white.csv
-let train_w = $white | first 3500
-let test_w = $white | skip 3500
-let preds_lgbm = lgbm-regress $train_w $test_w --target quality
-$preds_lgbm | get abs_error | math avg | math round -p 4
-lgbm-regress $train_w $test_w --target quality --importance
+let train_w = ($white | first 3500)
+let test_w = ($white | skip 3500)
+
+let lgb_preds = (
+  lgbm-regress $train_w $test_w
+    --num-trees 100 --learning-rate 0.05
+)
+$lgb_preds | first 5
+$lgb_preds | save -f wine_lgbm_predictions.csv
+let mae = ($lgb_preds.abs_error | math avg | math round -p 4)
+$"LightGBM Test MAE: ($mae)"
+
+let lgb_imp = (
+  lgbm-regress $train_w $test_w --importance
+)
+$lgb_imp | first 5
+$lgb_imp | to json | save -f /tmp/lgbm_imp.json
 ```
 
-La graduación alcohólica concentra la mayor reducción acumulada de error (`33.54%` de la ganancia total), seguida por `volatile_acidity` (`12.17%`), `free_sulfur_dioxide` (`11.07%`) y `residual_sugar` (`7.85%`).
+El error MAE de LightGBM sobre el conjunto de prueba se sitúa en torno a `0.54` puntos en la escala hedónica de 0 a 10, superando el rendimiento de los modelos lineales globales gracias a su capacidad para capturar interacciones no lineales entre alcohol, acidez volátil y azúcar residual.
+
+Para examinar de manera visual la importancia de cada atributo físico-químico, inspeccione el script de diagnóstico `plot_lgbm_importance.py`:
+
+```nu
+bat plot_lgbm_importance.py
+```
+
+```python
+#!/opt/modern-ml/bin/python
+"""Render LightGBM split-gain and split-count diagnostic plots."""
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import warnings
+
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib_cache")
+warnings.filterwarnings("ignore")
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def load_importance(src):
+    if src.endswith(".json") and os.path.exists(src):
+        with open(src) as f:
+            return pd.DataFrame(json.load(f))
+
+    if src.endswith(".txt") and os.path.exists(src):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        imp_py = os.path.join(script_dir, "lgbm_importance.py")
+        cmd = [sys.executable, imp_py, src]
+        out = subprocess.check_output(cmd, text=True)
+        return pd.DataFrame(json.loads(out))
+
+    df_raw = pd.read_csv(src)
+    drop_c = [c for c in ("type", "quality") if c in df_raw.columns]
+    fcols = [c for c in df_raw.columns if c not in drop_c]
+    target = "quality"
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False
+    ) as tmp_tr, tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False
+    ) as tmp_mod:
+        df_raw[fcols + [target]].to_csv(tmp_tr.name, index=False)
+        cmd_tr = [
+            "lightgbm", "task=train", "objective=regression",
+            f"data={tmp_tr.name}", "header=true",
+            f"label_column=name:{target}", "num_trees=100",
+            "learning_rate=0.05", "num_leaves=31", "seed=42",
+            "num_threads=4", "force_col_wise=true",
+            f"output_model={tmp_mod.name}", "verbosity=-1",
+        ]
+        subprocess.check_call(
+            cmd_tr, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        imp_py = os.path.join(script_dir, "lgbm_importance.py")
+        cmd_imp = [sys.executable, imp_py, tmp_mod.name]
+        raw_imp = subprocess.check_output(cmd_imp, text=True)
+        os.remove(tmp_tr.name)
+        os.remove(tmp_mod.name)
+        return pd.DataFrame(json.loads(raw_imp))
+
+
+def main():
+    src = sys.argv[1] if len(sys.argv) > 1 else "wine-white.csv"
+    png_out = (
+        sys.argv[2] if len(sys.argv) > 2 else "lgbm_importance.png"
+    )
+
+    df = load_importance(src)
+    df = df.sort_values("gain", ascending=True)
+
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(11.5, 4.4), dpi=130
+    )
+
+    bars1 = ax1.barh(df["feature"], df["gain_pct"], color="#0284c7")
+    ax1.set_title("Relative Gain Importance (%)", fontweight="bold")
+    ax1.set_xlabel("Contribution to Variance Reduction (%)")
+    ax1.set_xlim(0, max(df["gain_pct"]) * 1.18)
+    ax1.grid(True, axis="x", ls="--", lw=0.4, alpha=0.5)
+    for b in bars1:
+        w = b.get_width()
+        ax1.text(
+            w + 0.5, b.get_y() + b.get_height() / 2,
+            f"{w:.1f}%", va="center", fontsize=8
+        )
+
+    ax2.barh(df["feature"], df["splits"], color="#0f766e")
+    ax2.set_title("Interior Split Frequency", fontweight="bold")
+    ax2.set_xlabel("Total Splits Across 100 Trees")
+    ax2.set_yticks([])
+    ax2.grid(True, axis="x", ls="--", lw=0.4, alpha=0.5)
+
+    fig.suptitle(
+        "LightGBM Feature Importance Diagnostics (wine-white.csv)",
+        fontsize=11.5, fontweight="bold", y=1.01
+    )
+    fig.tight_layout()
+    fig.savefig(png_out, bbox_inches="tight", dpi=130)
+    top_f = df.iloc[-1]["feature"]
+    top_g = df.iloc[-1]["gain_pct"]
+    print(f"Saved {png_out} (top={top_f}: {top_g:.2f}%)")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Tres componentes organizan `plot_lgbm_importance.py`: la función `load_importance(src)` admite tablas JSON ya calculadas, archivos `.txt` de modelos serializados o archivos CSV crudos indistintamente; `ax1` grafica barras horizontales con el porcentaje de ganancia relativo ordenado; y `ax2` alinea la frecuencia absoluta de cortes en el eje vertical compartido. Genere `lgbm_importance.png` y examine el resultado gráfico en la terminal mediante `timg`:
+
+```nu
+python plot_lgbm_importance.py /tmp/lgbm_imp.json
+rm -f /tmp/lgbm_imp.json
+timg -g 80x25 lgbm_importance.png
+```
+
+![Diagnóstico de importancia por porcentaje de ganancia y frecuencia de divisiones en LightGBM sobre predictores de vino blanco](lgbm_importance.png){width=92%}
 
 ### Regresión Analítica Vectorizada en Proceso con DuckDB (`duckdb-ols`)
 
-Antes de ajustar ensambles multiparamétricos, el diagnóstico estadístico riguroso aconseja examinar las relaciones lineales marginales de cada regresor candidato. **DuckDB** (Raasveldt & Mühleisen, 2019) encapsula un motor SQL analítico columnar y vectorizado dentro de un único binario portátil (`/usr/local/bin/duckdb`) con salida nativa en JSON (`duckdb -json`). Sus funciones estadísticas agregadas del estándar SQL:2003 (`regr_slope`, `regr_intercept`, `corr`, `regr_r2` y `regr_count`) estiman parámetros de Mínimos Cuadrados Ordinarios en bucles SIMD de una sola pasada en menos de 200 milisegundos.
+Antes de ajustar ensambles multivariados con decenas de hiperparámetros, una práctica estadística prudente consiste en evaluar asociaciones marginales rápidas sobre los predictores candidatos. **DuckDB** (Raasveldt & Mühleisen, 2019) incorpora un motor analítico columnar vectorizado dentro de un binario independiente y autocontenido (`/usr/local/bin/duckdb`) con capacidad de emitir texto en formato JSON (`duckdb -json`). Sus agregaciones estadísticas del estándar SQL:2003 (`regr_slope`, `regr_intercept`, `corr`, `regr_r2` y `regr_count`) evalúan momentos de Mínimos Cuadrados Ordinarios en ciclos SIMD de una sola pasada en menos de 200 milisegundos.
 
-El comando **`duckdb-ols`** envía cualquier tabla de Nushell hacia `duckdb -json` y reconstruye de inmediato una tabla tipada ordenada por coeficiente de determinación ($R^2$):
+#### Consultas Directas SQL en CLI e Ingesta de JSON en Nushell
+
+Para apreciar el funcionamiento de DuckDB sin ningún comando envoltorio, formule una consulta SQL directa sobre `'wine-white.csv'` para calcular la regresión marginal de `quality` en función de `alcohol`, ejecute `^duckdb -json -c` y procese el resultado con `from json`:
 
 ```nu
-# Compute vectorized Ordinary Least Squares regression diagnostics via DuckDB CLI.
+let q_alc = [
+  "SELECT 'alcohol' AS predictor,"
+  "ROUND(regr_slope(quality, alcohol), 4) AS slope,"
+  "ROUND(regr_intercept(quality, alcohol), 4) AS intercept,"
+  "ROUND(corr(quality, alcohol), 4) AS pearson_r,"
+  "ROUND(regr_r2(quality, alcohol), 4) AS r_squared,"
+  "CAST(regr_count(quality, alcohol) AS BIGINT) AS n"
+  "FROM 'wine-white.csv';"
+] | str join " "
+^duckdb -json -c $q_alc | from json
+```
+
+Comparar dos o tres variables explicativas en SQL implica encadenar cláusulas `UNION ALL` ordenadas por `r_squared DESC`; no obstante, redactar manualmente once consultas concatenadas cada vez que cambia el esquema de un conjunto de datos resulta tedioso y propenso a errores.
+
+#### Encapsulando la Generación de SQL Guiada por Esquema en `duckdb-ols`
+
+En `dsin_tools.nu`, el comando **`duckdb-ols`** examina el esquema de la tabla de entrada en tiempo de ejecución, identifica todas las columnas numéricas (`int` o `float`) distintas de `--target`, genera un archivo CSV intermedio, construye automáticamente la consulta SQL con múltiples `UNION ALL` y transforma la salida de `^duckdb -json` en una tabla tipada y ordenada en Nushell:
+
+```nu
+# Compute vectorized OLS regression diagnostics via DuckDB CLI.
 export def duckdb-ols [
   --target(-y): string = "quality"
   --predictor(-x): string = ""
@@ -6507,27 +8385,32 @@ export def duckdb-ols [
     [$predictor]
   } else {
     $tbl | columns | where { |c|
-      let val_type = ($first_row | get $c | describe)
-      ($c != $target) and (($val_type == "int") or ($val_type == "float"))
+      let t = ($first_row | get $c | describe)
+      ($c != $target) and (($t == "int") or ($t == "float"))
     }
   }
 
   let tmp_csv = (mktemp --suffix ".csv")
-  $tbl | select ...($candidate_cols | append $target) | to csv | save -f $tmp_csv
+  let keep = ($candidate_cols | append $target)
+  $tbl | select ...$keep | to csv | save -f $tmp_csv
 
   let unions = ($candidate_cols | each { |col|
+    let q_y = $"\"($target)\""
+    let q_x = $"\"($col)\""
     [
       $"SELECT '($col)' AS predictor, "
-      $"ROUND\(regr_slope\(\"($target)\", \"($col)\"\), 4\) AS slope, "
-      $"ROUND\(regr_intercept\(\"($target)\", \"($col)\"\), 4\) AS intercept, "
-      $"ROUND\(corr\(\"($target)\", \"($col)\"\), 4\) AS pearson_r, "
-      $"ROUND\(regr_r2\(\"($target)\", \"($col)\"\), 4\) AS r_squared, "
-      $"CAST\(regr_count\(\"($target)\", \"($col)\"\) AS BIGINT\) AS n FROM tbl"
+      $"ROUND\(regr_slope\(($q_y), ($q_x)\), 4\) AS slope, "
+      $"ROUND\(regr_intercept\(($q_y), ($q_x)\), 4\) AS intercept, "
+      $"ROUND\(corr\(($q_y), ($q_x)\), 4\) AS pearson_r, "
+      $"ROUND\(regr_r2\(($q_y), ($q_x)\), 4\) AS r_squared, "
+      $"CAST\(regr_count\(($q_y), ($q_x)\) AS BIGINT\) AS n "
+      "FROM tbl"
     ] | str join ""
   } | str join " UNION ALL ")
 
   let sql = [
-    $"CREATE TEMP TABLE tbl AS SELECT * FROM read_csv_auto\('($tmp_csv)'\); "
+    "CREATE TEMP TABLE tbl AS "
+    $"SELECT * FROM read_csv_auto\('($tmp_csv)'\); "
     $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
   ] | str join ""
 
@@ -6537,40 +8420,322 @@ export def duckdb-ols [
 }
 ```
 
-Al recorrer los 11 predictores fisicoquímicos sobre las 4,898 observaciones de `wine-white.csv`, emerge con claridad la diferencia entre asociación lineal marginal y ganancia no lineal en árboles:
+#### Reejecución Comparativa y Diagnósticos de Residuos Multivariados
+
+Examinar todos los predictores en `wine-white.csv` toma ahora un solo comando en la terminal:
 
 ```nu
 open wine-white.csv | duckdb-ols --target quality
-open wine-white.csv | duckdb-ols --target quality --predictor alcohol
+open wine-white.csv
+| duckdb-ols --target quality --predictor alcohol
 ```
 
-En términos lineales simples, `alcohol` presenta el mayor poder explicativo individual ($\hat{\beta}_1 = 0.3135$, $r = 0.4356$, $R^2 = 0.1897$), escoltado por `density` ($r = -0.3071$, $R^2 = 0.0943$) y `chlorides` ($r = -0.2099$, $R^2 = 0.0441$). Por el contrario, `free_sulfur_dioxide` y `residual_sugar` registran un $R^2$ marginal casi nulo bajo ajuste lineal, aunque ocupan el tercer y cuarto lugar en ganancia dentro de LightGBM; su efecto sensorial opera mediante umbrales e interacciones químicas (concentraciones insuficientes de dióxido de azufre libre favorecen la oxidación, mientras que niveles excesivos generan notas picantes indeseadas).
+De forma marginal, el contenido de alcohol presenta la correlación lineal individual más fuerte con la calidad percibida ($\hat{\beta}_1 = 0.3135$, $r = 0.4356$, $R^2 = 0.1897$), seguido de la densidad ($r = -0.3071$, $R^2 = 0.0943$) y los cloruros ($r = -0.2099$, $R^2 = 0.0441$). Por el contrario, el dióxido de azufre libre y el azúcar residual registran un $R^2$ marginal cercano a cero bajo Mínimos Cuadrados Ordinarios lineales, pero ocupan el tercer y cuarto lugar en importancia por ganancia dentro de LightGBM, lo que corrobora que su influencia sobre la calidad opera a través de interacciones no lineales de umbral (una cantidad insuficiente de sulfuro permite la oxidación del vino, mientras que un exceso introduce aromas punzantes).
+
+Incluso cuando se incorporan los once atributos fisicoquímicos en una regresión OLS múltiple conjunta, la formulación puramente lineal captura únicamente un $R^2 = 0.2819$ de la variabilidad observada. Para analizar la geometría de los residuos resultantes, examine el script `plot_wine_residuals.py`:
+
+```nu
+bat plot_wine_residuals.py
+```
+
+```python
+#!/opt/modern-ml/bin/python
+"""Render OLS residual diagnostics on wine-white.csv."""
+import os
+import sys
+import warnings
+
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib_cache")
+warnings.filterwarnings("ignore")
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+
+
+def main():
+    csv_in = sys.argv[1] if len(sys.argv) > 1 else "wine-white.csv"
+    png_out = (
+        sys.argv[2] if len(sys.argv) > 2 else "wine_residuals.png"
+    )
+
+    df = pd.read_csv(csv_in)
+    drop_c = [c for c in ("type", "quality") if c in df.columns]
+    X = df.drop(columns=drop_c).select_dtypes(
+        include=[np.number]
+    )
+    y = df["quality"].to_numpy(dtype=float)
+
+    ols = LinearRegression().fit(X, y)
+    y_hat = ols.predict(X)
+    resid = y - y_hat
+    r2 = r2_score(y, y_hat)
+    sigma = float(np.std(resid, ddof=X.shape[1] + 1))
+
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(10.5, 4.2), dpi=130
+    )
+
+    ax1.scatter(
+        y_hat, resid, s=10, alpha=0.28,
+        color="#0284c7", edgecolors="none"
+    )
+    ax1.axhline(0.0, color="#be123c", ls="--", lw=1.4)
+    ax1.set_title("Residuals vs. Fitted Values", fontweight="bold")
+    ax1.set_xlabel("Fitted Sensory Quality")
+    ax1.set_ylabel("Residual (Observed - Fitted)")
+    ax1.grid(True, ls="--", lw=0.4, alpha=0.5)
+
+    ax2.hist(
+        resid, bins=32, density=True,
+        color="#0f766e", alpha=0.72, edgecolor="white"
+    )
+    grid_x = np.linspace(resid.min(), resid.max(), 200)
+    gauss = np.exp(-0.5 * (grid_x / sigma) ** 2) / (
+        sigma * np.sqrt(2.0 * np.pi)
+    )
+    ax2.plot(
+        grid_x, gauss, color="#be123c", lw=1.8,
+        label=f"Normal (sd={sigma:.2f})"
+    )
+    ax2.set_title("Residual Error Distribution", fontweight="bold")
+    ax2.set_xlabel("Residual")
+    ax2.set_ylabel("Density")
+    ax2.legend(loc="best", frameon=True)
+    ax2.grid(True, ls="--", lw=0.4, alpha=0.5)
+
+    fig.suptitle(
+        f"Multivariate OLS Diagnostics ({csv_in}, R2 = {r2:.3f})",
+        fontsize=11.5, fontweight="bold", y=1.01
+    )
+    fig.tight_layout()
+    fig.savefig(png_out, bbox_inches="tight", dpi=130)
+    print(f"Saved {png_out} (R2={r2:.4f}, sd={sigma:.4f})")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Tres diagnósticos estadísticos se desprenden de `plot_wine_residuals.py`:
+
+1. **Ajuste de escala por grados de libertad (`sigma`):** Dividir la suma de residuos al cuadrado entre $n - p - 1$ con `ddof=X.shape[1] + 1` en lugar de $n$ produce el estimador insesgado del error estándar residual de OLS ($\hat{\sigma} = 0.7514$).
+2. **Patrones en bandas por discretización (`ax1`):** Graficar los errores $e_i = y_i - \hat{y}_i$ frente a los valores ajustados $\hat{y}_i$ expone bandas diagonales paralelas correspondientes a las calificaciones sensoriales discretas (`y_i = 3, 4, ..., 9`), junto con una leve compresión en los extremos donde el modelo lineal regresa hacia la media muestral.
+3. **Contraste con la campana de Gauss (`ax2`):** La superposición de la función de densidad teórica $\mathcal{N}(0, \hat{\sigma}^2)$ sobre el histograma empírico revela una asimetría leve con colas ligeramente pesadas hacia la derecha en vinos de calidad sobresaliente.
+
+Genere `wine_residuals.png` y visualice ambos paneles en la terminal mediante `timg`:
+
+```nu
+python plot_wine_residuals.py
+timg -g 80x25 wine_residuals.png
+```
+
+![Diagnósticos de residuos OLS multivariados y superposición de densidad gaussiana sobre la calidad sensorial del vino blanco](wine_residuals.png){width=92%}
 
 ### Evaluación Multimarco en Streaming y Redes Neuronales (`ml-benchmark`)
 
-En la sección dedicada a SKLL (`run_experiment`), comparar una Regresión Logística frente a un Bosque Aleatorio requirió poblar carpetas `train/` y `test/`, redactar un archivo declarativo `classify.cfg` y extraer métricas desde archivos tabulados en `output/`. Un diseño nativo para pipelines prescinde por completo de ese andamiaje en disco.
+Anteriormente en este capítulo, comparar múltiples clasificadores requería escribir archivos de configuración en SKLL o coordinar scripts dispersos en R y Python. Para evaluar familias complementarias de algoritmos dentro de un único pipeline interactivo en Nushell, el script `/data/ch09/ml_benchmark.py` implementa un evaluador multimodelo preparado para flujos de datos que contrasta cinco arquitecturas de aprendizaje:
 
-La lógica de evaluación multimodelo reside en el script `ml_benchmark.py` ubicado en `/data/ch09`. Este script recibe datos por entrada estándar, realiza una partición estratificada con semilla fija, aplica estandarización por columnas y entrena cinco familias de modelos con métricas de exactitud, precisión, exhaustividad y puntuación $F_1$:
+1. **`logistic`:** Regresión logística regularizada con norma $L_2$ (`StandardScaler` + `LogisticRegression`).
+2. **`linear_svc`:** Máquina de vectores de soporte con formulación primal (`StandardScaler` + `LinearSVC`).
+3. **`rf`:** Ensamble de 100 árboles de clasificación mediante `RandomForestClassifier` multihilo (`n_jobs=4`).
+4. **`lgbm`:** Ensamble potenciado por gradiente mediante `LGBMClassifier` (`n_estimators=100`, `num_leaves=31`).
+5. **`mlp`:** Red neuronal prealimentada con arquitectura ReLU de dos capas ocultas `(64, 32)` y parada temprana adaptativa tras diez épocas sin mejora (`MLPClassifier`).
 
-1. **Regresión Logística (`logistic`):** Clasificador lineal penalizado en escala *log-odds*.
-2. **Máquina de Soporte Vectorial Lineal (`linear_svc`):** Hiperplano de margen máximo con pérdida bisagra (*hinge loss*).
-3. **Perceptrón Multicapa (`mlp`):** Red neuronal prealimentada (`MLPClassifier`) con dos capas ocultas ReLU de $(64, 32)$ unidades, optimizador Adam y detención temprana (*early stopping*).
-4. **Bosque Aleatorio (`rf`):** Ensamble *bagging* de árboles de decisión descorrelacionados.
-5. **LightGBM (`lgbm`):** Árboles de decisión potenciados por gradiente basados en histogramas.
+#### Inspeccionando e Invocando `ml_benchmark.py` Directamente
 
-Inspeccionemos el script modular antes de invocarlo:
+Examine el código fuente de `ml_benchmark.py` en `/data/ch09` con `bat`:
 
 ```nu
 bat ml_benchmark.py
 ```
 
-El comando orquestador **`ml-benchmark`** en `dsin_tools.nu` actúa como un wrapper limpio sobre el script:
+```python
+#!/usr/bin/env python
+"""Multi-model classification benchmark for Nushell pipelines."""
+import argparse
+import json
+import os
+import sys
+import time
+import warnings
+
+os.environ.setdefault("OMP_NUM_THREADS", "4")
+os.environ.setdefault("PYTHONWARNINGS", "ignore")
+warnings.filterwarnings("ignore")
+
+import lightgbm as lgb
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import (
+    LabelEncoder,
+    OneHotEncoder,
+    StandardScaler,
+)
+from sklearn.svm import LinearSVC
+
+
+def build_registry(prep_scaled, prep_tree, seed):
+    return {
+        "logistic": Pipeline([
+            ("prep", prep_scaled),
+            ("clf", LogisticRegression(
+                max_iter=1000, random_state=seed
+            )),
+        ]),
+        "rf": Pipeline([
+            ("prep", prep_tree),
+            ("clf", RandomForestClassifier(
+                n_estimators=100, random_state=seed, n_jobs=4
+            )),
+        ]),
+        "lgbm": Pipeline([
+            ("prep", prep_tree),
+            ("clf", lgb.LGBMClassifier(
+                n_estimators=100, learning_rate=0.05,
+                num_leaves=31, random_state=seed,
+                verbosity=-1, n_jobs=4,
+            )),
+        ]),
+        "linear_svc": Pipeline([
+            ("prep", prep_scaled),
+            ("clf", LinearSVC(
+                dual=False, max_iter=2000, random_state=seed
+            )),
+        ]),
+        "mlp": Pipeline([
+            ("prep", prep_scaled),
+            ("clf", MLPClassifier(
+                hidden_layer_sizes=(64, 32), max_iter=300,
+                early_stopping=True, n_iter_no_change=10,
+                random_state=seed,
+            )),
+        ]),
+    }
+
+
+def main():
+    p = argparse.ArgumentParser(
+        description="Multi-model classification benchmark."
+    )
+    p.add_argument("--input", "-i", type=str, default="-")
+    p.add_argument("--target", "-t", type=str, default="type")
+    p.add_argument(
+        "--models", "-m", type=str,
+        default="logistic,rf,lgbm,linear_svc,mlp",
+    )
+    p.add_argument("--test-size", type=float, default=0.25)
+    p.add_argument("--seed", "-s", type=int, default=42)
+    args = p.parse_args()
+
+    src = sys.stdin if args.input == "-" else args.input
+    df = pd.read_csv(src)
+    if args.target not in df.columns:
+        msg = f"Error: Target '{args.target}' not found.\n"
+        sys.stderr.write(msg)
+        sys.exit(1)
+
+    X = df.drop(columns=[args.target])
+    y = LabelEncoder().fit_transform(df[args.target].astype(str))
+    num_c = [
+        c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])
+    ]
+    cat_c = [c for c in X.columns if c not in num_c]
+
+    ohe_s = OneHotEncoder(handle_unknown="ignore")
+    ohe_d = OneHotEncoder(
+        handle_unknown="ignore", sparse_output=False
+    )
+    prep_scaled = ColumnTransformer(
+        [("num", StandardScaler(), num_c), ("cat", ohe_s, cat_c)],
+        remainder="drop",
+    )
+    prep_tree = ColumnTransformer(
+        [("num", "passthrough", num_c), ("cat", ohe_d, cat_c)],
+        remainder="drop",
+    )
+
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        X, y, test_size=args.test_size,
+        random_state=args.seed, stratify=y,
+    )
+    parts = args.models.split(",")
+    req = [m.strip().lower() for m in parts if m.strip()]
+    reg = build_registry(prep_scaled, prep_tree, args.seed)
+
+    rows = []
+    for name in req:
+        if name not in reg:
+            continue
+        pipe = reg[name]
+        t0 = time.perf_counter()
+        pipe.fit(X_tr, y_tr)
+        fit_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+        preds = pipe.predict(X_te)
+        kw = {"average": "weighted", "zero_division": 0}
+        rows.append({
+            "model": name,
+            "accuracy": round(float(accuracy_score(y_te, preds)), 4),
+            "precision": round(
+                float(precision_score(y_te, preds, **kw)), 4
+            ),
+            "recall": round(
+                float(recall_score(y_te, preds, **kw)), 4
+            ),
+            "f1_score": round(float(f1_score(y_te, preds, **kw)), 4),
+            "train_time_ms": fit_ms,
+        })
+
+    rows.sort(key=lambda r: r["f1_score"], reverse=True)
+    print(json.dumps(rows))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Cuatro elementos de ingeniería garantizan la estabilidad de `ml_benchmark.py`:
+
+1. **Preprocesamiento diferenciado con `ColumnTransformer`:** Los modelos sensibles a escalas numéricas (`logistic`, `linear_svc`, `mlp`) reciben variables continuas estandarizadas (`prep_scaled`), mientras que los modelos de árboles (`rf`, `lgbm`) preservan las escalas originales (`prep_tree`), compartiendo codificación *one-hot* para variables categóricas.
+2. **Partición estratificada de prueba (`stratify=y`):** Mantener las proporciones originales de clase entre `X_tr` y `X_te` evita distorsiones muestrales en conjuntos desbalanceados como `banco.csv`.
+3. **Límite acotado de concurrencia (`OMP_NUM_THREADS=4`, `n_jobs=4`):** Restringir los hilos de OpenMP evita contención en el núcleo del sistema operativo en entornos de contenedores mientras se cronometra el tiempo real de entrenamiento con `time.perf_counter()`.
+4. **Emisión estructurada en JSON:** Devolver una lista serializada con `json.dumps(rows)` ordenada por $F_1$ ponderado permite que Nushell procese métricas decimales y latencias en milisegundos mediante `from json` sin degradar la precisión numérica.
+
+Invoque `ml_benchmark.py` directamente sobre `wine-both.csv` a través de la entrada estándar antes de usar el comando envoltorio:
 
 ```nu
-# Benchmark multiple classification architectures on streaming Nushell tables.
+open wine-both.csv
+| to csv
+| python ml_benchmark.py --target type
+| from json
+```
+
+#### Encapsulando la Evaluación Multimarco en `ml-benchmark`
+
+En `dsin_tools.nu`, la función envoltorio **`ml-benchmark`** convierte listas tipadas de Nushell (`--models`) en cadenas delimitadas por comas, gestiona archivos CSV intermedios, resuelve `/usr/local/bin/ml-benchmark-py` y convierte el resultado JSON directamente en una tabla tipada:
+
+```nu
+# Benchmark classification architectures on streaming tables.
 export def ml-benchmark [
   --target(-t): string = "type"
-  --models(-m): list<string> = ["logistic", "rf", "lgbm", "linear_svc", "mlp"]
+  --models(-m): list<string> = [
+    "logistic" "rf" "lgbm" "linear_svc" "mlp"
+  ]
   --test-size: float = 0.25
   --seed(-s): int = 42
 ]: table -> table {
@@ -6579,81 +8744,321 @@ export def ml-benchmark [
   let tmp_in = (mktemp --suffix ".csv")
   $tbl | to csv | save -f $tmp_in
 
-  let res = (python ml_benchmark.py
-    --input $tmp_in
-    --target $target
-    --models $models_csv
-    --test-size $test_size
-    --seed $seed | from json)
+  let bin_p = "/usr/local/bin/ml-benchmark-py"
+  let py_bench = if ($bin_p | path exists) {
+    $bin_p
+  } else if ("/data/ch09/ml_benchmark.py" | path exists) {
+    "/data/ch09/ml_benchmark.py"
+  } else {
+    "ml_benchmark.py"
+  }
 
+  let res = (
+    python $py_bench
+      --input $tmp_in
+      --target $target
+      --models $models_csv
+      --test-size $test_size
+      --seed $seed
+    | from json
+  )
   rm -f $tmp_in
   $res
 }
 ```
 
-La comparación simultánea de las cinco arquitecturas sobre `wine-both.csv` y sobre la cartera bancaria `banco.csv` se reduce a pipelines directos de una línea, sin generar archivos `.cfg` ni directorios residuales:
+#### Reejecución Comparativa y Compromisos Visuales entre Exactitud y Latencia
+
+Evaluar los cinco algoritmos en `wine-both.csv` y sobre la campaña bancaria `banco.csv` (descartando identificadores no predictivos `ID` y `ZIP_cod`) se simplifica a pipelines concisos de una línea:
 
 ```nu
 open wine-both.csv | ml-benchmark --target type
-open banco.csv | reject ID ZIP_cod | ml-benchmark --target prestamo
+let banco_bench = (
+  open banco.csv
+  | reject ID ZIP_cod
+  | ml-benchmark --target prestamo
+)
+$banco_bench
+$banco_bench | to json | save -f /tmp/banco_bench.json
 ```
 
-En `banco.csv`, donde la aceptación del crédito personal depende de umbrales marcados de ingreso, nivel educacional y tamaño familiar, las fronteras lineales se estabilizan cerca de $F_1 \approx 0.95$ (`logistic` con `0.9484` y `linear_svc` con `0.9511`). La incorporación de capas ocultas no lineales mediante el Perceptrón Multicapa (`mlp`) eleva el $F_1$ ponderado hasta `0.9797` en menos de medio segundo de ajuste, mientras que los ensambles de árboles alineados con los ejes (`rf` con `0.9895` y `lgbm` con `0.9919`) alcanzan la mayor discriminación global, en concordancia con la evidencia empírica reciente sobre datos tabulares heterogéneos (Grinsztajn et al., 2022). Al devolver una tabla nativa de Nushell, cualquier filtrado posterior (`where train_time_ms < 500` o `first 3`) se encadena directamente con los operadores estándar del lenguaje.
+Sobre `banco.csv`, donde la contratación del crédito responde a umbrales específicos de ingresos, educación y grupo familiar, los modelos lineales alcanzan un techo de rendimiento en torno a $F_1 \approx 0.95$ (`logistic` en `0.9484` y `linear_svc` en `0.9511`) con latencias de apenas 10 milisegundos. Incorporar representaciones ocultas no lineales con el Perceptrón Multicapa (`mlp`) eleva el puntaje $F_1$ ponderado a `0.9797` en aproximadamente 250 milisegundos, mientras que los ensambles de árboles (`rf` con `0.9895` y `lgbm` con `0.9903`) obtienen la mayor capacidad de discriminación, lo que concuerda con la literatura empírica sobre conjuntos de datos tabulares medianos (Grinsztajn et al., 2022).
+
+Para examinar de forma conjunta la calidad predictiva y el costo temporal de entrenamiento, inspeccione `plot_benchmark_comparison.py`:
+
+```nu
+bat plot_benchmark_comparison.py
+```
+
+```python
+#!/opt/modern-ml/bin/python
+"""Render multi-model F1, accuracy, and training latency charts."""
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import warnings
+
+os.environ.setdefault("OMP_NUM_THREADS", "4")
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib_cache")
+warnings.filterwarnings("ignore")
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def load_benchmark(src):
+    if src.endswith(".json") and os.path.exists(src):
+        return pd.read_json(src)
+
+    df_raw = pd.read_csv(src)
+    drop_c = [c for c in ("ID", "ZIP_cod") if c in df_raw.columns]
+    df_clean = df_raw.drop(columns=drop_c)
+    tgt = "prestamo" if "prestamo" in df_clean.columns else "type"
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False
+    ) as tmp:
+        df_clean.to_csv(tmp.name, index=False)
+        tmp_path = tmp.name
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    bench_py = os.path.join(script_dir, "ml_benchmark.py")
+    cmd = [
+        sys.executable, bench_py,
+        "--input", tmp_path,
+        "--target", tgt,
+        "--models", "logistic,linear_svc,mlp,rf,lgbm",
+    ]
+    raw_out = subprocess.check_output(cmd, text=True)
+    os.remove(tmp_path)
+    return pd.DataFrame(json.loads(raw_out))
+
+
+def main():
+    src = sys.argv[1] if len(sys.argv) > 1 else "banco.csv"
+    png_out = (
+        sys.argv[2] if len(sys.argv) > 2
+        else "benchmark_comparison.png"
+    )
+    df = load_benchmark(src).sort_values(
+        "f1_score", ascending=True
+    )
+
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(11.2, 4.3), dpi=130
+    )
+    x = np.arange(len(df))
+    w = 0.36
+
+    b1 = ax1.bar(
+        x - w / 2, df["f1_score"], w,
+        label="Weighted F1", color="#0284c7"
+    )
+    ax1.bar(
+        x + w / 2, df["accuracy"], w,
+        label="Accuracy", color="#0f766e"
+    )
+    min_sc = float(df[["f1_score", "accuracy"]].min().min())
+    ax1.set_ylim(max(0.0, min_sc - 0.04), 1.015)
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(df["model"])
+    ax1.set_title("Classification Metrics", fontweight="bold")
+    ax1.set_ylabel("Score")
+    ax1.legend(loc="lower right", frameon=True)
+    ax1.grid(True, axis="y", ls="--", lw=0.4, alpha=0.5)
+    for b in b1:
+        h = b.get_height()
+        ax1.text(
+            b.get_x() + b.get_width() / 2, h + 0.002,
+            f"{h:.3f}", ha="center", va="bottom", fontsize=7.5
+        )
+
+    bars_t = ax2.barh(
+        df["model"], df["train_time_ms"], color="#be123c"
+    )
+    ax2.set_title("Training Latency (ms)", fontweight="bold")
+    ax2.set_xlabel("Wall-Clock Time (ms)")
+    max_ms = float(df["train_time_ms"].max())
+    ax2.set_xlim(0, max_ms * 1.25)
+    ax2.grid(True, axis="x", ls="--", lw=0.4, alpha=0.5)
+    for b in bars_t:
+        wt = b.get_width()
+        ax2.text(
+            wt + max_ms * 0.02,
+            b.get_y() + b.get_height() / 2,
+            f"{wt:.0f} ms", va="center", fontsize=8
+        )
+
+    fig.suptitle(
+        "Multi-Model Tabular Classification Benchmark",
+        fontsize=11.5, fontweight="bold", y=1.01
+    )
+    fig.tight_layout()
+    fig.savefig(png_out, bbox_inches="tight", dpi=130)
+    best = df.iloc[-1]
+    print(
+        f"Saved {png_out} (best={best['model']}: "
+        f"F1={best['f1_score']:.4f})"
+    )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Admitiendo tanto archivos JSON con evaluaciones ya guardadas (`/tmp/banco_bench.json`) como archivos CSV sin procesar (`banco.csv`), `plot_benchmark_comparison.py` ajusta el eje vertical izquierdo dinámicamente al intervalo `[min_sc - 0.04, 1.015]` para que las diferencias entre modelos lineales, neuronales y de árboles resulten claramente visibles junto con los tiempos de cómputo en milisegundos:
+
+```nu
+python plot_benchmark_comparison.py /tmp/banco_bench.json
+rm -f /tmp/banco_bench.json
+timg -g 80x25 benchmark_comparison.png
+```
+
+![Evaluación comparativa de arquitecturas de clasificación: exactitud frente a latencia de entrenamiento](benchmark_comparison.png){width=92%}
 
 ### La Frontera del Aprendizaje Automático Nativo en Rust
 
-Dado que tanto el núcleo de Nushell como `nu_plugin_polars` están implementados en Rust sobre el formato columnar en memoria Apache Arrow, la evolución natural del modelado en terminal apunta hacia herramientas y complementos compilados en Rust que operen sobre lotes Arrow sin serialización intermedia a CSV o JSON. Cuatro ecosistemas activos ilustran esta transición:
+Todas las herramientas de modelado examinadas en este capítulo invocan binarios externos o scripts en Python/R a través de serialización en disco o pipes estándar de Unix. Conforme el ecosistema científico de Rust madura, emerge una alternativa arquitectónica prometedora: ejecutar algoritmos de aprendizaje de manera nativa en memoria dentro del espacio de procesos de la shell mediante el protocolo de plugins de Nushell y buffers Apache Arrow sin costo de copia. Cuatro proyectos activos ilustran esta tendencia:
 
-1. **`linfa` y `smartcore`:** Bibliotecas de aprendizaje estadístico en Rust puro que compilan en binarios CLI autónomos de alto rendimiento, implementando PCA, K-Means, DBSCAN, modelos lineales penalizados, máquinas de soporte vectorial y bosques aleatorios con verificación estricta de tipos.
-2. **`candle` y `burn`:** Motores minimalistas de cálculo tensorial y aprendizaje profundo en Rust capaces de compilar redes prealimentadas (`MLP`) y arquitecturas complejas en ejecutables estáticos con aceleración opcional por GPU, sin requerir el intérprete de Python ni dependencias dinámicas.
-3. **`nutorch`:** Complemento experimental para Nushell que expone tensores de cálculo como valores nativos dentro de los pipelines interactivos de la terminal.
+1. **`linfa` y `smartcore`:** Bibliotecas de aprendizaje estadístico desarrolladas en Rust puro que implementan PCA, K-Means, DBSCAN, modelos lineales regularizados, SVMs y bosques aleatorios con garantías estrictas de seguridad de tipos en tiempo de compilación.
+2. **`candle` y `burn`:** Frameworks minimalistas de tensores y aprendizaje profundo en Rust capaces de compilar redes neuronales (`MLP`) y arquitecturas modernas en ejecutables nativos independientes sin dependencia de entornos de Python.
+3. **`nutorch`:** Complemento para Nushell que expone operaciones tensoriales de LibTorch directamente dentro de pipelines tabulares, integrando el cálculo tensorial como un tipo de dato de primera clase.
 
-Para ilustrar cómo se manifiesta este paradigma en la práctica, consideremos dos flujos de trabajo análogos a los estudiados con Python y C++:
+Para comprender cómo opera esta arquitectura en la práctica, considere dos flujos representativos análogos a los estudiados con Python y C++:
 
 #### Clasificación Supervisada en Rust Puro con Herramientas CLI
 
-Un binario compilado en Rust (como un ejecutable generado con `smartcore`) lee datos estructurados desde un pipeline de Nushell, ajusta un ensamble de árboles en paralelo aprovechando todos los núcleos del procesador sin sobrecarga de intérprete, y devuelve una tabla estructurada directamente a la consola:
+Un binario nativo compilado en Rust (por ejemplo, una herramienta basada en `smartcore`) consume datos estructurados desde un pipeline de Nushell, ajusta un ensamble en paralelo aprovechando todos los núcleos del procesador sin sobrecarga de intérpretes y emite una tabla tipada directamente a la consola:
 
 ```nu
-# skip-docker-exec (ejemplo ilustrativo de clasificación supervisada en Rust puro)
-open wine-both.csv |
-  first 500 |
-  smartcore-cli fit-predict --model random-forest --target type --trees 100 |
-  polars into-df |
-  polars group-by actual predicted |
-  polars agg [(polars col actual | polars count | polars as frecuencia)] |
-  polars collect |
-  polars into-nu
+# skip-docker-exec (pipeline de clasificación en Rust puro)
+open wine-both.csv
+| first 500
+| (
+    smartcore-cli fit-predict
+      --model random-forest --target type --trees 100
+  )
+| polars into-df
+| polars group-by actual predicted
+| polars agg [
+    (polars col actual | polars count | polars as frequency)
+  ]
+| polars collect
+| polars into-nu
 ```
 
-#### Operaciones Tensoriales de Copia Cero con Plugins de Rust
+#### Operaciones Tensoriales en Memoria con Copia Cero Mediante Plugins de Rust
 
-Mediante complementos como `nutorch` o extensiones directas de Apache Arrow, las tablas de Nushell pueden convertirse instantáneamente en matrices tensoriales sin serializar a texto plano:
+Utilizando complementos como `nutorch` o extensiones directas de Apache Arrow, las tablas de Nushell pueden convertirse de forma instantánea en buffers tensoriales sin aplanamiento a texto plano:
 
 ```nu
-# skip-docker-exec (ejemplo ilustrativo de operaciones tensoriales en memoria)
-open wine-both.csv |
-  select fixed_acidity volatile_acidity citric_acid alcohol |
-  first 5 |
-  tensor from-table |
-  tensor matmul (tensor eye 4) |
-  tensor into-table
+# skip-docker-exec (pipeline de operaciones tensoriales en memoria)
+open wine-both.csv
+| select fixed_acidity volatile_acidity citric_acid alcohol
+| first 5
+| tensor from-table
+| tensor matmul (tensor eye 4)
+| tensor into-table
 ```
 
-Aunque Python (`scikit-learn`, `umap-learn`) y C++ (`lightgbm`, `duckdb`) constituyen hoy los motores numéricos más maduros para el trabajo tabular cotidiano, la arquitectura modular de plugins en Nushell prepara al ingeniero estadístico para adoptar flujos de modelado de copia cero (*zero-copy*) conforme madure el ecosistema científico en Rust.
+Si bien Python (`scikit-learn`, `umap-learn`) y C++ (`lightgbm`, `duckdb`) constituyen hoy los motores más consolidados para el trabajo diario con datos tabulares, dominar la arquitectura de complementos de Nushell prepara al profesional para la adopción de pipelines analíticos con copia cero en Arrow conforme evolucione el ecosistema científico de Rust.
 
-## Resumen del Capítulo y Conclusión del Libro
+## Resumen del Capítulo {#ch09-summary}
 
-En este capítulo completamos el ciclo OSEMN aplicando técnicas de modelado no supervisado y supervisado desde la línea de comandos:
+A lo largo de este capítulo, construimos flujos completos de modelado supervisado y no supervisado desde la terminal en Nushell, transitando de manera metódica desde la ejecución directa de comandos y la inspección de scripts auxiliares hasta funciones modulares reutilizables:
 
-1. **Reducción de dimensionalidad (PCA y t-SNE) y diagnóstico de multicolinealidad** con `tapkee-reduce`, `pca_wine.R`, `pca_wine.py`, `vif_pcr_fish.py` y `vif_pcr_fish.R`.
-2. **Agrupamiento (K-Means, Jerárquico, DBSCAN y PAM)** con `kmeans-cluster`, `cluster_wine.R`, `cluster_wine.py`, `hclust_fish.R`, `hclust_fish.py`, `cluster_eval.py`, `dbscan_fish.py` y `pam_fish.R`.
-3. **Regresión supervisada** con Vowpal Wabbit (`vw-regress`), `regress_wine.R`, `regress_wine.py` y Regresión de Componentes Principales (PCR).
-4. **Clasificación supervisada** con SKLL (`run_experiment` + `skll-metrics`), `classify_wine.R`, `classify_wine.py`, árboles de decisión (`dt_banco.R` y `dt_banco.py`), $k$-NN (`knn_banco.R` y `knn_banco.py`), Naïve Bayes y SVM (`nb_svm_banco.py`), y Perceptrón Multicapa (`mlp_banco.py` y `mlp_banco.R`).
-5. **Modelado moderno nativo de pipelines** eliminando el formateo manual de texto y archivos `.cfg` mediante proyecciones topológicas **UMAP** (`umap-reduce`), árboles potenciados por gradiente en C++ con **LightGBM** (`lgbm-regress`), regresión analítica vectorizada en proceso con **DuckDB** (`duckdb-ols`) y evaluación multimarco en streaming incluyendo redes neuronales (`ml-benchmark`).
+1. **Reducción de Dimensionalidad y Control de Colinealidad:** Proyectamos atributos fisicoquímicos en subespacios de baja dimensión ejecutando **Tapkee** sobre matrices numéricas sin encabezados antes de utilizar `tapkee-reduce`, contrastamos las coordenadas con R (`prcomp`) y Python (`PCA`), y estabilizamos regresiones con predictores colineales mediante diagnósticos VIF y Regresión de Componentes Principales (PCR).
+2. **Agrupamiento No Supervisado y Validación Geométrica:** Segmentamos observaciones no etiquetadas con scripts independientes de **K-Means** (`kmeans_cluster.py` y `kmeans-cluster`), enlaces aglomerativos jerárquicos (`hclust`), exploración basada en densidad (**DBSCAN**) y medoides robustos (**PAM**), seleccionando el número de grupos mediante curvas de inercia y silueta (`kmeans_elbow.png`).
+3. **Regresión Fuera de Memoria y Penalizada:** Formateamos cadenas explícitas de atributos para **Vowpal Wabbit**, entrenamos modelos en flujo con `^vw` antes de presentar `to-vw` y `vw-regress`, y comparamos la precisión frente a Mínimos Cuadrados Ordinarios clásicos (`lm`), regresión Ridge y ensambles de Random Forest.
+4. **Clasificación Declarativa y Políglota:** Generamos particiones balanceadas y manifiestos de configuración para **SKLL** (`^run_experiment` y `skll-metrics`), evaluando scripts en R y Python para modelos logísticos binomiales, árboles de decisión, k-NN ponderado, Naïve Bayes gaussiano, SVMs con núcleo radial y perceptrones multicapa regularizados.
+5. **Modelado Moderno Nativo de Pipelines y Diagnósticos:** Procesamos tablas en proyecciones topológicas con **UMAP** (`umap-reduce`), potenciación por gradiente en **LightGBM** (`lgbm-regress` junto con diagnósticos de ganancia en `lgbm_importance.png`), regresiones SQL en memoria con **DuckDB** (`duckdb-ols` complementado con análisis residual en `wine_residuals.png`) y comparativas multimodelo de rendimiento (`ml-benchmark` y `benchmark_comparison.png`).
 
-A lo largo de los nueve capítulos de **Ciencia de Datos en la Línea de Comandos con Nushell**, hemos comprobado que una shell moderna basada en tablas tipadas, combinada con DataFrames perezosos en Polars, paralelismo nativo (`par-each` y GNU `parallel`), edición y visualización en terminal (`ttt` y `timg`) e interoperabilidad fluida con R, Python y motores compilados dentro del contenedor `dsin`, constituye un entorno científico reproducible, expresivo y de alto rendimiento para la Ciencia de Datos.
+Con cada fase del modelado sustentada en scripts accesibles, esquemas explícitos y diagnósticos gráficos rigurosos, nos encontramos en posición de sintetizar las lecciones metodológicas, científicas y de ingeniería desarrolladas a lo largo de este libro.
 
+\newpage
+
+\newpage
+
+# Conclusión: La Terminal como Laboratorio de Inteligencia de Datos {#chapter-conclusion}
+
+A lo largo de nueve capítulos, hemos reconstruido el flujo clásico de ciencia de datos en la línea de comandos sobre una premisa arquitectónica fundamental: la información en tránsito debe preservar su estructura matemática y semántica. Lo que comenzó con la configuración de contenedores y la navegación tabular básica evolucionó hacia la ingesta desde APIs HTTP, transformaciones columnares perezosas en Polars, orquestación multihilo de pipelines y modelado estadístico políglota a través de entornos de ejecución en C++, Rust, R y Python. Al tomar distancia de los comandos y estimadores individuales, podemos examinar con claridad por qué funciona esta arquitectura, cuáles son sus límites físicos y cómo implementarla con responsabilidad en la investigación científica y la ingeniería en producción.
+
+## El Ciclo OSEMN en Shells Tipadas
+
+Cuando Hilary Mason y Chris Wiggins introdujeron la taxonomía OSEMN (*Obtain*, *Scrub*, *Explore*, *Model* e *iNterpret*) en 2010, los profesionales enfrentaban una marcada división entre dos entornos incompatibles. Por un lado se encontraba la shell POSIX (`bash`, `zsh`, `awk`, `sed`), insuperable para la orquestación de archivos, la composición de procesos y la programación desatendida de tareas, pero ciega a los tipos de datos. Cada canal transportaba un flujo indiferenciado de bytes delimitado por saltos de línea. Introducir una coma dentro de una cadena entrecomillada, encontrar un separador decimal dependiente de la configuración regional o propagar valores faltantes hacia etapas posteriores corrompía con frecuencia los resultados analíticos sin emitir error alguno de sintaxis. Por otro lado se ubicaban los entornos interactivos monolíticos, que comprendían matrices y dataframes de manera interna pero aislaban dichas estructuras del sistema operativo, fomentando sesiones con estado mutable que dificultaban la automatización.
+
+Una shell tipada resuelve esta fractura histórica. Al elevar tablas, registros, listas, marcas temporales, tamaños de archivo y duraciones a valores de primera clase gobernados por el analizador sintáctico de la shell, Nushell permite que las cinco etapas de OSEMN compartan una base compositiva común:
+
+| Dimensión Analítica | Flujos de Texto POSIX Tradicionales (`bash` + `awk`) | Cuadernos Interactivos Monolíticos | Pipelines en Shells Tipadas (`nu` + `polars` + `dsin`) |
+| :--- | :--- | :--- | :--- |
+| **Representación de Datos** | Flujos de bytes sin tipo divididos por delimitadores arbitrarios | Objetos en memoria ligados al kernel de un único lenguaje | Tablas fuertemente tipadas, registros y arreglos Arrow |
+| **Modo de Fallo** | Desplazamientos silenciosos de columnas y errores léxicos | Mutación desordenada de celdas y estado global oculto | Errores inmediatos en tiempo de análisis o por discrepancia de esquema |
+| **Integración Políglota** | Extracción frágil de texto plano sobre la salida estándar | Envoltorios de funciones foráneas o exportación manual de archivos | Contratos explícitos en JSON, CSV e IPC hacia tablas tipadas |
+| **Reproducibilidad** | Alta al escribir scripts, pero frágil ante casos límite | Baja sin una estricta disciplina en el orden de ejecución | Scripts deterministas dentro de contenedores versionados |
+
+Esta continuidad estructural transforma la perspectiva analítica. Durante la **Obtención** (Capítulo 5), las respuestas provenientes de endpoints REST, consultas SQLite, libros de Excel y archivos Parquet ingresan al espacio de trabajo con esquemas explícitos en lugar de matrices de texto sin formato. Durante la **Depuración** (Capítulo 6), las conversiones de tipo, la imputación de nulos, las uniones relacionales y la extracción con expresiones regulares se convierten en transformaciones de esquema verificables en lugar de manipulaciones frágiles de cadenas. La **Exploración** (Capítulo 7) se ejecuta de forma natural junto al pipeline: estadísticas de resumen mediante `math` y `polars summary`, inspección interactiva con `explore` y diagnósticos gráficos en alta resolución renderizados en la propia consola con `timg` mantienen el análisis empírico conectado a las observaciones originales.
+
+De manera fundamental, el **Modelado** y la **Interpretación** (Capítulos 8 y 9) dejan de ser etapas aisladas. Las matrices de variables independientes fluyen hacia algoritmos compilados en C++ o scripts estadísticos, mientras que las predicciones, tablas de coeficientes, factores de inflación de la varianza, puntuaciones de silueta y diagnósticos de residuos retornan inmediatamente como tablas de Nushell. La interpretación deja de ser un resumen secundario insertado en una presentación estática; se convierte en una consulta ejecutable sobre las salidas del modelo, reproducible desde los datos crudos mediante una sola instrucción.
+
+## La Intersección entre Ingeniería de Software y Estadística
+
+La metodología estadística y la ingeniería de software maduraron bajo prioridades conceptuales distintas. La estadística clásica prioriza las propiedades de los estimadores: identificabilidad, balance entre sesgo y varianza, consistencia asintótica y cuantificación rigurosa de la incertidumbre. La ingeniería de software prioriza los invariantes del sistema: modularidad, interfaces explícitas, idempotencia, control de versiones y pruebas automatizadas. En la práctica aplicada, los proyectos fallan habitualmente no porque el analista elija una función de pérdida equivocada, sino porque el flujo de cómputo vulnera invariantes básicos de ingeniería de software.
+
+Pensemos en un patrón recurrente en la modelación académica e industrial. Un cuaderno de trabajo exploratorio comienza con propósitos claros. Tras semanas de experimentación continua, las celdas se ejecutan fuera de orden, se modifica un filtro inicial sin recalcular la celda catorce, una instalación de paquetes desactualizada modifica bibliotecas del sistema y surge una filtración sutil de información en la validación cruzada. Meses después, cuando un comité examinador, un revisor de revista científica o un equipo de ingeniería intenta reproducir las tablas desde los datos originales, el script falla o genera resultados divergentes.
+
+Tratar la terminal como un laboratorio estructurado incorpora cuatro disciplinas de ingeniería de software directamente en la práctica estadística:
+
+1. **Transparencia Referencial en las Transformaciones:** En Nushell, los valores son inmutables por defecto (`let`). Canalizar una tabla mediante `where`, `select`, `insert` o `polars with-column` genera una nueva estructura sin alterar las asignaciones previas en memoria. Es posible reejecutar cualquier pipeline diez veces sucesivas y obtener con precisión la misma tabla, eliminando el acoplamiento temporal derivado del estado mutable global.
+2. **Límites de Interfaz Explícitos:** A lo largo del Capítulo 9, evitamos deliberadamente incrustar extensas cadenas de código en Python o R dentro de funciones de la shell. En su lugar, organizamos las rutinas estadísticas en archivos `.R` y `.py` independientes (`cluster_eval.py`, `regress_wine.R`, `ml_benchmark.py`), verificamos su estructura con `bat`, validamos sus contratos de entrada y salida sobre los canales estándar de comunicación y solo entonces encapsulamos los pipelines verificados en comandos personalizados (`export def` en `dsin_tools.nu`). Separar la orquestación respecto al cómputo numérico permite que cada lenguaje opere en su ámbito óptimo, conservando la trazabilidad y legibilidad de cada archivo en `git diff`.
+3. **Especificación Hermética del Entorno:** La reproducibilidad estadística exige fijar la totalidad de las dependencias computacionales, más allá de definir una semilla pseudoaleatoria (`set.seed(42)` o `random_state=42`). El contenedor `dsin` define las bibliotecas del sistema operativo, el binario de Nushell y sus plugins compilados, los paquetes de R, los motores en C++ (`vw`, `tapkee`, `lightgbm`, `duckdb`) y un entorno virtual aislado en Python 3.12 gestionado por `uv` (`/opt/modern-ml`). De esta forma, herramientas con dependencias divergentes coexisten armónicamente mediante resolución explícita de rutas sin colisiones de paquetes.
+4. **Documentación Ejecutable y Verificación Continua:** Cada pipeline en un proyecto científico debe estar respaldado por pruebas automatizadas de ejecución. Cuando los bloques de código de la documentación y los scripts de modelado se validan continuamente dentro de un contenedor limpio (`test_md_execution.nu` y `test_modeling_pipelines.nu`), el deterioro silencioso del código resulta imposible. Cualquier alteración de esquemas, parámetros en desuso o rutas erróneas se detecta de inmediato en la etapa de verificación en lugar de propagar errores analíticos imperceptibles.
+
+Al unir el rigor estadístico con el diseño modular de software, la agilidad en la exploración y la confiabilidad en producción se fortalecen mutuamente.
+
+## Eficiencia Computacional, Límites Out-of-Core y la Frontera Zero-Copy en Arrow
+
+Una lección constante de los Capítulos 6, 8 y 9 es que la elegancia sintáctica carece de valor práctico si el flujo de trabajo colapsa cuando el tamaño muestral $n$ o la dimensionalidad $p$ aumentan considerablemente. Comprender cómo las herramientas de línea de comandos interactúan con las memorias caché de la CPU, los grupos de hilos, los gestores de memoria y las operaciones de entrada y salida diferencia a quien procesa algunos miles de registros de quien construye sistemas para cientos de millones de observaciones.
+
+En escalas pequeñas a moderadas ($10^3$ a $10^6$ filas), las tablas nativas de Nushell ofrecen gran flexibilidad para la inspección fila por fila, la manipulación de estructuras jerárquicas y la administración de configuraciones. No obstante, dado que Nushell representa internamente las tablas como colecciones de registros estructurados, las operaciones fila por fila (`each { ... }`) introducen sobrecarga por asignación de memoria y despacho dinámico. Al utilizar `nu_plugin_polars`, el procesamiento adopta una organización física distinta: búferes columnares contiguos y alineados con la memoria caché bajo el estándar Apache Arrow. Cuando un pipeline invoca `polars into-lazy`, Polars construye un plan lógico de consulta, transfiere los predicados de filtrado directamente a los lectores de CSV o Parquet, descarta columnas no requeridas antes de descomprimir y ejecuta instrucciones vectorizadas SIMD en múltiples núcleos de forma simultánea antes de materializar el resultado con `polars collect`.
+
+Cuando los volúmenes de datos superan la memoria RAM disponible o demandan métodos de cálculo especializados, las herramientas CLI examinadas en el Capítulo 9 aplican tres estrategias algorítmicas bien diferenciadas:
+
+- **Optimización Streaming Fuera de Memoria Principal (`vw`):** Vowpal Wabbit desvincula el consumo de memoria respecto al número de observaciones $n$. Mediante la dispersión de variables en un vector de ponderaciones de tamaño fijo $2^b$ con MurmurHash3 y la actualización continua de coeficientes mediante descenso de gradiente estocástico adaptativo, `vw` procesa flujos masivos de datos en memoria acotada $O(2^b)$ durante una sola pasada secuencial sobre disco o canales de red.
+- **SQL Analítico Vectorizado en Proceso (`duckdb`):** DuckDB procesa datos columnares en vectores dimensionados para las memorias caché L1 y L2 (habitualmente 2.048 tuplas por fragmento). Los operadores de agregación como `regr_slope`, `regr_intercept` y `regr_r2` acumulan estadísticas suficientes ($\sum x_i$, $\sum y_i$, $\sum x_i^2$, $\sum x_i y_i$) en bucles compactos en C++ sin necesidad de crear estructuras intermedias de memoria en Python o R.
+- **Inducción de Árboles mediante Histogramas (`lightgbm`):** La búsqueda exacta de puntos de corte en árboles con potenciación de gradiente requiere ordenar las variables continuas con un costo de $O(n \cdot p)$ por nivel. LightGBM agrupa los predictores continuos en contenedores discretos (frecuentemente 255 intervalos), reduciendo la evaluación de divisiones a sustracciones de histogramas de costo $O(\text{contenedores} \cdot p)$ con acceso secuencial eficiente a memoria.
+
+Incluso con herramientas optimizadas, los pipelines políglotas asumen un costo computable al cruzar fronteras de procesos cuando las tablas se serializan a texto en formato UTF-8 (`to csv` o `to json`) y se reconstruyen posteriormente (`from csv` o `from json`). Para tablas de resumen, métricas de rendimiento o conjuntos medianos (como los 6.497 registros de vino o los 4.521 perfiles bancarios), esta serialización toma solo milisegundos y garantiza legibilidad inmediata. Sin embargo, cuando decenas de millones de observaciones atraviesan procesos de forma iterativa, la conversión entre texto y números en punto flotante concentra la mayor parte del tiempo de ejecución.
+
+Existen dos soluciones prácticas para superar este cuello de botella. En primer lugar, los pipelines que intercambian tablas intermedias de gran volumen pueden utilizar archivos binarios columnares (como Apache Parquet o Arrow IPC Feather) en sistemas de archivos en memoria (`/dev/shm` o `/tmp`), permitiendo que Polars, DuckDB, Python (`pyarrow`) y R (`arrow`) mapeen arreglos tipados con un costo de lectura mínimo. En segundo lugar, dado que Nushell y `nu_plugin_polars` están desarrollados en Rust sobre Apache Arrow, los complementos nativos pueden compartir punteros de `RecordBatch` en memoria sin serialización. Conforme las bibliotecas científicas en Rust (`linfa`, `smartcore`, `candle`, `burn`) maduren junto con el protocolo de plugins de Nushell, el modelado tabular directo con costo de copia cero pasará de ser un prototipo conceptual a un estándar operativo en la terminal.
+
+## Guía Metodológica para Proyectos Aplicados en Producción
+
+El paso desde ejercicios didácticos hacia proyectos de consultoría estadística, tesis de grado o ingeniería de datos en producción requiere hábitos metodológicos consistentes. Los siguientes cinco principios condensan las prácticas desarrolladas a lo largo de este libro en una guía concreta de aplicación:
+
+1. **Validar Contratos de Esquema en la Entrada:** Trate los archivos externos, tablas extraídas de páginas web y respuestas de APIs como fuentes no confiables hasta verificar su integridad. Al momento de la ingesta, examine los tipos de datos con `describe`, verifique la cantidad esperada de filas y la unicidad de identificadores, estandarice nombres de columnas y transforme cadenas ambiguas en representaciones numéricas o temporales explícitas. Detectar un formato temporal inválido o un valor nulo imprevisto en las primeras líneas de un script evita horas de depuración por matrices singulares o divergencia numérica en los algoritmos posteriores.
+2. **Escalar la Complejidad Siguiendo una Jerarquía Gradual:** Evite recurrir por defecto a arquitecturas complejas o modelos de aprendizaje profundo sin justificación empírica. Inicie con pipelines nativos en Nushell y consultas en Polars para filtrado, agregación e ingeniería de atributos. Aplique SQL vectorizado (`duckdb-ols`) o modelos lineales (`lm`, Ridge, `vw`) para establecer referencias estadísticas interpretables con rapidez. Incorpore conjuntos de árboles (`lightgbm`, Random Forest) o proyecciones topológicas no lineales (`umap-reduce`, `tapkee-reduce`) únicamente cuando los diagnósticos iniciales revelen relaciones no lineales que justifiquen la complejidad adicional, siguiendo las recomendaciones observadas en estudios comparativos sobre datos tabulares (Grinsztajn et al., 2022).
+3. **Mantener la Orquestación Declarativa y el Cómputo Modular:** Utilice Nushell para gestionar la navegación en directorios, la distribución concurrente de tareas (`par-each` con hilos acotados mediante `--threads` o GNU `parallel`), la validación de esquemas y la consolidación de métricas. Conserve las operaciones matemáticas relevantes en scripts independientes y concisos en R o Python con argumentos explícitos en línea de comandos (`argparse` o `commandArgs`), límites en el uso de hilos (`OMP_NUM_THREADS`) para evitar sobrecarga en la CPU y emisión limpia de datos en JSON o CSV hacia la salida estándar. Cuando un flujo de trabajo se consolide entre proyectos, empaquételo como un comando personalizado documentado dentro de un módulo de Nushell.
+4. **Complementar las Métricas Globales con Diagnósticos Estructurales y Gráficos:** Los resúmenes estadísticos agregados pueden ocultar deficiencias críticas. Una precisión global elevada en clases desbalanceadas puede disimular una sensibilidad deficiente en la categoría de interés; un coeficiente $R^2$ aceptable puede encubrir heterocedasticidad severa o discretización en la variable objetivo (`wine_residuals.png`); una cantidad arbitraria de grupos $k$ puede fragmentar densidades continuas en divisiones espurias (`kmeans_elbow.png`). Construya gráficos de diagnóstico directamente en scripts reproducibles (`ggplot2`, `matplotlib`) e inspecciónelos en la terminal mediante `timg` junto con tablas de contingencia antes de validar cualquier modelo.
+5. **Empaquetar Cada Proyecto como un Artefacto Reproducible:** Un análisis estadístico riguroso no consiste en una carpeta con scripts dispersos e instrucciones manuales; constituye un pipeline automatizado respaldado por control de versiones (`git`), una definición de entorno verificable (`Dockerfile`, `uv.lock` o `renv.lock`), un archivo `README.md` detallado y scripts de validación que regeneren los resultados desde los datos iniciales con código de salida cero.
+
+```nu
+# skip-docker-exec (pipeline de verificación en producción)
+open raw/measurements.parquet
+| polars into-df
+| polars drop-nulls
+| polars collect
+| polars into-nu
+| lgbm-regress --target response --trees 200
+| get metrics
+| where rmse < 0.65
+```
+
+Dominar la línea de comandos con Nushell no exige renunciar a la riqueza estadística de R, a la versatilidad de Python ni a la velocidad de ejecución de C++ y Rust. Por el contrario, proporciona un lenguaje tabular común y fuertemente tipado donde herramientas especializadas se integran con naturalidad. Con pipelines estructurados, reproducibilidad garantizada en contenedores y criterio estadístico riguroso, la terminal se transforma en un laboratorio confiable y permanente para convertir observaciones empíricas en conocimiento científico sólido.
 
 \newpage
 

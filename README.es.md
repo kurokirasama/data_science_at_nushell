@@ -44,6 +44,7 @@ La obra original de Janssens sentó las bases del uso de la consola Unix para fl
 7. **Capítulo 7:** Exploración de Datos y Visualización en Terminal (`describe`, `math`, `polars`, scripts `.R`/`.py` y visualización con `timg`)
 8. **Capítulo 8:** Procesamiento en Serie y Pipelines Paralelos (`each`, `par-each` y GNU `parallel`)
 9. **Capítulo 9:** Modelado Políglota de Datos (Reducción de Dimensionalidad con PCA/t-SNE/UMAP, Clustering K-Means / Jerárquico / DBSCAN / PAM, Regresión con VW/LightGBM/DuckDB OLS y Clasificación Supervisada incluyendo MLP en CLI + `Rscript` + `python3` → Tablas Nushell)
+10. **Capítulo 10:** Conclusión: La Terminal como Laboratorio de Inteligencia de Datos (El ciclo OSEMN en shells tipadas, ingeniería de software aplicada a la estadística, eficiencia out-of-core y frontera zero-copy en Apache Arrow, y guía metodológica para proyectos en producción)
 
 ## Imagen Docker (`dsin`)
 

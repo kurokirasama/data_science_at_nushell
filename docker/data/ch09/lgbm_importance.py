@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-"""
-Extract split-count and total gain feature importance from a LightGBM model file.
-Outputs a JSON array of sorted feature importance records.
-"""
+"""Extract split-count and gain importance from a LightGBM model."""
 import json
 import sys
 import lightgbm as lgb
@@ -10,7 +7,9 @@ import lightgbm as lgb
 
 def main():
     if len(sys.argv) < 2:
-        sys.stderr.write("Usage: lgbm_importance.py <model_file.txt>\n")
+        sys.stderr.write(
+            "Usage: lgbm_importance.py <model_file.txt>\n"
+        )
         sys.exit(1)
 
     model_file = sys.argv[1]
@@ -18,7 +17,8 @@ def main():
     names = booster.feature_name()
     splits = booster.feature_importance(importance_type="split")
     gains = booster.feature_importance(importance_type="gain")
-    total_gain = float(gains.sum()) if float(gains.sum()) > 0 else 1.0
+    tot = float(gains.sum())
+    total_gain = tot if tot > 0 else 1.0
 
     rows = [
         {

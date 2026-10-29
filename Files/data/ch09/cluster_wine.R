@@ -7,10 +7,14 @@ X <- scale(df[, num_cols])
 km <- kmeans(X, centers = 2, nstart = 20)
 df$cluster <- paste0("cluster_", km$cluster)
 
-# Save cluster assignments
-write.csv(df[, c("type", "quality", "alcohol", "volatile_acidity", "cluster")], "wine_kmeans_r.csv", row.names = FALSE, quote = FALSE)
+keep_cols <- c(
+  "type", "quality", "alcohol", "volatile_acidity", "cluster"
+)
+write.csv(
+  df[, keep_cols], "wine_kmeans_r.csv",
+  row.names = FALSE, quote = FALSE
+)
 
-# Output cluster summary table to stdout
 tab <- as.data.frame.matrix(table(df$cluster, df$type))
 out <- data.frame(
   cluster = rownames(tab),

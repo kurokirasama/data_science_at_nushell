@@ -14,10 +14,14 @@ r2_pcr <- summary(fit_pcr)$r.squared
 rmse_pcr <- sqrt(mean(residuals(fit_pcr)^2))
 
 out_comp <- data.frame(
-  model = c("R_OLS_Multiple_Regression", "R_PCR_Principal_Components"),
+  model = c(
+    "R_OLS_Multiple_Regression", "R_PCR_Principal_Components"
+  ),
   components = c(5, 2),
   r2 = round(c(r2_ols, r2_pcr), 4),
   rmse = round(c(rmse_ols, rmse_pcr), 2)
 )
-write.csv(out_comp, "fish_pcr_r.csv", row.names = FALSE, quote = FALSE)
+write.csv(
+  out_comp, "fish_pcr_r.csv", row.names = FALSE, quote = FALSE
+)
 write.csv(out_comp, stdout(), row.names = FALSE, quote = FALSE)

@@ -6,9 +6,15 @@ train$target <- ifelse(train$type == "red", 1, 0)
 test$target  <- ifelse(test$type == "red", 1, 0)
 
 predictors <- setdiff(names(train), c("id", "type", "target"))
-formula_str <- paste("target ~", paste(predictors, collapse = " + "))
+formula_str <- paste(
+  "target ~", paste(predictors, collapse = " + ")
+)
 
-fit <- glm(as.formula(formula_str), data = train, family = binomial(link = "logit"))
+fit <- glm(
+  as.formula(formula_str),
+  data = train,
+  family = binomial(link = "logit")
+)
 probs <- predict(fit, newdata = test, type = "response")
 preds <- ifelse(probs >= 0.5, 1, 0)
 

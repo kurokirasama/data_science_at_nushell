@@ -47,6 +47,7 @@ Janssens' original work established the foundation for using the Unix console fo
 7. **Chapter 7: Exploring Data and In-Terminal Visualization** (`describe`, `math`, `polars`, `.R`/`.py` scripts, and plotting with `timg`)
 8. **Chapter 8: Serial Processing and Parallel Pipelines** (`each`, `par-each`, and GNU `parallel`)
 9. **Chapter 9: Polyglot Data Modeling** (Dimensionality Reduction with PCA/t-SNE/UMAP, K-Means / Hierarchical / DBSCAN / PAM Clustering, Regression with VW/LightGBM/DuckDB OLS, and Supervised Classification including MLP via CLI + `Rscript` + `python3` → Nushell Tables)
+10. **Chapter 10: Conclusion: The Command Line as a Data Intelligence Laboratory** (OSEMN lifecycle in typed shells, software engineering and statistical rigor, out-of-core and zero-copy Apache Arrow performance, and production methodological guidelines)
 
 ## Docker Image (`dsin`)
 
