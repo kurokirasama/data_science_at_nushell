@@ -5047,7 +5047,14 @@ $df_aggregated | polars sort-by developer | polars collect
 Se hace el pivoteo:
 
 ```nu
-let df_pivoted = ($df_aggregated | polars sort-by year | polars collect | polars pivot --index [developer] --on [year] --values [price_mean] --stable | polars collect | polars sort-by developer | polars collect)
+let df_pivoted = $df_aggregated
+  | polars sort-by year
+  | polars collect
+  | polars pivot --index [developer] --on [year] --values [price_mean]
+    --stable
+  | polars collect
+  | polars sort-by developer
+  | polars collect
 $df_pivoted | polars first 5 | polars into-nu
 $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 ```
@@ -5664,7 +5671,7 @@ El contenedor `dsin` incorpora **Tapkee** (Lisitsyn et al., 2013), una bibliotec
 Ejecutar `tapkee` directamente exige un pipeline de tres etapas en Nushell: preprocesar la matriz de entrada, invocar el ejecutable nativo y posprocesar el flujo resultante de coordenadas. En primer lugar, seleccionamos 200 observaciones de `wine-both.csv`, descartamos `type` y `quality` para conservar únicamente las 11 mediciones continuas, serializamos una matriz CSV sin encabezados y llamamos a `^tapkee`:
 
 ```nu
-let sample_w = (open wine-both.csv | first 200)
+let sample_w = open wine-both.csv | first 200
 $sample_w
   | reject type quality
   | to csv --noheaders
@@ -5681,16 +5688,14 @@ open --raw wine_pca_raw.csv | lines | first 5
 Al examinar la salida sin procesar observamos pares de coordenadas separados por comas (`-1.67715,-16.4492`) sin encabezados ni identificadores de fila. Dado que `tapkee` preserva el orden secuencial de entrada, convertimos el archivo de vuelta a una tabla de Nushell, asignamos nombres descriptivos de columna (`dim_1`, `dim_2`), redondeamos cada valor a cuatro decimales y unimos horizontalmente la proyección sobre `$sample_w`:
 
 ```nu
-let coords = (
-  open --raw wine_pca_raw.csv
+let coords = open --raw wine_pca_raw.csv
   | from csv --noheaders
   | rename dim_1 dim_2
   | update dim_1 { into float | math round -p 4 }
   | update dim_2 { into float | math round -p 4 }
-)
-let direct_pca = (
-  $sample_w | merge $coords | select type quality dim_1 dim_2
-)
+let direct_pca = $sample_w
+  | merge $coords
+  | select type quality dim_1 dim_2
 $direct_pca | first 5
 rm -f wine_matrix.csv wine_pca_raw.csv
 ```
@@ -5708,19 +5713,15 @@ export def tapkee-reduce [
   let tbl = $in
   let norm_m = if $method == "tsne" { "t-sne" } else { $method }
   let has_cols = ($cols != null) and (($cols | length) > 0)
-  let has_lbl = (
-    ($label_col != null)
-    and ($label_col | is-not-empty)
-    and ($label_col in ($tbl | columns))
-  )
+  let has_lbl = if ($label_col != null) {
+    $label_col in ($tbl | columns)
+  } else { false }
   let num_tbl = if $has_cols {
     $tbl | select ...$cols
   } else if $has_lbl {
     $tbl | reject $label_col
   } else {
-    let non_num = (
-      ["type"] | where { |c| $c in ($tbl | columns) }
-    )
+    let non_num = ["type"] | where { |c| $c in ($tbl | columns) }
     if ($non_num | is-not-empty) {
       $tbl | reject ...$non_num
     } else {
@@ -5728,8 +5729,8 @@ export def tapkee-reduce [
     }
   }
 
-  let tmp_in = (mktemp --suffix ".csv")
-  let tmp_out = (mktemp --suffix ".tsv")
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_out = mktemp --suffix ".tsv"
   $num_tbl | to csv --noheaders | save -f $tmp_in
 
   let tk_args = [
@@ -5738,28 +5739,24 @@ export def tapkee-reduce [
     "--delimiter" ","
   ]
   ^tapkee ...$tk_args
-  let raw_coords = (
-    open --raw $tmp_out
+  let raw_coords = open --raw $tmp_out
     | lines
     | where ($it | str trim | is-not-empty)
-  )
   rm -f $tmp_in $tmp_out
 
-  let coords_tbl = ($raw_coords | each { |line|
-    let parts = (
-      $line
+  let coords_tbl = $raw_coords | each { |line|
+    let parts = $line
       | split row ","
       | each { |v| $v | str trim | into float | math round -p 4 }
-    )
     mut rec = {}
     for idx in 0..<($parts | length) {
-      let val = ($parts | get $idx)
+      let val = $parts | get $idx
       let k1 = $"dim($idx + 1)"
       let k2 = $"dim_($idx + 1)"
-      $rec = ($rec | insert $k1 $val | insert $k2 $val)
+      $rec = $rec | insert $k1 $val | insert $k2 $val
     }
     $rec
-  })
+  }
 
   $tbl | merge $coords_tbl
 }
@@ -5780,12 +5777,10 @@ let features = [
   "residual_sugar" "chlorides" "free_sulfur_dioxide"
   "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"
 ]
-let pca_res = (
-  open wine-both.csv
+let pca_res = open wine-both.csv
   | first 200
   | tapkee-reduce --method pca --cols $features
   | select type quality dim_1 dim_2
-)
 $pca_res | first 5
 $pca_res | save -f wine_pca_tapkee.csv
 ```
@@ -5793,12 +5788,10 @@ $pca_res | save -f wine_pca_tapkee.csv
 Cambiando `--method pca` por `--method t-sne` calculamos una incrustación no lineal bidimensional a través de la misma interfaz:
 
 ```nu
-let tsne_res = (
-  open wine-both.csv
+let tsne_res = open wine-both.csv
   | first 150
   | tapkee-reduce --method t-sne --cols $features
   | select type quality dim_1 dim_2
-)
 $tsne_res | first 5
 $tsne_res | save -f wine_tsne_tapkee.csv
 ```
@@ -5848,7 +5841,7 @@ Observe las tres etapas estadísticas y de entrada/salida en `pca_wine.R`:
 Ejecutar `Rscript pca_wine.R | from csv` convierte la salida de R en una tabla estructurada de Nushell:
 
 ```nu
-let pca_r = (Rscript pca_wine.R | from csv)
+let pca_r = Rscript pca_wine.R | from csv
 $pca_r
 $pca_r | save -f wine_pca_summary_r.csv
 ```
@@ -5904,7 +5897,7 @@ Tres elementos clave alinean `pca_wine.py` con su versión en R:
 Ejecutamos `pca_wine.py` y comprobamos que Python y R coinciden con dos decimales de precisión tanto en la varianza marginal como en la acumulada:
 
 ```nu
-let pca_py = (python3 pca_wine.py | from csv)
+let pca_py = python3 pca_wine.py | from csv
 $pca_py
 ```
 
@@ -6102,12 +6095,10 @@ Tres decisiones de diseño permiten que `kmeans_cluster.py` opere como un filtro
 Antes de utilizar cualquier función envoltorio en Nushell, ejecutamos `kmeans_cluster.py` directamente en un pipeline básico: Nushell serializa `wine-both.csv` a formato CSV sobre la salida estándar, Python calcula dos clústeres estandarizados excluyendo `type` y `quality`, y Nushell procesa el flujo retornado mediante `from csv` para tabular los clústeres frente a las variedades reales en Polars:
 
 ```nu
-let raw_km = (
-  open wine-both.csv
+let raw_km = open wine-both.csv
   | to csv
   | ^python3 kmeans_cluster.py --k 2 --exclude "type,quality"
   | from csv
-)
 $raw_km
   | select type quality alcohol volatile_acidity cluster
   | first 5
@@ -6138,11 +6129,10 @@ export def kmeans-cluster [
 ]: table -> table {
   let tbl = $in
   let n_k = if $clusters > 0 { $clusters } else { $k }
-
-  let tmp_in = (mktemp --suffix ".csv")
+  let tmp_in = mktemp --suffix ".csv"
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = ($label_col | default "type")
+  let lbl = $label_col | default "type"
   let cols_flag = if ($cols != null) and (($cols | length) > 0) {
     ["--cols" ($cols | str join ",")]
   } else { [] }
@@ -6156,14 +6146,13 @@ export def kmeans-cluster [
     "kmeans_cluster.py"
   }
 
-  let res = (
-    python3 $py_km
-      --input $tmp_in
-      --k $n_k
-      --exclude $lbl
-      ...$cols_flag
-    | from csv
-  )
+  let km_args = [
+    "--input" $tmp_in
+    "--k" ($n_k | into string)
+    "--exclude" $lbl
+    ...$cols_flag
+  ]
+  let res = python3 $py_km ...$km_args | from csv
   rm -f $tmp_in
   $res
 }
@@ -6179,9 +6168,8 @@ let features = [
   "residual_sugar" "chlorides" "free_sulfur_dioxide"
   "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"
 ]
-let clustered = (
-  open wine-both.csv | kmeans-cluster --k 2 --cols $features
-)
+let clustered = open wine-both.csv
+  | kmeans-cluster --k 2 --cols $features
 $clustered
   | select type quality alcohol volatile_acidity cluster
   | first 5
@@ -6243,7 +6231,7 @@ write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
 Observe cómo `cluster_wine.R` estandariza los predictores mediante `scale()`, ejecuta el algoritmo de Hartigan-Wong sobre 20 inicios independientes (`kmeans(X, centers = 2, nstart = 20)`) y consolida los tamaños muestrales (`km$size`), la dispersión interna (`km$withinss`) y las frecuencias de contingencia (`table(df$cluster, df$type)`) en una tabla CSV emitida directamente a `stdout()`:
 
 ```nu
-let km_r = (Rscript cluster_wine.R | from csv)
+let km_r = Rscript cluster_wine.R | from csv
 $km_r
 $km_r | save -f wine_clusters_r.csv
 ```
@@ -6291,7 +6279,7 @@ pd.DataFrame(rows).to_csv(sys.stdout, index=False)
 Dentro del ciclo, `silhouette_score(..., sample_size=1500, random_state=42)` estima el contraste cohesión-separación en tiempo $O(m^2)$ sobre una submuestra fija para evitar el costo cuadrático de $6{,}497^2$ distancias por pares, guardando las asignaciones para $K = 2$ y transmitiendo la tabla métrica hacia `sys.stdout`:
 
 ```nu
-let km_py = (python3 cluster_wine.py | from csv)
+let km_py = python3 cluster_wine.py | from csv
 $km_py
 $km_py | save -f wine_clusters_py.csv
 ```
@@ -6337,7 +6325,7 @@ write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
 Tres operaciones definen `hclust_fish.R`: `dist(X, method = "euclidean")` calcula la matriz de distancias por pares de $159 \times 159$ sobre las variables morfométricas estandarizadas, `hclust(d, method = "ward.D2")` genera el dendrograma de varianza mínima y `cutree(hc, k = 3)` divide el árbol en tres grupos morfológicos cuyas especies biológicas predominantes se resumen mediante `max.col(tab)`:
 
 ```nu
-let hc_r = (Rscript hclust_fish.R | from csv)
+let hc_r = Rscript hclust_fish.R | from csv
 $hc_r
 $hc_r | save -f fish_hclust_r.csv
 ```
@@ -6383,7 +6371,7 @@ pd.DataFrame(rows).to_csv(sys.stdout, index=False)
 Tras el escalamiento $z$-score (`StandardScaler`), `AgglomerativeClustering(n_clusters=k, linkage="ward")` calcula las uniones deterministas de Ward, almacena las asignaciones con $K = 3$ y canaliza las puntuaciones de silueta para cada nivel de corte hacia `sys.stdout`:
 
 ```nu
-let hc_py = (python3 hclust_fish.py | from csv)
+let hc_py = python3 hclust_fish.py | from csv
 $hc_py
 ```
 
@@ -6440,7 +6428,7 @@ pd.DataFrame(rows).to_csv(sys.stdout, index=False)
 En `cluster_eval.py`, `StandardScaler` homogeniza las escalas monetarias y etarias, el ciclo `range(2, 7)` evalúa cada modelo ajustado sobre los tres índices simultáneamente y la exportación `pd.DataFrame(rows).to_csv(sys.stdout, index=False)` emite una tabla de evaluación ordenada directamente en Nushell:
 
 ```nu
-let eval_b = (python3 cluster_eval.py | from csv)
+let eval_b = python3 cluster_eval.py | from csv
 $eval_b | save -f banco_cluster_eval.csv
 $eval_b | sort-by silhouette -r
 ```
@@ -6672,17 +6660,15 @@ Antes de recurrir a cualquier comando envoltorio, implementamos el flujo complet
 
 ```nu
 let data = open wine-white.csv
-let train = ($data | first 3500)
-let test = ($data | skip 3500)
-let fcols = ($data | columns | where $it != "quality")
+let train = $data | first 3500
+let test = $data | skip 3500
+let fcols = $data | columns | where $it != "quality"
 
 $train
 | each { |r|
-    let kv = (
-      $fcols
+    let kv = $fcols
       | each { |c| $"($c):($r | get $c)" }
       | str join " "
-    )
     $"($r.quality) |f ($kv)"
   }
 | str join "\n"
@@ -6690,11 +6676,9 @@ $train
 
 $test
 | each { |r|
-    let kv = (
-      $fcols
+    let kv = $fcols
       | each { |c| $"($c):($r | get $c)" }
       | str join " "
-    )
     $"($r.quality) |f ($kv)"
   }
 | str join "\n"
@@ -6733,26 +6717,22 @@ Cinco parámetros gobiernan esta interacción:
 Dado que `vw` emite valores numéricos simples sin encabezados ni referencias originales, procesamos `/tmp/direct_preds.txt` en Nushell, vinculamos cada predicción con `$test.quality` mediante `zip`, calculamos residuos con signo y absolutos, y eliminamos los archivos temporales:
 
 ```nu
-let raw_p = (
-  open --raw /tmp/direct_preds.txt
+let raw_p = open --raw /tmp/direct_preds.txt
   | lines
   | where ($it | str trim | is-not-empty)
   | each { into float }
-)
-let obs_y = ($test.quality | each { into float })
+let obs_y = $test.quality | each { into float }
 
-let direct_vw = (
-  $obs_y | zip $raw_p | each { |pair|
-    let obs = $pair.0
-    let pred = ($pair.1 | math round -p 4)
-    {
-      observed: $obs
-      predicted: $pred
-      error: (($pred - $obs) | math round -p 4)
-      abs_error: (($obs - $pred) | math abs | math round -p 4)
-    }
+let direct_vw = $obs_y | zip $raw_p | each { |pair|
+  let obs = $pair.0
+  let pred = $pair.1 | math round -p 4
+  {
+    observed: $obs
+    predicted: $pred
+    error: (($pred - $obs) | math round -p 4)
+    abs_error: (($obs - $pred) | math abs | math round -p 4)
   }
-)
+}
 rm -rf /tmp/direct_train.vw /tmp/direct_test.vw
 rm -rf /tmp/direct_model.vw /tmp/direct_preds.txt /tmp/direct.cache
 $direct_vw | first 5
@@ -6769,14 +6749,12 @@ export def to-vw [
   --namespace(-n): string = "f"
 ]: table -> list<string> {
   let tbl = $in
-  let cols = ($tbl | columns | where $it != $target)
+  let cols = $tbl | columns | where $it != $target
   $tbl | each { |row|
-    let y = ($row | get $target)
-    let feats = (
-      $cols
+    let y = $row | get $target
+    let feats = $cols
       | each { |c| $"($c):($row | get $c)" }
       | str join " "
-    )
     $"($y) |($namespace) ($feats)"
   }
 }
@@ -6793,7 +6771,7 @@ export def vw-regress [
   --passes(-p): int = 10
   --learning-rate(-l): float = 0.5
 ]: nothing -> table {
-  let tmp_dir = (mktemp -d)
+  let tmp_dir = mktemp -d
   let train_vw = $"($tmp_dir)/train.vw"
   let test_vw = $"($tmp_dir)/test.vw"
   let model_file = $"($tmp_dir)/model.vw"
@@ -6820,31 +6798,28 @@ export def vw-regress [
   ^vw ...$train_args
   ^vw --data $test_vw -i $model_file -t -p $pred_file --quiet
 
-  let preds = (
-    open --raw $pred_file
+  let preds = open --raw $pred_file
     | lines
     | where ($it | str trim | is-not-empty)
     | each { |x| $x | into float }
-  )
-  let actuals = (
-    $test_tbl | get $target | each { |x| $x | into float }
-  )
-
-  let rows = (
-    $actuals | zip $preds | each { |pair|
-      let obs = $pair.0
-      let pr = ($pair.1 | math round -p 4)
-      {
-        observed: $obs
-        predicted: $pr
-        error: (($pr - $obs) | math round -p 4)
-        abs_error: (($obs - $pr) | math abs | math round -p 4)
-      }
-    }
-  )
-
+  let actuals = $test_tbl
+    | get $target
+    | each { |x| $x | into float }
   rm -rf $tmp_dir
-  $rows
+
+  $actuals | zip $preds | each { |pair|
+    let obs = $pair.0
+    let pred = $pair.1 | math round -p 4
+    let signed_err = ($pred - $obs) | math round -p 4
+    let err = ($obs - $pred) | math abs | math round -p 4
+    {
+      actual: $obs
+      observed: $obs
+      predicted: $pred
+      error: $signed_err
+      abs_error: $err
+    }
+  }
 }
 ```
 
@@ -6854,14 +6829,14 @@ Con estos comandos disponibles en la shell, el procedimiento completo se reduce 
 
 ```nu
 let data = open wine-white.csv
-let train = ($data | first 3500)
-let test = ($data | skip 3500)
+let train = $data | first 3500
+let test = $data | skip 3500
 
-let preds = (vw-regress $train $test --passes 15 --learning-rate 0.5)
+let preds = vw-regress $train $test --passes 15 --learning-rate 0.5
 $preds | first 5
 $preds | save -f wine_vw_predictions.csv
 
-let mae = ($preds.abs_error | math avg | math round -p 4)
+let mae = $preds.abs_error | math avg | math round -p 4
 $"VW Test MAE: ($mae)"
 ```
 
@@ -6920,11 +6895,9 @@ Ejecutar `regress_wine.R` y procesar su salida estándar con `from csv` permite 
 
 ```nu
 Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
-let sig = (
-  open wine_regression_r.csv
+let sig = open wine_regression_r.csv
   | where p_value < 0.01
   | sort-by t_stat -r
-)
 $sig
 $sig | save -f wine_significant_predictors.csv
 ```
@@ -7014,20 +6987,16 @@ En lugar de leer un único archivo arbitrario, SKLL requiere directorios separad
 
 ```nu
 mkdir /tmp/skll_demo/train /tmp/skll_demo/test
-let red = (open wine-red.csv | insert type "red")
-let n_red = ($red | length)
-let white_s = (
-  open wine-white.csv
+let red = open wine-red.csv | insert type "red"
+let n_red = $red | length
+let white_s = open wine-white.csv
   | insert type "white"
   | first $n_red
-)
-let bal = (
-  $red
+let bal = $red
   | append $white_s
   | enumerate
   | each { |r| $r.item | insert id $r.index }
-)
-let n_test = (($bal | length) * 0.2 | into int)
+let n_test = ($bal | length) * 0.2 | into int
 $bal | first $n_test | save -f /tmp/skll_demo/test/features.csv
 $bal | skip $n_test | save -f /tmp/skll_demo/train/features.csv
 rm -rf /tmp/skll_demo
@@ -7818,13 +7787,11 @@ Tres elementos arquitectónicos facilitan el procesamiento en flujos en `umap_re
 Pruebe `umap_reduce.py` directamente sobre un subconjunto de 200 observaciones de `wine-both.csv` a través de un pipeline básico:
 
 ```nu
-let raw_umap = (
-  open wine-both.csv
+let raw_umap = open wine-both.csv
   | first 200
   | to csv
   | ^python umap_reduce.py --label-col type --cols "alcohol,density"
   | from csv
-)
 $raw_umap | select type quality umap_1 umap_2 | first 3
 ```
 
@@ -7843,14 +7810,14 @@ export def umap-reduce [
   --cols(-c): list<string>
 ]: table -> table {
   let tbl = $in
-  let tmp_in = (mktemp --suffix ".csv")
-  $tbl | to csv | save -f $tmp_in
-
   let cols_flag = if ($cols != null) and (($cols | length) > 0) {
     ["--cols" ($cols | str join ",")]
   } else { [] }
 
-  let bin_p = "/usr/local/bin/umap-reduce"
+  let tmp_in = mktemp --suffix ".csv"
+  $tbl | to csv | save -f $tmp_in
+
+  let bin_p = "/usr/local/bin/umap-reduce-py"
   let py_script = if ($bin_p | path exists) {
     $bin_p
   } else if ("/data/ch09/umap_reduce.py" | path exists) {
@@ -7859,17 +7826,16 @@ export def umap-reduce [
     "umap_reduce.py"
   }
 
-  let res = (
-    python $py_script
-      --input $tmp_in
-      --neighbors $neighbors
-      --min-dist $min_dist
-      --target-dim $target_dim
-      --seed $seed
-      --label-col $label_col
-      ...$cols_flag
-    | from csv
-  )
+  let umap_args = [
+    "--input" $tmp_in
+    "--neighbors" ($neighbors | into string)
+    "--min-dist" ($min_dist | into string)
+    "--target-dim" ($target_dim | into string)
+    "--seed" ($seed | into string)
+    "--label-col" $label_col
+    ...$cols_flag
+  ]
+  let res = python $py_script ...$umap_args | from csv
   rm -f $tmp_in
   $res
 }
@@ -7880,17 +7846,13 @@ export def umap-reduce [
 Repetir la proyección de 200 vinos con `umap-reduce` produce coordenadas idénticas en una sola llamada declarativa:
 
 ```nu
-let features = (
-  open wine-both.csv
+let features = open wine-both.csv
   | columns
   | where $it not-in ["type" "quality"]
-)
-let umap_tbl = (
-  open wine-both.csv
+let umap_tbl = open wine-both.csv
   | first 200
   | umap-reduce --label-col type --cols $features
   | select type quality umap_1 umap_2
-)
 $umap_tbl | first 5
 $umap_tbl | save -f wine_umap.csv
 ```
@@ -7988,9 +7950,9 @@ Controlamos `/usr/local/bin/lightgbm` directamente desde Nushell sobre las misma
 
 ```nu
 let white = open wine-white.csv
-let train_w = ($white | first 3500)
-let test_w = ($white | skip 3500)
-let fcols = ($white | columns | where $it != "quality")
+let train_w = $white | first 3500
+let test_w = $white | skip 3500
+let fcols = $white | columns | where $it != "quality"
 
 $train_w
 | select ...($fcols | append "quality")
@@ -8018,26 +7980,22 @@ $test_w | select ...$fcols | to csv | save -f /tmp/lgb_test.csv
 Posteriormente, procesamos `/tmp/lgb_preds.txt` como números decimales, los emparejamos con `$test_w.quality` mediante `zip` y calculamos el Error Absoluto Medio (MAE) directamente en Nushell:
 
 ```nu
-let p_raw = (
-  open --raw /tmp/lgb_preds.txt
+let p_raw = open --raw /tmp/lgb_preds.txt
   | lines
   | where ($it | str trim | is-not-empty)
   | each { into float }
-)
-let direct_lgb = (
-  $test_w.quality
+let direct_lgb = $test_w.quality
   | each { into float }
   | zip $p_raw
   | each { |p|
       let obs = $p.0
-      let pred = ($p.1 | math round -p 4)
+      let pred = $p.1 | math round -p 4
       {
         observed: $obs
         predicted: $pred
         abs_error: (($obs - $pred) | math abs | math round -p 4)
       }
     }
-)
 $direct_lgb | first 4
 $direct_lgb.abs_error | math avg | math round -p 4
 ```
@@ -8111,16 +8069,14 @@ export def lgbm-regress [
   --num-leaves: int = 31
   --importance(-i)
 ]: nothing -> table {
-  let tmp_dir = (mktemp -d)
+  let tmp_dir = mktemp -d
   let train_csv = $"($tmp_dir)/train.csv"
   let test_csv = $"($tmp_dir)/test_features.csv"
   let model_file = $"($tmp_dir)/model.txt"
   let pred_file = $"($tmp_dir)/preds.txt"
 
-  let feat_cols = (
-    $train_tbl | columns | where $it != $target
-  )
-  let train_cols = ($feat_cols | append $target)
+  let feat_cols = $train_tbl | columns | where $it != $target
+  let train_cols = $feat_cols | append $target
   $train_tbl | select ...$train_cols | to csv | save -f $train_csv
   $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
 
@@ -8150,7 +8106,7 @@ export def lgbm-regress [
     } else {
       "lgbm_importance.py"
     }
-    let imp_tbl = (python $py_imp $model_file | from json)
+    let imp_tbl = python $py_imp $model_file | from json
     rm -rf $tmp_dir
     return $imp_tbl
   }
@@ -8165,31 +8121,26 @@ export def lgbm-regress [
   ]
   ^lightgbm ...$lgbm_pred_args out+err> /dev/null
 
-  let raw_preds = (
-    open --raw $pred_file
+  let preds = open --raw $pred_file
     | lines
     | where ($it | str trim | is-not-empty)
-    | each { |x| $x | into float }
-  )
-  let actuals = (
-    $test_tbl | get $target | each { |x| $x | into float }
-  )
-
-  let rows = (
-    $actuals | zip $raw_preds | each { |pair|
-      let obs = $pair.0
-      let pr = ($pair.1 | math round -p 4)
-      {
-        observed: $obs
-        predicted: $pr
-        error: (($pr - $obs) | math round -p 4)
-        abs_error: (($obs - $pr) | math abs | math round -p 4)
-      }
-    }
-  )
-
+    | each { into float }
+  let actuals = $test_tbl | get $target | each { into float }
   rm -rf $tmp_dir
-  $rows
+
+  $actuals | zip $preds | each { |pair|
+    let obs = $pair.0
+    let pred = $pair.1 | math round -p 4
+    let signed_err = ($pred - $obs) | math round -p 4
+    let abs_err = ($obs - $pred) | math abs | math round -p 4
+    {
+      actual: $obs
+      observed: $obs
+      predicted: $pred
+      error: $signed_err
+      abs_error: $abs_err
+    }
+  }
 }
 ```
 
@@ -8199,21 +8150,17 @@ Al invocar `lgbm-regress`, evaluamos el modelo y extraemos la jerarquía de vari
 
 ```nu
 let white = open wine-white.csv
-let train_w = ($white | first 3500)
-let test_w = ($white | skip 3500)
+let train_w = $white | first 3500
+let test_w = $white | skip 3500
 
-let lgb_preds = (
-  lgbm-regress $train_w $test_w
-    --num-trees 100 --learning-rate 0.05
-)
+let lgb_preds = lgbm-regress $train_w $test_w
+  --num-trees 100 --learning-rate 0.05
 $lgb_preds | first 5
 $lgb_preds | save -f wine_lgbm_predictions.csv
-let mae = ($lgb_preds.abs_error | math avg | math round -p 4)
+let mae = $lgb_preds.abs_error | math avg | math round -p 4
 $"LightGBM Test MAE: ($mae)"
 
-let lgb_imp = (
-  lgbm-regress $train_w $test_w --importance
-)
+let lgb_imp = lgbm-regress $train_w $test_w --importance
 $lgb_imp | first 5
 $lgb_imp | to json | save -f /tmp/lgbm_imp.json
 ```
@@ -8380,21 +8327,21 @@ export def duckdb-ols [
   --predictor(-x): string = ""
 ]: table -> table {
   let tbl = $in
-  let first_row = ($tbl | first)
+  let first_row = $tbl | first
   let candidate_cols = if ($predictor | is-not-empty) {
     [$predictor]
   } else {
     $tbl | columns | where { |c|
-      let t = ($first_row | get $c | describe)
+      let t = $first_row | get $c | describe
       ($c != $target) and (($t == "int") or ($t == "float"))
     }
   }
 
-  let tmp_csv = (mktemp --suffix ".csv")
-  let keep = ($candidate_cols | append $target)
+  let tmp_csv = mktemp --suffix ".csv"
+  let keep = $candidate_cols | append $target
   $tbl | select ...$keep | to csv | save -f $tmp_csv
 
-  let unions = ($candidate_cols | each { |col|
+  let unions = $candidate_cols | each { |col|
     let q_y = $"\"($target)\""
     let q_x = $"\"($col)\""
     [
@@ -8406,7 +8353,7 @@ export def duckdb-ols [
       $"CAST\(regr_count\(($q_y), ($q_x)\) AS BIGINT\) AS n "
       "FROM tbl"
     ] | str join ""
-  } | str join " UNION ALL ")
+  } | str join " UNION ALL "
 
   let sql = [
     "CREATE TEMP TABLE tbl AS "
@@ -8414,7 +8361,7 @@ export def duckdb-ols [
     $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
   ] | str join ""
 
-  let res = (^duckdb -json -c $sql | from json)
+  let res = ^duckdb -json -c $sql | from json
   rm -f $tmp_csv
   $res
 }
@@ -8740,8 +8687,8 @@ export def ml-benchmark [
   --seed(-s): int = 42
 ]: table -> table {
   let tbl = $in
-  let models_csv = ($models | str join ",")
-  let tmp_in = (mktemp --suffix ".csv")
+  let models_csv = $models | str join ","
+  let tmp_in = mktemp --suffix ".csv"
   $tbl | to csv | save -f $tmp_in
 
   let bin_p = "/usr/local/bin/ml-benchmark-py"
@@ -8753,15 +8700,14 @@ export def ml-benchmark [
     "ml_benchmark.py"
   }
 
-  let res = (
-    python $py_bench
-      --input $tmp_in
-      --target $target
-      --models $models_csv
-      --test-size $test_size
-      --seed $seed
-    | from json
-  )
+  let bench_args = [
+    "--input" $tmp_in
+    "--target" $target
+    "--models" $models_csv
+    "--test-size" ($test_size | into string)
+    "--seed" ($seed | into string)
+  ]
+  let res = python $py_bench ...$bench_args | from json
   rm -f $tmp_in
   $res
 }
@@ -8773,11 +8719,9 @@ Evaluar los cinco algoritmos en `wine-both.csv` y sobre la campaña bancaria `ba
 
 ```nu
 open wine-both.csv | ml-benchmark --target type
-let banco_bench = (
-  open banco.csv
+let banco_bench = open banco.csv
   | reject ID ZIP_cod
   | ml-benchmark --target prestamo
-)
 $banco_bench
 $banco_bench | to json | save -f /tmp/banco_bench.json
 ```

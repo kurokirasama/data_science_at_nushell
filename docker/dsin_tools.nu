@@ -8,14 +8,12 @@ export def to-vw [
   --namespace(-n): string = "f"
 ]: table -> list<string> {
   let tbl = $in
-  let cols = ($tbl | columns | where $it != $target)
+  let cols = $tbl | columns | where $it != $target
   $tbl | each { |row|
-    let y = ($row | get $target)
-    let feats = (
-      $cols
+    let y = $row | get $target
+    let feats = $cols
       | each { |c| $"($c):($row | get $c)" }
       | str join " "
-    )
     $"($y) |($namespace) ($feats)"
   }
 }
@@ -28,7 +26,7 @@ export def vw-regress [
   --passes(-p): int = 10
   --learning-rate(-l): float = 0.5
 ]: nothing -> table {
-  let tmp_dir = (mktemp -d)
+  let tmp_dir = mktemp -d
   let train_vw = $"($tmp_dir)/train.vw"
   let test_vw = $"($tmp_dir)/test.vw"
   let model_file = $"($tmp_dir)/model.vw"
@@ -55,22 +53,20 @@ export def vw-regress [
   ^vw ...$train_args
   ^vw --data $test_vw -i $model_file -t -p $pred_file --quiet
 
-  let preds = (
-    open --raw $pred_file
+  let preds = open --raw $pred_file
     | lines
     | where ($it | str trim | is-not-empty)
     | each { |x| $x | into float }
-  )
-  let actuals = (
-    $test_tbl | get $target | each { |x| $x | into float }
-  )
+  let actuals = $test_tbl
+    | get $target
+    | each { |x| $x | into float }
   rm -rf $tmp_dir
 
   $actuals | zip $preds | each { |pair|
     let obs = $pair.0
-    let pred = ($pair.1 | math round -p 4)
-    let signed_err = (($pred - $obs) | math round -p 4)
-    let err = (($obs - $pred) | math abs | math round -p 4)
+    let pred = $pair.1 | math round -p 4
+    let signed_err = ($pred - $obs) | math round -p 4
+    let err = ($obs - $pred) | math abs | math round -p 4
     {
       actual: $obs
       observed: $obs
@@ -91,19 +87,15 @@ export def tapkee-reduce [
   let tbl = $in
   let norm_m = if $method == "tsne" { "t-sne" } else { $method }
   let has_cols = ($cols != null) and (($cols | length) > 0)
-  let has_lbl = (
-    ($label_col != null)
-    and ($label_col | is-not-empty)
-    and ($label_col in ($tbl | columns))
-  )
+  let has_lbl = if ($label_col != null) {
+    $label_col in ($tbl | columns)
+  } else { false }
   let num_tbl = if $has_cols {
     $tbl | select ...$cols
   } else if $has_lbl {
     $tbl | reject $label_col
   } else {
-    let non_num = (
-      ["type"] | where { |c| $c in ($tbl | columns) }
-    )
+    let non_num = ["type"] | where { |c| $c in ($tbl | columns) }
     if ($non_num | is-not-empty) {
       $tbl | reject ...$non_num
     } else {
@@ -111,8 +103,8 @@ export def tapkee-reduce [
     }
   }
 
-  let tmp_in = (mktemp --suffix ".csv")
-  let tmp_out = (mktemp --suffix ".tsv")
+  let tmp_in = mktemp --suffix ".csv"
+  let tmp_out = mktemp --suffix ".tsv"
   $num_tbl | to csv --noheaders | save -f $tmp_in
 
   let tk_args = [
@@ -121,28 +113,24 @@ export def tapkee-reduce [
     "--delimiter" ","
   ]
   ^tapkee ...$tk_args
-  let raw_coords = (
-    open --raw $tmp_out
+  let raw_coords = open --raw $tmp_out
     | lines
     | where ($it | str trim | is-not-empty)
-  )
   rm -f $tmp_in $tmp_out
 
-  let coords_tbl = ($raw_coords | each { |line|
-    let parts = (
-      $line
+  let coords_tbl = $raw_coords | each { |line|
+    let parts = $line
       | split row ","
       | each { |v| $v | str trim | into float | math round -p 4 }
-    )
     mut rec = {}
     for idx in 0..<($parts | length) {
-      let val = ($parts | get $idx)
+      let val = $parts | get $idx
       let k1 = $"dim($idx + 1)"
       let k2 = $"dim_($idx + 1)"
-      $rec = ($rec | insert $k1 $val | insert $k2 $val)
+      $rec = $rec | insert $k1 $val | insert $k2 $val
     }
     $rec
-  })
+  }
 
   $tbl | merge $coords_tbl
 }
@@ -156,10 +144,10 @@ export def kmeans-cluster [
 ]: table -> table {
   let tbl = $in
   let n_k = if $clusters > 0 { $clusters } else { $k }
-  let tmp_in = (mktemp --suffix ".csv")
+  let tmp_in = mktemp --suffix ".csv"
   $tbl | to csv | save -f $tmp_in
 
-  let lbl = ($label_col | default "type")
+  let lbl = $label_col | default "type"
   let cols_flag = if ($cols != null) and (($cols | length) > 0) {
     ["--cols" ($cols | str join ",")]
   } else { [] }
@@ -173,14 +161,13 @@ export def kmeans-cluster [
     "kmeans_cluster.py"
   }
 
-  let res = (
-    python3 $py_km
-      --input $tmp_in
-      --k $n_k
-      --exclude $lbl
-      ...$cols_flag
-    | from csv
-  )
+  let km_args = [
+    "--input" $tmp_in
+    "--k" ($n_k | into string)
+    "--exclude" $lbl
+    ...$cols_flag
+  ]
+  let res = python3 $py_km ...$km_args | from csv
   rm -f $tmp_in
   $res
 }
@@ -217,7 +204,7 @@ export def umap-reduce [
     ["--cols" ($cols | str join ",")]
   } else { [] }
 
-  let tmp_in = (mktemp --suffix ".csv")
+  let tmp_in = mktemp --suffix ".csv"
   $tbl | to csv | save -f $tmp_in
 
   let bin_p = "/usr/local/bin/umap-reduce-py"
@@ -229,17 +216,16 @@ export def umap-reduce [
     "umap_reduce.py"
   }
 
-  let res = (
-    python $py_script
-      --input $tmp_in
-      --neighbors $neighbors
-      --min-dist $min_dist
-      --target-dim $target_dim
-      --seed $seed
-      --label-col $label_col
-      ...$cols_flag
-    | from csv
-  )
+  let umap_args = [
+    "--input" $tmp_in
+    "--neighbors" ($neighbors | into string)
+    "--min-dist" ($min_dist | into string)
+    "--target-dim" ($target_dim | into string)
+    "--seed" ($seed | into string)
+    "--label-col" $label_col
+    ...$cols_flag
+  ]
+  let res = python $py_script ...$umap_args | from csv
   rm -f $tmp_in
   $res
 }
@@ -254,16 +240,14 @@ export def lgbm-regress [
   --num-leaves: int = 31
   --importance(-i)
 ]: nothing -> table {
-  let tmp_dir = (mktemp -d)
+  let tmp_dir = mktemp -d
   let train_csv = $"($tmp_dir)/train.csv"
   let test_csv = $"($tmp_dir)/test_features.csv"
   let model_file = $"($tmp_dir)/model.txt"
   let pred_file = $"($tmp_dir)/preds.txt"
 
-  let feat_cols = (
-    $train_tbl | columns | where $it != $target
-  )
-  let train_cols = ($feat_cols | append $target)
+  let feat_cols = $train_tbl | columns | where $it != $target
+  let train_cols = $feat_cols | append $target
   $train_tbl | select ...$train_cols | to csv | save -f $train_csv
   $test_tbl | select ...$feat_cols | to csv | save -f $test_csv
 
@@ -293,7 +277,7 @@ export def lgbm-regress [
     } else {
       "lgbm_importance.py"
     }
-    let imp_tbl = (python $py_imp $model_file | from json)
+    let imp_tbl = python $py_imp $model_file | from json
     rm -rf $tmp_dir
     return $imp_tbl
   }
@@ -308,22 +292,18 @@ export def lgbm-regress [
   ]
   ^lightgbm ...$lgbm_pred_args out+err> /dev/null
 
-  let preds = (
-    open --raw $pred_file
+  let preds = open --raw $pred_file
     | lines
     | where ($it | str trim | is-not-empty)
     | each { into float }
-  )
-  let actuals = (
-    $test_tbl | get $target | each { into float }
-  )
+  let actuals = $test_tbl | get $target | each { into float }
   rm -rf $tmp_dir
 
   $actuals | zip $preds | each { |pair|
     let obs = $pair.0
-    let pred = ($pair.1 | math round -p 4)
-    let signed_err = (($pred - $obs) | math round -p 4)
-    let abs_err = (($obs - $pred) | math abs | math round -p 4)
+    let pred = $pair.1 | math round -p 4
+    let signed_err = ($pred - $obs) | math round -p 4
+    let abs_err = ($obs - $pred) | math abs | math round -p 4
     {
       actual: $obs
       observed: $obs
@@ -340,21 +320,21 @@ export def duckdb-ols [
   --predictor(-x): string = ""
 ]: table -> table {
   let tbl = $in
-  let first_row = ($tbl | first)
+  let first_row = $tbl | first
   let candidate_cols = if ($predictor | is-not-empty) {
     [$predictor]
   } else {
     $tbl | columns | where { |c|
-      let t = ($first_row | get $c | describe)
+      let t = $first_row | get $c | describe
       ($c != $target) and (($t == "int") or ($t == "float"))
     }
   }
 
-  let tmp_csv = (mktemp --suffix ".csv")
-  let keep = ($candidate_cols | append $target)
+  let tmp_csv = mktemp --suffix ".csv"
+  let keep = $candidate_cols | append $target
   $tbl | select ...$keep | to csv | save -f $tmp_csv
 
-  let unions = ($candidate_cols | each { |col|
+  let unions = $candidate_cols | each { |col|
     let q_y = $"\"($target)\""
     let q_x = $"\"($col)\""
     [
@@ -366,7 +346,7 @@ export def duckdb-ols [
       $"CAST\(regr_count\(($q_y), ($q_x)\) AS BIGINT\) AS n "
       "FROM tbl"
     ] | str join ""
-  } | str join " UNION ALL ")
+  } | str join " UNION ALL "
 
   let sql = [
     "CREATE TEMP TABLE tbl AS "
@@ -374,7 +354,7 @@ export def duckdb-ols [
     $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
   ] | str join ""
 
-  let res = (^duckdb -json -c $sql | from json)
+  let res = ^duckdb -json -c $sql | from json
   rm -f $tmp_csv
   $res
 }
@@ -389,8 +369,8 @@ export def ml-benchmark [
   --seed(-s): int = 42
 ]: table -> table {
   let tbl = $in
-  let models_csv = ($models | str join ",")
-  let tmp_in = (mktemp --suffix ".csv")
+  let models_csv = $models | str join ","
+  let tmp_in = mktemp --suffix ".csv"
   $tbl | to csv | save -f $tmp_in
 
   let bin_p = "/usr/local/bin/ml-benchmark-py"
@@ -402,15 +382,14 @@ export def ml-benchmark [
     "ml_benchmark.py"
   }
 
-  let res = (
-    python $py_bench
-      --input $tmp_in
-      --target $target
-      --models $models_csv
-      --test-size $test_size
-      --seed $seed
-    | from json
-  )
+  let bench_args = [
+    "--input" $tmp_in
+    "--target" $target
+    "--models" $models_csv
+    "--test-size" ($test_size | into string)
+    "--seed" ($seed | into string)
+  ]
+  let res = python $py_bench ...$bench_args | from json
   rm -f $tmp_in
   $res
 }
