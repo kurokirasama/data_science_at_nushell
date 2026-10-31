@@ -1,6 +1,7 @@
 ---
 title: Ciencia de Datos en la Terminal Linux con Nushell
 author: Luis Gómez Guzmán
+date: "30 Octubre 2026"
 number_sections: true
 output: pdf_document
 graphics: true

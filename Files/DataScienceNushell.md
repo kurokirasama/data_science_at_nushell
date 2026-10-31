@@ -1,6 +1,7 @@
 ---
 title: Data Science at the Linux Terminal with Nushell
 author: Luis Gómez Guzmán
+date: "October 30, 2026"
 number_sections: true
 output: pdf_document
 graphics: true
