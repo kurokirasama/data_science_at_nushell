@@ -9148,7 +9148,7 @@ open wine-both.csv
 | first 300
 | append (open wine-both.csv | last 300)
 | to csv
-| smartcore-cli fit-predict --model random-forest --target type --trees 100
+| smartcore-cli fit-predict --target type --trees 100
 | from csv
 | polars into-df
 | polars group-by actual predicted
@@ -9213,7 +9213,7 @@ Using `burn`, we iteratively train a multi-layer perceptron to predict sensory q
 open wine-both.csv
 | first 200
 | to csv
-| burn-cli train-mlp --target quality --epochs 10 --hidden 16 --lr 0.01
+| burn-cli train-mlp --target quality
 | from csv
 | select actual predicted quality alcohol
 | first 5

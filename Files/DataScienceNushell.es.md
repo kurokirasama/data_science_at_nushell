@@ -8641,7 +8641,7 @@ let train_w = $white | first 3500
 
 let test_w = $white | skip 3500
 
-let lgb_preds = lgbm-regress $train_w $test_w --num-trees 100 --learning-rate 0.05
+let lgb_preds = lgbm-regress $train_w $test_w -n 100 -l 0.05
 
 $lgb_preds | first 5
 
@@ -9389,7 +9389,7 @@ open wine-both.csv
 | first 300
 | append (open wine-both.csv | last 300)
 | to csv
-| smartcore-cli fit-predict --model random-forest --target type --trees 100
+| smartcore-cli fit-predict --target type --trees 100
 | from csv
 | polars into-df
 | polars group-by actual predicted
@@ -9454,7 +9454,7 @@ Con el framework `burn`, entrenamos de manera iterativa un perceptrón multicapa
 open wine-both.csv
 | first 200
 | to csv
-| burn-cli train-mlp --target quality --epochs 10 --hidden 16 --lr 0.01
+| burn-cli train-mlp --target quality
 | from csv
 | select actual predicted quality alcohol
 | first 5
