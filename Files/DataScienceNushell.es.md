@@ -9372,11 +9372,11 @@ timg -g 80x25 benchmark_comparison.png
 
 Todas las herramientas de modelado examinadas en este capítulo invocan binarios externos o scripts en Python/R a través de serialización en disco o pipes estándar de Unix. Conforme el ecosistema científico de Rust madura, emerge una alternativa arquitectónica prometedora: ejecutar algoritmos de aprendizaje de manera nativa en memoria dentro del espacio de procesos de la shell mediante el protocolo de plugins de Nushell y buffers Apache Arrow sin costo de copia. Cinco proyectos activos ilustran esta tendencia y se encuentran integrados como herramientas nativas de línea de comandos en el contenedor `dsin`:
 
-1. **`smartcore` (`smartcore-cli`):** Biblioteca integral de aprendizaje automático estadístico en Rust puro que implementa bosques aleatorios, regresiones regularizadas y máquinas de soporte vectorial con estricta seguridad de tipos y concurrencia sin carreras de datos.
-2. **`linfa` (`linfa-cli`):** Ecosistema modular de algoritmos clásicos de agrupamiento (*K-Means*, *DBSCAN*) y reducción dimensional (*PCA*) inspirado en `scikit-learn`.
-3. **`candle` (`candle-cli`):** Framework minimalista de computación tensorial y redes neuronales desarrollado por Hugging Face en Rust puro, diseñado para inferencia ligera y evaluación sin dependencias de CUDA o Python.
-4. **`burn` (`burn-cli`):** Sistema integral de aprendizaje profundo en Rust que proporciona tensores con diferenciación automática y entrenamiento de perceptrones multicapa (`MLP`) directamente sobre la CPU mediante el backend `ndarray`.
-5. **`nutorch` (`nutorch`):** Utilidad tensorial de alto rendimiento diseñada para operar sobre tablas de Nushell, permitiendo multiplicar matrices, escalar atributos y calcular normas geométricas en memoria.
+1. **`smartcore`** ([`smartcore-cli`](#ref-smartcore)): Biblioteca integral de aprendizaje automático estadístico en Rust puro ([SmartCore Development Team, 2024](#ref-smartcore)) que implementa bosques aleatorios, regresiones regularizadas y máquinas de soporte vectorial con estricta seguridad de tipos y concurrencia sin carreras de datos.
+2. **`linfa`** ([`linfa-cli`](#ref-linfa)): Ecosistema modular de algoritmos clásicos de agrupamiento (*K-Means*, *DBSCAN*) y reducción dimensional (*PCA*) inspirado en `scikit-learn` ([Linfa Contributors, 2024](#ref-linfa)).
+3. **`candle`** ([`candle-cli`](#ref-candle)): Framework minimalista de computación tensorial y redes neuronales desarrollado por Hugging Face en Rust puro ([Hugging Face, 2024](#ref-candle)), diseñado para inferencia ligera y evaluación sin dependencias de CUDA o Python.
+4. **`burn`** ([`burn-cli`](#ref-burn)): Sistema integral de aprendizaje profundo en Rust ([Burn Contributors, 2024](#ref-burn)) que proporciona tensores con diferenciación automática y entrenamiento de perceptrones multicapa (`MLP`) directamente sobre la CPU mediante el backend `ndarray`.
+5. **`nutorch`** ([`nutorch`](#ref-nutorch)): Utilidad tensorial de alto rendimiento diseñada para operar sobre tablas de Nushell ([AstroHacker Labs, 2024](#ref-nutorch)), permitiendo multiplicar matrices, escalar atributos y calcular normas geométricas en memoria.
 
 A continuación, examinamos flujos completos y reproducibles con cada una de estas cinco herramientas sobre nuestro conjunto de datos vitivinícola:
 
@@ -9662,6 +9662,11 @@ Como este libro trata sobre la intersección de la línea de comandos y la cienc
 - []{#ref-langford2007}**Vowpal Wabbit**: Langford, J., Li, L., & Strehl, A. (2007). *Vowpal Wabbit Online Learning Project*. Microsoft Research. <https://vowpalwabbit.org/>
 - **SKLL (SciKit-Learn Laboratory)**: Educational Testing Service (ETS). Framework declarativo para experimentación con modelos de Scikit-Learn. <https://skll.readthedocs.io/>
 - **Polars**: Ritchie Vink. Motor columnar de DataFrames multihilo de ultra-alto rendimiento en Rust. <https://pola.rs/>
+- []{#ref-smartcore}**SmartCore (`smartcore-cli`)**: SmartCore Development Team (2024). *SmartCore: Machine Learning in Rust*. <https://github.com/smartcorelib/smartcore>
+- []{#ref-linfa}**Linfa (`linfa-cli`)**: Linfa Contributors (2024). *Linfa: A Rust Machine Learning Framework*. <https://github.com/rust-ml/linfa>
+- []{#ref-candle}**Candle (`candle-cli`)**: Hugging Face (2024). *Candle: Minimalist ML Framework for Rust*. <https://github.com/huggingface/candle>
+- []{#ref-burn}**Burn (`burn-cli`)**: Burn Contributors (2024). *Burn: A Flexible and Comprehensive Deep Learning Framework in Rust*. <https://github.com/tracel-ai/burn>
+- []{#ref-nutorch}**NuTorch (`nutorch`)**: AstroHacker Labs (2024). *NuTorch: Tensor Operations and Numerical Computing for Nushell*. <https://github.com/astrohackerlabs/nutorch>
 
 ## Bibliografía y Literatura Académica
 

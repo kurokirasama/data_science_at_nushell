@@ -9131,11 +9131,11 @@ timg -g 80x25 benchmark_comparison.png
 
 Because Nushell itself and `nu_plugin_polars` are written in Rust on top of Apache Arrow columnar memory, executing machine learning models directly in compiled Rust binaries offers strict compile-time type safety, effortless Rayon CPU parallelism, and memory efficiency without interpreter startup costs. Five active open-source projects represent this modern frontier and are pre-packaged as standalone command-line tools in the `dsin` container:
 
-1. **`smartcore` (`smartcore-cli`):** Comprehensive statistical machine learning in pure Rust providing random forests, regularized linear models, and SVMs with zero data races.
-2. **`linfa` (`linfa-cli`):** Modular pure-Rust classical machine learning toolkit implementing *K-Means*, *DBSCAN*, and Principal Component Analysis (*PCA*).
-3. **`candle` (`candle-cli`):** Minimalist tensor computing and neural network framework from Hugging Face designed for lightweight, high-performance model evaluation without CUDA or Python runtimes.
-4. **`burn` (`burn-cli`):** Flexible deep learning framework in Rust providing autograd tensors and multi-layer perceptron (`MLP`) training directly on CPU via the `ndarray` backend.
-5. **`nutorch` (`nutorch`):** High-performance tensor utility engineered to ingest tabular Nushell streams, compute linear algebraic transformations, and evaluate geometric matrix norms.
+1. **`smartcore`** ([`smartcore-cli`](#ref-smartcore)): Comprehensive statistical machine learning in pure Rust ([SmartCore Development Team, 2024](#ref-smartcore)) providing random forests, regularized linear models, and SVMs with zero data races.
+2. **`linfa`** ([`linfa-cli`](#ref-linfa)): Modular pure-Rust classical machine learning toolkit ([Linfa Contributors, 2024](#ref-linfa)) implementing *K-Means*, *DBSCAN*, and Principal Component Analysis (*PCA*).
+3. **`candle`** ([`candle-cli`](#ref-candle)): Minimalist tensor computing and neural network framework from Hugging Face ([Hugging Face, 2024](#ref-candle)) designed for lightweight, high-performance model evaluation without CUDA or Python runtimes.
+4. **`burn`** ([`burn-cli`](#ref-burn)): Flexible deep learning framework in Rust ([Burn Contributors, 2024](#ref-burn)) providing autograd tensors and multi-layer perceptron (`MLP`) training directly on CPU via the `ndarray` backend.
+5. **`nutorch`** ([`nutorch`](#ref-nutorch)): High-performance tensor utility engineered to ingest tabular Nushell streams ([AstroHacker Labs, 2024](#ref-nutorch)), compute linear algebraic transformations, and evaluate geometric matrix norms.
 
 Below, we examine complete, reproducible workflows for all five engines on our wine quality benchmark:
 
@@ -9406,6 +9406,11 @@ Mastering the command line with Nushell does not ask you to abandon the statisti
 - **Tapkee:** Fast C++ template library for dimensionality reduction. [https://tapkee.lisitsyn.me/](https://tapkee.lisitsyn.me/)
 - **SKLL:** SciKit-Learn Laboratory for command-line machine learning. [https://skll.readthedocs.io/](https://skll.readthedocs.io/)
 - **ddgr:** DuckDuckGo from the terminal. [https://github.com/jarun/ddgr](https://github.com/jarun/ddgr)
+- []{#ref-smartcore}**SmartCore (`smartcore-cli`):** SmartCore Development Team (2024). *SmartCore: Machine Learning in Rust*. [https://github.com/smartcorelib/smartcore](https://github.com/smartcorelib/smartcore)
+- []{#ref-linfa}**Linfa (`linfa-cli`):** Linfa Contributors (2024). *Linfa: A Rust Machine Learning Framework*. [https://github.com/rust-ml/linfa](https://github.com/rust-ml/linfa)
+- []{#ref-candle}**Candle (`candle-cli`):** Hugging Face (2024). *Candle: Minimalist ML Framework for Rust*. [https://github.com/huggingface/candle](https://github.com/huggingface/candle)
+- []{#ref-burn}**Burn (`burn-cli`):** Burn Contributors (2024). *Burn: A Flexible and Comprehensive Deep Learning Framework in Rust*. [https://github.com/tracel-ai/burn](https://github.com/tracel-ai/burn)
+- []{#ref-nutorch}**NuTorch (`nutorch`):** AstroHacker Labs (2024). *NuTorch: Tensor Operations and Numerical Computing for Nushell*. [https://github.com/astrohackerlabs/nutorch](https://github.com/astrohackerlabs/nutorch)
 
 ## Academic Bibliography and Literature
 
