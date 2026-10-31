@@ -187,7 +187,7 @@ Para descargar la imagen oficial del libro desde GitHub Container Registry:
 docker pull ghcr.io/kurokirasama/dsin:latest
 ```
 
-Para iniciar una sesión interactiva en el contenedor con el entorno listo para usar, ejecute:
+Para iniciar una sesión interactiva en el contenedor con el entorno listo para usar, ejecutamos:
 
 ```bash
 # skip-docker-exec
@@ -207,9 +207,13 @@ Una vez dentro del contenedor `dsin`, verificamos que nos encontramos en `/home/
 
 ```nu
 pwd
+
 ls /data
+
 version
+
 which nu ttt timg parallel vw tapkee run_experiment Rscript python3
+
 plugin list
 ```
 
@@ -221,7 +225,7 @@ plugin list
 
 ## Ciencia de Datos
 
-De acuerdo a la definición de Hilary Mason y Chris H. Wiggins (2010), la _ciencia de datos_ se define de acuerdo a 4 pasos:
+De acuerdo a la definición de Hilary Mason y Chris H. Wiggins ([2010](#ref-mason2010)), la _ciencia de datos_ se define de acuerdo a 4 pasos:
 
 1. Obtención de datos.
 2. Depuración de datos.
@@ -387,6 +391,7 @@ En ciencia de datos reproducible, además de visualizar el resultado en pantalla
 
 ```nu
 open movies.txt | lines | first 5 | to text | save -f movies_top5.txt
+
 open movies_top5.txt
 ```
 
@@ -568,7 +573,9 @@ Para ordenar la tabla por tamaño, se toma la salida de `ls` y se canaliza hacia
 
 ```nu
 ls | sort-by size | reverse
+
 ls | sort-by size -r
+
 ls | sort-by modified
 ```
 
@@ -604,6 +611,7 @@ La salida es bastante extensa, por lo que se obtendra la fila para el comando `e
 
 ```nu
 help commands | where name == each
+
 help commands | where name == each | first
 ```
 
@@ -611,6 +619,7 @@ Al ecuperar una sola fila de una tabla se obtiene un _registro_ (_record_), que 
 
 ```nu
 help commands | where name == each | first | get description
+
 help commands | where name == each | first | get params
 ```
 
@@ -618,8 +627,11 @@ El comando `get` nos permite saltar al contenido de los datos estructurados (una
 
 ```nu
 help commands | where name == each | first | get category
+
 help commands | where name == each | first | get command_type
+
 help commands | where name == each | first | get description
+
 help commands | where name == each | first
 ```
 
@@ -627,7 +639,9 @@ Estas columnas anidadas se llaman _rutas de celda_ (_cellpaths_). Nu tomará la 
 
 ```nu
 help commands | where name == each | first | get params
+
 help commands | where name == each | first | get params.0
+
 help commands | where name == each | first | get params.3.description
 ```
 
@@ -641,7 +655,9 @@ Notar que se pueden acceder a todas las herramientas estandar de la terminal uti
 
 ```nu
 ^ls
+
 open tips.csv | first 5
+
 uname
 ```
 
@@ -661,7 +677,9 @@ Se puede leer texto de ayuda para cualquiera de los comandos incorporados de Nu 
 
 ```nu
 help explore
+
 help http get
+
 help -f open
 ```
 
@@ -674,7 +692,9 @@ Asimismo, Nushell proporciona el comando `tutor`, una guía interactiva integrad
 
 ```nu
 tutor
+
 tutor list
+
 tutor table
 ```
 
@@ -735,7 +755,9 @@ Por ejemplo, lo siguiente no tiene sentido en Nushell, y fallará al ejecutarse 
 ```nu
 # skip-docker-exec (demostración de error de compilación)
 "def abc [] { 1 + 2 }" | save -f output.nu
+
 source "output.nu"
+
 abc
 ```
 
@@ -757,6 +779,7 @@ funcionaría, ya que la cadena se puede evaluar en tiempo de compilación:
 ```nu
 # skip-docker-exec (ejemplo ilustrativo de ruta constante)
 const my_path = ([$nu.home-dir nushell] | path join)
+
 source $"($my_path)/common.nu" # sources /home/user/nushell/common.nu
 ```
 
@@ -785,6 +808,7 @@ Fiel a los principios de la programación funcional moderna, Nushell promueve el
 ```nu
 # skip-docker-exec (demostración de inmutabilidad)
 let tasa = 0.15
+
 $tasa = 0.20 # Error: nu::shell::assignment_requires_mutable_variable
 ```
 
@@ -792,11 +816,14 @@ Aunque una variable inmutable no admite reasignación directa mediante el operad
 
 ```nu
 let conteo = 10
+
 do {
   let conteo = 50
   $conteo # En el bloque interno vale 50
 }
+
 $conteo # En el ámbito exterior continúa valiendo 10
+
 # Sombreado explícito en el ámbito exterior: ahora vale 11
 let conteo = $conteo + 1
 ```
@@ -809,8 +836,11 @@ En escenarios computacionales donde un algoritmo demanda acumulación explícita
 
 ```nu
 mut total = 0
+
 $total += 15
+
 $total *= 2
+
 $total # Resultado: 30
 ```
 
@@ -834,6 +864,7 @@ Sin embargo, la mutabilidad impone una restricción de diseño fundamental: **lo
 ```nu
 # skip-docker-exec (demostración de restricción en cierres)
 mut contador = 0
+
 [1 2 3] | each { $contador += 1 } # Error: nu::shell::capture_of_mutable_var
 ```
 
@@ -851,7 +882,9 @@ Comprender la frontera entre ambas etapas es esencial en Nushell. Consideremos, 
 ```nu
 # skip-docker-exec (demostración de la separación parse-time vs runtime)
 "def abc [] { 1 + 2 }" | save -f output.nu
+
 source "output.nu"
+
 abc
 ```
 
@@ -872,6 +905,7 @@ Para resolver requerimientos estructurales donde el compilador necesita conocer 
 ```nu
 # skip-docker-exec (definición de constante en tiempo de compilación)
 const ruta_modulos = ([$nu.home-dir mis_scripts] | path join)
+
 use $"($ruta_modulos)/utilidades.nu" *
 ```
 
@@ -903,7 +937,9 @@ En la práctica, los patrones clásicos que en otros lenguajes demandan acumulac
 - **Contadores de iteración:** En lugar de incrementar manualmente un contador mutable, se utiliza `enumerate` en combinación con `each`:
   ```nu
   ls |
+
     enumerate |
+
     each { |elt|
       $"Elemento #($elt.index) mide ($elt.item.size)"
     }
@@ -964,6 +1000,7 @@ Una característica definitoria de un shell es la capacidad de navegar e interac
 
 ```nu
 cd /data/ch03
+
 ls
 ```
 
@@ -973,6 +1010,7 @@ El comando `ls` también admite un argumento posicional opcional para acotar los
 
 ```nu
 cd /data/ch03
+
 ls *.csv
 ```
 
@@ -986,6 +1024,7 @@ Nushell también soporta el comodín doble `**`, que desciende recursivamente po
 
 ```nu
 cd /data
+
 ls **/*.csv
 ```
 
@@ -1038,7 +1077,9 @@ Las técnicas de comillas mencionadas anteriormente son útiles al construir glo
     ```nu
     # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
     let current_month = date now | format date '%Y-%m'
+
     let glob_pattern = $"*($current_month)*" | into glob
+
     ls $glob_pattern
     ```
 
@@ -1049,6 +1090,7 @@ Las técnicas de comillas mencionadas anteriormente son útiles al construir glo
     ```nu
     # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
     let current_month = date now | format date '%Y-%m'
+
     ls ...(glob $"*($current_month)*")
     ```
 
@@ -1057,7 +1099,9 @@ Las técnicas de comillas mencionadas anteriormente son útiles al construir glo
     ```nu
     # Encuentra archivos cuyo nombre incluya el mes actual en el formato YYYY-mm
     let current_month = date now | format date '%Y-%m'
+
     let glob_pattern: glob = $"*($current_month)*"
+
     ls $glob_pattern
     ```
 
@@ -1086,6 +1130,7 @@ El string más simple en Nushell es el string con comillas simples. Este string 
 'hello world'
 
 'The
+
 end'
 ```
 
@@ -1137,6 +1182,7 @@ Al igual que otros lenguajes de shell (pero a diferencia de la mayoría de los o
 
 ```nu
 print hello
+
 print "hello"
 
 [hello] | describe
@@ -1146,14 +1192,21 @@ Pero se debe tener cuidado: si usa una palabra simple directamente en la línea 
 
 ```nu
 hello
+
 Error: nu::shell::external_command
 
   × External command failed
+
    ╭─[entry #5:1:1]
+
  1 │ hello
+
    · ──┬──
+
    ·   ╰── executable was not found
+
    ╰────
+
   help: program not found
 ```
 
@@ -1202,6 +1255,7 @@ Puede colocar el signo `^` delante de cualquier string (incluida una variable) p
 ^'ls'
 
 let foo = 'ls'
+
 ^$foo
 ```
 
@@ -1213,6 +1267,7 @@ Hay varias formas de anteponer o añadir strings. Si se desea agregar algo al pr
 
 ```nu
 ['foo', 'bar'] | each {|s| '~/' ++ $s} # ~/foo, ~/bar
+
 ['foo', 'bar'] | each {|s| '~/' + $s} # ~/foo, ~/bar
 ```
 
@@ -1220,6 +1275,7 @@ También puede usar una expresión regular para reemplazar el principio o el fin
 
 ```nu
 ['foo', 'bar'] | str replace -r '^' '~/' # ~/foo, ~/bar
+
 ['foo', 'bar'] | str replace -r '$' '~/' # foo~/, bar~/
 ```
 
@@ -1384,6 +1440,7 @@ Para expresiones regulares:
 
 ```nu
 'APL' =~ '^\w{0,3}$'
+
 'FORTRAN' !~ '^\w{0,3}$'
 ```
 
@@ -1458,10 +1515,15 @@ Por ejemplo:
 
 ```nu
 let colors = [yellow green]
+
 let colors = $colors | prepend red
+
 let colors = $colors | append purple
+
 let colors = $colors ++ ["blue"]
+
 let colors = ["black"] ++ $colors
+
 $colors # [black red yellow green purple blue]
 ```
 
@@ -1469,8 +1531,11 @@ En caso de que se requiera eliminar elementos de la lista, hay muchas maneras. `
 
 ```nu
 let colors = [red yellow green purple]
+
 let colors = $colors | skip 1
+
 let colors = $colors | drop 2
+
 $colors # [yellow]
 ```
 
@@ -1478,7 +1543,9 @@ También está `last` y `first` que permiten tomar valores desde el final o el p
 
 ```nu
 let colors = [red yellow green purple black magenta]
+
 let colors = $colors | last 3
+
 $colors # [purple black magenta]
 ```
 
@@ -1486,7 +1553,9 @@ Y desde el principio de una lista,
 
 ```nu
 let colors = [yellow green purple]
+
 let colors = $colors | first 2
+
 $colors # [yellow green]
 ```
 
@@ -1524,7 +1593,9 @@ El siguiente ejemplo obtiene todos los colores cuyos nombres terminan en "e".
 
 ```nu
 let colors = [red orange yellow green blue purple]
+
 $colors | where ($it | str ends-with 'e')
+
 # El bloque pasado a `where` debe evaluarse como un booleano.
 # Esto imprime la lista [orange blue purple].
 ```
@@ -1533,6 +1604,7 @@ En este ejemplo, mantenemos solo los valores superiores a `7`.
 
 ```nu
 let scores = [7 10 8 6 7]
+
 $scores | where $it > 7 # [10 8]
 ```
 
@@ -1544,6 +1616,7 @@ Por ejemplo:
 
 ```nu
 let scores = [3 8 4]
+
 $"total = ($scores | reduce { |elt, acc| $acc + $elt })" # total = 15
 
 $"total = ($scores | math sum)" # enfoque más fácil, mismo resultado
@@ -1561,6 +1634,7 @@ Por ejemplo, se puede acceder al segundo elemento de la lista a continuación co
 
 ```nu
 let names = [Mark Tami Amanda Jeremy]
+
 $names.1 # da Tami
 ```
 
@@ -1568,7 +1642,9 @@ Si el índice está en alguna variable `$index`, podemos usar el comando `get` p
 
 ```nu
 let names = [Mark Tami Amanda Jeremy]
+
 let index = 1
+
 $names | get $index # da Tami
 ```
 
@@ -1580,9 +1656,11 @@ Se puede usar con listas de la siguiente manera:
 
 ```nu
 let colors = [red green blue]
+
 $colors | is-empty # false
 
 let colors = []
+
 $colors | is-empty # true
 ```
 
@@ -1590,8 +1668,11 @@ Los operadores `in` y `not-in` se utilizan para probar si un valor está en una 
 
 ```nu
 let colors = [red green blue]
+
 'blue' in $colors # true
+
 'yellow' in $colors # false
+
 'gold' not-in $colors # true
 ```
 
@@ -1600,6 +1681,7 @@ Por ejemplo:
 
 ```nu
 let colors = [red green blue]
+
 # ¿Algún nombre de color termina con "e"?
 $colors | any {|elt| $elt | str ends-with "e" } # true
 
@@ -1607,6 +1689,7 @@ $colors | any {|elt| $elt | str ends-with "e" } # true
 $colors | any {|elt| ($elt | str length) < 3 } # false
 
 let scores = [3 8 4]
+
 # ¿Alguna puntuación es superior a 7?
 $scores | any {|elt| $elt > 7 } # true
 
@@ -1619,6 +1702,7 @@ Por ejemplo:
 
 ```nu
 let colors = [red green blue]
+
 # ¿Todos los nombres de color terminan con "e"?
 $colors | all {|elt| $elt | str ends-with "e" } # false
 
@@ -1626,6 +1710,7 @@ $colors | all {|elt| $elt | str ends-with "e" } # false
 $colors | all {|elt| ($elt | str length) >= 3 } # true
 
 let scores = [3 8 4]
+
 # ¿Todas las puntuaciones son superiores a 7?
 $scores | all {|elt| $elt > 7 } # false
 
@@ -1640,11 +1725,15 @@ Por ejemplo:
 
 ```nu
 [1 [2 3] 4 [5 6]]
+
 [1 [2 3] 4 [5 6]] | table -e
+
 [1 [2 3] 4 [5 6]] | flatten # [1 2 3 4 5 6]
 
 [[1 2] [3 [4 5 [6 7 8]]]]
+
 [[1 2] [3 [4 5 [6 7 8]]]] | table -e
+
 [[1 2] [3 [4 5 [6 7 8]]]] | flatten
 
 [[1 2] [3 [4 5 [6 7 8]]]] | flatten | flatten | flatten # [1 2 3 4 5 6 7 8]
@@ -1657,7 +1746,9 @@ let zones = [UTC CET Europe/Moscow Asia/Yekaterinburg]
 
 # Mostrar el reloj mundial para las zonas horarias seleccionadas
 $zones |
+
   wrap 'Zone' |
+
   upsert Time {|row|
     (date now | date to-timezone $row.Zone | format date '%Y.%m.%d %H:%M')
   }
@@ -1673,6 +1764,7 @@ let my_record = {
    name: "Sam"
    age: 30
    }
+
 $my_record | update age { $in + 1 }
 ```
 
@@ -1683,11 +1775,17 @@ Un registro es una colección de cero o más asignaciones de pares clave-valor. 
 ```nu
 # Nushell
 { "apples": 543, "bananas": 411, "oranges": 0 }
+
 ╭─────────┬─────╮
+
 │ apples  │ 543 │
+
 │ bananas │ 411 │
+
 │ oranges │ 0   │
+
 ╰─────────┴─────╯
+
 # JSON
 '{ "apples": 543, "bananas": 411, "oranges": 0 }' | from json
 ```
@@ -1723,6 +1821,7 @@ Para hacer una copia de un registro con nuevos campos, se puede:
 
 ```nu
 let first_record = { name: "Sam", rank: 10 }
+
 $first_record | merge { title: "Mayor" }
 ```
 
@@ -1730,6 +1829,7 @@ $first_record | merge { title: "Mayor" }
 
 ```nu
 let first_record = { name: "Sam", rank: 10 }
+
 {
    ...$first_record
    title: "Mayor"
@@ -1742,7 +1842,9 @@ Se puede iterar sobre los pares clave-valor de un registro transponiéndolo prim
 
 ```nu
 { "apples": 543, "bananas": 411, "oranges": 0 } |
+
   transpose fruit count |
+
   each {|f| $"We have ($f.count) ($f.fruit)" }
 ```
 
@@ -1826,9 +1928,11 @@ Se pueden concatenar tablas usando `append`:
 
 ```nu
 let first = [[a b]; [1 2]]
+
 let second = [[a b]; [3 4]]
 
 $first
+
 $second
 
 $first | append $second
@@ -1838,7 +1942,9 @@ Si los nombres de columna no son idénticos, entonces, adicionalmente, se crear�
 
 ```nu
 let first = [[a b]; [1 2]]
+
 let second = [[a b]; [3 4]]
+
 let third = [[a c]; [3 4]]
 
 $first | append $second | append $third
@@ -1856,6 +1962,7 @@ Se puede utilizar el comando `merge` para combinar dos (o más) tablas:
 
 ```nu
 let first = [[a b]; [1 2]]
+
 let second = [[c d]; [3 4]]
 
 $first | merge $second
@@ -1885,7 +1992,9 @@ Se puede utilizar el comando `insert` para agregar una nueva columna a la tabla.
 
 ```nu
 {edition: 2024} | save -f edition.json
+
 open edition.json
+
 open edition.json | save -f edition_copia.json
 ```
 
@@ -1905,6 +2014,7 @@ Notar que si se abre el archivo original, el contenido se ha mantenido igual:
 
 ```nu
 open edition.json
+
 open edition.json | save -f edition_copia.json
 ```
 
@@ -1912,11 +2022,15 @@ Los cambios en Nu son cambios funcionales, lo que significa que trabajan en los 
 
 ```nu
 open edition.json |
+
   insert next_edition 2025 |
+
   append {edition: 2021 next_edition: 2023} |
+
   save -f edition2.json
 
 open edition.json
+
 open edition2.json
 ```
 
@@ -1926,6 +2040,7 @@ De forma similar al comando `insert`, el comando [`update` sirve para cambiar el
 
 ```nu
 open edition.json
+
 open edition.json | save -f edition_copia.json
 ```
 
@@ -2049,16 +2164,27 @@ Acceder a los datos del segundo día como un registro:
 
 ```nu
 > $data.1
+
 ╭───────────┬───────────────╮
+
 │ date      │ 2 years ago   │
+
 │           │ ╭───┬───────╮ │
+
 │ temps     │ │ 0 │ 35.24 │ │
+
 │           │ │ 1 │ 35.94 │ │
+
 │           │ │ 2 │ 34.91 │ │
+
 │           │ │ 3 │ 35.24 │ │
+
 │           │ │ 4 │ 36.65 │ │
+
 │           │ ╰───┴───────╯ │
+
 │ condition │ sunny         │
+
 ╰───────────┴───────────────╯
 ```
 
@@ -2110,10 +2236,11 @@ Continuando con la tabla de muestra anterior:
 
 ```nu
 $data | get 1
+
 $data | select 1
 ```
 
-Observe que:
+Observamos que:
 
 - `get` devuelve el mismo registro que el ejemplo `$data.1` anterior
 - `select` devuelve una nueva tabla de una sola fila, incluidos los nombres de las columnas y los índices de las filas
@@ -2145,6 +2272,7 @@ let record_example = {
     "key x":12
     "key y":4
   }
+
 $record_example."key x"
 
 # o
@@ -2192,9 +2320,11 @@ El comando `default` se puede usar para aplicar un valor predeterminado al resul
 
 ```nu
 let missing_value = [{a:1 b:2} {b:1}]
+
 $missing_value
 
 let with_default_value = $missing_value | default 'n/a' a
+
 $with_default_value
 
 $with_default_value.1.a
@@ -2239,8 +2369,11 @@ También podemos generar archivos estructurados directamente desde pipelines de 
 
 ```nu
 "# Script generado en /data/ch03\ndef saludo [nombre: string] {\n  $\"Hola, ($nombre)!\"\n}\nsaludo 'Ciencia de Datos en Nushell'\n" | save -f ejemplo_ttt.nu
+
 nu ejemplo_ttt.nu
+
 nu ejemplo_ttt.nu | save -f saludo_salida.txt
+
 open saludo_salida.txt
 ```
 
@@ -2303,9 +2436,13 @@ En primer lugar, nos aseguramos de estar en el directorio principal del usuario 
 ```nu
 # skip-docker-exec (requiere conexión a internet para clonar)
 cd ~
+
 mkdir ~/software
+
 cd ~/software
+
 git clone --depth 1 https://github.com/jarun/ddgr.git
+
 cd ddgr
 ```
 
@@ -2314,6 +2451,7 @@ A continuación, instalamos la herramienta usando `make`. En el contenedor `dsin
 ```nu
 # skip-docker-exec (instalación local en ~/bin)
 make install PREFIX=/home/dsin
+
 which ddgr
 ```
 
@@ -2337,7 +2475,9 @@ Una de las mayores ventajas de las herramientas CLI modernas es su capacidad par
 ```nu
 # skip-docker-exec (consulta web que requiere acceso a red en vivo)
 ddgr --json -n 3 "nushell data science" |
+
   from json |
+
   select title url
 ```
 
@@ -2386,7 +2526,7 @@ Github permite la existencia de solo un repositorio personal privado (en su vers
 
 Una vez creada la cuenta de usuario, se debe autentificar la maquina local mediante una clave `ssh`.
 
-Creamos la clave (seleccione Si a todo):
+Creamos la clave (seleccionamos Sí a todo):
 
 ```bash
 ssh-keygen -t rsa
@@ -2468,7 +2608,7 @@ Reemplace `<copied_https_url>` con la URL que copió en el paso anterior.
 
 - **Navegar a GitHub:** Vuelva al repositorio original que bifurcó en GitHub.
 - **Crear PR:** Por lo general, verá un aviso sobre su rama recientemente enviada. Haga clic en el botón "Comparar y solicitar PR". Si no es así, vaya a la pestaña "Solicitudes de extracción" y haga clic en "Nueva solicitud de extracción", luego seleccione su rama.
-- **Revisar y Enviar:** Revise cuidadosamente sus cambios, agregue un título y una descripción a su solicitud de extracción explicando sus cambios y haga clic en "Crear solicitud de extracción".
+- **Revisar y Enviar:** Revisamos cuidadosamente los cambios, agregando un título y una descripción a su solicitud de extracción explicando sus cambios y haga clic en "Crear solicitud de extracción".
 
 ### Sugerencias de mensajes commit
 
@@ -2615,16 +2755,25 @@ Si se intenta realizar una operación en tipos de datos no compatibles, se encon
 
 ```nu
 > "spam" - 1
+
 Error: nu::parser::unsupported_operation (link)
 
   × Tipos no coincidentes para la operación.
+
    ╭─[entry #49:1:1]
+
  1 │ "spam" - 1
+
    · ───┬── ┬ ┬
+
    ·    │   │ ╰── int
+
    ·    │   ╰── no admite estos valores.
+
    ·    ╰── string
+
    ╰────
+
   help: Cambie string o int para que sean los tipos correctos e intente nuevamente.
 ```
 
@@ -2641,7 +2790,9 @@ Por ejemplo:
 
 ```nu
 "foobarbaz" =~ "bar" # devuelve true
+
 "foobarbaz" !~ "bar" # devuelve false
+
 ls | where name =~ ^nu # devuelve todos los archivos cuyos nombres comienzan con "nu"
 ```
 
@@ -2653,6 +2804,7 @@ Los operadores suelen ser sensibles a mayúsculas y minúsculas cuando operan co
 
 ```nu
 "FOO" =~ "foo" # devuelve falso
+
 "FOO" =~ "(?i)foo" # devuelve verdadero
 ```
 
@@ -2686,7 +2838,9 @@ algunos valores individuales. Esto se puede hacer con `append` y `prepend`, pero
 
 ```nu
 let dogs = [Spot, Teddy, Tommy]
+
 let cats = ["Mr. Humphrey Montgomery", Kitten]
+
 [
     ...$dogs
     Polly
@@ -2700,9 +2854,13 @@ El siguiente código es una versión equivalente usando `append`:
 
 ```nu
 $dogs |
+
   append Polly |
+
   append ($cats | each { |elt| $"($elt) \(cat\)" }) |
+
   append [Porky Bessie] |
+
   append ...Nemo
 ```
 
@@ -2758,6 +2916,7 @@ Si se tiene una lista de argumentos para pasar a `args`, se puede propagar de la
 
 ```nu
 foo "bar" "baz" ...[1 2 3] # Con ..., los números se tratan como argumentos separados
+
 foo "bar" "baz" [1 2 3] # Sin ..., [1 2 3] se trata como un solo argumento
 ```
 
@@ -2765,6 +2924,7 @@ Una forma más útil de usar el operador de propagación es si tiene otro comand
 
 ```nu
 def bar [ ...args ] { foo --flag "bar" "baz" ...$args }
+
 bar 1 2 3
 ```
 
@@ -2844,6 +3004,7 @@ Se puede llamar al comando personalizado como si fuera un subcomando incorporado
 
 ```nu
 def "str mycommand" [] { "hello" }
+
 str mycommand
 ```
 
@@ -2904,7 +3065,9 @@ Se puede llamar a este comando sin el parámetro o con un valor para anular el v
 
 ```nu
 def greet [name = "nushell"] { $"hello ($name)" }
+
 greet
+
 greet world
 ```
 
@@ -2924,11 +3087,17 @@ Por defecto, los parámetros posicionales son requeridos. Si un parámetro posic
 
 ```nu
   × Missing required positional argument.
+
    ╭─[entry #23:1:1]
+
  1 │ greet
+
    ·      ▲
+
    ·      ╰── missing name
+
    ╰────
+
   help: Usage: greet <name>
 ```
 
@@ -2940,6 +3109,7 @@ def greet [name?: string] {
 }
 
 greet
+
 greet world
 ```
 
@@ -3051,6 +3221,7 @@ También se puede asignar un valor de verdadero/falso para habilitar/deshabilita
 
 ```nu
 greet -a 10 --twice=false hello
+
 greet -a 10 --twice=true hello
 ```
 
@@ -3124,8 +3295,11 @@ A continuación se muestra una definición exhaustivamente documentada:
 ```nu
 # Comando de saludo personalizado que ilustra anotaciones y documentación
 @category utilidades
+
 @search-terms saludo bienvenida mensaje
+
 @example "Saludar indicando la edad" { greet "Carlos" --age 28 } --result ["Carlos", 28]
+
 def greet [
   name: string      # Nombre de la persona a saludar
   --age (-a): int   # Edad opcional de la persona
@@ -3198,6 +3372,7 @@ Para evaluar un cierre almacenado en una variable se utiliza el comando nativo `
 
 ```nu
 do $duplicar 21
+
 do $ponderar 4.5 0.8
 ```
 
@@ -3297,6 +3472,7 @@ Los comandos de elección/condicionales son expresiones, por lo que devuelven va
 
 ```nu
 let x = 5
+
 if $x > 0 { 'positivo' }
 ```
 
@@ -3407,12 +3583,12 @@ La funcionalidad de los comandos de bucle es similar a los comandos que aplican 
 
 ```nu
 mut result = []
+
 for $it in [1 2 3] {
    $result = ($result | append ($it + 1))
 }
 
 $result
-
 
 [1 2 3] | each { $in + 1 }
 ```
@@ -3429,14 +3605,21 @@ Las sentencias tampoco funcionan en las _pipelines_ de Nushell, que requieren al
 
 ```nu
 [1 2 3] | for x in $in { $x + 1 } | $in ++ [5 6 7]
+
 Error: nu::parser::unexpected_keyword
 
   × Statement used in pipeline.
+
    ╭─[entry #5:1:1]
+
  1 │ [1 2 3] | for x in $in { $x + 1 } | $in ++ [5 6 7]
+
    ·           ─┬─
+
    ·            ╰── not allowed in pipeline
+
    ╰────
+
   help: 'for' keyword is not allowed in pipeline. Use 'for' by itself, outside of a pipeline.
 ```
 
@@ -3450,13 +3633,19 @@ Si los bucles tienen una desventaja tan grande, ¿por qué existen? Bueno, una r
 mut foo = []
 
 [1 2 3] | each { $foo = ($foo | append ($in + 1)) }
+
 Error: nu::parser::expected_keyword
 
   × Capture of mutable variable.
+
    ╭─[entry #8:1:1]
+
  1 │ [1 2 3] | each { $foo = ($foo | append ($in + 1)) }
+
    ·                  ──┬─
+
    ·                    ╰── capture of mutable variable
+
    ╰────
 ```
 
@@ -3529,6 +3718,7 @@ for x in 1..10 { if $x > 3 { break }; print $x }
 
 ```nu
 mut x = -1
+
 while $x <= 6 {
 	$x = $x + 1;
 	if $x mod 3 == 0 {
@@ -3548,12 +3738,16 @@ while $x <= 6 {
 ```nu
 error make { msg: 'Some error info' }; print 'unprinted'
 
-
 Error:   × Some error info
+
    ╭─[entry #9:1:1]
+
  1 │ print 'printed'; error make { msg: 'Some error info' }; print 'unprinted'
+
    ·                  ─────┬────
+
    ·                       ╰── originates from here
+
    ╰────
 ```
 
@@ -3632,12 +3826,19 @@ En primer lugar, se muestra cómo obtener las 10 palabras más frecuentes de `al
 
 ```nu
 open --raw alice.txt |
+
   str lowercase |
+
   parse --regex '(?P<word>[a-z]{2,})' |
+
   get word |
+
   uniq -c |
+
   rename word count |
+
   sort-by count --reverse |
+
   first 10
 ```
 
@@ -3645,6 +3846,7 @@ A continuación se filtran las palabras vacías contenidas en el archivo `stopwo
 
 ```nu
 let sw = open --raw stopwords | lines | each { str trim | str lowercase }
+
 let top10 = open --raw alice.txt
     | str lowercase
     | parse --regex '(?P<word>[a-z]{2,})'
@@ -3656,6 +3858,7 @@ let top10 = open --raw alice.txt
     | first 10
 
 $top10
+
 $top10 | save -f top10_alice.csv
 ```
 
@@ -3680,6 +3883,7 @@ let sw = if ("stopwords" | path exists) {
 } else {
     []
 }
+
 open --raw alice.txt
 | str lowercase
 | parse --regex "(?P<word>[a-z]{2,})"
@@ -3695,8 +3899,11 @@ Para inspeccionar el contenido de un script o archivo de código fuente desde la
 
 ```nu
 open --raw top-words-1.nu
+
 bat top-words-1.nu
+
 nu top-words-1.nu
+
 nu top-words-1.nu | save -f salida_paso1.csv
 ```
 
@@ -3712,6 +3919,7 @@ let sw = if ("stopwords" | path exists) {
 } else {
     []
 }
+
 open --raw alice.txt
 | str lowercase
 | parse --regex "(?P<word>[a-z]{2,})"
@@ -3727,7 +3935,9 @@ Se configuran y verifican los permisos con `chmod` y `ls`:
 
 ```nu
 cp top-words-1.nu top-words-2.nu
+
 chmod u+x top-words-2.nu
+
 ls -l top-words-1.nu top-words-2.nu | select name mode size
 ```
 
@@ -3746,6 +3956,7 @@ let sw = if ("stopwords" | path exists) {
 } else {
     []
 }
+
 open --raw alice.txt
 | str lowercase
 | parse --regex "(?P<word>[a-z]{2,})"
@@ -3761,7 +3972,9 @@ Se visualiza el script con `bat` y se ejecuta directamente:
 
 ```nu
 bat top-words-3.nu
+
 ./top-words-3.nu
+
 ./top-words-3.nu | save -f salida_paso3.json
 ```
 
@@ -3788,7 +4001,9 @@ Se inspecciona con `bat` y se prueba la canalización desde la terminal:
 
 ```nu
 bat top-words-4.nu
+
 open --raw alice.txt | ./top-words-4.nu
+
 open --raw alice.txt | ./top-words-4.nu | save -f salida_paso4.json
 ```
 
@@ -3828,7 +4043,9 @@ Se inspecciona con `bat` y se ejecuta especificando parámetros posicionales:
 
 ```nu
 bat top-words-5.nu
+
 open --raw alice.txt | ./top-words-5.nu 8
+
 open --raw alice.txt | ./top-words-5.nu 8 | save -f top8_alice.json
 ```
 
@@ -3838,8 +4055,11 @@ Para invocar la herramienta desde cualquier ubicación del sistema de archivos s
 
 ```nu
 cp top-words-5.nu /home/dsin/bin/top-words-nu
+
 chmod +x /home/dsin/bin/top-words-nu
+
 open --raw alice.txt | top-words-nu 5
+
 open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 ```
 
@@ -3847,13 +4067,15 @@ open --raw alice.txt | top-words-nu 5 | save -f top5_alice.json
 
 Dado que la línea de comandos es agnóstica al lenguaje, podemos combinar scripts escritos en **Python** (`#!/usr/bin/env python3`) y **R** (`#!/usr/bin/env Rscript`) dentro de nuestros pipelines de Nushell. Siguiendo las buenas prácticas de este libro, siempre creamos o inspeccionamos primero el archivo `.py` o `.R` en el directorio del capítulo y luego lo invocamos desde Nushell, convirtiendo su salida en una tabla estructurada con `from csv` y guardando los resultados.
 
-### Portando la Herramienta a Python (`top-words.py`) y R (`top-words.R`)
+### Portando la Herramienta a Python y R
 
 En `/data/ch04` disponemos de las implementaciones completas en Python (`top-words.py`) y en R (`top-words.R`). Inspeccionemos primero el archivo `top-words.py` y ejecutémoslo desde Nushell:
 
 ```nu
 bat top-words.py
+
 open --raw alice.txt | python3 top-words.py 5 | from csv
+
 open --raw alice.txt | python3 top-words.py 5 | from csv | save -f top_words_py.csv
 ```
 
@@ -3861,17 +4083,21 @@ Ahora inspeccionemos el script en R (`top-words.R`), ejecutémoslo sobre `alice.
 
 ```nu
 bat top-words.R
+
 open --raw alice.txt | Rscript top-words.R 5 | from csv
+
 open --raw alice.txt | Rscript top-words.R 5 | from csv | save -f top_words_r.csv
 ```
 
-### Procesando Datos en Transmisión (*Streaming*) desde `stdin` (`fizzbuzz.py` y `fizzbuzz.R`)
+### Procesando Datos en Transmisión (*Streaming*) desde `stdin`
 
 Cuando la entrada es un flujo línea por línea, tanto Python como R pueden procesar cada línea conforme llega desde `stdin`. En `/data/ch04` contamos con `fizzbuzz.py` y `fizzbuzz.R`, que implementan el problema clásico de *FizzBuzz* (imprimir `"fizz"` si el número es divisible por 3, `"buzz"` si es divisible por 5, y `"fizzbuzz"` si es divisible por 15):
 
 ```nu
 bat fizzbuzz.py
+
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py
+
 1..15 | to text | python3 fizzbuzz.py | lines | wrap resultado_py | save -f fizzbuzz_py.csv
 ```
 
@@ -3879,7 +4105,9 @@ Y de manera idéntica con el script `fizzbuzz.R`:
 
 ```nu
 bat fizzbuzz.R
+
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r
+
 1..15 | to text | Rscript fizzbuzz.R | lines | wrap resultado_r | save -f fizzbuzz_r.csv
 ```
 
@@ -3921,8 +4149,11 @@ En `/data/ch05` contamos con el archivo `urls.json` y muestras de publicaciones 
 
 ```nu
 let response = open posts_sample.json
+
 $response | first 3 | select userId id title
+
 $response | save -f posts.json
+
 open posts.json | first 3 | select id title
 ```
 
@@ -3931,6 +4162,7 @@ Si descargamos o leemos un documento HTML (como `MolinosFriesland.html` en `/dat
 ```nu
 # skip-docker-exec (requiere descarga web previa)
 open --raw MolinosFriesland.html | lines | first 10
+
 open --raw MolinosFriesland.html | lines | first 10 | to text | save -f molinos_encabezado.txt
 ```
 
@@ -3940,7 +4172,9 @@ En `/data/ch05/urls.json` tenemos una lista de *endpoints* bajo la clave `urls`:
 
 ```nu
 open urls.json
+
 open urls.json | get urls
+
 open urls.json | get urls | to text | save -f lista_urls.txt
 ```
 
@@ -3959,7 +4193,7 @@ open urls.json | get urls | each { |u| http get $u } | save -f respuestas_api.js
 } | get my_payload | to json | http post --content-type "application/json" https://jsonplaceholder.typicode.com/posts $in
 ```
 
-### Siguiendo Redirecciones e Inspeccionando Cabeceras HTTP (`http head`)
+### Siguiendo Redirecciones e Inspeccionando Cabeceras HTTP
 
 Cuando se accede a una URL acortada (como `bit.ly`) o se depura un servidor web, es útil inspeccionar únicamente las cabeceras HTTP y el código de estado (por ejemplo, `200 OK`, `301 Moved Permanently`, `303 See Other`, `403 Forbidden`, `404 Not Found`) utilizando `http head` o la bandera `--full` de `http get`:
 
@@ -3976,7 +4210,9 @@ En `/data/ch05` se dispone del archivo comprimido `logs.tar.gz`. Antes de proced
 
 ```nu
 tar -tzf logs.tar.gz | lines | first 10
+
 tar -tzf logs.tar.gz | lines | save -f indice_logs.txt
+
 7z l logs.tar.gz
 ```
 
@@ -3984,7 +4220,9 @@ Dado que los archivos empaquetados en `logs.tar.gz` no residen dentro de un dire
 
 ```nu
 rm -rf logs_extraidos
+
 mkdir logs_extraidos
+
 tar -xzf logs.tar.gz -C logs_extraidos
 ```
 
@@ -3992,7 +4230,9 @@ De forma equivalente, la descompresión puede llevarse a cabo utilizando **`7z`*
 
 ```nu
 rm -rf logs_7z
+
 mkdir logs_7z
+
 7z x logs.tar.gz -so | 7z x -si -ttar -o./logs_7z
 ```
 
@@ -4008,7 +4248,9 @@ let resumen_logs = ls logs_extraidos
         }
     }
     | sort-by archivo
+
 $resumen_logs | first 5
+
 $resumen_logs | save -f resumen_logs.csv
 ```
 
@@ -4020,6 +4262,7 @@ En Nushell, `open` detecta automáticamente el encabezado de `tmnt-with-header.c
 
 ```nu
 open tmnt-with-header.csv
+
 open tmnt-with-header.csv | save -f tmnt_con_encabezado.json
 ```
 
@@ -4027,6 +4270,7 @@ Si un archivo CSV **no posee fila de encabezado** (como `tmnt-missing-newline.cs
 
 ```nu
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma
+
 open --raw tmnt-missing-newline.csv | from csv --noheaders | rename nombre apodo color arma | save -f tmnt_normalizado.csv
 ```
 
@@ -4040,7 +4284,9 @@ Vemos que `cars.xlsx` contiene la hoja `autos`. Extraemos dicha hoja con `get au
 
 ```nu
 open cars.xlsx | get autos | first 5 | select make "body.style" horsepower "city.mpg" price
+
 open cars.xlsx | get autos | save -f cars.csv
+
 open cars.xlsx | get autos | save -f cars_exportado.csv
 ```
 
@@ -4048,6 +4294,7 @@ Si deseamos filtrar únicamente los vehículos de la marca `toyota` usando una e
 
 ```nu
 open cars.csv | where make =~ '^toyota$' | select make "body.style" "engine.size" horsepower price | first 8
+
 open cars.csv | where make =~ '^toyota$' | save -f cars_toyota.csv
 ```
 
@@ -4063,6 +4310,7 @@ Para ejecutar consultas SQL `SELECT` directamente sobre `r-datasets.db`, utiliza
 
 ```nu
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | first 8
+
 open r-datasets.db | query db "SELECT row_names, mpg, cyl, hp, wt FROM mtcars ORDER BY mpg DESC" | save -f mtcars_ordenado.csv
 ```
 
@@ -4071,7 +4319,9 @@ También podemos realizar agrupaciones SQL directamente con `query db` y guardar
 ```nu
 let resumen_cyl = open r-datasets.db
     | query db "SELECT cyl, COUNT(*) AS n_autos, ROUND(AVG(mpg), 2) AS mpg_promedio, ROUND(AVG(hp), 1) AS hp_promedio FROM mtcars GROUP BY cyl ORDER BY cyl"
+
 $resumen_cyl
+
 $resumen_cyl | save -f mtcars_por_cilindros.csv
 ```
 
@@ -4100,6 +4350,7 @@ Muchas APIs web (como *News API* o *Google Maps*) requieren una clave de autenti
 ```nu
 # skip-docker-exec (requiere clave de API en .secret)
 let api_key = open --raw .secret/newsapi.org_apikey | str trim
+
 let news_url = {
     scheme: "https"
     host: "newsapi.org"
@@ -4109,7 +4360,9 @@ let news_url = {
         apiKey: $api_key
     }
 } | url join
+
 $news_url
+
 $news_url | save -f news_endpoint.txt
 ```
 
@@ -4136,7 +4389,9 @@ En lugar de concatenar cadenas manualmente (lo cual induce errores con espacios 
 
 ```nu
 let mapsAPIkey = "the_api_key"
+
 let address = "Paseo Yugoslavo 176, Valparaiso, Chile"
+
 let url_record = {
     scheme: "https"
     host: "maps.googleapis.com"
@@ -4146,7 +4401,9 @@ let url_record = {
         key: $mapsAPIkey
     }
 }
+
 $url_record | url join
+
 $url_record | save -f consulta_maps.json
 ```
 
@@ -4171,8 +4428,11 @@ let sample_response = {
         }
     ]
 }
+
 $sample_response.results | select formatted_address
+
 $sample_response.results.geometry.location
+
 $sample_response.results.geometry.location | save -f coordenadas.json
 ```
 
@@ -4228,7 +4488,9 @@ Para utilizar el módulo, lo importamos en nuestra sesión interactiva con `use 
 ```nu
 # skip-docker-exec
 use maps.nu *
+
 loc-from-address "Paseo Yugoslavo 176, Valparaiso, Chile"
+
 address-from-loc -33.0400281 -71.6289843
 ```
 
@@ -4301,7 +4563,9 @@ Importamos el comando `trans` y lo aplicamos en nuestros pipelines:
 ```nu
 # skip-docker-exec
 use translate.nu *
+
 "Data science workflows at the command line" | trans
+
 trans "Structured data pipelines in Nushell" --destination "fr"
 ```
 
@@ -4390,7 +4654,9 @@ Podemos utilizar la herramienta para alimentar pipelines posteriores con comando
 ```nu
 # skip-docker-exec
 use ollama_search.nu *
+
 ollama-search "nushell data science pipelines" -n 3 | select title url
+
 ollama-search "command line data science" --md | save -f resultados_busqueda.md
 ```
 
@@ -4409,6 +4675,7 @@ let edits_en = open --raw wikimedia-stream-sample
     | select -o title user bot timestamp
 
 $edits_en | first 10
+
 $edits_en | save -f wikimedia_edits_en.csv
 ```
 
@@ -4439,13 +4706,16 @@ Con frecuencia, la salida de una herramienta requiere una transformación interm
 
 ```nu
 1..100 | to text | python3 fizzbuzz.py | save -f fb.seq
+
 let conteo_fb = open --raw fb.seq
     | lines
     | where ($it =~ "fizz|buzz")
     | uniq -c
     | rename value count
     | sort-by count --reverse
+
 $conteo_fb
+
 $conteo_fb | save -f fb.csv
 ```
 
@@ -4467,7 +4737,9 @@ open --raw lines | lines
 
 ```nu
 open --raw lines | lines | first 3
+
 open --raw lines | lines | last 3
+
 open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
 ```
 
@@ -4475,8 +4747,11 @@ open --raw lines | lines | first 3 | to text | save -f lines_primeras3.txt
 
 ```nu
 open --raw lines | lines | skip 3
+
 open --raw lines | lines | drop 3
+
 open --raw lines | lines | slice 3..5
+
 open --raw lines | lines | slice 3..5 | to text | save -f lines_4_a_6.txt
 ```
 
@@ -4484,6 +4759,7 @@ open --raw lines | lines | slice 3..5 | to text | save -f lines_4_a_6.txt
 
 ```nu
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item
+
 open --raw lines | lines | enumerate | where ($it.index mod 2) == 0 | get item | to text | save -f lines_impares.txt
 ```
 
@@ -4493,8 +4769,11 @@ Para conservar o descartar líneas según una expresión regular, utilizamos `wh
 
 ```nu
 open --raw alice.txt | lines | where ($it =~ '(?i)^chapter')
+
 open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The')
+
 open --raw alice.txt | lines | where ($it =~ '^CHAPTER (.*)\. The') | to text | save -f capitulos_the.txt
+
 open --raw alice.txt | lines | where ($it | str trim | is-not-empty) | length
 ```
 
@@ -4504,6 +4783,7 @@ Cuando formulamos un pipeline sobre un archivo muy grande, resulta útil tomar u
 
 ```nu
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10
+
 1..1000 | each { |i| $"Line ($i)" } | shuffle | first 10 | to text | save -f muestra_10_lineas.txt
 ```
 
@@ -4518,6 +4798,7 @@ let caps = open --raw alice.txt
     | parse --regex '^CHAPTER (?P<numero>[IVXLCDM]+)\.\s+(?P<titulo>.*)$'
 
 $caps
+
 $caps | save -f capitulos_alice.csv
 ```
 
@@ -4534,6 +4815,7 @@ let palabras_ae = open --raw alice.txt
     | wrap palabra
 
 $palabras_ae | first 15
+
 $palabras_ae | save -f palabras_a_e.csv
 ```
 
@@ -4543,10 +4825,15 @@ En Nushell, la familia de comandos `str` (`str replace`, `str uppercase`, `str l
 
 ```nu
 "hello world!" | str replace -a " " "_"
+
 "hello world!" | str replace -a --regex '[ !]' ''
+
 "hallo wêreld!" | str uppercase
+
 "helló világ" | str uppercase
+
 "  hello     world!  " | str trim | str replace -a --regex '\s+' ' ' | str replace "hello" "bye"
+
 "  hello     world!  " | str trim | str replace -a --regex '\s+' ' ' | str replace "hello" "bye" | save -f saludo_limpio.txt
 ```
 
@@ -4594,6 +4881,7 @@ Permite analizar un patrón arbitrario de una cadena de texto en una tabla de va
 
 ```nu
 'nu = "0.116.1" # A new type of shell
+
 ttt = "1.8.0" # Terminal text editor' | lines | parse '{crate_name} = "{version}" #{description}' | update description { str trim }
 ```
 
@@ -4611,6 +4899,7 @@ Por ejemplo, en `/data/ch06`, convirtamos a mayúsculas únicamente la columna `
 
 ```nu
 open tips.csv | update day { str uppercase } | first 5
+
 open tips.csv | update day { str uppercase } | save -f tips_day_upper.csv
 ```
 
@@ -4620,8 +4909,11 @@ Cuando deseamos expresar transformaciones complejas utilizando sintaxis **SQL** 
 
 ```nu
 rm -f tips_temp.db
+
 open tips.csv | into sqlite tips_temp.db
+
 open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE bill > 40.0 AND day LIKE 'S%'"
+
 open tips_temp.db | query db "SELECT bill, tip, day, time, size FROM main WHERE bill > 40.0 AND day LIKE 'S%'" | save -f tips_sql_resultado.csv
 ```
 
@@ -4631,7 +4923,9 @@ Para extraer un subconjunto de columnas en un orden específico utilizamos `sele
 
 ```nu
 open iris.csv | select sepal_length petal_length sepal_width petal_width | first 5
+
 open iris.csv | reject species | first 5
+
 open iris.csv | select sepal_length petal_length sepal_width petal_width | save -f iris_columnas_reordenadas.csv
 ```
 
@@ -4641,7 +4935,9 @@ En Nushell filtramos filas de tablas CSV combinando condiciones numéricas y exp
 
 ```nu
 open tips.csv | where size >= 5 | first 6
+
 open tips.csv | where bill > 40.0 and day =~ '^S'
+
 open tips.csv | where bill > 40.0 and day =~ '^S' | save -f tips_altos_finde.csv
 ```
 
@@ -4651,6 +4947,7 @@ Consideremos los archivos `names.csv` y `names-comma.csv` en `/data/ch06`, los c
 
 ```nu
 open names.csv
+
 open names-comma.csv
 ```
 
@@ -4662,6 +4959,7 @@ let nombres_limpios = open names-comma.csv
     | select id full_name born
 
 $nombres_limpios
+
 $nombres_limpios | save -f names_completos.csv
 ```
 
@@ -4673,11 +4971,15 @@ En `/data/ch06` podemos dividir `tips.csv` en tres archivos CSV con distintas co
 
 ```nu
 open tips.csv | select bill tip | save -f bills.csv
+
 open tips.csv | select day time | save -f datetime.csv
+
 open tips.csv | select sex smoker size | save -f customers.csv
 
 let unido_horizontal = open bills.csv | merge (open customers.csv) | merge (open datetime.csv)
+
 $unido_horizontal | first 5
+
 $unido_horizontal | save -f tips_horizontal.csv
 ```
 
@@ -4687,11 +4989,13 @@ Cuando dos tablas comparten una columna clave (como `species` en `iris.csv` e `i
 
 ```nu
 open irismeta.csv
+
 let iris_enriquecido = open iris.csv
     | join (open irismeta.csv) species
     | select sepal_length sepal_width species usda_id
 
 $iris_enriquecido | slice 48..53
+
 $iris_enriquecido | save -f iris_usda.csv
 ```
 
@@ -4708,6 +5012,7 @@ let usuarios = open users.json
     | rename sex email nat phone
 
 $usuarios | first 5
+
 $usuarios | save -f users_sex.csv
 ```
 
@@ -4716,6 +5021,7 @@ De igual manera, a partir de la tabla HTML convertida a JSON en `table.json` (li
 ```nu
 # skip-docker-exec (requiere descarga web previa de Wikipedia)
 open countries.csv | first 10
+
 open countries.csv | first 10 | save -f countries_top10.csv
 ```
 
@@ -4772,7 +5078,9 @@ Ahora, se puede cargar el archivo `vgsales.csv` en un DataFrame de Polars de la 
 
 ```nu
 let df = open vgsales.csv | polars into-df
+
 $df | polars first 5 | polars collect
+
 $df | describe
 ```
 
@@ -4828,7 +5136,9 @@ let df = $df
   ]
 
 $df | polars schema
+
 $df | polars summary | polars collect
+
 $df | polars summary | polars select descriptor "price (f64)" "average_playtime (i64)" "median_playtime (i64)" "metascore (i64)" | polars collect
 
 $df | polars first 5 | polars collect
@@ -4896,14 +5206,17 @@ Se pueden filtrar filas de un `DataFrame` usando el comando `polars filter`. Por
 ```nu
 #búsqueda Insensible a Mayúsculas/Minúsculas
 let filter_condition = polars col developer | polars contains "(?i)Action"
+
 $df | polars filter $filter_condition | polars collect
 
 #búsqueda Sensible a Mayúsculas/Minúsculas
 let filter_condition = polars col developer | polars contains "Action"
+
 $df | polars filter $filter_condition | polars collect
 
 #eliminar na in price
 let filter_condition = polars col price | polars is-not-null
+
 $df | polars filter $filter_condition | polars collect
 ```
 
@@ -4911,6 +5224,7 @@ Por otro lado, para eliminar todas las filas con valores nulos en todas las colu
 
 ```nu
 let df_filtered = $df | polars drop-nulls
+
 $df_filtered | polars collect
 ```
 
@@ -4928,9 +5242,13 @@ Se pueden agrupar y agregar datos en un `DataFrame` usando los comandos `group-b
 
 ```nu
 $df_filtered |
+
   polars group-by developer |
+
   polars agg (polars col game | polars count) |
+
   polars sort-by game --reverse [true] |
+
   polars collect
 ```
 
@@ -4938,12 +5256,16 @@ $df_filtered |
 
 ```nu
 $df_filtered |
+
   polars group-by developer |
+
   polars agg [
     (polars col price | polars mean | polars as "price_mean"),
     (polars col game  | polars count | polars as "n_games")
   ] |
+
   polars sort-by developer |
+
   polars collect
 ```
 
@@ -4955,6 +5277,7 @@ $df_filtered | polars select release_date | polars collect
 
 #primero se extrae año, luego se agrupa
 let data_by_year = $df_filtered |
+
   polars with-column [
     (polars col release_date
        | polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1" # extrae el año
@@ -4962,18 +5285,25 @@ let data_by_year = $df_filtered |
        | polars cast i64
        | polars as "year")
    ] |
+
   polars group-by year |
+
   polars agg [
     (polars col price | polars mean | polars as "price_mean"),
     (polars col game  | polars count | polars as "n_games")
   ] |
+
   polars sort-by year |
+
   polars collect
 
 #se visualiza
 $data_by_year
+
 $data_by_year | describe
+
 $data_by_year | polars into-nu #tabla nu
+
 $data_by_year | polars into-nu | describe
 ```
 
@@ -4983,7 +5313,9 @@ Para guardar un `DataFrame` en un archivo, se usaría el comando `polars save`. 
 
 ```nu
 $df_filtered | polars collect | polars save vgsales_filtered.parquet
+
 $df_filtered | polars collect | polars save vgsales_filtered.csv
+
 $data_by_year | polars save data_by_year.csv
 ```
 
@@ -4995,6 +5327,7 @@ $df_filtered | polars collect | polars save ($env.PWD | path join vgsales_filter
 
 ```nu
 $df_filtered | polars collect | polars save vgsales_filtered.csv
+
 $data_by_year | polars save data_by_year.csv
 ```
 
@@ -5023,6 +5356,7 @@ Primero, se preparan los datos para el pivoteo:
 
 ```nu
 let df_aggregated = $df_filtered |
+
   polars with-column [
     (polars col release_date
       | polars str-replace-all --pattern ".*,\\s*(\\d{4})$" --replace "$1"
@@ -5031,16 +5365,21 @@ let df_aggregated = $df_filtered |
       | polars as "year"
     )
   ] |
+
   polars select [
     (polars col developer)
     (polars col price)
     (polars col year)
   ] |
+
   polars group-by [developer year] |
+
   polars agg [(polars col price | polars mean | polars as price_mean)]
 
 $df_aggregated | polars collect
+
 $df_aggregated | polars sort-by year | polars collect
+
 $df_aggregated | polars sort-by developer | polars collect
 ```
 
@@ -5055,7 +5394,9 @@ let df_pivoted = $df_aggregated
   | polars collect
   | polars sort-by developer
   | polars collect
+
 $df_pivoted | polars first 5 | polars into-nu
+
 $df_pivoted | polars into-nu | save -f vgsales_pivot.csv
 ```
 
@@ -5078,7 +5419,7 @@ El plugin `polars` para Nushell combina la expresividad y conveniencia de la she
 
 # Exploración y Visualización de Datos {#chapter-7-data-exploration}
 
-El cuarto paso del flujo de trabajo OSEMN consiste en explorar los datos. Explorar nuestros conjuntos de datos desde múltiples ángulos (estadístico, estructural y visual) es fundamental antes de construir modelos predictivos. Como destacó John W. Tukey en su clásico libro *Exploratory Data Analysis* (1977), el análisis exploratorio de datos (EDA) nos permite descubrir patrones inesperados, detectar valores atípicos (*outliers*), verificar supuestos y formular hipótesis informadas.
+El cuarto paso del flujo de trabajo OSEMN consiste en explorar los datos. Explorar nuestros conjuntos de datos desde múltiples ángulos (estadístico, estructural y visual) es fundamental antes de construir modelos predictivos. Como destacó John W. Tukey en su clásico libro *Exploratory Data Analysis* ([1977](#ref-tukey1977)), el análisis exploratorio de datos (EDA) nos permite descubrir patrones inesperados, detectar valores atípicos (*outliers*), verificar supuestos y formular hipótesis informadas.
 
 En este capítulo abordaremos la exploración y visualización de datos desde tres perspectivas complementarias dentro de la imagen Docker `dsin`:
 
@@ -5116,7 +5457,9 @@ Al abrirlo de forma estructurada con `open venture.csv`, Nushell interpreta auto
 
 ```nu
 open venture.csv | length
+
 open venture.csv | columns | enumerate | first 15
+
 open venture.csv | columns | enumerate | wrap col_info | flatten | save -f venture_columns.csv
 ```
 
@@ -5126,6 +5469,7 @@ Veamos el archivo `datatypes.csv`, diseñado específicamente para ilustrar dist
 
 ```nu
 open datatypes.csv
+
 open datatypes.csv | save -f datatypes_copy.json
 ```
 
@@ -5133,6 +5477,7 @@ Para conocer el tipo exacto que Nushell o Polars asignó a cada columna, podemos
 
 ```nu
 open datatypes.csv | polars into-df | polars schema | transpose column dtype
+
 open datatypes.csv | polars into-df | polars schema | transpose column dtype | save -f datatypes_schema.csv
 ```
 
@@ -5144,8 +5489,11 @@ En Nushell podemos detectar el número de valores únicos de cada columna traspo
 
 ```nu
 let df = open venture.csv
+
 let non_const_cols = $df | columns | where {|c| ($df | get $c | uniq | length) > 1 }
+
 $df | select ...$non_const_cols | first 5
+
 $df | select ...$non_const_cols | save -f venture_clean.csv
 ```
 
@@ -5157,6 +5505,7 @@ Trabajemos ahora con el clásico conjunto de datos `tips.csv` (propinas en un re
 
 ```nu
 open tips.csv | first 10
+
 open tips.csv | first 10 | save -f tips_sample.csv
 ```
 
@@ -5166,7 +5515,9 @@ Nushell incluye la familia de comandos `math` (`math sum`, `math avg`, `math med
 
 ```nu
 open tips.csv | select bill tip size | math avg
+
 open tips.csv | select bill tip size | math stddev
+
 open tips.csv | select bill tip size | math median | save -f tips_median.json
 ```
 
@@ -5174,6 +5525,7 @@ Si deseamos obtener simultáneamente el conteo, media, desviación estándar, m�
 
 ```nu
 open tips.csv | polars into-df | polars summary | polars collect | polars into-nu
+
 open tips.csv | polars into-df | polars summary | polars collect | polars into-nu | save -f tips_summary.csv
 ```
 
@@ -5181,6 +5533,7 @@ Para variables categóricas (como `day` o `time`), el comando nativo `histogram`
 
 ```nu
 open tips.csv | histogram day
+
 open tips.csv | histogram day | save -f tips_day_freq.csv
 ```
 
@@ -5198,6 +5551,7 @@ Al ejecutar `Rscript mutate_tips.R` y canalizar su salida hacia `from csv`, Nush
 
 ```nu
 Rscript mutate_tips.R | from csv | first 10
+
 Rscript mutate_tips.R | from csv | save -f tips_with_percent.csv
 ```
 
@@ -5205,7 +5559,9 @@ Del mismo modo, el script `summary_tips.R` agrupa las propinas por día y horari
 
 ```nu
 bat summary_tips.R
+
 Rscript summary_tips.R | from csv | sort-by mean_tip -r
+
 Rscript summary_tips.R | from csv | sort-by mean_tip -r | save -f tips_grouped_summary.csv
 ```
 
@@ -5213,7 +5569,9 @@ Y con Python (`corr_tips.py`), podemos calcular la matriz de correlación de Pea
 
 ```nu
 bat corr_tips.py
+
 python3 corr_tips.py | from csv
+
 python3 corr_tips.py | from csv | save -f tips_correlations.csv
 ```
 
@@ -5227,13 +5585,18 @@ Veamos primero el script `plot_faceted.R`, que genera un gráfico de dispersión
 
 ```nu
 bat plot_faceted.R
+
 Rscript plot_faceted.R
+
 ls tips_faceted.png
 ```
 
 ### Visualizando Imágenes Directamente en la Terminal con `timg`
 
-En el flujo de trabajo tradicional de los contenedores Docker sin servidor gráfico X11, el usuario debía copiar cada imagen generada hacia el sistema anfitrión para poder abrirla. En la imagen `dsin`, incluimos **`timg`** (*Terminal Image and Video Viewer*), una herramienta que renderiza archivos PNG, JPEG, SVG o incluso animaciones directamente dentro de la terminal utilizando bloques Unicode de alta resolución o los protocolos gráficos de Kitty/iTerm2/Sixel.
+En el flujo de trabajo tradicional de los contenedores Docker sin servidor gráfico X11, el usuario debía copiar cada imagen generada hacia el sistema anfitrión para poder abrirla. En la imagen `dsin`, incluimos **`timg`** (*Terminal Image and Video Viewer*), una herramienta que renderiza archivos PNG, JPEG, SVG o incluso animaciones directamente dentro de la terminal utilizando bloques Unicode de alta resolución o protocolos gráficos avanzados.
+
+> [!NOTE]
+> **Fidelidad gráfica y resolución original en la terminal:** Cuando se utiliza un emulador de terminal moderno compatible con protocolos gráficos en mapa de bits —como el protocolo de gráficos de Kitty (*Kitty Graphics Protocol*) o Sixel, incorporados de forma nativa en emuladores como **Ghostty**, Kitty o WezTerm—, `timg` detecta las capacidades del canal y proyecta las imágenes en su **resolución nativa píxel por píxel**, sin degradación a caracteres de texto. En terminales estándar o conexiones SSH desprovistas de dicho soporte, `timg` conmuta de forma automática a una matriz de medios bloques Unicode de alta densidad (`-g 80x25`), garantizando la inspección visual inmediata en cualquier entorno.
 
 Para visualizar cualquier gráfico generado en `/data/ch07`, basta con ejecutar:
 
@@ -5245,7 +5608,9 @@ También podemos mostrar varios gráficos en una cuadrícula comparativa dentro 
 
 ```nu
 Rscript plot_histogram.R
+
 Rscript plot_density.R
+
 timg --grid=2x1 -g 80x25 tips_histogram.png tips_density.png
 ```
 
@@ -5268,25 +5633,29 @@ La gramática de los gráficos (*Grammar of Graphics*) implementada en `ggplot2`
 
 En `/data/ch07` disponemos de una colección completa de scripts listos para usar que ilustran los gráficos fundamentales del análisis exploratorio.
 
-### Gráfico de Barras (`geom_bar`)
+### Gráfico de Barras
 
 Para visualizar la distribución de frecuencias de una variable categórica o discreta, como la cantidad de mesas atendidas por día de la semana en `tips.csv`, ejecutamos `plot_bar.R`:
 
 ```nu
 bat plot_bar.R
+
 Rscript plot_bar.R
+
 timg -g 80x25 tips_bar.png
 ```
 
 ![Gráfico de barras generado con ggplot2](dscl_0702.png)
 
-### Histograma (`geom_histogram`)
+### Histograma
 
 Para inspeccionar la distribución empírica de una variable continua como el monto total de la cuenta (`bill`), ejecutamos `plot_histogram.R`:
 
 ```nu
 bat plot_histogram.R
+
 Rscript plot_histogram.R
+
 timg -g 80x25 tips_histogram.png
 ```
 
@@ -5294,68 +5663,85 @@ timg -g 80x25 tips_histogram.png
 
 Ajustar el número de intervalos (`bins`) es crucial para evitar tanto el sobre-suavizado (pocas barras que ocultan multimodalidad) como el ruido excesivo (demasiadas barras estrechas).
 
-### Gráfico de Densidad (`geom_density`)
+### Gráfico de Densidad
 
 Una alternativa suave al histograma es la estimación de densidad por núcleos (*Kernel Density Estimation*, KDE), implementada en `plot_density.R`:
 
 ```nu
 bat plot_density.R
+
 Rscript plot_density.R
+
 timg -g 80x25 tips_density.png
 ```
 
 ![Estimación de densidad por núcleos](dscl_0706.png)
 
-### Gráfico de Líneas para Series Temporales (`geom_line`)
+### Gráfico de Líneas para Series Temporales
 
 Cuando trabajamos con registros indexados en el tiempo, como la serie de fallecimientos mensuales por accidentes de tránsito en el Reino Unido (`Fatalities.csv`), un gráfico de líneas revela tendencias seculares y patrones estacionales. Veamos y ejecutemos `plot_accident.R`:
 
 ```nu
 open Fatalities.csv | first 5
+
 open Fatalities.csv | first 5 | save -f fatalities_head.csv
+
 bat plot_accident.R
+
 Rscript plot_accident.R
+
 timg -g 80x25 fatalities_line.png
 ```
 
 ![Serie temporal de accidentes](dscl_0707.png)
 
-### Diagrama de Dispersión y Tendencia (`geom_point` y `geom_smooth`)
+### Diagrama de Dispersión y Tendencia
 
 Para estudiar la relación conjunta entre dos variables cuantitativas continuas (`bill` y `tip`), utilizamos `plot_scatter.R` y `plot_trend.R`:
 
 ```nu
 bat plot_scatter.R
+
 Rscript plot_scatter.R
+
 bat plot_trend.R
+
 Rscript plot_trend.R
+
 timg --grid=2x1 -g 80x25 tips_scatter.png tips_trend.png
 ```
 
 ![Diagrama de dispersión con curva de tendencia suavizada](dscl_0710.png)
 
-### Diagrama de Caja (`geom_boxplot`) y Gráfico de Violín (`geom_violin`)
+### Diagrama de Caja y Gráfico de Violín
 
 Para comparar la distribución de una variable continua (`bill`) a través de varios grupos categóricos (`day`), los diagramas de caja (*boxplots*) resumen la mediana, el rango intercuartílico ($\text{IQR} = Q_3 - Q_1$) y los valores atípicos, mientras que los gráficos de violín muestran además la forma completa de la densidad en cada grupo:
 
 ```nu
 bat plot_boxplot.R
+
 Rscript plot_boxplot.R
+
 bat plot_violin.R
+
 Rscript plot_violin.R
+
 timg --grid=2x1 -g 80x25 tips_boxplot.png tips_violin.png
 ```
 
 ![Diagrama de caja de cuentas por día](dscl_0713.png)
 
-### Visualización Estadística Equivalente en Python (`matplotlib` / `seaborn`)
+### Visualización Estadística Equivalente en Python
 
 También podemos generar visualizaciones multipanel desde Python ejecutando `plot_tips_py.py`, el cual produce el archivo `tips_python.png` y devuelve en formato JSON las estadísticas por día hacia Nushell:
 
 ```nu
 bat plot_tips_py.py
+
 python3 plot_tips_py.py | from json
+
 python3 plot_tips_py.py | from json | save -f tips_py_summary.json
+
 timg -g 80x25 tips_python.png
 ```
 
@@ -5399,6 +5785,7 @@ Supongamos que queremos calcular el cuadrado de los primeros diez números enter
 
 ```nu
 1..10 | each {|x| {n: $x, cuadrado: ($x * $x), es_mult_3: (($x mod 3) == 0)} }
+
 1..10 | each {|x| {n: $x, cuadrado: ($x * $x), es_mult_3: (($x mod 3) == 0)} } | save -f squares_table.csv
 ```
 
@@ -5414,6 +5801,7 @@ En `/data/ch08` tenemos el archivo `movies.txt` y el archivo `input.csv`:
 
 ```nu
 open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie: ($row.item | str trim), chars: ($row.item | str length)} }
+
 open --raw movies.txt | lines | enumerate | each {|row| {idx: $row.index, movie: ($row.item | str trim), chars: ($row.item | str length)} } | save -f movies_summary.csv
 ```
 
@@ -5423,6 +5811,7 @@ Del mismo modo, podemos recorrer todos los archivos CSV de un directorio, contar
 
 ```nu
 ls *.csv | each {|f| {archivo: $f.name, bytes: $f.size, filas: (open $f.name | length)} }
+
 ls *.csv | each {|f| {archivo: $f.name, bytes: $f.size, filas: (open $f.name | length)} } | save -f csv_inventory.csv
 ```
 
@@ -5432,12 +5821,13 @@ Cuando el bloque de código que pasamos a `each` realiza trabajo intensivo de CP
 
 ![Comparación conceptual entre ejecución secuencial y ejecución en paralelo](dscl_0801.png)
 
-### Ejecución Concurrente y Control de Hilos (`--threads` y `--keep-order`)
+### Ejecución Concurrente y Control de Hilos
 
 En `/data/ch08` disponemos del script `slow.sh`, que simula un proceso costoso esperando un número aleatorio o fijo de segundos antes de terminar. Comparemos el tiempo de ejecución de 4 tareas usando `each` frente a `par-each` mediante el comando `timeit`:
 
 ```nu
 1..4 | par-each --threads 4 {|i| {job: $i, msg: $"Tarea ($i) completada"} }
+
 1..4 | par-each --threads 4 --keep-order {|i| {job: $i, cuadrado: ($i * $i)} } | save -f parallel_jobs.csv
 ```
 
@@ -5452,7 +5842,7 @@ Además de `par-each`, la imagen `dsin` incluye **GNU `parallel`** (desarrollado
 
 ![Flujo de ejecución de GNU parallel distribuyendo argumentos en múltiples núcleos](dscl_0802.png)
 
-### Especificando Argumentos y Marcadores de Reemplazo (`{}`, `{/}`, `{.}` y `{#}`)
+### Especificando Argumentos y Marcadores de Reemplazo
 
 GNU `parallel` lee argumentos desde la entrada estándar (o tras el separador `:::`) y ejecuta una plantilla de comando para cada argumento utilizando marcadores de reemplazo:
 
@@ -5467,11 +5857,13 @@ Veamos cómo invocar `parallel` desde Nushell sobre `input.csv` usando `--colsep
 
 ```nu
 open input.csv
+
 open --raw input.csv | parallel --colsep ',' --header : "echo {name}:{quantity}" | lines | where ($it | str contains ":") | split column ":" nombre cantidad | collect | save -f input_parallel.csv
+
 open input_parallel.csv
 ```
 
-### Controlando el Número de Trabajos Concurrentes (`--jobs`)
+### Controlando el Número de Trabajos Concurrentes
 
 Por defecto, GNU `parallel` lanza tantos trabajos en paralelo como núcleos lógicos detecte en el sistema. Con la opción `--jobs` (o `-j`), podemos fijar un número exacto (por ejemplo `-j 4`), un porcentaje de núcleos (`-j 50%`) o sumar/restar hilos respecto al total (`-j +2`):
 
@@ -5479,7 +5871,7 @@ Por defecto, GNU `parallel` lanza tantos trabajos en paralelo como núcleos lóg
 1..4 | to text | parallel -j 4 "sh slow.sh {}" | lines
 ```
 
-### Registro de Salidas y Etiquetado (`--results`, `--keep-order` y `--tag`)
+### Registro de Salidas y Etiquetado
 
 Cuando ejecutamos múltiples experimentos en paralelo, los mensajes de salida pueden mezclarse en la terminal a medida que cada subproceso imprime líneas:
 
@@ -5495,6 +5887,7 @@ Ejecutemos un ejemplo con `--tag` y `-k` en `/data/ch08` y guardemos la tabla re
 
 ```nu
 1..5 | to text | parallel -k --tag "echo $(( {} * 10 ))" | from tsv --noheaders | rename arg resultado
+
 1..5 | to text | parallel -k --tag "echo $(( {} * 10 ))" | from tsv --noheaders | rename arg resultado | save -f tagged_output.csv
 ```
 
@@ -5504,7 +5897,7 @@ También podemos combinar `parallel` con utilidades clásicas como `cowsay` (inc
 ["Nushell", "Polars"] | str join "\n" | parallel -k "cowsay {}"
 ```
 
-### Creando Herramientas Paralelas y Procesamiento por Bloques (`--pipe`)
+### Creando Herramientas Paralelas y Procesamiento por Bloques
 
 Cuando tenemos un archivo de texto de varios gigabytes y queremos aplicarle un comando de línea a línea sin crear millones de procesos individuales, la bandera `--pipe` (junto con `--block 10M`) divide la entrada estándar en bloques y envía cada bloque a una instancia paralela del comando:
 
@@ -5520,7 +5913,7 @@ Cuando una sola máquina no basta, tanto Nushell como GNU `parallel` permiten di
 
 Podemos definir nuestra lista de nodos en un archivo `hosts.txt` o en una tabla de Nushell y verificar su disponibilidad antes de lanzar el cálculo.
 
-### Ejecutando un Comando en Todos los Nodos (`--nonall`)
+### Ejecutando un Comando en Todos los Nodos
 
 Con `parallel --nonall --slf hosts.txt`, GNU `parallel` se conecta por SSH a cada servidor listado en `hosts.txt` y ejecuta el mismo comando de diagnóstico o aprovisionamiento (por ejemplo, `uptime` o `nu --version`):
 
@@ -5529,7 +5922,7 @@ Con `parallel --nonall --slf hosts.txt`, GNU `parallel` se conecta por SSH a cad
 parallel --nonall --slf hosts.txt "nu --version"
 ```
 
-### Distribuyendo Datos Locales entre Nodos (`--pipe --slf`)
+### Distribuyendo Datos Locales entre Nodos
 
 Si combinamos `--pipe` con `--slf hosts.txt`, GNU `parallel` trocea un flujo de datos local y envía cada fragmento por SSH a los distintos nodos del clúster para su procesamiento simultáneo:
 
@@ -5538,7 +5931,7 @@ Si combinamos `--pipe` con `--slf hosts.txt`, GNU `parallel` trocea un flujo de 
 cat gran_dataset.csv | parallel --pipe --header : --block 50M --slf hosts.txt "nu -c \"from csv | where amount > 100 | to csv\"" > filtrado_distribuido.csv
 ```
 
-### Procesando Archivos en Nodos Remotos (`--transferfile` y `--return`)
+### Procesando Archivos en Nodos Remotos
 
 Finalmente, cuando cada nodo debe procesar archivos locales distintos y devolver los archivos de resultados al nodo maestro, empleamos `--transferfile {}` y `--return {.}.out`:
 
@@ -5577,28 +5970,33 @@ A partir de este punto, todos los ejemplos de código y pipelines de modelado se
 
 ## Preparación y Exploración del Conjunto de Datos de Vinos
 
-Primero, revise los archivos de datos disponibles en `/data/ch09`:
+Primero, revisamos los archivos de datos disponibles en `/data/ch09`:
 
 ```nu
 ls
 ```
 
-Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos blancos) registran 11 propiedades fisicoquímicas (acidez fija, acidez volátil, ácido cítrico, azúcar residual, cloruros, dióxido de azufre libre, dióxido de azufre total, densidad, pH, sulfatos y alcohol) junto con evaluaciones sensoriales de calidad de 0 a 10 provenientes del conjunto de datos clásico de vinho verde (Cortez et al., 2009).
+Los archivos `wine-red.csv` (1.599 vinos tintos) y `wine-white.csv` (4.898 vinos blancos) registran 11 propiedades fisicoquímicas (acidez fija, acidez volátil, ácido cítrico, azúcar residual, cloruros, dióxido de azufre libre, dióxido de azufre total, densidad, pH, sulfatos y alcohol) junto con evaluaciones sensoriales de calidad de 0 a 10 provenientes del conjunto de datos clásico de vinho verde ([Cortez et al., 2009](#ref-cortez2009)).
 
 Concatenamos ambos conjuntos en una única tabla unificada (`wine-both.csv`), creando la columna categórica `type` y guardando el resultado en disco:
 
 ```nu
 let red = open wine-red.csv | insert type "red"
+
 let white = open wine-white.csv | insert type "white"
+
 let both = $red | append $white
+
 $both | first 5
+
 $both | save -f wine-both-generated.csv
 ```
 
-A continuación, verifique el balance de clases (`red` frente a `white`) con `histogram`:
+A continuación, verificamos el balance de clases (`red` frente a `white`) con `histogram`:
 
 ```nu
 open wine-both.csv | histogram type
+
 open wine-both.csv
 | histogram type
 | save -f wine_type_distribution.csv
@@ -5654,6 +6052,7 @@ Ejecutamos el script y renderizamos `wine_eda.png` directamente en la terminal c
 
 ```nu
 Rscript plot_wine_eda.R
+
 timg -g 80x25 wine_eda.png
 ```
 
@@ -5664,14 +6063,15 @@ Las tablas con alta dimensionalidad sufren frecuentemente de colinealidad pronun
 - **Análisis de Componentes Principales (PCA):** Proyección lineal ortogonal alineada con las direcciones de máxima varianza muestral.
 - **t-Distributed Stochastic Neighbor Embedding (t-SNE):** Incrustación no lineal de variedades que convierte distancias euclidianas entre pares en probabilidades condicionales para preservar vecindades locales.
 
-### Reducción de Dimensionalidad con Herramientas CLI (`tapkee` y `tapkee-reduce`)
+### Reducción de Dimensionalidad con Herramientas CLI
 
-El contenedor `dsin` incorpora **Tapkee** (Lisitsyn et al., 2013), una biblioteca de plantillas en C++ compilada para cálculos rápidos de reducción dimensional espectral y sobre variedades. Al igual que la mayoría de los ejecutables numéricos en C++, `tapkee` no procesa esquemas de Nushell, nombres de columnas ni etiquetas de texto. Requiere un archivo sin encabezados compuesto por números en punto flotante separados por un delimitador explícito (`--delimiter ","`) y genera un archivo de salida con coordenadas sin nombres de fila.
+El contenedor `dsin` incorpora **Tapkee** ([Lisitsyn et al., 2013](#ref-lisitsyn2014)), una biblioteca de plantillas en C++ compilada para cálculos rápidos de reducción dimensional espectral y sobre variedades. Al igual que la mayoría de los ejecutables numéricos en C++, `tapkee` no procesa esquemas de Nushell, nombres de columnas ni etiquetas de texto. Requiere un archivo sin encabezados compuesto por números en punto flotante separados por un delimitador explícito (`--delimiter ","`) y genera un archivo de salida con coordenadas sin nombres de fila.
 
-Ejecutar `tapkee` directamente exige un pipeline de tres etapas en Nushell: preprocesar la matriz de entrada, invocar el ejecutable nativo y posprocesar el flujo resultante de coordenadas. En primer lugar, seleccionamos 200 observaciones de `wine-both.csv`, descartamos `type` y `quality` para conservar únicamente las 11 mediciones continuas, serializamos una matriz CSV sin encabezados y llamamos a `^tapkee`:
+Ejecutar `tapkee` directamente exige un pipeline de tres etapas en Nushell: preprocesar la matriz de entrada, invocar el ejecutable nativo y posprocesar el flujo resultante de coordenadas. En primer lugar, seleccionamos 200 observaciones de `wine-both.csv`, descartamos `type` y `quality` para conservar únicamente las 11 mediciones continuas, serializamos una matriz CSV sin encabezados y llamamos a `tapkee`:
 
 ```nu
 let sample_w = open wine-both.csv | first 200
+
 $sample_w
   | reject type quality
   | to csv --noheaders
@@ -5681,7 +6081,9 @@ let tk_cmd = [
   "-i" "wine_matrix.csv" "-o" "wine_pca_raw.csv"
   "-m" "pca" "-td" "2" "--delimiter" ","
 ]
-^tapkee ...$tk_cmd
+
+tapkee ...$tk_cmd
+
 open --raw wine_pca_raw.csv | lines | first 5
 ```
 
@@ -5693,10 +6095,13 @@ let coords = open --raw wine_pca_raw.csv
   | rename dim_1 dim_2
   | update dim_1 { into float | math round -p 4 }
   | update dim_2 { into float | math round -p 4 }
+
 let direct_pca = $sample_w
   | merge $coords
   | select type quality dim_1 dim_2
+
 $direct_pca | first 5
+
 rm -f wine_matrix.csv wine_pca_raw.csv
 ```
 
@@ -5738,7 +6143,7 @@ export def tapkee-reduce [
     "-m" $norm_m "-td" ($target_dim | into string)
     "--delimiter" ","
   ]
-  ^tapkee ...$tk_args
+  tapkee ...$tk_args
   let raw_coords = open --raw $tmp_out
     | lines
     | where ($it | str trim | is-not-empty)
@@ -5777,11 +6182,14 @@ let features = [
   "residual_sugar" "chlorides" "free_sulfur_dioxide"
   "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"
 ]
+
 let pca_res = open wine-both.csv
   | first 200
   | tapkee-reduce --method pca --cols $features
   | select type quality dim_1 dim_2
+
 $pca_res | first 5
+
 $pca_res | save -f wine_pca_tapkee.csv
 ```
 
@@ -5792,13 +6200,15 @@ let tsne_res = open wine-both.csv
   | first 150
   | tapkee-reduce --method t-sne --cols $features
   | select type quality dim_1 dim_2
+
 $tsne_res | first 5
+
 $tsne_res | save -f wine_tsne_tapkee.csv
 ```
 
 ![Proyecciones bidimensionales obtenidas mediante reducción de dimensionalidad](dscl_0902.png){width=85%}
 
-### Reducción de Dimensionalidad con `Rscript` (`pca_wine.R`)
+### Reducción de Dimensionalidad con Rscript
 
 Mientras que `tapkee` destaca por su velocidad de proyección, el diagnóstico estadístico formal requiere examinar los valores propios y la proporción acumulada de varianza explicada. El script `pca_wine.R` realiza una descomposición en valores singulares estandarizada en R (`prcomp`) y emite el resumen de varianza directamente hacia la salida estándar:
 
@@ -5832,7 +6242,7 @@ coords <- data.frame(
 write.csv(coords, "wine_pca_r.csv", row.names = FALSE, quote = FALSE)
 ```
 
-Observe las tres etapas estadísticas y de entrada/salida en `pca_wine.R`:
+Observamos las tres etapas estadísticas y de entrada/salida en `pca_wine.R`:
 
 1. **Aislamiento de variables y estandarización z-score:** `setdiff` excluye `type` y `quality`, mientras que `prcomp(..., center = TRUE, scale. = TRUE)` escala las 11 variables a varianza unitaria para evitar que predictores con magnitudes elevadas (como `total_sulfur_dioxide`) dominen artificialmente `PC1`.
 2. **Descomposición espectral de varianza:** Elevar al cuadrado los valores singulares (`pca$sdev^2`) produce los valores propios de cada componente, a partir de los cuales se derivan los porcentajes de varianza marginal (`var_exp`) y acumulada (`cumsum(var_exp)`).
@@ -5842,13 +6252,15 @@ Ejecutar `Rscript pca_wine.R | from csv` convierte la salida de R en una tabla e
 
 ```nu
 let pca_r = Rscript pca_wine.R | from csv
+
 $pca_r
+
 $pca_r | save -f wine_pca_summary_r.csv
 ```
 
 Los primeros cuatro componentes principales explican el 73,37% de la varianza fisicoquímica total entre los 11 predictores (`PC1` por sí solo captura el 27,54%, impulsado por el contraste entre los niveles de dióxido de azufre en vinos blancos y la acidez volátil en tintos).
 
-### Reducción de Dimensionalidad con Python (`pca_wine.py`)
+### Reducción de Dimensionalidad con Python
 
 El script complementario `pca_wine.py` replica la misma descomposición ortogonal utilizando `scikit-learn`:
 
@@ -5898,6 +6310,7 @@ Ejecutamos `pca_wine.py` y comprobamos que Python y R coinciden con dos decimale
 
 ```nu
 let pca_py = python3 pca_wine.py | from csv
+
 $pca_py
 ```
 
@@ -5974,6 +6387,7 @@ Ejecutar el script en Nushell evidencia una colinealidad extrema entre las tres 
 
 ```nu
 python3 vif_pcr_fish.py | from csv
+
 open fish_vif_py.csv | sort-by vif -r
 ```
 
@@ -6030,11 +6444,11 @@ Esta sección examina cuatro familias complementarias de agrupamiento:
 - **Validación Multimétrica y Visual de Clústeres:** Selección conjunta de $K$ a través de curvas de codo de inercia, coeficientes de silueta, índices de varianza de Calinski-Harabasz y puntuaciones de Davies-Bouldin.
 - **Métodos Basados en Densidad y Medoides (DBSCAN y PAM):** Aislamiento de valores atípicos morfológicos como ruido explícito y sustitución de promedios aritméticos sensibles por medoides muestrales observados.
 
-### Clustering K-Means (`kmeans_cluster.py` y `kmeans-cluster`)
+### Clustering K-Means
 
 A diferencia de `tapkee`, compilado como un binario nativo en C++, nuestro pipeline tabular de K-Means delega la optimización numérica en un script auxiliar en Python (`kmeans_cluster.py`) basado en `scikit-learn` y preparado para flujos de datos. Mantener el núcleo computacional en un script `.py` explícito en lugar de incrustar código interpretado dentro de funciones de shell permite inspeccionar, probar y ejecutar la lógica de agrupamiento de forma autónoma antes de integrarla en Nushell.
 
-Abra `kmeans_cluster.py` en `/data/ch09` con `bat`:
+Abrimos `kmeans_cluster.py` en `/data/ch09` con `bat`:
 
 ```nu
 bat kmeans_cluster.py
@@ -6097,8 +6511,9 @@ Antes de utilizar cualquier función envoltorio en Nushell, ejecutamos `kmeans_c
 ```nu
 let raw_km = open wine-both.csv
   | to csv
-  | ^python3 kmeans_cluster.py --k 2 --exclude "type,quality"
+  | python3 kmeans_cluster.py --k 2 --exclude "type,quality"
   | from csv
+
 $raw_km
   | select type quality alcohol volatile_acidity cluster
   | first 5
@@ -6115,7 +6530,7 @@ $raw_km
   | sort-by cluster type
 ```
 
-Observe los resultados en la tabla de contingencia: sin haber accedido jamás a la columna `type`, la partición euclidiana no supervisada en el espacio químico estandarizado de once dimensiones asigna más del 98.5% de los vinos tintos a un grupo y más del 98.5% de los vinos blancos al otro.
+Observamos los resultados en la tabla de contingencia: sin haber accedido jamás a la columna `type`, la partición euclidiana no supervisada en el espacio químico estandarizado de once dimensiones asigna más del 98.5% de los vinos tintos a un grupo y más del 98.5% de los vinos blancos al otro.
 
 Para evitar la serialización manual con `to csv` y `from csv` y aprovechar el autocompletado nativo de argumentos en la terminal, `dsin_tools.nu` define el comando **`kmeans-cluster`**:
 
@@ -6168,11 +6583,14 @@ let features = [
   "residual_sugar" "chlorides" "free_sulfur_dioxide"
   "total_sulfur_dioxide" "density" "ph" "sulphates" "alcohol"
 ]
+
 let clustered = open wine-both.csv
   | kmeans-cluster --k 2 --cols $features
+
 $clustered
   | select type quality alcohol volatile_acidity cluster
   | first 5
+
 $clustered
   | select type quality alcohol volatile_acidity cluster
   | save -f wine_kmeans_cli.csv
@@ -6190,7 +6608,7 @@ $clustered
   | tee { save -f wine_kmeans_contingency.csv }
 ```
 
-### Diagnósticos de K-Means en R (`cluster_wine.R`) y Python (`cluster_wine.py`)
+### Diagnósticos de K-Means en R y Python
 
 Al documentar particiones en estudios estadísticos formales, resulta indispensable reportar la suma de cuadrados intra-clúster (`withinss`) y diagnosticar la estabilidad de las soluciones obtenidas. En R, el script `cluster_wine.R` ajusta un modelo K-Means con 20 reinicios aleatorios (`nstart = 20`) y evalúa la pureza de los grupos directamente:
 
@@ -6228,11 +6646,13 @@ out <- data.frame(
 write.csv(out, stdout(), row.names = FALSE, quote = FALSE)
 ```
 
-Observe cómo `cluster_wine.R` estandariza los predictores mediante `scale()`, ejecuta el algoritmo de Hartigan-Wong sobre 20 inicios independientes (`kmeans(X, centers = 2, nstart = 20)`) y consolida los tamaños muestrales (`km$size`), la dispersión interna (`km$withinss`) y las frecuencias de contingencia (`table(df$cluster, df$type)`) en una tabla CSV emitida directamente a `stdout()`:
+Observamos cómo `cluster_wine.R` estandariza los predictores mediante `scale()`, ejecuta el algoritmo de Hartigan-Wong sobre 20 inicios independientes (`kmeans(X, centers = 2, nstart = 20)`) y consolida los tamaños muestrales (`km$size`), la dispersión interna (`km$withinss`) y las frecuencias de contingencia (`table(df$cluster, df$type)`) en una tabla CSV emitida directamente a `stdout()`:
 
 ```nu
 let km_r = Rscript cluster_wine.R | from csv
+
 $km_r
+
 $km_r | save -f wine_clusters_r.csv
 ```
 
@@ -6280,11 +6700,13 @@ Dentro del ciclo, `silhouette_score(..., sample_size=1500, random_state=42)` est
 
 ```nu
 let km_py = python3 cluster_wine.py | from csv
+
 $km_py
+
 $km_py | save -f wine_clusters_py.csv
 ```
 
-### Clustering Jerárquico Aglomerativo (`hclust_fish.R` y `hclust_fish.py`)
+### Clustering Jerárquico Aglomerativo
 
 A diferencia de K-Means, que requiere prefijar $K$ antes del ajuste, el agrupamiento jerárquico aglomerativo construye un árbol binario completo de uniones (dendrograma) desde $n$ hojas individuales hasta una raíz unificada. El criterio de mínima varianza de Ward (`ward.D2`) fusiona en cada etapa el par de grupos que genera el menor incremento en la suma total de cuadrados intra-clúster.
 
@@ -6326,7 +6748,9 @@ Tres operaciones definen `hclust_fish.R`: `dist(X, method = "euclidean")` calcul
 
 ```nu
 let hc_r = Rscript hclust_fish.R | from csv
+
 $hc_r
+
 $hc_r | save -f fish_hclust_r.csv
 ```
 
@@ -6372,10 +6796,11 @@ Tras el escalamiento $z$-score (`StandardScaler`), `AgglomerativeClustering(n_cl
 
 ```nu
 let hc_py = python3 hclust_fish.py | from csv
+
 $hc_py
 ```
 
-### Validación Multimétrica y Diagnóstico Visual del Codo (`cluster_eval.py` y `plot_kmeans_elbow.py`)
+### Validación Multimétrica y Diagnóstico Visual del Codo
 
 Seleccionar la cantidad de grupos $K$ examinando únicamente el decrecimiento monótono de la inercia WCSS puede resultar subjetivo cuando la curvatura del codo es gradual. Una validación rigurosa combina la inercia con criterios analíticos internos de separación:
 
@@ -6429,7 +6854,9 @@ En `cluster_eval.py`, `StandardScaler` homogeniza las escalas monetarias y etari
 
 ```nu
 let eval_b = python3 cluster_eval.py | from csv
+
 $eval_b | save -f banco_cluster_eval.csv
+
 $eval_b | sort-by silhouette -r
 ```
 
@@ -6521,20 +6948,21 @@ if __name__ == "__main__":
     main()
 ```
 
-Observe la estructura de `plot_kmeans_elbow.py`: toma los archivos de entrada y salida mediante argumentos de línea de comandos, estandariza los atributos fisicoquímicos continuos, calcula iteraciones de K-Means con diez reinicios deterministas para cada $K$ y dibuja un panel comparativo dual (curva WCSS en el panel izquierdo y silueta promedio en el panel derecho con una línea vertical destacando el óptimo $K = 2$). Genere `kmeans_elbow.png` y examine el resultado gráfico en la terminal mediante `timg`:
+Observamos la estructura de `plot_kmeans_elbow.py`: toma los archivos de entrada y salida mediante argumentos de línea de comandos, estandariza los atributos fisicoquímicos continuos, calcula iteraciones de K-Means con diez reinicios deterministas para cada $K$ y dibuja un panel comparativo dual (curva WCSS en el panel izquierdo y silueta promedio en el panel derecho con una línea vertical destacando el óptimo $K = 2$). Genere `kmeans_elbow.png` y examine el resultado gráfico en la terminal mediante `timg`:
 
 ```nu
 python plot_kmeans_elbow.py wine-both.csv kmeans_elbow.png
+
 timg -g 80x25 kmeans_elbow.png
 ```
 
 ![Evaluación de clústeres K-Means: curvas de inercia WCSS y coeficiente de silueta](kmeans_elbow.png){width=92%}
 
-### Clustering Basado en Densidad con DBSCAN (`dbscan_fish.py`) y K-Medoides con PAM (`pam_fish.R`)
+### Clustering Basado en Densidad con DBSCAN y K-Medoides con PAM
 
 Los algoritmos K-Means y jerárquicos de Ward asumen implícitamente grupos de morfología esférica y dimensiones similares, lo que los vuelve vulnerables a valores atípicos aislados. **DBSCAN** (*Density-Based Spatial Clustering of Applications with Noise*, Ester et al., 1996) supera estas restricciones descubriendo densidades continuas de geometría arbitraria y marcando de forma explícita las observaciones periféricas como ruido estadístico (etiqueta `-1`).
 
-Examine `dbscan_fish.py` en `/data/ch09`:
+Examinamos `dbscan_fish.py` en `/data/ch09`:
 
 ```nu
 bat dbscan_fish.py
@@ -6582,7 +7010,7 @@ En `dbscan_fish.py`, `StandardScaler` normaliza las seis dimensiones morfométri
 python3 dbscan_fish.py | from csv
 ```
 
-Observe cómo los especímenes atípicos de gran tamaño (`avg_weight` superior a 1.000 g) quedan aislados en el clúster `-1` (`Noise / Outliers`) en lugar de distorsionar la partición morfológica principal.
+Observamos cómo los especímenes atípicos de gran tamaño (`avg_weight` superior a 1.000 g) quedan aislados en el clúster `-1` (`Noise / Outliers`) en lugar de distorsionar la partición morfológica principal.
 
 Cuando se requiere un número fijo de grupos $K$ pero se necesita robustez ante valores extremos, **Partitioning Around Medoids (PAM)** restringe los centros de los clústeres a observaciones reales de la muestra (*medoides*) y minimiza las disimilitudes por pares en lugar de desviaciones cuadráticas. Su implementación en R se encuentra en `pam_fish.R`:
 
@@ -6631,9 +7059,9 @@ La regresión supervisada aprende una función $f: \mathcal{X} \rightarrow \math
 2. **Regresión Lineal Múltiple en R (`regress_wine.R`):** Estimación clásica de Mínimos Cuadrados Ordinarios (OLS) con pruebas $t$ paramétricas y valores $p$.
 3. **Regresión Regularizada y Ensambles en Python (`regress_wine.py`):** Regresión Ridge estandarizada ($L_2$) contrastada frente a ensambles no lineales de Random Forest.
 
-### Aprendizaje en Línea con Vowpal Wabbit (`to-vw` y `vw-regress`)
+### Aprendizaje en Línea con Vowpal Wabbit
 
-Los paquetes estadísticos tradicionales alojan matrices densas en memoria RAM antes de calcular un solo paso de gradiente. **Vowpal Wabbit** (Langford et al., 2007) invierte ese diseño: procesa observaciones línea por línea desde la entrada estándar o desde archivos binarios en caché, proyectando nombres arbitrarios de atributos hacia un vector de pesos de tamaño fijo mediante la técnica de hashing y actualizando los coeficientes en tiempo real con descenso de gradiente estocástico (SGD).
+Los paquetes estadísticos tradicionales alojan matrices densas en memoria RAM antes de calcular un solo paso de gradiente. **Vowpal Wabbit** ([Langford et al., 2007](#ref-langford2007)) invierte ese diseño: procesa observaciones línea por línea desde la entrada estándar o desde archivos binarios en caché, proyectando nombres arbitrarios de atributos hacia un vector de pesos de tamaño fijo mediante la técnica de hashing y actualizando los coeficientes en tiempo real con descenso de gradiente estocástico (SGD).
 
 Cada registro de entrada en Vowpal Wabbit sigue una sintaxis estricta en texto plano:
 
@@ -6660,8 +7088,11 @@ Antes de recurrir a cualquier comando envoltorio, implementamos el flujo complet
 
 ```nu
 let data = open wine-white.csv
+
 let train = $data | first 3500
+
 let test = $data | skip 3500
+
 let fcols = $data | columns | where $it != "quality"
 
 $train
@@ -6690,17 +7121,18 @@ open --raw /tmp/direct_train.vw
 | each { str substring 0..64 }
 ```
 
-Con ambos archivos `.vw` en disco, invocamos el binario en C++ `^vw` en dos pasos: primero para optimizar los coeficientes bajo pérdida cuadrática a lo largo de 15 pasadas (almacenando los atributos procesados en `/tmp/direct.cache` para acelerar iteraciones sucesivas), y luego en modo de evaluación congelada (`-t`) para emitir predicciones continuas hacia `/tmp/direct_preds.txt`:
+Con ambos archivos `.vw` en disco, invocamos el binario en C++ `vw` en dos pasos: primero para optimizar los coeficientes bajo pérdida cuadrática a lo largo de 15 pasadas (almacenando los atributos procesados en `/tmp/direct.cache` para acelerar iteraciones sucesivas), y luego en modo de evaluación congelada (`-t`) para emitir predicciones continuas hacia `/tmp/direct_preds.txt`:
 
 ```nu
 (
-  ^vw --data /tmp/direct_train.vw
+  vw --data /tmp/direct_train.vw
     --final_regressor /tmp/direct_model.vw
     --passes 15 -l 0.5
     --cache_file /tmp/direct.cache --quiet
 )
+
 (
-  ^vw --data /tmp/direct_test.vw
+  vw --data /tmp/direct_test.vw
     -i /tmp/direct_model.vw -t
     -p /tmp/direct_preds.txt --quiet
 )
@@ -6721,6 +7153,7 @@ let raw_p = open --raw /tmp/direct_preds.txt
   | lines
   | where ($it | str trim | is-not-empty)
   | each { into float }
+
 let obs_y = $test.quality | each { into float }
 
 let direct_vw = $obs_y | zip $raw_p | each { |pair|
@@ -6733,8 +7166,11 @@ let direct_vw = $obs_y | zip $raw_p | each { |pair|
     abs_error: (($obs - $pred) | math abs | math round -p 4)
   }
 }
+
 rm -rf /tmp/direct_train.vw /tmp/direct_test.vw
+
 rm -rf /tmp/direct_model.vw /tmp/direct_preds.txt /tmp/direct.cache
+
 $direct_vw | first 5
 ```
 
@@ -6760,7 +7196,7 @@ export def to-vw [
 }
 ```
 
-En segundo lugar, **`vw-regress`** aplica `to-vw` sobre ambas tablas dentro de un directorio aislado generado con `mktemp -d`, ejecuta las dos fases con `^vw`, reconstruye la tabla tipada de residuos mediante `zip` y elimina todos los archivos binarios intermedios antes de retornar:
+En segundo lugar, **`vw-regress`** aplica `to-vw` sobre ambas tablas dentro de un directorio aislado generado con `mktemp -d`, ejecuta las dos fases con `vw`, reconstruye la tabla tipada de residuos mediante `zip` y elimina todos los archivos binarios intermedios antes de retornar:
 
 ```nu
 # Train and evaluate a Vowpal Wabbit regression model.
@@ -6795,8 +7231,8 @@ export def vw-regress [
     "--cache_file" $cache_file
     "--quiet"
   ]
-  ^vw ...$train_args
-  ^vw --data $test_vw -i $model_file -t -p $pred_file --quiet
+  vw ...$train_args
+  vw --data $test_vw -i $model_file -t -p $pred_file --quiet
 
   let preds = open --raw $pred_file
     | lines
@@ -6829,18 +7265,23 @@ Con estos comandos disponibles en la shell, el procedimiento completo se reduce 
 
 ```nu
 let data = open wine-white.csv
+
 let train = $data | first 3500
+
 let test = $data | skip 3500
 
 let preds = vw-regress $train $test --passes 15 --learning-rate 0.5
+
 $preds | first 5
+
 $preds | save -f wine_vw_predictions.csv
 
 let mae = $preds.abs_error | math avg | math round -p 4
+
 $"VW Test MAE: ($mae)"
 ```
 
-### Regresión Lineal Múltiple con `Rscript` (`regress_wine.R`)
+### Regresión Lineal Múltiple con Rscript
 
 Para contrastar el descenso de gradiente estocástico de `vw` frente a la inferencia analítica exacta de Mínimos Cuadrados Ordinarios, examine `regress_wine.R` en `/data/ch09`:
 
@@ -6895,14 +7336,17 @@ Ejecutar `regress_wine.R` y procesar su salida estándar con `from csv` permite 
 
 ```nu
 Rscript regress_wine.R | from csv | save -f wine_regression_r.csv
+
 let sig = open wine_regression_r.csv
   | where p_value < 0.01
   | sort-by t_stat -r
+
 $sig
+
 $sig | save -f wine_significant_predictors.csv
 ```
 
-### Regresión Regularizada (Ridge) y Ensambles en Python (`regress_wine.py`)
+### Regresión Regularizada y Ensambles en Python
 
 Dado que densidad, azúcar residual y alcohol muestran una marcada colinealidad en los vinos blancos, los coeficientes de Mínimos Cuadrados Ordinarios sin penalización pueden sufrir de varianza inflada, mientras que los modelos puramente lineales no capturan interacciones complejas de umbral. El script `regress_wine.py` evalúa un modelo lineal regularizado $L_2$ (`Ridge`) frente a un ensamble no lineal de 100 árboles mediante `RandomForestRegressor` sobre una partición 80/20 idéntica:
 
@@ -6970,6 +7414,7 @@ Tres elecciones de diseño aportan solidez a `regress_wine.py` dentro de un pipe
 
 ```nu
 python regress_wine.py | from csv
+
 python regress_wine.py | from csv | save -f wine_regression_py.csv
 ```
 
@@ -6977,9 +7422,9 @@ python regress_wine.py | from csv | save -f wine_regression_py.csv
 
 La clasificación supervisada aprende una regla de decisión discreta $f: \mathcal{X} \rightarrow \{1, \dots, C\}$ que separa clases categóricas, tales como vinos tintos (`red`) frente a blancos (`white`) en `wine-both.csv` o suscriptores de créditos personales (`prestamo` $\in \{0, 1\}$) en el conjunto de datos de telemarketing bancario `banco.csv`. A lo largo de las siguientes subsecciones, avanzamos desde ejecutores declarativos de experimentos en la línea de comandos hacia clasificadores paramétricos, no paramétricos, de núcleos (*kernels*) y redes neuronales en R y Python.
 
-### Experimentos de Clasificación con SKLL (`run_experiment` y `skll-metrics`)
+### Experimentos de Clasificación con SKLL
 
-#### Experimentación Declarativa con SciKit-Learn Laboratory (`skll`)
+#### Experimentación Declarativa con SciKit-Learn Laboratory
 
 **SKLL** (*SciKit-Learn Laboratory*, pronunciado *skull*) es un entorno de línea de comandos desarrollado por Educational Testing Service (ETS) para ejecutar comparaciones reproducibles entre múltiples algoritmos de `scikit-learn` a partir de archivos de configuración `.cfg` en texto plano, sin necesidad de escribir scripts repetitivos de soporte ([https://skll.readthedocs.io/](https://skll.readthedocs.io/)).
 
@@ -6987,18 +7432,26 @@ En lugar de leer un único archivo arbitrario, SKLL requiere directorios separad
 
 ```nu
 mkdir /tmp/skll_demo/train /tmp/skll_demo/test
+
 let red = open wine-red.csv | insert type "red"
+
 let n_red = $red | length
+
 let white_s = open wine-white.csv
   | insert type "white"
   | first $n_red
+
 let bal = $red
   | append $white_s
   | enumerate
   | each { |r| $r.item | insert id $r.index }
+
 let n_test = ($bal | length) * 0.2 | into int
+
 $bal | first $n_test | save -f /tmp/skll_demo/test/features.csv
+
 $bal | skip $n_test | save -f /tmp/skll_demo/train/features.csv
+
 rm -rf /tmp/skll_demo
 
 open train/features.csv
@@ -7006,7 +7459,7 @@ open train/features.csv
 | first 3
 ```
 
-Ahora examine `classify.cfg` en `/data/ch09` mediante `bat`:
+Ahora examinamos `classify.cfg` en `/data/ch09` mediante `bat`:
 
 ```nu
 bat classify.cfg
@@ -7054,11 +7507,13 @@ Cuatro secciones INI estructuran el experimento:
 
 #### Ejecución Directa en CLI y Pospocesamiento de TSV en Nushell
 
-Invoque el binario nativo `^run_experiment` directamente, revise los archivos generados en `output/` y procese `output/wine_summary.tsv` con el lector TSV integrado de Nushell:
+Invocamos el binario nativo `run_experiment` directamente, revisamos los archivos generados en `output/` y procese `output/wine_summary.tsv` con el lector TSV integrado de Nushell:
 
 ```nu
-^run_experiment -l classify.cfg out+err> /dev/null
+run_experiment -l classify.cfg out+err> /dev/null
+
 ls output/wine* | select name size | first 5
+
 open output/wine_summary.tsv
 | select learner_name feature_scaling accuracy
 | sort-by accuracy -r
@@ -7091,13 +7546,15 @@ export def skll-metrics [
 Invocar `skll-metrics` después de `run_experiment` extrae la tabla de rendimiento de los cuatro clasificadores directamente hacia Nushell, lista para su exportación a CSV:
 
 ```nu
-^run_experiment -l classify.cfg out+err> /dev/null
+run_experiment -l classify.cfg out+err> /dev/null
+
 skll-metrics output/wine_summary.tsv
+
 skll-metrics output/wine_summary.tsv
 | save -f wine_skll_summary.csv
 ```
 
-### Regresión Logística Binomial con `Rscript` (`classify_wine.R`)
+### Regresión Logística Binomial con Rscript
 
 Para complementar el análisis declarativo de SKLL con un modelo lineal generalizado (GLM) paramétrico sobre las mismas particiones `train/features.csv` y `test/features.csv`, examine `classify_wine.R`:
 
@@ -7156,12 +7613,13 @@ Tres etapas articulan `classify_wine.R`:
 
 ```nu
 Rscript classify_wine.R | from csv
+
 Rscript classify_wine.R
 | from csv
 | save -f wine_classification_r.csv
 ```
 
-### Clasificación con Regresión Logística y Random Forest en Python (`classify_wine.py`)
+### Clasificación con Regresión Logística y Random Forest en Python
 
 En Python, el script `classify_wine.py` evalúa un pipeline de `LogisticRegression` regularizado con norma $L_2$ junto con un clasificador `RandomForestClassifier` de 100 árboles sobre las particiones idénticas de entrenamiento y prueba:
 
@@ -7226,12 +7684,13 @@ Excluir `id` y `type` reproduce la especificación utilizada en R, `make_pipelin
 
 ```nu
 python classify_wine.py | from csv
+
 python classify_wine.py
 | from csv
 | save -f wine_classification_py.csv
 ```
 
-### Árboles de Decisión sobre Datos Bancarios Desbalanceados (`dt_banco.R` y `dt_banco.py`)
+### Árboles de Decisión sobre Datos Bancarios Desbalanceados
 
 Los árboles de decisión dividen el espacio de atributos recursivamente mediante umbrales ortogonales a los ejes coordenados que minimizan la impureza de los nodos (índice de Gini o entropía de Shannon), generando reglas de clasificación legibles. En `banco.csv`, donde la aceptación de préstamos personales (`prestamo == 1`) representa una clase minoritaria, evaluar únicamente la exactitud global puede ocultar una baja sensibilidad en la clase positiva. Revise la implementación en R contenida en `dt_banco.R`:
 
@@ -7290,10 +7749,11 @@ En `dt_banco.R`, la configuración `rpart(..., method = "class", control = rpart
 
 ```nu
 Rscript dt_banco.R | from csv
+
 Rscript dt_banco.R | from csv | save -f banco_dt_r.csv
 ```
 
-Ahora examine la implementación correspondiente con `scikit-learn` en `dt_banco.py`:
+Ahora examinamos la implementación correspondiente con `scikit-learn` en `dt_banco.py`:
 
 ```nu
 bat dt_banco.py
@@ -7349,10 +7809,11 @@ Utilizando el criterio de impureza Gini de CART con `max_depth=4` y protección 
 
 ```nu
 python dt_banco.py | from csv
+
 python dt_banco.py | from csv | save -f banco_dt_py.csv
 ```
 
-### Clasificación con k-Vecinos Más Cercanos (`knn_banco.R` y `knn_banco.py`)
+### Clasificación con k-Vecinos Más Cercanos
 
 A diferencia de los árboles de decisión, que son invariantes ante reescalamientos monótonos de atributos, el algoritmo de $k$-Vecinos Más Cercanos ($k$-NN) clasifica observaciones mediante votación mayoritaria entre los $k$ puntos de entrenamiento más próximos en el espacio euclidiano. Sin estandarización previa, ingresos anuales (`ingreso`) y saldos hipotecarios (`hipoteca`) dominarían por completo sobre el tamaño del grupo familiar (`familia`) y el nivel educativo (`educacion`). Abra `knn_banco.R`:
 
@@ -7414,10 +7875,11 @@ Tras centrar y escalar los seis predictores (`scale(df[, features])`), `knn_banc
 
 ```nu
 Rscript knn_banco.R | from csv
+
 Rscript knn_banco.R | from csv | save -f banco_knn_r.csv
 ```
 
-Compare esta estructura con `knn_banco.py`, que ajusta `StandardScaler()` estrictamente sobre `X_train` antes de transformar `X_test`:
+Comparamos esta estructura con `knn_banco.py`, que ajusta `StandardScaler()` estrictamente sobre `X_train` antes de transformar `X_test`:
 
 ```nu
 bat knn_banco.py
@@ -7479,10 +7941,11 @@ Ejecutar `knn_banco.py` desde Nushell permite constatar la sensibilidad de las v
 
 ```nu
 python knn_banco.py | from csv
+
 python knn_banco.py | from csv | save -f banco_knn_py.csv
 ```
 
-### Naïve Bayes Generativo frente a SVMs con Núcleo RBF (`nb_svm_banco.py`)
+### Naïve Bayes Generativo frente a SVMs con Núcleo RBF
 
 Para contrastar un clasificador generativo veloz que asume independencia condicional entre covariables frente a una frontera de margen máximo en espacios proyectados por núcleos, examine `nb_svm_banco.py`:
 
@@ -7550,11 +8013,13 @@ En este script, `GaussianNB` ajusta densidades gaussianas univariadas condiciona
 
 ```nu
 python nb_svm_banco.py | from csv
+
 python nb_svm_banco.py | from csv | save -f banco_nb_svm_py.csv
+
 open banco_nb_svm_py.csv | sort-by f1_score -r
 ```
 
-### Redes Neuronales Prealimentadas: Perceptrón Multicapa (`mlp_banco.py` y `mlp_banco.R`)
+### Redes Neuronales Prealimentadas: Perceptrón Multicapa
 
 Los **Perceptrones Multicapa** (MLP) componen matrices de pesos afines con funciones de activación no lineales a lo largo de capas ocultas, aproximando superficies complejas de decisión mediante retropropagación de gradientes (*backpropagation*). Inspeccione `mlp_banco.py`, que compara una red de una capa `(8,)` frente a una arquitectura ReLU de dos capas `(16, 8)`:
 
@@ -7622,6 +8087,7 @@ Tres detalles destacan en `mlp_banco.py`: la estandarización de entrada evita q
 
 ```nu
 python mlp_banco.py | from csv
+
 python mlp_banco.py | from csv | save -f banco_mlp_py.csv
 ```
 
@@ -7683,6 +8149,7 @@ En `mlp_banco.R`, la llamada `nnet(..., size = 6, decay = 0.01, maxit = 400, tra
 
 ```nu
 Rscript mlp_banco.R | from csv
+
 Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 ```
 
@@ -7690,19 +8157,23 @@ Rscript mlp_banco.R | from csv | save -f banco_mlp_r.csv
 
 Las herramientas clásicas de modelado en línea de comandos estudiadas previamente en este capítulo (`tapkee`, `vw` y `run_experiment`) fueron diseñadas para shells de texto tradicionales bajo el estándar POSIX. Dado que los pipes estándar de Unix transmiten flujos de bytes sin tipos de datos en lugar de esquemas estructurados, cada herramienta clásica impone una penalización de serialización externa: `tapkee` exige matrices numéricas sin encabezados y descarta las etiquetas de clase, `vw` requiere formatear cada registro línea por línea mediante espacios de nombres con `to-vw`, y `skll` demanda estructuras rígidas de carpetas en disco (`train/`, `test/`, `output/`) junto con archivos de configuración `.cfg`.
 
-En una shell tipada como Nushell, los motores de modelado pueden intercambiar tablas estructuradas (`table -> table`) directamente a través de flujos estándar con una mínima sobrecarga en disco. Dentro del contenedor `dsin`, utilidades nativas compiladas en C++ (`duckdb` y `lightgbm`) conviven con un entorno aislado de Python 3.12 ubicado en `/opt/modern-ml` (gestionado mediante el administrador estático `uv`). Para garantizar una experiencia de uso fluida, la ruta `/opt/modern-ml/bin` se encuentra antepuesta en `$env.PATH`: invocar `python` ejecuta directamente Python 3.12 con bibliotecas contemporáneas (`umap-learn`, `lightgbm`, `scikit-learn` 1.9+, `pandas` y `matplotlib`), mientras que las herramientas que dependen de Python 3.9 (como SKLL) invocan su intérprete correspondiente mediante su respectivo shebang sin conflictos. Verifique las versiones activas directamente desde `/data/ch09`:
+En una shell tipada como Nushell, los motores de modelado pueden intercambiar tablas estructuradas (`table -> table`) directamente a través de flujos estándar con una mínima sobrecarga en disco. Dentro del contenedor `dsin`, utilidades nativas compiladas en C++ (`duckdb` y `lightgbm`) conviven con un entorno aislado de Python 3.12 ubicado en `/opt/modern-ml` (gestionado mediante el administrador estático `uv`). Para garantizar una experiencia de uso fluida, la ruta `/opt/modern-ml/bin` se encuentra antepuesta en `$env.PATH`: invocar `python` ejecuta directamente Python 3.12 con bibliotecas contemporáneas (`umap-learn`, `lightgbm`, `scikit-learn` 1.9+, `pandas` y `matplotlib`), mientras que las herramientas que dependen de Python 3.9 (como SKLL) invocan su intérprete correspondiente mediante su respectivo shebang sin conflictos. Verificamos las versiones activas directamente desde `/data/ch09`:
 
 ```nu
 duckdb --version
+
 uv --version
+
 python --version
+
 let py_chk = "import umap, lightgbm as g; print(g.__version__)"
+
 python -c $py_chk
 ```
 
-### Proyección Topológica de Variedades con UMAP (`umap-reduce`)
+### Proyección Topológica de Variedades con UMAP
 
-El análisis de componentes principales (PCA) restringe sus proyecciones a subespacios lineales ortogonales, mientras que t-SNE clásico optimiza afinidades locales por pares con un alto costo computacional y sin preservar las distancias globales entre grupos. El algoritmo **Uniform Manifold Approximation and Projection** (**UMAP**, McInnes et al., 2018) combina ambas perspectivas modelando observaciones de alta dimensión como un conjunto simplicial difuso ponderado sobre una variedad riemanniana localmente conexa. Minimizar la entropía cruzada difusa entre los grafos topológicos de alta y baja dimensión preserva la estructura de vecindad fina (controlada por `--neighbors`) junto con la separación macroscópica entre subpoblaciones (controlada por `--min-dist`).
+El análisis de componentes principales (PCA) restringe sus proyecciones a subespacios lineales ortogonales, mientras que t-SNE clásico optimiza afinidades locales por pares con un alto costo computacional y sin preservar las distancias globales entre grupos. El algoritmo **Uniform Manifold Approximation and Projection** (**UMAP**, [McInnes et al., 2018](#ref-mcinnes2018)) combina ambas perspectivas modelando observaciones de alta dimensión como un conjunto simplicial difuso ponderado sobre una variedad riemanniana localmente conexa. Minimizar la entropía cruzada difusa entre los grafos topológicos de alta y baja dimensión preserva la estructura de vecindad fina (controlada por `--neighbors`) junto con la separación macroscópica entre subpoblaciones (controlada por `--min-dist`).
 
 #### Inspeccionando y Ejecutando `umap_reduce.py` Directamente
 
@@ -7790,8 +8261,9 @@ Pruebe `umap_reduce.py` directamente sobre un subconjunto de 200 observaciones d
 let raw_umap = open wine-both.csv
   | first 200
   | to csv
-  | ^python umap_reduce.py --label-col type --cols "alcohol,density"
+  | python umap_reduce.py --label-col type --cols "alcohol,density"
   | from csv
+
 $raw_umap | select type quality umap_1 umap_2 | first 3
 ```
 
@@ -7849,11 +8321,14 @@ Repetir la proyección de 200 vinos con `umap-reduce` produce coordenadas idént
 let features = open wine-both.csv
   | columns
   | where $it not-in ["type" "quality"]
+
 let umap_tbl = open wine-both.csv
   | first 200
   | umap-reduce --label-col type --cols $features
   | select type quality umap_1 umap_2
+
 $umap_tbl | first 5
+
 $umap_tbl | save -f wine_umap.csv
 ```
 
@@ -7935,14 +8410,15 @@ Muestrear 400 vinos tintos y 400 blancos (`random_state=42`), estandarizar los o
 
 ```nu
 python plot_umap_comparison.py
+
 timg -g 80x25 umap_comparison.png
 ```
 
 ![Comparación de proyecciones bidimensionales entre PCA, t-SNE y UMAP sobre atributos del vino](umap_comparison.png){width=95%}
 
-### Árboles Potenciados por Gradiente desde la CLI con LightGBM (`lgbm-regress`)
+### Árboles Potenciados por Gradiente desde la CLI con LightGBM
 
-Vowpal Wabbit destaca al procesar flujos masivos de millones de variables dispersas de texto que superan la memoria RAM, pero los conjuntos tabulares densos con una docena de variables continuas raramente se benefician del hashing de atributos o de pesos lineales puramente aditivos. **LightGBM** (Ke et al., 2017) compila como un binario nativo independiente en C++ (`/usr/local/bin/lightgbm`) que discretiza predictores continuos en 256 intervalos o histogramas y construye árboles de regresión priorizando las hojas con mayor ganancia (*best-first* o *leaf-wise*) en lugar del crecimiento tradicional por niveles. Puesto que `lightgbm` procesa encabezados CSV directamente (`header=true` y `label_column=name:quality`), elimina por completo la necesidad de formateadores de texto especializados.
+Vowpal Wabbit destaca al procesar flujos masivos de millones de variables dispersas de texto que superan la memoria RAM, pero los conjuntos tabulares densos con una docena de variables continuas raramente se benefician del hashing de atributos o de pesos lineales puramente aditivos. **LightGBM** ([Ke et al., 2017](#ref-ke2017)) compila como un binario nativo independiente en C++ (`/usr/local/bin/lightgbm`) que discretiza predictores continuos en 256 intervalos o histogramas y construye árboles de regresión priorizando las hojas con mayor ganancia (*best-first* o *leaf-wise*) en lugar del crecimiento tradicional por niveles. Puesto que `lightgbm` procesa encabezados CSV directamente (`header=true` y `label_column=name:quality`), elimina por completo la necesidad de formateadores de texto especializados.
 
 #### Preprocesamiento Directo en CLI, Entrenamiento, Predicción y Atribución de Variables
 
@@ -7950,18 +8426,22 @@ Controlamos `/usr/local/bin/lightgbm` directamente desde Nushell sobre las misma
 
 ```nu
 let white = open wine-white.csv
+
 let train_w = $white | first 3500
+
 let test_w = $white | skip 3500
+
 let fcols = $white | columns | where $it != "quality"
 
 $train_w
 | select ...($fcols | append "quality")
 | to csv
 | save -f /tmp/lgb_train.csv
+
 $test_w | select ...$fcols | to csv | save -f /tmp/lgb_test.csv
 
 (
-  ^lightgbm task=train objective=regression
+  lightgbm task=train objective=regression
     data=/tmp/lgb_train.csv header=true
     label_column=name:quality num_trees=100
     learning_rate=0.05 num_leaves=31 seed=42
@@ -7969,8 +8449,9 @@ $test_w | select ...$fcols | to csv | save -f /tmp/lgb_test.csv
     output_model=/tmp/lgb_model.txt verbosity=-1
   out+err> /dev/null
 )
+
 (
-  ^lightgbm task=predict data=/tmp/lgb_test.csv
+  lightgbm task=predict data=/tmp/lgb_test.csv
     header=true input_model=/tmp/lgb_model.txt
     output_result=/tmp/lgb_preds.txt verbosity=-1
   out+err> /dev/null
@@ -7984,6 +8465,7 @@ let p_raw = open --raw /tmp/lgb_preds.txt
   | lines
   | where ($it | str trim | is-not-empty)
   | each { into float }
+
 let direct_lgb = $test_w.quality
   | each { into float }
   | zip $p_raw
@@ -7996,7 +8478,9 @@ let direct_lgb = $test_w.quality
         abs_error: (($obs - $pred) | math abs | math round -p 4)
       }
     }
+
 $direct_lgb | first 4
+
 $direct_lgb.abs_error | math avg | math round -p 4
 ```
 
@@ -8050,13 +8534,15 @@ Cargar el modelo mediante `lgb.Booster(model_file=...)` recupera los nombres exa
 
 ```nu
 python lgbm_importance.py /tmp/lgb_model.txt | from json | first 5
+
 rm -f /tmp/lgb_train.csv /tmp/lgb_test.csv
+
 rm -f /tmp/lgb_model.txt /tmp/lgb_preds.txt
 ```
 
 #### Encapsulando Entrenamiento e Importancia en `lgbm-regress`
 
-En `dsin_tools.nu`, la función **`lgbm-regress`** unifica la alineación de columnas, la gestión de directorios de trabajo temporales, la invocación de `^lightgbm` y la extracción opcional de variables influyentes con `--importance`:
+En `dsin_tools.nu`, la función **`lgbm-regress`** unifica la alineación de columnas, la gestión de directorios de trabajo temporales, la invocación de `lightgbm` y la extracción opcional de variables influyentes con `--importance`:
 
 ```nu
 # Train and evaluate LightGBM C++ CLI regression on tables.
@@ -8095,7 +8581,7 @@ export def lgbm-regress [
     $"output_model=($model_file)"
     "verbosity=-1"
   ]
-  ^lightgbm ...$lgbm_train_args out+err> /dev/null
+  lightgbm ...$lgbm_train_args out+err> /dev/null
 
   if $importance {
     let bin_p = "/usr/local/bin/lgbm-importance"
@@ -8119,7 +8605,7 @@ export def lgbm-regress [
     $"output_result=($pred_file)"
     "verbosity=-1"
   ]
-  ^lightgbm ...$lgbm_pred_args out+err> /dev/null
+  lightgbm ...$lgbm_pred_args out+err> /dev/null
 
   let preds = open --raw $pred_file
     | lines
@@ -8150,18 +8636,25 @@ Al invocar `lgbm-regress`, evaluamos el modelo y extraemos la jerarquía de vari
 
 ```nu
 let white = open wine-white.csv
+
 let train_w = $white | first 3500
+
 let test_w = $white | skip 3500
 
-let lgb_preds = lgbm-regress $train_w $test_w
-  --num-trees 100 --learning-rate 0.05
+let lgb_preds = lgbm-regress $train_w $test_w --num-trees 100 --learning-rate 0.05
+
 $lgb_preds | first 5
+
 $lgb_preds | save -f wine_lgbm_predictions.csv
+
 let mae = $lgb_preds.abs_error | math avg | math round -p 4
+
 $"LightGBM Test MAE: ($mae)"
 
 let lgb_imp = lgbm-regress $train_w $test_w --importance
+
 $lgb_imp | first 5
+
 $lgb_imp | to json | save -f /tmp/lgbm_imp.json
 ```
 
@@ -8287,19 +8780,21 @@ Tres componentes organizan `plot_lgbm_importance.py`: la función `load_importan
 
 ```nu
 python plot_lgbm_importance.py /tmp/lgbm_imp.json
+
 rm -f /tmp/lgbm_imp.json
+
 timg -g 80x25 lgbm_importance.png
 ```
 
 ![Diagnóstico de importancia por porcentaje de ganancia y frecuencia de divisiones en LightGBM sobre predictores de vino blanco](lgbm_importance.png){width=92%}
 
-### Regresión Analítica Vectorizada en Proceso con DuckDB (`duckdb-ols`)
+### Regresión Analítica Vectorizada en Proceso con DuckDB
 
-Antes de ajustar ensambles multivariados con decenas de hiperparámetros, una práctica estadística prudente consiste en evaluar asociaciones marginales rápidas sobre los predictores candidatos. **DuckDB** (Raasveldt & Mühleisen, 2019) incorpora un motor analítico columnar vectorizado dentro de un binario independiente y autocontenido (`/usr/local/bin/duckdb`) con capacidad de emitir texto en formato JSON (`duckdb -json`). Sus agregaciones estadísticas del estándar SQL:2003 (`regr_slope`, `regr_intercept`, `corr`, `regr_r2` y `regr_count`) evalúan momentos de Mínimos Cuadrados Ordinarios en ciclos SIMD de una sola pasada en menos de 200 milisegundos.
+Antes de ajustar ensambles multivariados con decenas de hiperparámetros, una práctica estadística prudente consiste en evaluar asociaciones marginales rápidas sobre los predictores candidatos. **DuckDB** ([Raasveldt & Mühleisen, 2019](#ref-raasveldt2019)) incorpora un motor analítico columnar vectorizado dentro de un binario independiente y autocontenido (`/usr/local/bin/duckdb`) con capacidad de emitir texto en formato JSON (`duckdb -json`). Sus agregaciones estadísticas del estándar SQL:2003 (`regr_slope`, `regr_intercept`, `corr`, `regr_r2` y `regr_count`) evalúan momentos de Mínimos Cuadrados Ordinarios en ciclos SIMD de una sola pasada en menos de 200 milisegundos.
 
 #### Consultas Directas SQL en CLI e Ingesta de JSON en Nushell
 
-Para apreciar el funcionamiento de DuckDB sin ningún comando envoltorio, formule una consulta SQL directa sobre `'wine-white.csv'` para calcular la regresión marginal de `quality` en función de `alcohol`, ejecute `^duckdb -json -c` y procese el resultado con `from json`:
+Para apreciar el funcionamiento de DuckDB sin ningún comando envoltorio, formule una consulta SQL directa sobre `'wine-white.csv'` para calcular la regresión marginal de `quality` en función de `alcohol`, ejecute `duckdb -json -c` y procese el resultado con `from json`:
 
 ```nu
 let q_alc = [
@@ -8311,14 +8806,15 @@ let q_alc = [
   "CAST(regr_count(quality, alcohol) AS BIGINT) AS n"
   "FROM 'wine-white.csv';"
 ] | str join " "
-^duckdb -json -c $q_alc | from json
+
+duckdb -json -c $q_alc | from json
 ```
 
 Comparar dos o tres variables explicativas en SQL implica encadenar cláusulas `UNION ALL` ordenadas por `r_squared DESC`; no obstante, redactar manualmente once consultas concatenadas cada vez que cambia el esquema de un conjunto de datos resulta tedioso y propenso a errores.
 
 #### Encapsulando la Generación de SQL Guiada por Esquema en `duckdb-ols`
 
-En `dsin_tools.nu`, el comando **`duckdb-ols`** examina el esquema de la tabla de entrada en tiempo de ejecución, identifica todas las columnas numéricas (`int` o `float`) distintas de `--target`, genera un archivo CSV intermedio, construye automáticamente la consulta SQL con múltiples `UNION ALL` y transforma la salida de `^duckdb -json` en una tabla tipada y ordenada en Nushell:
+En `dsin_tools.nu`, el comando **`duckdb-ols`** examina el esquema de la tabla de entrada en tiempo de ejecución, identifica todas las columnas numéricas (`int` o `float`) distintas de `--target`, genera un archivo CSV intermedio, construye automáticamente la consulta SQL con múltiples `UNION ALL` y transforma la salida de `duckdb -json` en una tabla tipada y ordenada en Nushell:
 
 ```nu
 # Compute vectorized OLS regression diagnostics via DuckDB CLI.
@@ -8361,7 +8857,7 @@ export def duckdb-ols [
     $"SELECT * FROM \(($unions)\) ORDER BY r_squared DESC;"
   ] | str join ""
 
-  let res = ^duckdb -json -c $sql | from json
+  let res = duckdb -json -c $sql | from json
   rm -f $tmp_csv
   $res
 }
@@ -8373,6 +8869,7 @@ Examinar todos los predictores en `wine-white.csv` toma ahora un solo comando en
 
 ```nu
 open wine-white.csv | duckdb-ols --target quality
+
 open wine-white.csv
 | duckdb-ols --target quality --predictor alcohol
 ```
@@ -8474,16 +8971,17 @@ Tres diagnósticos estadísticos se desprenden de `plot_wine_residuals.py`:
 2. **Patrones en bandas por discretización (`ax1`):** Graficar los errores $e_i = y_i - \hat{y}_i$ frente a los valores ajustados $\hat{y}_i$ expone bandas diagonales paralelas correspondientes a las calificaciones sensoriales discretas (`y_i = 3, 4, ..., 9`), junto con una leve compresión en los extremos donde el modelo lineal regresa hacia la media muestral.
 3. **Contraste con la campana de Gauss (`ax2`):** La superposición de la función de densidad teórica $\mathcal{N}(0, \hat{\sigma}^2)$ sobre el histograma empírico revela una asimetría leve con colas ligeramente pesadas hacia la derecha en vinos de calidad sobresaliente.
 
-Genere `wine_residuals.png` y visualice ambos paneles en la terminal mediante `timg`:
+Generamos `wine_residuals.png` y visualizamos ambos paneles en la terminal mediante `timg`:
 
 ```nu
 python plot_wine_residuals.py
+
 timg -g 80x25 wine_residuals.png
 ```
 
 ![Diagnósticos de residuos OLS multivariados y superposición de densidad gaussiana sobre la calidad sensorial del vino blanco](wine_residuals.png){width=92%}
 
-### Evaluación Multimarco en Streaming y Redes Neuronales (`ml-benchmark`)
+### Evaluación Multimarco en Streaming y Redes Neuronales
 
 Anteriormente en este capítulo, comparar múltiples clasificadores requería escribir archivos de configuración en SKLL o coordinar scripts dispersos en R y Python. Para evaluar familias complementarias de algoritmos dentro de un único pipeline interactivo en Nushell, el script `/data/ch09/ml_benchmark.py` implementa un evaluador multimodelo preparado para flujos de datos que contrasta cinco arquitecturas de aprendizaje:
 
@@ -8495,7 +8993,7 @@ Anteriormente en este capítulo, comparar múltiples clasificadores requería es
 
 #### Inspeccionando e Invocando `ml_benchmark.py` Directamente
 
-Examine el código fuente de `ml_benchmark.py` en `/data/ch09` con `bat`:
+Examinamos el código fuente de `ml_benchmark.py` en `/data/ch09` con `bat`:
 
 ```nu
 bat ml_benchmark.py
@@ -8719,14 +9217,17 @@ Evaluar los cinco algoritmos en `wine-both.csv` y sobre la campaña bancaria `ba
 
 ```nu
 open wine-both.csv | ml-benchmark --target type
+
 let banco_bench = open banco.csv
   | reject ID ZIP_cod
   | ml-benchmark --target prestamo
+
 $banco_bench
+
 $banco_bench | to json | save -f /tmp/banco_bench.json
 ```
 
-Sobre `banco.csv`, donde la contratación del crédito responde a umbrales específicos de ingresos, educación y grupo familiar, los modelos lineales alcanzan un techo de rendimiento en torno a $F_1 \approx 0.95$ (`logistic` en `0.9484` y `linear_svc` en `0.9511`) con latencias de apenas 10 milisegundos. Incorporar representaciones ocultas no lineales con el Perceptrón Multicapa (`mlp`) eleva el puntaje $F_1$ ponderado a `0.9797` en aproximadamente 250 milisegundos, mientras que los ensambles de árboles (`rf` con `0.9895` y `lgbm` con `0.9903`) obtienen la mayor capacidad de discriminación, lo que concuerda con la literatura empírica sobre conjuntos de datos tabulares medianos (Grinsztajn et al., 2022).
+Sobre `banco.csv`, donde la contratación del crédito responde a umbrales específicos de ingresos, educación y grupo familiar, los modelos lineales alcanzan un techo de rendimiento en torno a $F_1 \approx 0.95$ (`logistic` en `0.9484` y `linear_svc` en `0.9511`) con latencias de apenas 10 milisegundos. Incorporar representaciones ocultas no lineales con el Perceptrón Multicapa (`mlp`) eleva el puntaje $F_1$ ponderado a `0.9797` en aproximadamente 250 milisegundos, mientras que los ensambles de árboles (`rf` con `0.9895` y `lgbm` con `0.9903`) obtienen la mayor capacidad de discriminación, lo que concuerda con la literatura empírica sobre conjuntos de datos tabulares medianos ([Grinsztajn et al., 2022](#ref-grinsztajn2022)).
 
 Para examinar de forma conjunta la calidad predictiva y el costo temporal de entrenamiento, inspeccione `plot_benchmark_comparison.py`:
 
@@ -8859,7 +9360,9 @@ Admitiendo tanto archivos JSON con evaluaciones ya guardadas (`/tmp/banco_bench.
 
 ```nu
 python plot_benchmark_comparison.py /tmp/banco_bench.json
+
 rm -f /tmp/banco_bench.json
+
 timg -g 80x25 benchmark_comparison.png
 ```
 
@@ -8867,26 +9370,27 @@ timg -g 80x25 benchmark_comparison.png
 
 ### La Frontera del Aprendizaje Automático Nativo en Rust
 
-Todas las herramientas de modelado examinadas en este capítulo invocan binarios externos o scripts en Python/R a través de serialización en disco o pipes estándar de Unix. Conforme el ecosistema científico de Rust madura, emerge una alternativa arquitectónica prometedora: ejecutar algoritmos de aprendizaje de manera nativa en memoria dentro del espacio de procesos de la shell mediante el protocolo de plugins de Nushell y buffers Apache Arrow sin costo de copia. Cuatro proyectos activos ilustran esta tendencia:
+Todas las herramientas de modelado examinadas en este capítulo invocan binarios externos o scripts en Python/R a través de serialización en disco o pipes estándar de Unix. Conforme el ecosistema científico de Rust madura, emerge una alternativa arquitectónica prometedora: ejecutar algoritmos de aprendizaje de manera nativa en memoria dentro del espacio de procesos de la shell mediante el protocolo de plugins de Nushell y buffers Apache Arrow sin costo de copia. Cinco proyectos activos ilustran esta tendencia y se encuentran integrados como herramientas nativas de línea de comandos en el contenedor `dsin`:
 
-1. **`linfa` y `smartcore`:** Bibliotecas de aprendizaje estadístico desarrolladas en Rust puro que implementan PCA, K-Means, DBSCAN, modelos lineales regularizados, SVMs y bosques aleatorios con garantías estrictas de seguridad de tipos en tiempo de compilación.
-2. **`candle` y `burn`:** Frameworks minimalistas de tensores y aprendizaje profundo en Rust capaces de compilar redes neuronales (`MLP`) y arquitecturas modernas en ejecutables nativos independientes sin dependencia de entornos de Python.
-3. **`nutorch`:** Complemento para Nushell que expone operaciones tensoriales de LibTorch directamente dentro de pipelines tabulares, integrando el cálculo tensorial como un tipo de dato de primera clase.
+1. **`smartcore` (`smartcore-cli`):** Biblioteca integral de aprendizaje automático estadístico en Rust puro que implementa bosques aleatorios, regresiones regularizadas y máquinas de soporte vectorial con estricta seguridad de tipos y concurrencia sin carreras de datos.
+2. **`linfa` (`linfa-cli`):** Ecosistema modular de algoritmos clásicos de agrupamiento (*K-Means*, *DBSCAN*) y reducción dimensional (*PCA*) inspirado en `scikit-learn`.
+3. **`candle` (`candle-cli`):** Framework minimalista de computación tensorial y redes neuronales desarrollado por Hugging Face en Rust puro, diseñado para inferencia ligera y evaluación sin dependencias de CUDA o Python.
+4. **`burn` (`burn-cli`):** Sistema integral de aprendizaje profundo en Rust que proporciona tensores con diferenciación automática y entrenamiento de perceptrones multicapa (`MLP`) directamente sobre la CPU mediante el backend `ndarray`.
+5. **`nutorch` (`nutorch`):** Utilidad tensorial de alto rendimiento diseñada para operar sobre tablas de Nushell, permitiendo multiplicar matrices, escalar atributos y calcular normas geométricas en memoria.
 
-Para comprender cómo opera esta arquitectura en la práctica, considere dos flujos representativos análogos a los estudiados con Python y C++:
+A continuación, examinamos flujos completos y reproducibles con cada una de estas cinco herramientas sobre nuestro conjunto de datos vitivinícola:
 
-#### Clasificación Supervisada en Rust Puro con Herramientas CLI
+#### Clasificación Supervisada con Bosques Aleatorios
 
-Un binario nativo compilado en Rust (por ejemplo, una herramienta basada en `smartcore`) consume datos estructurados desde un pipeline de Nushell, ajusta un ensamble en paralelo aprovechando todos los núcleos del procesador sin sobrecarga de intérpretes y emite una tabla tipada directamente a la consola:
+Ajustamos un ensamble de 100 árboles de decisión sobre atributos fisicoquímicos para clasificar el tipo de vino (`red` frente a `white`), evaluando la concordancia entre clases reales y predichas:
 
 ```nu
-# skip-docker-exec (pipeline de clasificación en Rust puro)
 open wine-both.csv
-| first 500
-| (
-    smartcore-cli fit-predict
-      --model random-forest --target type --trees 100
-  )
+| first 300
+| append (open wine-both.csv | last 300)
+| to csv
+| smartcore-cli fit-predict --model random-forest --target type --trees 100
+| from csv
 | polars into-df
 | polars group-by actual predicted
 | polars agg [
@@ -8896,21 +9400,93 @@ open wine-both.csv
 | polars into-nu
 ```
 
-#### Operaciones Tensoriales en Memoria con Copia Cero Mediante Plugins de Rust
+El pipeline procesa los atributos numéricos en paralelo, entrena los árboles de decisión en memoria sin intérpretes intermediarios y devuelve una tabla tipada con la matriz de confusión observada.
 
-Utilizando complementos como `nutorch` o extensiones directas de Apache Arrow, las tablas de Nushell pueden convertirse de forma instantánea en buffers tensoriales sin aplanamiento a texto plano:
+#### Agrupamiento No Supervisado y Reducción Dimensional
+
+Para explorar la estructura geométrica intrínseca de los datos sin etiquetas, ejecutamos agrupamiento *K-Means* en tres conglomerados sobre predictores continuos:
 
 ```nu
-# skip-docker-exec (pipeline de operaciones tensoriales en memoria)
+open wine-both.csv
+| first 200
+| to csv
+| linfa-cli kmeans --k 3 --exclude type
+| from csv
+| select cluster fixed_acidity alcohol quality
+| first 5
+```
+
+De forma análoga, proyectamos los atributos multivariados en dos componentes ortogonales mediante Análisis de Componentes Principales (*PCA*):
+
+```nu
+open wine-both.csv
+| first 200
+| to csv
+| linfa-cli pca --components 2 --exclude type
+| from csv
+| select pc_1 pc_2 type quality
+| first 5
+```
+
+Ambos comandos consumen flujos tabulares en CSV y emiten tablas con las nuevas dimensiones y particiones preservando los identificadores de fila.
+
+#### Inferencia Tensorial y Redes Neuronales
+
+Hugging Face `candle` permite construir tensores en memoria y evaluar la propagación hacia adelante (*forward pass*) de una red neuronal multicapa con capas ocultas y funciones de activación sin inicializar el runtime de Python:
+
+```nu
+open wine-both.csv
+| first 100
+| to csv
+| candle-cli forward-mlp --hidden 16 --classes 2 --exclude type
+| from csv
+| select logit_0 logit_1 quality type
+| first 5
+```
+
+Los valores `logit_0` y `logit_1` corresponden a las activaciones tensoriales de salida para cada muestra, calculadas mediante álgebra matricial vectorizada en CPU.
+
+#### Entrenamiento Profundo en CPU con Tensores Nativos
+
+Con el framework `burn`, entrenamos de manera iterativa un perceptrón multicapa para regresión, ajustando los pesos sinápticos mediante descenso de gradiente sobre las calificaciones de calidad sensorial:
+
+```nu
+open wine-both.csv
+| first 200
+| to csv
+| burn-cli train-mlp --target quality --epochs 10 --hidden 16 --lr 0.01
+| from csv
+| select actual predicted quality alcohol
+| first 5
+```
+
+La tabla resultante contrasta la calificación real del catador frente a la predicción generada por la arquitectura neuronal en Rust.
+
+#### Álgebra Tensorial en Memoria
+
+Finalmente, con `nutorch` realizamos operaciones tensoriales matriciales sobre atributos seleccionados, verificando la estabilidad dimensional y calculando la norma de Frobenius:
+
+```nu
 open wine-both.csv
 | select fixed_acidity volatile_acidity citric_acid alcohol
 | first 5
-| tensor from-table
-| tensor matmul (tensor eye 4)
-| tensor into-table
+| to csv
+| nutorch matmul --eye 4
+| from csv
 ```
 
-Si bien Python (`scikit-learn`, `umap-learn`) y C++ (`lightgbm`, `duckdb`) constituyen hoy los motores más consolidados para el trabajo diario con datos tabulares, dominar la arquitectura de complementos de Nushell prepara al profesional para la adopción de pipelines analíticos con copia cero en Arrow conforme evolucione el ecosistema científico de Rust.
+Para cuantificar la dispersión y magnitud de la matriz en un único resumen tensorial, invocamos el cálculo de métricas:
+
+```nu
+open wine-both.csv
+| select fixed_acidity volatile_acidity citric_acid alcohol
+| first 100
+| to csv
+| nutorch stats
+| from csv
+```
+
+Si bien Python (`scikit-learn`, `umap-learn`) y C++ (`lightgbm`, `duckdb`) constituyen hoy los motores más consolidados para el trabajo diario con datos tabulares, dominar las herramientas nativas de Rust prepara al ingeniero estadístico para adoptar pipelines de alto rendimiento sin costo de serialización conforme madure el ecosistema analítico.
 
 ## Resumen del Capítulo {#ch09-summary}
 
@@ -8918,8 +9494,8 @@ A lo largo de este capítulo, construimos flujos completos de modelado supervisa
 
 1. **Reducción de Dimensionalidad y Control de Colinealidad:** Proyectamos atributos fisicoquímicos en subespacios de baja dimensión ejecutando **Tapkee** sobre matrices numéricas sin encabezados antes de utilizar `tapkee-reduce`, contrastamos las coordenadas con R (`prcomp`) y Python (`PCA`), y estabilizamos regresiones con predictores colineales mediante diagnósticos VIF y Regresión de Componentes Principales (PCR).
 2. **Agrupamiento No Supervisado y Validación Geométrica:** Segmentamos observaciones no etiquetadas con scripts independientes de **K-Means** (`kmeans_cluster.py` y `kmeans-cluster`), enlaces aglomerativos jerárquicos (`hclust`), exploración basada en densidad (**DBSCAN**) y medoides robustos (**PAM**), seleccionando el número de grupos mediante curvas de inercia y silueta (`kmeans_elbow.png`).
-3. **Regresión Fuera de Memoria y Penalizada:** Formateamos cadenas explícitas de atributos para **Vowpal Wabbit**, entrenamos modelos en flujo con `^vw` antes de presentar `to-vw` y `vw-regress`, y comparamos la precisión frente a Mínimos Cuadrados Ordinarios clásicos (`lm`), regresión Ridge y ensambles de Random Forest.
-4. **Clasificación Declarativa y Políglota:** Generamos particiones balanceadas y manifiestos de configuración para **SKLL** (`^run_experiment` y `skll-metrics`), evaluando scripts en R y Python para modelos logísticos binomiales, árboles de decisión, k-NN ponderado, Naïve Bayes gaussiano, SVMs con núcleo radial y perceptrones multicapa regularizados.
+3. **Regresión Fuera de Memoria y Penalizada:** Formateamos cadenas explícitas de atributos para **Vowpal Wabbit**, entrenamos modelos en flujo con `vw` antes de presentar `to-vw` y `vw-regress`, y comparamos la precisión frente a Mínimos Cuadrados Ordinarios clásicos (`lm`), regresión Ridge y ensambles de Random Forest.
+4. **Clasificación Declarativa y Políglota:** Generamos particiones balanceadas y manifiestos de configuración para **SKLL** (`run_experiment` y `skll-metrics`), evaluando scripts en R y Python para modelos logísticos binomiales, árboles de decisión, k-NN ponderado, Naïve Bayes gaussiano, SVMs con núcleo radial y perceptrones multicapa regularizados.
 5. **Modelado Moderno Nativo de Pipelines y Diagnósticos:** Procesamos tablas en proyecciones topológicas con **UMAP** (`umap-reduce`), potenciación por gradiente en **LightGBM** (`lgbm-regress` junto con diagnósticos de ganancia en `lgbm_importance.png`), regresiones SQL en memoria con **DuckDB** (`duckdb-ols` complementado con análisis residual en `wine_residuals.png`) y comparativas multimodelo de rendimiento (`ml-benchmark` y `benchmark_comparison.png`).
 
 Con cada fase del modelado sustentada en scripts accesibles, esquemas explícitos y diagnósticos gráficos rigurosos, nos encontramos en posición de sintetizar las lecciones metodológicas, científicas y de ingeniería desarrolladas a lo largo de este libro.
@@ -8934,7 +9510,7 @@ A lo largo de nueve capítulos, hemos reconstruido el flujo clásico de ciencia 
 
 ## El Ciclo OSEMN en Shells Tipadas
 
-Cuando Hilary Mason y Chris Wiggins introdujeron la taxonomía OSEMN (*Obtain*, *Scrub*, *Explore*, *Model* e *iNterpret*) en 2010, los profesionales enfrentaban una marcada división entre dos entornos incompatibles. Por un lado se encontraba la shell POSIX (`bash`, `zsh`, `awk`, `sed`), insuperable para la orquestación de archivos, la composición de procesos y la programación desatendida de tareas, pero ciega a los tipos de datos. Cada canal transportaba un flujo indiferenciado de bytes delimitado por saltos de línea. Introducir una coma dentro de una cadena entrecomillada, encontrar un separador decimal dependiente de la configuración regional o propagar valores faltantes hacia etapas posteriores corrompía con frecuencia los resultados analíticos sin emitir error alguno de sintaxis. Por otro lado se ubicaban los entornos interactivos monolíticos, que comprendían matrices y dataframes de manera interna pero aislaban dichas estructuras del sistema operativo, fomentando sesiones con estado mutable que dificultaban la automatización.
+Cuando Hilary Mason y Chris Wiggins introdujeron la taxonomía OSEMN (*Obtain*, *Scrub*, *Explore*, *Model* e *iNterpret*) en [2010](#ref-mason2010), los profesionales enfrentaban una marcada división entre dos entornos incompatibles. Por un lado se encontraba la shell POSIX (`bash`, `zsh`, `awk`, `sed`), insuperable para la orquestación de archivos, la composición de procesos y la programación desatendida de tareas, pero ciega a los tipos de datos. Cada canal transportaba un flujo indiferenciado de bytes delimitado por saltos de línea. Introducir una coma dentro de una cadena entrecomillada, encontrar un separador decimal dependiente de la configuración regional o propagar valores faltantes hacia etapas posteriores corrompía con frecuencia los resultados analíticos sin emitir error alguno de sintaxis. Por otro lado se ubicaban los entornos interactivos monolíticos, que comprendían matrices y dataframes de manera interna pero aislaban dichas estructuras del sistema operativo, fomentando sesiones con estado mutable que dificultaban la automatización.
 
 Una shell tipada resuelve esta fractura histórica. Al elevar tablas, registros, listas, marcas temporales, tamaños de archivo y duraciones a valores de primera clase gobernados por el analizador sintáctico de la shell, Nushell permite que las cinco etapas de OSEMN compartan una base compositiva común:
 
@@ -8984,8 +9560,8 @@ Existen dos soluciones prácticas para superar este cuello de botella. En primer
 
 El paso desde ejercicios didácticos hacia proyectos de consultoría estadística, tesis de grado o ingeniería de datos en producción requiere hábitos metodológicos consistentes. Los siguientes cinco principios condensan las prácticas desarrolladas a lo largo de este libro en una guía concreta de aplicación:
 
-1. **Validar Contratos de Esquema en la Entrada:** Trate los archivos externos, tablas extraídas de páginas web y respuestas de APIs como fuentes no confiables hasta verificar su integridad. Al momento de la ingesta, examine los tipos de datos con `describe`, verifique la cantidad esperada de filas y la unicidad de identificadores, estandarice nombres de columnas y transforme cadenas ambiguas en representaciones numéricas o temporales explícitas. Detectar un formato temporal inválido o un valor nulo imprevisto en las primeras líneas de un script evita horas de depuración por matrices singulares o divergencia numérica en los algoritmos posteriores.
-2. **Escalar la Complejidad Siguiendo una Jerarquía Gradual:** Evite recurrir por defecto a arquitecturas complejas o modelos de aprendizaje profundo sin justificación empírica. Inicie con pipelines nativos en Nushell y consultas en Polars para filtrado, agregación e ingeniería de atributos. Aplique SQL vectorizado (`duckdb-ols`) o modelos lineales (`lm`, Ridge, `vw`) para establecer referencias estadísticas interpretables con rapidez. Incorpore conjuntos de árboles (`lightgbm`, Random Forest) o proyecciones topológicas no lineales (`umap-reduce`, `tapkee-reduce`) únicamente cuando los diagnósticos iniciales revelen relaciones no lineales que justifiquen la complejidad adicional, siguiendo las recomendaciones observadas en estudios comparativos sobre datos tabulares (Grinsztajn et al., 2022).
+1. **Validar Contratos de Esquema en la Entrada:** Tratamos los archivos externos, tablas extraídas de páginas web y respuestas de APIs como fuentes no confiables hasta verificar su integridad. Al momento de la ingesta, examinamos los tipos de datos con `describe`, verificamos la cantidad esperada de filas y la unicidad de identificadores, estandarizamos nombres de columnas y transformamos cadenas ambiguas en representaciones numéricas o temporales explícitas. Detectar un formato temporal inválido o un valor nulo imprevisto en las primeras líneas de un script evita horas de depuración por matrices singulares o divergencia numérica en los algoritmos posteriores.
+2. **Escalar la Complejidad Siguiendo una Jerarquía Gradual:** Evitamos recurrir por defecto a arquitecturas complejas o modelos de aprendizaje profundo sin justificación empírica. Iniciamos con pipelines nativos en Nushell y consultas en Polars para filtrado, agregación e ingeniería de atributos. Aplicamos SQL vectorizado (`duckdb-ols`) o modelos lineales (`lm`, Ridge, `vw`) para establecer referencias estadísticas interpretables con rapidez. Incorporamos conjuntos de árboles (`lightgbm`, Random Forest) o proyecciones topológicas no lineales (`umap-reduce`, `tapkee-reduce`) únicamente cuando los diagnósticos iniciales revelen relaciones no lineales que justifiquen la complejidad adicional, siguiendo las recomendaciones observadas en estudios comparativos sobre datos tabulares ([Grinsztajn et al., 2022](#ref-grinsztajn2022)).
 3. **Mantener la Orquestación Declarativa y el Cómputo Modular:** Utilice Nushell para gestionar la navegación en directorios, la distribución concurrente de tareas (`par-each` con hilos acotados mediante `--threads` o GNU `parallel`), la validación de esquemas y la consolidación de métricas. Conserve las operaciones matemáticas relevantes en scripts independientes y concisos en R o Python con argumentos explícitos en línea de comandos (`argparse` o `commandArgs`), límites en el uso de hilos (`OMP_NUM_THREADS`) para evitar sobrecarga en la CPU y emisión limpia de datos en JSON o CSV hacia la salida estándar. Cuando un flujo de trabajo se consolide entre proyectos, empaquételo como un comando personalizado documentado dentro de un módulo de Nushell.
 4. **Complementar las Métricas Globales con Diagnósticos Estructurales y Gráficos:** Los resúmenes estadísticos agregados pueden ocultar deficiencias críticas. Una precisión global elevada en clases desbalanceadas puede disimular una sensibilidad deficiente en la categoría de interés; un coeficiente $R^2$ aceptable puede encubrir heterocedasticidad severa o discretización en la variable objetivo (`wine_residuals.png`); una cantidad arbitraria de grupos $k$ puede fragmentar densidades continuas en divisiones espurias (`kmeans_elbow.png`). Construya gráficos de diagnóstico directamente en scripts reproducibles (`ggplot2`, `matplotlib`) e inspecciónelos en la terminal mediante `timg` junto con tablas de contingencia antes de validar cualquier modelo.
 5. **Empaquetar Cada Proyecto como un Artefacto Reproducible:** Un análisis estadístico riguroso no consiste en una carpeta con scripts dispersos e instrucciones manuales; constituye un pipeline automatizado respaldado por control de versiones (`git`), una definición de entorno verificable (`Dockerfile`, `uv.lock` o `renv.lock`), un archivo `README.md` detallado y scripts de validación que regeneren los resultados desde los datos iniciales con código de salida cero.
@@ -9044,6 +9620,11 @@ Como este libro trata sobre la intersección de la línea de comandos y la cienc
 - _LightGBM Documentation_: [https://lightgbm.readthedocs.io/](https://lightgbm.readthedocs.io/)
 - _DuckDB Documentation_: [https://duckdb.org/docs/](https://duckdb.org/docs/)
 - _UMAP Documentation_: [https://umap-learn.readthedocs.io/](https://umap-learn.readthedocs.io/)
+- _SmartCore (Machine Learning en Rust)_: [https://github.com/smartcorelib/smartcore](https://github.com/smartcorelib/smartcore)
+- _Linfa (Framework de Machine Learning en Rust)_: [https://github.com/rust-ml/linfa](https://github.com/rust-ml/linfa)
+- _Candle (Minimalist ML Framework for Rust por Hugging Face)_: [https://github.com/huggingface/candle](https://github.com/huggingface/candle)
+- _Burn (Flexible Deep Learning Framework in Rust)_: [https://github.com/tracel-ai/burn](https://github.com/tracel-ai/burn)
+- _NuTorch (Tensor Operations for Nushell)_: [https://github.com/astrohackerlabs/nutorch](https://github.com/astrohackerlabs/nutorch)
 
 
 
@@ -9072,25 +9653,26 @@ Como este libro trata sobre la intersección de la línea de comandos y la cienc
 
 - **ttt (Terminal Text Tree / Text Editor)**: Liam Galvin. Editor ligero de consola con soporte para mouse y resaltado de sintaxis. <https://github.com/liamg/ttt>
 - **timg (Terminal Image and Video Viewer)**: Henner Zeller. Visor gráfico en alta resolución para terminales con soporte Sixel, Kitty y bloques Unicode. <https://github.com/hzeller/timg>
-- **GNU Parallel**: Tange, Ole (2018). *GNU Parallel 2018*. Ole Tange. <https://www.gnu.org/software/parallel/>
+- []{#ref-tange2018}**GNU Parallel**: Tange, Ole (2018). *GNU Parallel 2018*. Ole Tange. <https://www.gnu.org/software/parallel/>
 - **DuckDB**: Motor de base de datos SQL analítico embebido y vectorizado en proceso. <https://duckdb.org/>
 - **LightGBM**: Framework compilado de árboles de decisión potenciados por gradiente de alto rendimiento. <https://github.com/microsoft/LightGBM>
 - **UMAP (`umap-learn`)**: Reducción de dimensionalidad no lineal mediante aproximación y proyección uniforme de variedades. <https://github.com/lmcinnes/umap>
 - **uv**: Gestor ultrarrápido de paquetes y entornos aislados de Python escrito en Rust. <https://github.com/astral-sh/uv>
-- **Tapkee**: Lisitsyn, S., Widmer, C., & Rath, F. J. (2014). *Tapkee: An Efficient Dimension Reduction Library*. Journal of Machine Learning Research, 15(1), 3955-3959. <https://tapkee.lisitsyn.me/>
-- **Vowpal Wabbit**: Langford, J., Li, L., & Strehl, A. (2007). *Vowpal Wabbit Online Learning Project*. Microsoft Research. <https://vowpalwabbit.org/>
+- []{#ref-lisitsyn2014}**Tapkee**: Lisitsyn, S., Widmer, C., & Rath, F. J. (2014). *Tapkee: An Efficient Dimension Reduction Library*. Journal of Machine Learning Research, 15(1), 3955-3959. <https://tapkee.lisitsyn.me/>
+- []{#ref-langford2007}**Vowpal Wabbit**: Langford, J., Li, L., & Strehl, A. (2007). *Vowpal Wabbit Online Learning Project*. Microsoft Research. <https://vowpalwabbit.org/>
 - **SKLL (SciKit-Learn Laboratory)**: Educational Testing Service (ETS). Framework declarativo para experimentación con modelos de Scikit-Learn. <https://skll.readthedocs.io/>
 - **Polars**: Ritchie Vink. Motor columnar de DataFrames multihilo de ultra-alto rendimiento en Rust. <https://pola.rs/>
 
 ## Bibliografía y Literatura Académica
 
-- **Mason, H., & Wiggins, C. H. (2010)**. *A Taxonomy of Data Science*. Dataists. <http://www.dataists.com/2010/09/a-taxonomy-of-data-science>
-- **Tukey, J. W. (1977)**. *Exploratory Data Analysis*. Reading, Mass.: Addison-Wesley Publishing Company.
-- **Wickham, H., & Grolemund, G. (2017)**. *R for Data Science: Import, Tidy, Transform, Visualize, and Model Data*. O'Reilly Media.
-- **Pedregosa, F., et al. (2011)**. *Scikit-learn: Machine Learning in Python*. Journal of Machine Learning Research, 12, 2825-2830.
-- **Breiman, L. (2001)**. *Random Forests*. Machine Learning, 45(1), 5-32.
-- **Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q., & Liu, T. Y. (2017)**. *LightGBM: A Highly Efficient Gradient Boosting Decision Tree*. Advances in Neural Information Processing Systems, 30, 3146-3154.
-- **McInnes, L., Healy, J., & Melville, J. (2018)**. *UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction*. arXiv preprint arXiv:1802.03426.
-- **Raasveldt, M., & Mühleisen, H. (2019)**. *DuckDB: An Embeddable Analytical Database*. Proceedings of the 2019 International Conference on Management of Data (SIGMOD '19), 1981-1984.
-- **Grinsztajn, L., Oyallon, E., & Varoquaux, G. (2022)**. *Why do tree-based models still outperform deep learning on typical tabular data?* Advances in Neural Information Processing Systems, 35, 507-520.
-- **Hastie, T., Tibshirani, R., & Friedman, J. (2009)**. *The Elements of Statistical Learning: Data Mining, Inference, and Prediction* (2nd ed.). Springer New York.
+- []{#ref-mason2010}**Mason, H., & Wiggins, C. H. (2010)**. *A Taxonomy of Data Science*. Dataists. <http://www.dataists.com/2010/09/a-taxonomy-of-data-science>
+- []{#ref-tukey1977}**Tukey, J. W. (1977)**. *Exploratory Data Analysis*. Reading, Mass.: Addison-Wesley Publishing Company.
+- []{#ref-wickham2017}**Wickham, H., & Grolemund, G. (2017)**. *R for Data Science: Import, Tidy, Transform, Visualize, and Model Data*. O'Reilly Media.
+- []{#ref-pedregosa2011}**Pedregosa, F., et al. (2011)**. *Scikit-learn: Machine Learning in Python*. Journal of Machine Learning Research, 12, 2825-2830.
+- []{#ref-cortez2009}**Cortez, P., Cerdeira, A., Almeida, F., Matos, T., & Reis, J. (2009)**. *Modeling wine preferences by data mining from physicochemical properties*. Decision Support Systems, 47(4), 547-553.
+- []{#ref-breiman2001}**Breiman, L. (2001)**. *Random Forests*. Machine Learning, 45(1), 5-32.
+- []{#ref-ke2017}**Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q., & Liu, T. Y. (2017)**. *LightGBM: A Highly Efficient Gradient Boosting Decision Tree*. Advances in Neural Information Processing Systems, 30, 3146-3154.
+- []{#ref-mcinnes2018}**McInnes, L., Healy, J., & Melville, J. (2018)**. *UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction*. arXiv preprint arXiv:1802.03426.
+- []{#ref-raasveldt2019}**Raasveldt, M., & Mühleisen, H. (2019)**. *DuckDB: An Embeddable Analytical Database*. Proceedings of the 2019 International Conference on Management of Data (SIGMOD '19), 1981-1984.
+- []{#ref-grinsztajn2022}**Grinsztajn, L., Oyallon, E., & Varoquaux, G. (2022)**. *Why do tree-based models still outperform deep learning on typical tabular data?* Advances in Neural Information Processing Systems, 35, 507-520.
+- []{#ref-hastie2009}**Hastie, T., Tibshirani, R., & Friedman, J. (2009)**. *The Elements of Statistical Learning: Data Mining, Inference, and Prediction* (2nd ed.). Springer New York.

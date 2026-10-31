@@ -395,6 +395,81 @@ export def ml-benchmark [
 }
 
 # =========================================================
+# PURE-RUST NATIVE MACHINE LEARNING PIPELINE WRAPPERS
+# =========================================================
+
+# Pure-Rust Random Forest classification via smartcore-cli.
+export def smartcore-predict [
+  --target(-t): string = "type"
+  --trees: int = 100
+]: table -> table {
+  $in
+  | to csv
+  | smartcore-cli fit-predict --target $target --trees $trees
+  | from csv
+}
+
+# Pure-Rust K-Means unsupervised clustering via linfa-cli.
+export def linfa-kmeans [
+  --k: int = 3
+  --exclude: string = "type"
+]: table -> table {
+  $in
+  | to csv
+  | linfa-cli kmeans --k $k --exclude $exclude
+  | from csv
+}
+
+# Pure-Rust PCA dimensionality reduction via linfa-cli.
+export def linfa-pca [
+  --components(-c): int = 2
+  --exclude: string = "type"
+]: table -> table {
+  $in
+  | to csv
+  | linfa-cli pca --components $components --exclude $exclude
+  | from csv
+}
+
+# Pure-Rust neural tensor forward pass via candle-cli.
+export def candle-mlp [
+  --hidden: int = 16
+  --classes: int = 2
+  --exclude: string = "type"
+]: table -> table {
+  $in
+  | to csv
+  | candle-cli forward-mlp --hidden $hidden --classes $classes --exclude $exclude
+  | from csv
+}
+
+# Pure-Rust neural MLP model training via burn-cli.
+export def burn-mlp [
+  --target(-t): string = "quality"
+  --epochs: int = 15
+  --hidden: int = 16
+  --lr: float = 0.01
+]: table -> table {
+  $in
+  | to csv
+  | burn-cli train-mlp --target $target --epochs $epochs --hidden $hidden --lr $lr
+  | from csv
+}
+
+# Pure-Rust in-memory tensor linear algebra via nutorch.
+export def nutorch-matmul [
+  --eye: int
+  --scale: float = 1.0
+]: table -> table {
+  let tbl = $in
+  if ($eye | is-empty) {
+    $tbl | to csv | nutorch matmul --scale $scale | from csv
+  } else {
+    $tbl | to csv | nutorch matmul --eye $eye --scale $scale | from csv
+  }
+}
+
+# =========================================================
 # FILE & DIRECTORY LISTING HELPERS (l, lc, lo, le)
 # =========================================================
 

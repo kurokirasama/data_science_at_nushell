@@ -106,12 +106,13 @@ COPY custom_l.nu /usr/local/share/nushell/vendor/autoload/custom_l.nu
 COPY custom_l.nu /home/dsin/.config/nushell/nu_modules/custom_l.nu
 COPY data/ /data/
 COPY plugins/* /usr/local/bin/
+COPY rust-ml-tools/bin/* /usr/local/bin/
 RUN cp /data/ch08/pbc /usr/local/bin/pbc && \
     cp /data/ch09/kmeans_cluster.py /usr/local/bin/kmeans-cluster-py && \
     cp /data/ch09/umap_reduce.py /usr/local/bin/umap-reduce-py && \
     cp /data/ch09/lgbm_importance.py /usr/local/bin/lgbm-importance && \
     cp /data/ch09/ml_benchmark.py /usr/local/bin/ml-benchmark-py && \
-    chmod +x /usr/local/bin/pbc /usr/local/bin/kmeans-cluster-py /usr/local/bin/umap-reduce-py /usr/local/bin/lgbm-importance /usr/local/bin/ml-benchmark-py /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* && \
+    chmod +x /usr/local/bin/pbc /usr/local/bin/kmeans-cluster-py /usr/local/bin/umap-reduce-py /usr/local/bin/lgbm-importance /usr/local/bin/ml-benchmark-py /usr/local/bin/ttt /usr/local/bin/timg /usr/local/bin/nu_plugin_* /usr/local/bin/smartcore-cli /usr/local/bin/linfa-cli /usr/local/bin/candle-cli /usr/local/bin/burn-cli /usr/local/bin/nutorch && \
     chown -R dsin:dsin /home/dsin /data
 
 # 5. Register all Nushell plugins for user dsin and pre-warm Numba/Matplotlib caches
