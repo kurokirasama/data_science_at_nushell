@@ -60,3 +60,17 @@ export def le [] {
     }
   | sort-by ext
 }
+
+# Inspect the source code of a custom Nushell command with syntax highlighting
+export def view-code [
+  ...command
+  --raw(-r)
+] {
+  let cmd = $command | str join " "
+  if $raw {
+    view source $cmd
+  } else {
+    view source $cmd | nu-highlight
+  }
+}
+

@@ -3748,7 +3748,7 @@ open --raw alice.txt
 | first 10
 ```
 
-To inspect script source code directly from the terminal, Nushell prints raw text via `open --raw <file>`. Additionally, for syntax highlighting and line numbers, the environment includes **`bat`** (`bat top-words-1.nu`). We utilize `bat` for code inspection throughout the remainder of this chapter:
+To inspect script source code directly from the terminal, Nushell prints raw text via `open --raw <file>`. Additionally, for syntax highlighting and line numbers, the environment includes **`bat`** (`bat top-words-1.nu`). For custom Nushell commands and functions loaded in memory (such as commands from `dsin_tools.nu`), the environment provides **`view-code`** (`view-code <command>`), which displays syntax-highlighted source code directly from the shell runtime. We utilize `bat` for script inspections and `view-code` for custom command inspections throughout this text:
 
 ```nu
 open --raw top-words-1.nu
@@ -5362,6 +5362,8 @@ To render an image in `/data/ch07`, invoke:
 timg -g 80x25 tips_faceted.png
 ```
 
+![Faceted scatter plot of total bills and tips across days of the week](tips_faceted.png){width=85%}
+
 Multiple figures can also be arranged and displayed as a composite terminal gallery using `--grid`:
 
 ```nu
@@ -5371,6 +5373,8 @@ Rscript plot_density.R
 
 timg --grid=2x1 -g 80x25 tips_histogram.png tips_density.png
 ```
+
+![Composite terminal gallery of histogram and kernel density estimation](tips_grid.png){width=90%}
 
 ### Remote Alternatives: Copying Graphics via `scp`
 
@@ -5494,6 +5498,8 @@ python3 plot_tips_py.py | from json | save -f tips_py_summary.json
 
 timg -g 80x25 tips_python.png
 ```
+
+![Dual-panel empirical distribution and scatter plot generated via Python matplotlib](tips_python.png){width=85%}
 
 ## Summary
 
@@ -5799,6 +5805,8 @@ Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
 ```
 
+![Class-conditional density of sensory quality across red and white wines](wine_eda.png){width=85%}
+
 ## Dimensionality Reduction (PCA and t-SNE)
 
 High-dimensional feature tables often suffer from strong collinearity and geometric sparsity. Dimensionality reduction maps $p$ correlated predictors into a low-dimensional subspace (typically two or three coordinates) that retains either global variance or local neighborhood structure:
@@ -5848,7 +5856,11 @@ $direct_pca | first 5
 rm -f wine_matrix.csv wine_pca_raw.csv
 ```
 
-Repeating that manual sequence (feature isolation, temporary CSV creation, external binary execution, float parsing, horizontal merge, and file cleanup) every time we explore a projection quickly clutters interactive sessions. In `dsin_tools.nu`, the custom command **`tapkee-reduce`** encapsulates those exact operations behind a typed `table -> table` signature:
+Repeating that manual sequence (feature isolation, temporary CSV creation, external binary execution, float parsing, horizontal merge, and file cleanup) every time we explore a projection quickly clutters interactive sessions. In `dsin_tools.nu`, the custom command **`tapkee-reduce`** encapsulates those exact operations behind a typed `table -> table` signature. To inspect its implementation directly in the terminal, we execute `view-code tapkee-reduce`:
+
+```nu
+view-code tapkee-reduce
+```
 
 ```nu
 # Run Tapkee dimensionality reduction on a numeric table.
@@ -6275,7 +6287,11 @@ $raw_km
 
 Look at that contingency table: without ever seeing the `type` column, unsupervised Euclidean partitioning in standardized 11-dimensional chemical space places over 98.5% of red wines into one cluster and over 98.5% of white wines into the other.
 
-To eliminate manual `to csv` and `from csv` plumbing and provide native Nushell tab-completion, `dsin_tools.nu` defines the wrapper **`kmeans-cluster`**:
+To eliminate manual `to csv` and `from csv` plumbing and provide native Nushell tab-completion, `dsin_tools.nu` defines the wrapper **`kmeans-cluster`**. We inspect its implementation in the terminal via `view-code kmeans-cluster`:
+
+```nu
+view-code kmeans-cluster
+```
 
 ```nu
 # Partition numeric columns via standardized K-Means clustering.
@@ -6923,7 +6939,11 @@ $direct_vw | first 5
 
 #### Encapsulating the Workflow in `to-vw` and `vw-regress`
 
-Repeating string-interpolation loops, cache paths, and residual joins by hand across multiple experiments invites copy-paste errors. In `dsin_tools.nu`, two composable Nushell functions automate those exact stages. First, **`to-vw`** generalizes the row serializer for any target column and namespace tag:
+Repeating string-interpolation loops, cache paths, and residual joins by hand across multiple experiments invites copy-paste errors. In `dsin_tools.nu`, two composable Nushell functions automate those exact stages. First, **`to-vw`** generalizes the row serializer for any target column and namespace tag. We inspect its implementation in the terminal via `view-code to-vw`:
+
+```nu
+view-code to-vw
+```
 
 ```nu
 # Convert a Nushell table into Vowpal Wabbit line format.
@@ -7291,7 +7311,11 @@ Because SKLL writes over thirty diagnostic columns into `wine_summary.tsv` (time
 
 #### Encapsulating TSV Projection in `skll-metrics`
 
-In `dsin_tools.nu`, **`skll-metrics`** wraps default path resolution and column projection into a single zero-boilerplate helper:
+In `dsin_tools.nu`, **`skll-metrics`** wraps default path resolution and column projection into a single zero-boilerplate helper. We inspect its implementation in the terminal via `view-code skll-metrics`:
+
+```nu
+view-code skll-metrics
+```
 
 ```nu
 # Parse SKLL experiment summary TSV into a clean Nushell table.
@@ -8046,7 +8070,11 @@ open wine-both.csv
 
 #### Encapsulating the Pipeline in `umap-reduce`
 
-In `dsin_tools.nu`, **`umap-reduce`** wraps CSV serialization, list-to-flag formatting (`--cols`), binary/script path resolution, and `from csv` deserialization behind native Nushell type signatures (`table -> table`):
+In `dsin_tools.nu`, **`umap-reduce`** wraps CSV serialization, list-to-flag formatting (`--cols`), binary/script path resolution, and `from csv` deserialization behind native Nushell type signatures (`table -> table`). We inspect its implementation in the terminal via `view-code umap-reduce`:
+
+```nu
+view-code umap-reduce
+```
 
 ```nu
 # Compute UMAP manifold coordinates on a numeric Nushell table.
@@ -8319,7 +8347,11 @@ rm -f /tmp/lgb_model.txt /tmp/lgb_preds.txt
 
 #### Encapsulating Training and Importance in `lgbm-regress`
 
-In `dsin_tools.nu`, **`lgbm-regress`** bundles predictor column alignment, temporary directory lifecycle, `lightgbm` CLI invocation, and optional `--importance` extraction into one clean command:
+In `dsin_tools.nu`, **`lgbm-regress`** bundles predictor column alignment, temporary directory lifecycle, `lightgbm` CLI invocation, and optional `--importance` extraction into one clean command. We inspect its implementation in the terminal via `view-code lgbm-regress`:
+
+```nu
+view-code lgbm-regress
+```
 
 ```nu
 # Train and evaluate LightGBM C++ CLI regression on tables.
@@ -8572,7 +8604,11 @@ Comparing two or three predictors directly in SQL simply chains `UNION ALL` bran
 
 #### Encapsulating Schema-Driven SQL Generation in `duckdb-ols`
 
-In `dsin_tools.nu`, **`duckdb-ols`** inspects the incoming Nushell table schema at runtime, identifies all numeric columns (`int` or `float`) distinct from `--target`, writes a temporary CSV snapshot, synthesizes the `UNION ALL` query string automatically, and parses `duckdb -json` back into a sorted Nushell table:
+In `dsin_tools.nu`, **`duckdb-ols`** inspects the incoming Nushell table schema at runtime, identifies all numeric columns (`int` or `float`) distinct from `--target`, writes a temporary CSV snapshot, synthesizes the `UNION ALL` query string automatically, and parses `duckdb -json` back into a sorted Nushell table. We inspect its implementation in the terminal via `view-code duckdb-ols`:
+
+```nu
+view-code duckdb-ols
+```
 
 ```nu
 # Compute vectorized OLS regression diagnostics via DuckDB CLI.
@@ -8932,7 +8968,11 @@ open wine-both.csv
 
 #### Encapsulating Multi-Model Benchmarking in `ml-benchmark`
 
-In `dsin_tools.nu`, **`ml-benchmark`** converts Nushell list flags (`--models`) into comma-separated strings, manages temporary CSV handoff, resolves `/usr/local/bin/ml-benchmark-py`, and parses the resulting JSON leaderboard directly into a Nushell table:
+In `dsin_tools.nu`, **`ml-benchmark`** converts Nushell list flags (`--models`) into comma-separated strings, manages temporary CSV handoff, resolves `/usr/local/bin/ml-benchmark-py`, and parses the resulting JSON leaderboard directly into a Nushell table. We inspect its implementation in the terminal via `view-code ml-benchmark`:
+
+```nu
+view-code ml-benchmark
+```
 
 ```nu
 # Benchmark classification architectures on streaming tables.

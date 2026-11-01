@@ -3896,7 +3896,7 @@ open --raw alice.txt
 | first 10
 ```
 
-Para inspeccionar el contenido de un script o archivo de código fuente desde la terminal, Nushell permite imprimir su texto directamente mediante `open --raw <archivo>`. Adicionalmente, para una lectura más cómoda con resaltado de sintaxis y numeración de líneas, el entorno dispone de la utilidad especializada **`bat`** (`bat top-words-1.nu`). A partir de este punto se adoptará preferentemente `bat` para la visualización de código:
+Para inspeccionar el contenido de un script o archivo de código fuente desde la terminal, Nushell permite imprimir su texto directamente mediante `open --raw <archivo>`. Adicionalmente, para una lectura más cómoda con resaltado de sintaxis y numeración de líneas, el entorno dispone de la utilidad especializada **`bat`** (`bat top-words-1.nu`). Asimismo, para comandos personalizados y funciones cargadas en memoria dentro de Nushell (en lugar de archivos en disco), el entorno incorpora **`view-code`** (`view-code <comando>`), que presenta el código fuente con resaltado sintáctico directamente desde la shell. A lo largo de la obra utilizaremos `bat` para inspeccionar scripts y `view-code` para examinar comandos personalizados:
 
 ```nu
 open --raw top-words-1.nu
@@ -5605,6 +5605,8 @@ Para visualizar cualquier gráfico generado en `/data/ch07`, basta con ejecutar:
 timg -g 80x25 tips_faceted.png
 ```
 
+![Dispersión segmentada por día de facturas y propinas](tips_faceted.png){width=85%}
+
 También podemos mostrar varios gráficos en una cuadrícula comparativa dentro de la terminal usando la bandera `--grid`:
 
 ```nu
@@ -5614,6 +5616,8 @@ Rscript plot_density.R
 
 timg --grid=2x1 -g 80x25 tips_histogram.png tips_density.png
 ```
+
+![Galería comparativa en terminal de histograma y estimación de densidad](tips_grid.png){width=90%}
 
 ### Alternativa Remota: Copiando Gráficos con `scp`
 
@@ -5745,6 +5749,8 @@ python3 plot_tips_py.py | from json | save -f tips_py_summary.json
 
 timg -g 80x25 tips_python.png
 ```
+
+![Panel comparativo dual generado con Python y matplotlib](tips_python.png){width=85%}
 
 ## Resumen
 
@@ -6057,6 +6063,8 @@ Rscript plot_wine_eda.R
 timg -g 80x25 wine_eda.png
 ```
 
+![Densidad condicional de la calidad sensorial entre vinos tintos y blancos](wine_eda.png){width=85%}
+
 ## Reducción de Dimensionalidad (PCA y t-SNE)
 
 Las tablas con alta dimensionalidad sufren frecuentemente de colinealidad pronunciada y dispersión geométrica. La reducción de dimensionalidad proyecta $p$ variables correlacionadas hacia un subespacio de baja dimensión (habitualmente dos o tres coordenadas) que retiene la varianza global o la estructura de vecindad local:
@@ -6106,7 +6114,11 @@ $direct_pca | first 5
 rm -f wine_matrix.csv wine_pca_raw.csv
 ```
 
-Repetir manualmente esta secuencia (aislar variables, crear el CSV temporal, ejecutar el binario externo, convertir a tipos flotantes, unir tablas y eliminar archivos) en cada exploración sobrecarga las sesiones interactivas. En `dsin_tools.nu`, el comando personalizado **`tapkee-reduce`** encapsula estas operaciones bajo una firma tipada `table -> table`:
+Repetir manualmente esta secuencia (aislar variables, crear el CSV temporal, ejecutar el binario externo, convertir a tipos flotantes, unir tablas y eliminar archivos) en cada exploración sobrecarga las sesiones interactivas. En `dsin_tools.nu`, el comando personalizado **`tapkee-reduce`** encapsula estas operaciones bajo una firma tipada `table -> table`. Para inspeccionar su implementación directamente en la terminal, ejecutamos `view-code tapkee-reduce`:
+
+```nu
+view-code tapkee-reduce
+```
 
 ```nu
 # Run Tapkee dimensionality reduction on a numeric table.
@@ -6533,7 +6545,11 @@ $raw_km
 
 Observamos los resultados en la tabla de contingencia: sin haber accedido jamás a la columna `type`, la partición euclidiana no supervisada en el espacio químico estandarizado de once dimensiones asigna más del 98.5% de los vinos tintos a un grupo y más del 98.5% de los vinos blancos al otro.
 
-Para evitar la serialización manual con `to csv` y `from csv` y aprovechar el autocompletado nativo de argumentos en la terminal, `dsin_tools.nu` define el comando **`kmeans-cluster`**:
+Para evitar la serialización manual con `to csv` y `from csv` y aprovechar el autocompletado nativo de argumentos en la terminal, `dsin_tools.nu` define el comando **`kmeans-cluster`**. Inspeccionamos su implementación en la terminal mediante `view-code kmeans-cluster`:
+
+```nu
+view-code kmeans-cluster
+```
 
 ```nu
 # Partition numeric columns via standardized K-Means clustering.
@@ -7177,7 +7193,11 @@ $direct_vw | first 5
 
 #### Encapsulando el Flujo de Trabajo en `to-vw` y `vw-regress`
 
-Reescribir manualmente ciclos de interpolación de cadenas, rutas de caché y operaciones `zip` entre experimentos propicia inconsistencias. En `dsin_tools.nu`, dos comandos modulares automatizan estas etapas. Primero, **`to-vw`** estandariza la serialización de registros para cualquier variable objetivo y espacio de nombres:
+Reescribir manualmente ciclos de interpolación de cadenas, rutas de caché y operaciones `zip` entre experimentos propicia inconsistencias. En `dsin_tools.nu`, dos comandos modulares automatizan estas etapas. Primero, **`to-vw`** estandariza la serialización de registros para cualquier variable objetivo y espacio de nombres. Inspeccionamos su implementación en la terminal mediante `view-code to-vw`:
+
+```nu
+view-code to-vw
+```
 
 ```nu
 # Convert a Nushell table into Vowpal Wabbit line format.
@@ -7524,7 +7544,11 @@ Dado que SKLL genera más de treinta columnas de diagnóstico en `wine_summary.t
 
 #### Encapsulando la Proyección de Métricas en `skll-metrics`
 
-En `dsin_tools.nu`, la función **`skll-metrics`** encapsula la resolución de rutas por defecto y la selección de columnas en un comando directo:
+En `dsin_tools.nu`, la función **`skll-metrics`** encapsula la resolución de rutas por defecto y la selección de columnas en un comando directo. Inspeccionamos su implementación en la terminal mediante `view-code skll-metrics`:
+
+```nu
+view-code skll-metrics
+```
 
 ```nu
 # Parse SKLL experiment summary TSV into a clean Nushell table.
@@ -8270,7 +8294,11 @@ $raw_umap | select type quality umap_1 umap_2 | first 3
 
 #### Encapsulando el Pipeline en `umap-reduce`
 
-En `dsin_tools.nu`, la función envoltorio **`umap-reduce`** automatiza la gestión de archivos temporales mediante `mktemp` y resuelve las rutas instaladas:
+En `dsin_tools.nu`, la función envoltorio **`umap-reduce`** automatiza la gestión de archivos temporales mediante `mktemp` y resuelve las rutas instaladas. Inspeccionamos su implementación en la terminal mediante `view-code umap-reduce`:
+
+```nu
+view-code umap-reduce
+```
 
 ```nu
 # Compute UMAP manifold coordinates on a numeric Nushell table.
@@ -8543,7 +8571,11 @@ rm -f /tmp/lgb_model.txt /tmp/lgb_preds.txt
 
 #### Encapsulando Entrenamiento e Importancia en `lgbm-regress`
 
-En `dsin_tools.nu`, la función **`lgbm-regress`** unifica la alineación de columnas, la gestión de directorios de trabajo temporales, la invocación de `lightgbm` y la extracción opcional de variables influyentes con `--importance`:
+En `dsin_tools.nu`, la función **`lgbm-regress`** unifica la alineación de columnas, la gestión de directorios de trabajo temporales, la invocación de `lightgbm` y la extracción opcional de variables influyentes con `--importance`. Inspeccionamos su implementación en la terminal mediante `view-code lgbm-regress`:
+
+```nu
+view-code lgbm-regress
+```
 
 ```nu
 # Train and evaluate LightGBM C++ CLI regression on tables.
@@ -8815,7 +8847,11 @@ Comparar dos o tres variables explicativas en SQL implica encadenar cláusulas `
 
 #### Encapsulando la Generación de SQL Guiada por Esquema en `duckdb-ols`
 
-En `dsin_tools.nu`, el comando **`duckdb-ols`** examina el esquema de la tabla de entrada en tiempo de ejecución, identifica todas las columnas numéricas (`int` o `float`) distintas de `--target`, genera un archivo CSV intermedio, construye automáticamente la consulta SQL con múltiples `UNION ALL` y transforma la salida de `duckdb -json` en una tabla tipada y ordenada en Nushell:
+En `dsin_tools.nu`, el comando **`duckdb-ols`** examina el esquema de la tabla de entrada en tiempo de ejecución, identifica todas las columnas numéricas (`int` o `float`) distintas de `--target`, genera un archivo CSV intermedio, construye automáticamente la consulta SQL con múltiples `UNION ALL` y transforma la salida de `duckdb -json` en una tabla tipada y ordenada en Nushell. Inspeccionamos su implementación en la terminal mediante `view-code duckdb-ols`:
+
+```nu
+view-code duckdb-ols
+```
 
 ```nu
 # Compute vectorized OLS regression diagnostics via DuckDB CLI.
@@ -9173,7 +9209,11 @@ open wine-both.csv
 
 #### Encapsulando la Evaluación Multimarco en `ml-benchmark`
 
-En `dsin_tools.nu`, la función envoltorio **`ml-benchmark`** convierte listas tipadas de Nushell (`--models`) en cadenas delimitadas por comas, gestiona archivos CSV intermedios, resuelve `/usr/local/bin/ml-benchmark-py` y convierte el resultado JSON directamente en una tabla tipada:
+En `dsin_tools.nu`, la función envoltorio **`ml-benchmark`** convierte listas tipadas de Nushell (`--models`) en cadenas delimitadas por comas, gestiona archivos CSV intermedios, resuelve `/usr/local/bin/ml-benchmark-py` y convierte el resultado JSON directamente en una tabla tipada. Inspeccionamos su implementación en la terminal mediante `view-code ml-benchmark`:
+
+```nu
+view-code ml-benchmark
+```
 
 ```nu
 # Benchmark classification architectures on streaming tables.

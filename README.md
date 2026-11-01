@@ -84,6 +84,10 @@ nu update-dsin-nushell.nu --version 0.116.1 --push
 To compile the official PDF document using XeLaTeX, complete with native Nushell syntax highlighting and transparent suppression of test directives via the Lua filter:
 
 ```bash
+# Compile all editions via the Nushell helper:
+nu Files/compile_books.nu
+
+# Or compile manually with Pandoc:
 cd Files
 pandoc --pdf-engine=xelatex \
   --lua-filter=hide_skip.lua \
