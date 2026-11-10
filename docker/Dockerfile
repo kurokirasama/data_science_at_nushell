@@ -3,7 +3,7 @@
 # =============================================================================
 FROM datasciencetoolbox/dsatcl2e:latest
 
-ARG NUSHELL_VERSION="0.116.1"
+ARG NUSHELL_VERSION="0.117.0"
 ARG DUCKDB_VERSION="1.2.1"
 ARG LIGHTGBM_VERSION="4.6.0"
 LABEL maintainer="Luis Gómez <lgomez@ubiobio.cl>"

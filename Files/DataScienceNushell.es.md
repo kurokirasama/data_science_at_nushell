@@ -1,7 +1,7 @@
 ---
 title: Ciencia de Datos en la Terminal Linux con Nushell
 author: Luis Gómez Guzmán
-date: "1 Noviembre 2026"
+date: "10 Noviembre 2026"
 number_sections: true
 output: pdf_document
 graphics: true
@@ -1837,16 +1837,151 @@ let first_record = { name: "Sam", rank: 10 }
  }
 ```
 
-### Iterando sobre un Registro
+### Iterando y Transformando Registros
 
-Se puede iterar sobre los pares clave-valor de un registro transponiéndolo primero a una tabla:
+Los datos rara vez llegan listos para el consumo directo. En la práctica, cualquier flujo de análisis exige inspeccionar campos individuales, descartar ruido, transformar claves o normalizar tipos. Nushell aborda la manipulación de registros desde dos estrategias complementarias: transponer la estructura a una tabla para procesamiento secuencial, o aplicar comandos nativos del espacio de nombres `record` para transformar registros directamente en memoria.
+
+#### Transposición de Registros para Procesamiento Secuencial
+
+Cuando necesitamos tratar cada atributo como una observación independiente (por ejemplo, al generar un mensaje formateado a partir de cada clave y valor), podemos transponer el registro a una tabla de dos columnas:
 
 ```nu
 { "apples": 543, "bananas": 411, "oranges": 0 } |
-
   transpose fruit count |
+  each {|f| $"Tenemos ($f.count) ($f.fruit)" }
+```
 
-  each {|f| $"We have ($f.count) ($f.fruit)" }
+Al proyectar claves y valores en columnas separadas, habilitamos el uso directo de operadores tabulares como `each`, `where` y `sort-by`. Sin embargo, reconstruir un registro tras aplicar filtros sobre la tabla exigía históricamente un viaje de ida y vuelta poco ergonómico:
+
+```nu
+# Patrón tradicional con doble transposición:
+{ a: 10, b: 25, c: 5 } |
+  transpose k v |
+  where v > 20 |
+  transpose -r -d
+```
+
+#### Comandos Nativos de Manipulación de Registros
+
+Para evitar sobrecargas de conversión y mantener el código expresivo, Nushell ofrece una familia de subcomandos nativos bajo el prefijo `record` (`record where`, `record each`, `record walk` y `record apply`). Estas herramientas transforman registros sin necesidad de transponerlos a tablas intermedias.
+
+##### Filtrado de Campos con record where
+
+El comando `record where` filtra los atributos de un registro según una condición booleana. La clausura puede evaluar la clave (`key`) o el valor (`value`), conservando únicamente las entradas que satisfagan la prueba:
+
+```nu
+{ apples: 543, bananas: 411, oranges: 0 } | record where value > 0
+```
+
+```text
+╭─────────┬─────╮
+│ apples  │ 543 │
+│ bananas │ 411 │
+╰─────────┴─────╯
+```
+
+El filtrado por nombre de campo opera de la misma manera, facilitando la eliminación inmediata de claves sensibles o metadatos innecesarios:
+
+```nu
+{ id: 101, token: "secret_xyz", name: "Alice" } | record where key != "token"
+```
+
+```text
+╭──────┬───────╮
+│ id   │ 101   │
+│ name │ Alice │
+╰──────┴───────╯
+```
+
+##### Transformación de Claves y Valores con record each
+
+El comando `record each` genera un registro nuevo a partir de una clausura aplicada a cada par de clave y valor. La clausura toma dos argumentos posicionales, `k` y `v`, y puede retornar un registro unitario `{nueva_clave: nuevo_valor}`, una lista de dos elementos `[nueva_clave, nuevo_valor]`, o `null` para descartar el campo:
+
+```nu
+# Escalar valores numéricos y transformar claves a mayúsculas en una sola pasada:
+{ apples: 543, bananas: 411 } |
+  record each {|k, v| {($k | str uppercase): ($v * 10)}}
+```
+
+```text
+╭─────────┬──────╮
+│ APPLES  │ 5430 │
+│ BANANAS │ 4110 │
+╰─────────┴──────╯
+```
+
+Retornar una lista de dos elementos permite invertir claves y valores de manera directa:
+
+```nu
+{ a: "x", b: "y" } | record each {|k, v| [$v, $k]}
+```
+
+```text
+╭───┬───╮
+│ x │ a │
+│ y │ b │
+╰───┴───╯
+```
+
+##### Recorrido Jerárquico con record walk
+
+Las estructuras jerárquicas y anidadas son comunes al consumir respuestas en JSON o archivos de configuración complejos. En lugar de escribir funciones recursivas manuales, el comando `record walk` desciende por todos los niveles del árbol, entregando a la clausura cada valor hoja (`val`) junto con su ruta de acceso (`path`). Esta capacidad simplifica notablemente la anonimización de credenciales y la limpieza profunda:
+
+```nu
+let payload = {
+  user: "sam",
+  auth: { token: "secret_123", key: "password" },
+  host: "cluster-01"
+}
+
+$payload | record walk {|val, path|
+  if ($path | to text) =~ '(?i)token|key|password' { '***' } else { $val }
+}
+```
+
+```text
+╭──────┬───────────────────╮
+│ user │ sam               │
+│ auth │ {record 2 fields} │
+│ host │ cluster-01        │
+╰──────┴───────────────────╯
+```
+
+##### Conversiones Declarativas de Tipos con record apply
+
+Durante la fase de preparación de datos, muchas columnas o claves ingresan como cadenas de texto y deben ser convertidas a tipos primitivos específicos. En vez de encadenar múltiples comandos `update` consecutivos, `record apply` asocia un mapa de nombres de campo con sus respectivas clausuras de conversión:
+
+```nu
+{ age: "30", score: "95.5", active: "true" } | record apply {
+  age: {into int},
+  score: {into float},
+  active: {into bool}
+}
+```
+
+```text
+╭────────┬───────╮
+│ age    │ 30    │
+│ score  │ 95.50 │
+│ active │ true  │
+╰────────┴───────╯
+```
+
+##### Flujo de Registros a través de Filas de Tablas
+
+Dado que Nushell implementa sus tablas como flujos estructurados de registros, todos los comandos de la familia `record` funcionan directamente sobre cada fila al procesar tablas. Esto permite normalizar esquemas columna por columna dentro del flujo sin recurrir a bucles externos:
+
+```nu
+[[name age]; [Alice "25"] [Bob "30"]] | record apply { age: {into int} }
+```
+
+```text
+╭───┬───────┬─────╮
+│ # │ name  │ age │
+├───┼───────┼─────┤
+│ 0 │ Alice │  25 │
+│ 1 │ Bob   │  30 │
+╰───┴───────┴─────╯
 ```
 
 <!--AQUI-->

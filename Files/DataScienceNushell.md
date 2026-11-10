@@ -1,7 +1,7 @@
 ---
 title: Data Science at the Linux Terminal with Nushell
 author: Luis Gómez Guzmán
-date: "November 01, 2026"
+date: "November 10, 2026"
 number_sections: true
 output: pdf_document
 graphics: true
@@ -1709,16 +1709,151 @@ let first_record = { name: "Sam", rank: 10 }
  }
 ```
 
-### Iterating Over a Record
+### Iterating and Transforming Records
 
-We can iterate over each key-value pair of a record by first transposing it into a two-column table:
+Data processing rarely leaves records untouched. In practice, pipelines must inspect fields, filter out noise, reshape keys, and coerce values into appropriate types. Nushell approaches record manipulation through two distinct mechanisms: transposing records into tabular streams for sequence processing, and invoking native `record` subcommands for direct in-memory transformations.
+
+#### Transposing Records for Sequence Processing
+
+When you need to process record entries as independent observations (such as constructing a formatted log line from every key-value pair), transposing the record yields a two-column table:
 
 ```nu
 { "apples": 543, "bananas": 411, "oranges": 0 } |
-
   transpose fruit count |
-
   each {|f| $"We have ($f.count) ($f.fruit)" }
+```
+
+By projecting keys and values into columns, transposition brings the full power of table commands like `each`, `where`, and `sort-by` into play. Rebuilding a record from a filtered table, however, historically required an awkward roundtrip:
+
+```nu
+# Legacy transposition roundtrip to filter fields:
+{ a: 10, b: 25, c: 5 } |
+  transpose k v |
+  where v > 20 |
+  transpose -r -d
+```
+
+#### Native Record Commands
+
+To eliminate transposition overhead and keep pipelines readable, Nushell provides dedicated subcommands under the `record` namespace (`record where`, `record each`, `record walk`, and `record apply`). These commands manipulate records directly without intermediate tabular conversions.
+
+##### Filtering Fields with record where
+
+The `record where` command filters record attributes in place. The filtering closure evaluates either `key` or `value`, retaining only the entries that satisfy the predicate:
+
+```nu
+{ apples: 543, bananas: 411, oranges: 0 } | record where value > 0
+```
+
+```text
+╭─────────┬─────╮
+│ apples  │ 543 │
+│ bananas │ 411 │
+╰─────────┴─────╯
+```
+
+Filtering by key is just as straightforward, making it easy to prune sensitive tokens or unneeded metadata:
+
+```nu
+{ id: 101, token: "secret_xyz", name: "Alice" } | record where key != "token"
+```
+
+```text
+╭──────┬───────╮
+│ id   │ 101   │
+│ name │ Alice │
+╰──────┴───────╯
+```
+
+##### Transforming Keys and Values with record each
+
+The `record each` command builds a fresh record by evaluating a closure over every key-value pair. The closure accepts two positional arguments, `k` and `v`, and can return a single-field record `{new_key: new_value}`, a two-element list `[new_key, new_value]`, or `null` to drop the field entirely:
+
+```nu
+# Scale values and convert keys to uppercase in a single pass:
+{ apples: 543, bananas: 411 } |
+  record each {|k, v| {($k | str uppercase): ($v * 10)}}
+```
+
+```text
+╭─────────┬──────╮
+│ APPLES  │ 5430 │
+│ BANANAS │ 4110 │
+╰─────────┴──────╯
+```
+
+Returning a two-element list allows swapping keys and values in place:
+
+```nu
+{ a: "x", b: "y" } | record each {|k, v| [$v, $k]}
+```
+
+```text
+╭───┬───╮
+│ x │ a │
+│ y │ b │
+╰───┴───╯
+```
+
+##### Recursive Processing with record walk
+
+Hierarchical, nested records are common when parsing JSON responses or reading configuration trees. Rather than writing ad-hoc recursive functions to traverse arbitrary nesting, `record walk` descends through every branch, passing each leaf `value` and its corresponding `cell-path` into the closure. This makes redaction and deep transformations concise:
+
+```nu
+let payload = {
+  user: "sam",
+  auth: { token: "secret_123", key: "password" },
+  host: "cluster-01"
+}
+
+$payload | record walk {|val, path|
+  if ($path | to text) =~ '(?i)token|key|password' { '***' } else { $val }
+}
+```
+
+```text
+╭──────┬───────────────────╮
+│ user │ sam               │
+│ auth │ {record 2 fields} │
+│ host │ cluster-01        │
+╰──────┴───────────────────╯
+```
+
+##### Declarative Field Conversions with record apply
+
+Preparing raw inputs for statistical analysis often demands explicit type casting across several fields. Instead of chaining repetitive `update` operations, `record apply` accepts a mapping of field names to conversion closures:
+
+```nu
+{ age: "30", score: "95.5", active: "true" } | record apply {
+  age: {into int},
+  score: {into float},
+  active: {into bool}
+}
+```
+
+```text
+╭────────┬───────╮
+│ age    │ 30    │
+│ score  │ 95.50 │
+│ active │ true  │
+╰────────┴───────╯
+```
+
+##### Row Streaming Across Tables
+
+Because Nushell structures tables as streams of records, every command in the `record` family executes row by row across tabular data. Applying declarative conversions to an entire dataset requires nothing more than piping the table directly into `record apply`:
+
+```nu
+[[name age]; [Alice "25"] [Bob "30"]] | record apply { age: {into int} }
+```
+
+```text
+╭───┬───────┬─────╮
+│ # │ name  │ age │
+├───┼───────┼─────┤
+│ 0 │ Alice │  25 │
+│ 1 │ Bob   │  30 │
+╰───┴───────┴─────╯
 ```
 
 <!--AQUI-->

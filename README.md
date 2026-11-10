@@ -76,7 +76,7 @@ nu update-dsin-nushell.nu --check
 nu update-dsin-nushell.nu
 
 # Rebuild pinned to a specific version and push to GHCR
-nu update-dsin-nushell.nu --version 0.116.1 --push
+nu update-dsin-nushell.nu --version 0.117.0 --push
 ```
 
 ## Compiling the Textbook to PDF
