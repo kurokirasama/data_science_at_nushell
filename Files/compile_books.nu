@@ -93,7 +93,7 @@ def build-web [t: record] {
       --split-level=1
       --toc --toc-depth=2
       --math-method=mathml
-      --css=$t.web_css
+      $"--css=($t.web_css)"
       -M $"lang=($t.lang)"
       -M $"figureTitle=($t.fig_title)"
       -M $"figPrefix=($t.fig_title)"

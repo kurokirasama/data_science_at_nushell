@@ -18,7 +18,7 @@
       } catch(e) {}
     })();
   </script>
-  <link rel="stylesheet" href="$t.web_css" />
+  <link rel="stylesheet" href="../Files/web_book.css" />
   
   
   
@@ -420,7 +420,7 @@ Literature</a></li>
         <div class="nav-slot nav-up">
         </div>
         <div class="nav-slot nav-next">
-          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" accesskey="n" rel="next">Data Science at the Linux Terminal with Nushell &rarr;</a>
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html#reader-main" accesskey="n" rel="next">Data Science at the Linux Terminal with Nushell &rarr;</a>
         </div>
       </nav>
 
@@ -434,6 +434,332 @@ Nushell</h1>
       </div>
 
       <article class="reader-content">
+        <section class="cover-toc" aria-label="Book contents">
+          <h2>Contents</h2>
+<ul>
+<li><a href="1-chapter-1-introduction.html#chapter-1-introduction"
+id="toc-chapter-1-introduction"><span
+class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="2-chapter-2-installation.html#chapter-2-installation"
+id="toc-chapter-2-installation"><span
+class="toc-section-number">2</span> Software Installation</a>
+<ul>
+<li><a href="2-chapter-2-installation.html#windows-10"
+id="toc-windows-10"><span class="toc-section-number">2.1</span> Windows
+10+</a></li>
+<li><a href="2-chapter-2-installation.html#section-install-docker"
+id="toc-section-install-docker"><span
+class="toc-section-number">2.2</span> Linux, WSL2, and the
+<code>dsin</code> Container (Data Science in Nushell)</a></li>
+</ul></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#chapter-3-nushell-fundamentals"
+id="toc-chapter-3-nushell-fundamentals"><span
+class="toc-section-number">3</span> Nushell Fundamentals and Data
+Structures</a>
+<ul>
+<li><a href="3-chapter-3-nushell-fundamentals.html#data-science"
+id="toc-data-science"><span class="toc-section-number">3.1</span> Data
+Science</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#history-of-the-terminal"
+id="toc-history-of-the-terminal"><span
+class="toc-section-number">3.2</span> History of the Terminal</a></li>
+<li><a href="3-chapter-3-nushell-fundamentals.html#the-terminal"
+id="toc-the-terminal"><span class="toc-section-number">3.3</span> The
+Terminal</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#bashisms-and-productivity-shortcuts-in-nushell"
+id="toc-bashisms-and-productivity-shortcuts-in-nushell"><span
+class="toc-section-number">3.4</span> Bashisms and Productivity
+Shortcuts in Nushell</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#basic-elements-of-nushell"
+id="toc-basic-elements-of-nushell"><span
+class="toc-section-number">3.5</span> Basic Elements of Nushell</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#data-types-and-variables-in-nushell"
+id="toc-data-types-and-variables-in-nushell"><span
+class="toc-section-number">3.6</span> Data Types and Variables in
+Nushell</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#navigating-the-filesystem"
+id="toc-navigating-the-filesystem"><span
+class="toc-section-number">3.7</span> Navigating the Filesystem</a></li>
+<li><a href="3-chapter-3-nushell-fundamentals.html#working-with-strings"
+id="toc-working-with-strings"><span
+class="toc-section-number">3.8</span> Working with Strings</a></li>
+<li><a href="3-chapter-3-nushell-fundamentals.html#working-with-lists"
+id="toc-working-with-lists"><span class="toc-section-number">3.9</span>
+Working with Lists</a></li>
+<li><a href="3-chapter-3-nushell-fundamentals.html#working-with-records"
+id="toc-working-with-records"><span
+class="toc-section-number">3.10</span> Working with Records</a></li>
+<li><a href="3-chapter-3-nushell-fundamentals.html#working-with-tables"
+id="toc-working-with-tables"><span
+class="toc-section-number">3.11</span> Working with Tables</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#navigating-and-accessing-structured-data"
+id="toc-navigating-and-accessing-structured-data"><span
+class="toc-section-number">3.12</span> Navigating and Accessing
+Structured Data</a></li>
+<li><a
+href="3-chapter-3-nushell-fundamentals.html#in-terminal-file-editing-with-ttt"
+id="toc-in-terminal-file-editing-with-ttt"><span
+class="toc-section-number">3.13</span> In-Terminal File Editing with
+<code>ttt</code></a></li>
+<li><a href="3-chapter-3-nushell-fundamentals.html#version-control"
+id="toc-version-control"><span class="toc-section-number">3.14</span>
+Version Control</a></li>
+</ul></li>
+<li><a
+href="4-chapter-4-programming-cli-tools.html#chapter-4-programming-cli-tools"
+id="toc-chapter-4-programming-cli-tools"><span
+class="toc-section-number">4</span> Programming and Creating
+Command-Line Tools</a>
+<ul>
+<li><a
+href="4-chapter-4-programming-cli-tools.html#programming-in-nushell"
+id="toc-programming-in-nushell"><span
+class="toc-section-number">4.1</span> Programming in Nushell</a></li>
+<li><a
+href="4-chapter-4-programming-cli-tools.html#converting-one-liners-into-command-line-tools"
+id="toc-converting-one-liners-into-command-line-tools"><span
+class="toc-section-number">4.2</span> Converting One-Liners into
+Command-Line Tools</a></li>
+<li><a
+href="4-chapter-4-programming-cli-tools.html#creating-command-line-tools-with-python-and-r"
+id="toc-creating-command-line-tools-with-python-and-r"><span
+class="toc-section-number">4.3</span> Creating Command-Line Tools with
+Python and R</a></li>
+</ul></li>
+<li><a
+href="5-chapter-5-data-acquisition.html#chapter-5-data-acquisition"
+id="toc-chapter-5-data-acquisition"><span
+class="toc-section-number">5</span> Data Acquisition</a>
+<ul>
+<li><a
+href="5-chapter-5-data-acquisition.html#copying-local-files-into-the-docker-container"
+id="toc-copying-local-files-into-the-docker-container"><span
+class="toc-section-number">5.1</span> Copying Local Files into the
+Docker Container</a></li>
+<li><a
+href="5-chapter-5-data-acquisition.html#downloading-data-from-the-internet-with-http-get"
+id="toc-downloading-data-from-the-internet-with-http-get"><span
+class="toc-section-number">5.2</span> Downloading Data from the Internet
+with <code>http get</code></a></li>
+<li><a
+href="5-chapter-5-data-acquisition.html#decompressing-and-extracting-archives"
+id="toc-decompressing-and-extracting-archives"><span
+class="toc-section-number">5.3</span> Decompressing and Extracting
+Archives</a></li>
+<li><a
+href="5-chapter-5-data-acquisition.html#working-with-spreadsheets-microsoft-excel-and-csv-files"
+id="toc-working-with-spreadsheets-microsoft-excel-and-csv-files"><span
+class="toc-section-number">5.4</span> Working with Spreadsheets
+(Microsoft Excel) and CSV Files</a></li>
+<li><a
+href="5-chapter-5-data-acquisition.html#querying-relational-databases-sqlite"
+id="toc-querying-relational-databases-sqlite"><span
+class="toc-section-number">5.5</span> Querying Relational Databases
+(SQLite)</a></li>
+<li><a href="5-chapter-5-data-acquisition.html#consuming-web-apis"
+id="toc-consuming-web-apis"><span class="toc-section-number">5.6</span>
+Consuming Web APIs</a></li>
+</ul></li>
+<li><a href="6-chapter-6-data-cleaning.html#chapter-6-data-cleaning"
+id="toc-chapter-6-data-cleaning"><span
+class="toc-section-number">6</span> Data Cleaning and Transformation</a>
+<ul>
+<li><a
+href="6-chapter-6-data-cleaning.html#transformations-in-a-data-pipeline"
+id="toc-transformations-in-a-data-pipeline"><span
+class="toc-section-number">6.1</span> Transformations in a Data
+Pipeline</a></li>
+<li><a href="6-chapter-6-data-cleaning.html#plain-text"
+id="toc-plain-text"><span class="toc-section-number">6.2</span> Plain
+Text</a></li>
+<li><a href="6-chapter-6-data-cleaning.html#parsing-command-output"
+id="toc-parsing-command-output"><span
+class="toc-section-number">6.3</span> Parsing Command Output</a></li>
+<li><a href="6-chapter-6-data-cleaning.html#csv-and-structured-tables"
+id="toc-csv-and-structured-tables"><span
+class="toc-section-number">6.4</span> CSV and Structured Tables</a></li>
+<li><a
+href="6-chapter-6-data-cleaning.html#working-with-xmlhtml-and-json"
+id="toc-working-with-xmlhtml-and-json"><span
+class="toc-section-number">6.5</span> Working with XML/HTML and
+JSON</a></li>
+<li><a href="6-chapter-6-data-cleaning.html#the-nushell-polars-plugin"
+id="toc-the-nushell-polars-plugin"><span
+class="toc-section-number">6.6</span> The Nushell Polars Plugin</a></li>
+</ul></li>
+<li><a
+href="7-chapter-7-data-exploration.html#chapter-7-data-exploration"
+id="toc-chapter-7-data-exploration"><span
+class="toc-section-number">7</span> Exploratory Data Analysis and
+Visualization</a>
+<ul>
+<li><a
+href="7-chapter-7-data-exploration.html#inspecting-data-and-its-properties"
+id="toc-inspecting-data-and-its-properties"><span
+class="toc-section-number">7.1</span> Inspecting Data and Its
+Properties</a></li>
+<li><a
+href="7-chapter-7-data-exploration.html#computing-descriptive-statistics"
+id="toc-computing-descriptive-statistics"><span
+class="toc-section-number">7.2</span> Computing Descriptive
+Statistics</a></li>
+<li><a
+href="7-chapter-7-data-exploration.html#creating-statistical-visualizations-from-the-command-line"
+id="toc-creating-statistical-visualizations-from-the-command-line"><span
+class="toc-section-number">7.3</span> Creating Statistical
+Visualizations from the Command Line</a></li>
+<li><a
+href="7-chapter-7-data-exploration.html#catalog-of-statistical-graphics-via-r-and-python-scripts"
+id="toc-catalog-of-statistical-graphics-via-r-and-python-scripts"><span
+class="toc-section-number">7.4</span> Catalog of Statistical Graphics
+via R and Python Scripts</a></li>
+<li><a href="7-chapter-7-data-exploration.html#summary-1"
+id="toc-summary-1"><span class="toc-section-number">7.5</span>
+Summary</a></li>
+</ul></li>
+<li><a
+href="8-chapter-8-parallel-pipelines.html#chapter-8-parallel-pipelines"
+id="toc-chapter-8-parallel-pipelines"><span
+class="toc-section-number">8</span> Serial and Parallel Data
+Pipelines</a>
+<ul>
+<li><a
+href="8-chapter-8-parallel-pipelines.html#serial-processing-iterating-over-data-with-each"
+id="toc-serial-processing-iterating-over-data-with-each"><span
+class="toc-section-number">8.1</span> Serial Processing: Iterating Over
+Data with <code>each</code></a></li>
+<li><a
+href="8-chapter-8-parallel-pipelines.html#parallel-processing-in-nushell-with-par-each"
+id="toc-parallel-processing-in-nushell-with-par-each"><span
+class="toc-section-number">8.2</span> Parallel Processing in Nushell
+with <code>par-each</code></a></li>
+<li><a
+href="8-chapter-8-parallel-pipelines.html#process-parallelization-with-gnu-parallel-from-nushell"
+id="toc-process-parallelization-with-gnu-parallel-from-nushell"><span
+class="toc-section-number">8.3</span> Process Parallelization with GNU
+<code>parallel</code> from Nushell</a></li>
+<li><a
+href="8-chapter-8-parallel-pipelines.html#distributed-computing-across-multiple-nodes"
+id="toc-distributed-computing-across-multiple-nodes"><span
+class="toc-section-number">8.4</span> Distributed Computing Across
+Multiple Nodes</a></li>
+<li><a href="8-chapter-8-parallel-pipelines.html#summary-2"
+id="toc-summary-2"><span class="toc-section-number">8.5</span>
+Summary</a></li>
+</ul></li>
+<li><a
+href="9-chapter-9-polyglot-modeling.html#chapter-9-polyglot-modeling"
+id="toc-chapter-9-polyglot-modeling"><span
+class="toc-section-number">9</span> Polyglot Data Modeling</a>
+<ul>
+<li><a
+href="9-chapter-9-polyglot-modeling.html#data-preparation-and-exploration-of-the-wine-dataset"
+id="toc-data-preparation-and-exploration-of-the-wine-dataset"><span
+class="toc-section-number">9.1</span> Data Preparation and Exploration
+of the Wine Dataset</a></li>
+<li><a
+href="9-chapter-9-polyglot-modeling.html#dimensionality-reduction-pca-and-t-sne"
+id="toc-dimensionality-reduction-pca-and-t-sne"><span
+class="toc-section-number">9.2</span> Dimensionality Reduction (PCA and
+t-SNE)</a></li>
+<li><a href="9-chapter-9-polyglot-modeling.html#clustering"
+id="toc-clustering"><span class="toc-section-number">9.3</span>
+Clustering</a></li>
+<li><a
+href="9-chapter-9-polyglot-modeling.html#regression-predicting-wine-quality"
+id="toc-regression-predicting-wine-quality"><span
+class="toc-section-number">9.4</span> Regression: Predicting Wine
+Quality</a></li>
+<li><a
+href="9-chapter-9-polyglot-modeling.html#supervised-classification"
+id="toc-supervised-classification"><span
+class="toc-section-number">9.5</span> Supervised Classification</a></li>
+<li><a
+href="9-chapter-9-polyglot-modeling.html#modern-pipeline-native-modeling"
+id="toc-modern-pipeline-native-modeling"><span
+class="toc-section-number">9.6</span> Modern Pipeline-Native
+Modeling</a></li>
+<li><a href="9-chapter-9-polyglot-modeling.html#ch09-summary"
+id="toc-ch09-summary"><span class="toc-section-number">9.7</span>
+Chapter Summary</a></li>
+</ul></li>
+<li><a href="10-chapter-conclusion.html#chapter-conclusion"
+id="toc-chapter-conclusion"><span class="toc-section-number">10</span>
+Conclusion: The Command Line as a Data Intelligence Laboratory</a>
+<ul>
+<li><a
+href="10-chapter-conclusion.html#the-osemn-lifecycle-in-typed-shells"
+id="toc-the-osemn-lifecycle-in-typed-shells"><span
+class="toc-section-number">10.1</span> The OSEMN Lifecycle in Typed
+Shells</a></li>
+<li><a
+href="10-chapter-conclusion.html#the-intersection-of-software-engineering-and-statistics"
+id="toc-the-intersection-of-software-engineering-and-statistics"><span
+class="toc-section-number">10.2</span> The Intersection of Software
+Engineering and Statistics</a></li>
+<li><a
+href="10-chapter-conclusion.html#computational-efficiency-out-of-core-limits-and-the-zero-copy-arrow-frontier"
+id="toc-computational-efficiency-out-of-core-limits-and-the-zero-copy-arrow-frontier"><span
+class="toc-section-number">10.3</span> Computational Efficiency,
+Out-of-Core Limits, and the Zero-Copy Arrow Frontier</a></li>
+<li><a
+href="10-chapter-conclusion.html#methodological-guide-for-applied-production-projects"
+id="toc-methodological-guide-for-applied-production-projects"><span
+class="toc-section-number">10.4</span> Methodological Guide for Applied
+Production Projects</a></li>
+</ul></li>
+<li><a
+href="11-for-further-exploration-1.html#for-further-exploration-1"
+id="toc-for-further-exploration-1"><span
+class="toc-section-number">11</span> For Further Exploration</a>
+<ul>
+<li><a href="11-for-further-exploration-1.html#the-command-line"
+id="toc-the-command-line"><span class="toc-section-number">11.1</span>
+The Command Line</a></li>
+<li><a href="11-for-further-exploration-1.html#shell-programming"
+id="toc-shell-programming"><span class="toc-section-number">11.2</span>
+Shell Programming</a></li>
+<li><a href="11-for-further-exploration-1.html#python-r-and-sql"
+id="toc-python-r-and-sql"><span class="toc-section-number">11.3</span>
+Python, R, and SQL</a></li>
+<li><a href="11-for-further-exploration-1.html#apis" id="toc-apis"><span
+class="toc-section-number">11.4</span> APIs</a></li>
+<li><a href="11-for-further-exploration-1.html#machine-learning"
+id="toc-machine-learning"><span class="toc-section-number">11.5</span>
+Machine Learning</a></li>
+</ul></li>
+<li><a href="12-chapter-references.html#chapter-references"
+id="toc-chapter-references"><span class="toc-section-number">12</span>
+References</a>
+<ul>
+<li><a href="12-chapter-references.html#nushell-ecosystem"
+id="toc-nushell-ecosystem"><span class="toc-section-number">12.1</span>
+Nushell Ecosystem</a></li>
+<li><a
+href="12-chapter-references.html#data-science-at-the-command-line-dsitcl"
+id="toc-data-science-at-the-command-line-dsitcl"><span
+class="toc-section-number">12.2</span> Data Science at the Command Line
+(DSitCL)</a></li>
+<li><a
+href="12-chapter-references.html#command-line-tools-integrated-into-dsin"
+id="toc-command-line-tools-integrated-into-dsin"><span
+class="toc-section-number">12.3</span> Command-Line Tools Integrated
+into <code>dsin</code></a></li>
+<li><a
+href="12-chapter-references.html#academic-bibliography-and-literature"
+id="toc-academic-bibliography-and-literature"><span
+class="toc-section-number">12.4</span> Academic Bibliography and
+Literature</a></li>
+</ul></li>
+</ul>
+        </section>
 
       </article>
 
@@ -443,7 +769,7 @@ Nushell</h1>
         <div class="nav-slot nav-up">
         </div>
         <div class="nav-slot nav-next">
-          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" rel="next">Data Science at the Linux Terminal with Nushell &rarr;</a>
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html#reader-main" rel="next">Data Science at the Linux Terminal with Nushell &rarr;</a>
         </div>
       </nav>
     </main>

@@ -76,7 +76,7 @@ $endif$
       <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
         <div class="nav-slot nav-prev">
 $if(previous.url)$
-          <a href="$previous.url$" accesskey="p" rel="prev">&larr; $previous.title$</a>
+          <a href="$previous.url$#reader-main" accesskey="p" rel="prev">&larr; $previous.title$</a>
 $endif$
         </div>
         <div class="nav-slot nav-up">
@@ -86,7 +86,7 @@ $endif$
         </div>
         <div class="nav-slot nav-next">
 $if(next.url)$
-          <a href="$next.url$" accesskey="n" rel="next">$next.title$ &rarr;</a>
+          <a href="$next.url$#reader-main" accesskey="n" rel="next">$next.title$ &rarr;</a>
 $endif$
         </div>
       </nav>
@@ -112,13 +112,22 @@ $endif$
 $endif$
 
       <article class="reader-content">
+$if(top)$
+$else$
+$if(toc)$
+        <section class="cover-toc" aria-label="Book contents">
+          <h2>$toc_heading$</h2>
+$table-of-contents$
+        </section>
+$endif$
+$endif$
 $body$
       </article>
 
       <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
         <div class="nav-slot nav-prev">
 $if(previous.url)$
-          <a href="$previous.url$" rel="prev">&larr; $previous.title$</a>
+          <a href="$previous.url$#reader-main" rel="prev">&larr; $previous.title$</a>
 $endif$
         </div>
         <div class="nav-slot nav-up">
@@ -128,7 +137,7 @@ $endif$
         </div>
         <div class="nav-slot nav-next">
 $if(next.url)$
-          <a href="$next.url$" rel="next">$next.title$ &rarr;</a>
+          <a href="$next.url$#reader-main" rel="next">$next.title$ &rarr;</a>
 $endif$
         </div>
       </nav>

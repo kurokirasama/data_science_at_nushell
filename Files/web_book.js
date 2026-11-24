@@ -62,6 +62,8 @@
     var children = Array.isArray(node) ? node : (node.subsections || []);
     children.forEach(function (item) {
       var sec = item.section || item;
+      var lvl = parseInt(sec.level || "1", 10);
+      if (lvl > 2) return;
       var li = document.createElement("li");
       if (sec.path) {
         var a = document.createElement("a");
@@ -69,14 +71,17 @@
         var num = sec.number ? sec.number + " " : "";
         a.textContent = num + (sec.title || sec.path);
         var cleanPath = sec.path.split("#")[0];
-        if (cleanPath === currentFile) {
+        if (cleanPath === currentFile && lvl === 1) {
           a.classList.add("active");
           a.setAttribute("aria-current", "page");
         }
         li.appendChild(a);
       }
-      if (item.subsections && item.subsections.length > 0) {
-        li.appendChild(renderSitemapList(item.subsections));
+      if (item.subsections && item.subsections.length > 0 && lvl < 2) {
+        var sub = renderSitemapList(item.subsections);
+        if (sub.children.length > 0) {
+          li.appendChild(sub);
+        }
       }
       ul.appendChild(li);
     });
@@ -94,6 +99,10 @@
         if (tree.children.length > 0) {
           sidebarToc.innerHTML = "";
           sidebarToc.appendChild(tree);
+          var activeLink = sidebarToc.querySelector("a.active");
+          if (activeLink && activeLink.scrollIntoView) {
+            activeLink.scrollIntoView({ block: "nearest" });
+          }
         }
       })
       .catch(function () {
