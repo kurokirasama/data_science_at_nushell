@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <title>Instalación de Software</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #ececec; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { color: #bb00ff; } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { color: #ffa500; } /* Constant */
+code span.co { color: #008f00; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fu { color: #006666; font-weight: bold; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { color: #e45649; } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Ciencia de Datos en la Terminal Linux con Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Portal del Curso</a>
+      <a class="header-pill" href="../../read/">English</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.epub" download>EPUB</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contenido</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="1-chapter-1-introduction.html" accesskey="p" rel="prev">&larr; Introducción</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" accesskey="u" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="3-chapter-3-nushell-fundamentals.html" accesskey="n" rel="next">Fundamentos y Estructuras de Datos en Nushell &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="2" id="chapter-2-installation"><span
+class="header-section-number">2</span> Instalación de Software</h1>
+<p>En esta sección se entregaran las instrucciones para instalar el
+software necesario para este libro, tanto en Windows 10+ como en Linux,
+para distribución basada en Debian como Ubuntu.</p>
+<h2 data-number="2.1" id="windows-10"><span
+class="header-section-number">2.1</span> Windows 10+</h2>
+<h3 data-number="2.1.1" id="instalación-ubuntu-wsl"><span
+class="header-section-number">2.1.1</span> Instalación Ubuntu WSL</h3>
+<ol type="1">
+<li>Habilitar WSL1, ejecutando en Powershell (con permisos de
+administrador):</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Enable-WindowsOptionalFeature <span class="op">-</span>Online <span class="op">-</span>FeatureName Microsoft-Windows-Subsystem-Linux</span></code></pre></div>
+<ol start="2" type="1">
+<li>Habilitar VMP, ejecutando en Powershell:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Enable-WindowsOptionalFeature <span class="op">-</span>Online <span class="op">-</span>FeatureName VirtualMachinePlatform</span></code></pre></div>
+<ol start="3" type="1">
+<li>Listar las distribuciones disponibles y seleccionar (recomendada
+Ubuntu 24.04):</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>list <span class="op">--</span>online</span></code></pre></div>
+<ol start="4" type="1">
+<li>Instalamos la distribución seleccionada:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>install <span class="op">-</span>d Ubuntu-24<span class="op">.</span><span class="dv">04</span></span></code></pre></div>
+<ol start="4" type="1">
+<li>Configuramos para que la distribución Linux en WSL use v2.
+Ejecutamos en Powershell:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>set-version Ubuntu-24<span class="op">.</span><span class="dv">04</span> <span class="dv">2</span></span></code></pre></div>
+<p>Para hacerlo por defecto en todas las distribuciones
+(recomendado):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>set-default-version <span class="dv">2</span></span></code></pre></div>
+<ol start="5" type="1">
+<li>Actualizar kernel. Descarga desde <a
+href="https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi">WSL</a>
+e instalar.</li>
+</ol>
+<h3 data-number="2.1.2" id="instalación-de-docker"><span
+class="header-section-number">2.1.2</span> Instalación de Docker</h3>
+<ol type="1">
+<li><p>Descargar instalador Docker para Windows desde: <a
+href="https://docs.docker.com/desktop/install/windows-install/">docker</a>
+y ejecutar. Seleccionar “Usar WSL 2…”.</p></li>
+<li><p>Habilitar “Iniciar Docker al iniciar sesión”, en la configuración
+de Docker.</p></li>
+<li><p>Reiniciar.</p></li>
+</ol>
+<h3 data-number="2.1.3" id="abrir-distribución"><span
+class="header-section-number">2.1.3</span> Abrir distribución</h3>
+<p>Para entrar a la distribución instalada, ejecutar en <code>cmd</code>
+o <code>powershell</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>wsl</span></code></pre></div>
+<h2 data-number="2.2" id="section-install-docker"><span
+class="header-section-number">2.2</span> Linux, WSL2 y el Contenedor
+<code>dsin</code> (Data Science in Nushell)</h2>
+<p>En este libro trabajaremos sobre una imagen Docker integrada llamada
+<strong><code>dsin</code></strong> (<em>Data Science in Nushell</em>),
+publicada en <code>ghcr.io/kurokirasama/dsin:latest</code>. A diferencia
+de los entornos tradicionales basados en <em>shells</em> de texto plano,
+el contenedor <code>dsin</code> inicia directamente en
+<strong>Nushell</strong> como <em>shell</em> predeterminado en el
+directorio de trabajo <code>/data</code>, e incluye preconfigurados:</p>
+<ul>
+<li><strong>Nushell (<code>nu</code>)</strong> y su suite completa de
+complementos registrados: <strong><code>nu_plugin_polars</code></strong>
+(motor de DataFrames Arrow/Polars),
+<strong><code>nu_plugin_formats</code></strong>,
+<strong><code>nu_plugin_gstat</code></strong>,
+<strong><code>nu_plugin_inc</code></strong>,
+<strong><code>nu_plugin_query</code></strong>,
+<strong><code>nu_plugin_file</code></strong>,
+<strong><code>nu_plugin_plot</code></strong> (gráficos en la terminal) y
+<strong><code>nu_plugin_port_extension</code></strong>.</li>
+<li><strong>Directorio <code>/data</code> integrado por
+defecto:</strong> Contiene todas las carpetas de datos del libro
+organizadas exactamente según el número del capítulo en que se utilizan
+(<code>/data/ch03</code>, <code>/data/ch04</code>,
+<code>/data/ch05</code>, <code>/data/ch06</code>,
+<code>/data/ch07</code>, <code>/data/ch08</code> y
+<code>/data/ch09</code>), sin necesidad de descargas ni configuraciones
+manuales adicionales.</li>
+<li><strong>Editor de texto en terminal <code>ttt</code></strong> en
+<code>$env.PATH</code> con resaltado de sintaxis y atajos
+preconfigurados.</li>
+<li><strong>Visor gráfico de terminal <code>timg</code></strong> en
+<code>$env.PATH</code> para inspeccionar imágenes y gráficos
+estadísticos directamente en la consola.</li>
+<li><strong>Ecosistema políglota:</strong> R (<code>Rscript</code>,
+<code>tidyverse</code>, <code>ggplot2</code>, <code>rpart</code>,
+<code>class</code>, <code>cluster</code>), Python 3
+(<code>pandas</code>, <code>scikit-learn</code>, <code>scipy</code>,
+<code>matplotlib</code>, <code>seaborn</code>, <code>skll</code>),
+<strong>GNU Parallel (<code>parallel</code>)</strong>, <strong>Tapkee
+(<code>tapkee</code>)</strong> y <strong>Vowpal Wabbit
+(<code>vw</code>)</strong>.</li>
+<li><strong>Módulo de herramientas del libro
+(<code>dsin_tools.nu</code>):</strong> Comandos personalizados
+(<code>to-vw</code>, <code>vw-regress</code>,
+<code>tapkee-reduce</code>, <code>kmeans-cluster</code>) cargados
+automáticamente al iniciar.</li>
+</ul>
+<h3 data-number="2.2.1"
+id="instalación-de-docker-en-linux-wsl-basado-en-debianubuntu"><span
+class="header-section-number">2.2.1</span> Instalación de Docker en
+Linux / WSL (basado en Debian/Ubuntu)</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt upgrade <span class="at">-y</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> ca-certificates curl gnupg lsb-release git</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-aG</span> docker <span class="va">$USER</span></span></code></pre></div>
+<h3 data-number="2.2.2"
+id="instalación-de-docker-en-linux-basado-en-arch-cachyos-manjaro"><span
+class="header-section-number">2.2.2</span> Instalación de Docker en
+Linux (basado en Arch / CachyOS / Manjaro)</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> pacman <span class="at">-Syu</span> <span class="at">--needed</span> docker docker-buildx docker-compose git</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable <span class="at">--now</span> docker.service</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-aG</span> docker <span class="va">$USER</span></span></code></pre></div>
+<h3 data-number="2.2.3"
+id="descarga-y-ejecución-del-contenedor-dsin"><span
+class="header-section-number">2.2.3</span> Descarga y Ejecución del
+Contenedor <code>dsin</code></h3>
+<p>Para descargar la imagen oficial del libro desde GitHub Container
+Registry:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> pull ghcr.io/kurokirasama/dsin:latest</span></code></pre></div>
+<p>Para iniciar una sesión interactiva en el contenedor con el entorno
+listo para usar, ejecutamos:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="at">-it</span> ghcr.io/kurokirasama/dsin:latest</span></code></pre></div>
+<h3 data-number="2.2.4"
+id="crear-alias-para-llamado-simple-opcional"><span
+class="header-section-number">2.2.4</span> Crear alias para llamado
+simple (opcional)</h3>
+<p>Si deseas iniciar el contenedor escribiendo únicamente
+<code>dsin</code> en tu terminal anfitriona, puedes definir un alias en
+tu archivo de configuración del shell anfitrión (<code>~/.bashrc</code>
+o <code>~/.config/nushell/config.nu</code>):</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">alias</span> dsin=<span class="st">&#39;docker run --rm -it ghcr.io/kurokirasama/dsin:latest&#39;</span></span></code></pre></div>
+<p>Una vez dentro del contenedor <code>dsin</code>, verificamos que nos
+encontramos en <code>/home/dsin</code>, inspeccionamos las carpetas de
+los capítulos en <code>/data</code> y comprobamos que todas las
+herramientas y complementos están disponibles:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">pwd</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">/</span>data</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">version</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">which</span> <span class="bu">nu</span> <span class="bu">ttt</span> <span class="bu">timg</span> <span class="bu">parallel</span> <span class="bu">vw</span> <span class="bu">tapkee</span> run_experiment <span class="bu">Rscript</span> <span class="bu">python3</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">plugin list</span></span></code></pre></div>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="1-chapter-1-introduction.html" rel="prev">&larr; Introducción</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="3-chapter-3-nushell-fundamentals.html" rel="next">Fundamentos y Estructuras de Datos en Nushell &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Ciencia de Datos en la Terminal Linux con Nushell</span>
+    <span>&bull; 24 Noviembre 2026</span>
+    <span>&bull; <a href="../">Portal del Curso</a></span>
+  </footer>
+
+  <script src="../../Files/web_book.js" defer></script>
+</body>
+</html>

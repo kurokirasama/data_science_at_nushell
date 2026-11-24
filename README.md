@@ -9,9 +9,10 @@
 
 **Practical Guide and Textbook** for **Data Science at the Command Line** with **Nushell**
 
-- 📖 **Web Portal & Direct Downloads:** [https://kurokirasama.github.io/data_science_at_nushell/](https://kurokirasama.github.io/data_science_at_nushell/)
-- 📄 **English Edition PDF:** [DataScienceNushell.pdf](Files/DataScienceNushell.pdf) • [Direct Online Link](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.pdf)
-- 📄 **Spanish Edition PDF:** [DataScienceNushell.es.pdf](Files/DataScienceNushell.es.pdf) • [Direct Online Link](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)
+- 📖 **Web Portal & Downloads:** [https://kurokirasama.github.io/data_science_at_nushell/](https://kurokirasama.github.io/data_science_at_nushell/)
+- 🌐 **Read Online (HTML5 Web Book):** [English Edition](https://kurokirasama.github.io/data_science_at_nushell/read/) • [Spanish Edition](https://kurokirasama.github.io/data_science_at_nushell/es/read/)
+- 📄 **English Edition:** [PDF](Files/DataScienceNushell.pdf) ([Online](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.pdf)) • [EPUB3](Files/DataScienceNushell.epub) ([Online](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.epub))
+- 📄 **Spanish Edition:** [PDF](Files/DataScienceNushell.es.pdf) ([Online](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)) • [EPUB3](Files/DataScienceNushell.es.epub) ([Online](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.epub))
 
 ## Description
 
@@ -79,41 +80,40 @@ nu update-dsin-nushell.nu
 nu update-dsin-nushell.nu --version 0.117.0 --push
 ```
 
-## Compiling the Textbook to PDF
+## Compiling the Textbook (PDF, EPUB3 & Web Book)
 
-To compile the official PDF document using XeLaTeX, complete with native Nushell syntax highlighting and transparent suppression of test directives via the Lua filter:
+To compile PDF (XeLaTeX), EPUB3, and static multi-chapter HTML5 web books (`read/`, `es/read/`) with native Nushell syntax highlighting and `hide_skip.lua`:
 
 ```bash
-# Compile all editions via the Nushell helper:
+# Compile all editions and formats (PDF, EPUB3, and Web Book):
 nu Files/compile_books.nu
 
-# Or compile manually with Pandoc:
-cd Files
-pandoc --pdf-engine=xelatex \
-  --lua-filter=hide_skip.lua \
-  --syntax-definition=nu.xml \
-  --syntax-definition=nushell.xml \
-  --syntax-highlighting=pandoc_highlight.theme \
-  DataScienceNushell.md -o DataScienceNushell.pdf
+# Or compile a specific format ("pdf", "epub", or "web") or edition ("en", "es"):
+nu Files/compile_books.nu --edition en --format epub
+nu Files/compile_books.nu --edition all --format web
 ```
 
 ## Repository Structure
 
 ```text
 ├── Files/
-│   ├── DataScienceNushell.md      # Primary English textbook (Pandoc Markdown)
-│   ├── DataScienceNushell.es.md   # Spanish textbook (Pandoc Markdown)
-│   ├── DataScienceNushell.pdf     # Compiled English PDF (XeLaTeX)
-│   ├── DataScienceNushell.es.pdf  # Compiled Spanish PDF (XeLaTeX)
-│   ├── *.png / *.jpg              # Course diagrams and figures
-│   └── data/                      # Per-chapter data sets (ch03..ch09) bundled into /data
+│   ├── DataScienceNushell.md       # Primary English textbook (Pandoc Markdown)
+│   ├── DataScienceNushell.es.md    # Spanish textbook (Pandoc Markdown)
+│   ├── DataScienceNushell.pdf      # Compiled English PDF (XeLaTeX)
+│   ├── DataScienceNushell.es.pdf   # Compiled Spanish PDF (XeLaTeX)
+│   ├── DataScienceNushell.epub     # Compiled English EPUB3
+│   ├── DataScienceNushell.es.epub  # Compiled Spanish EPUB3
+│   ├── *.png / *.jpg               # Course diagrams and figures
+│   └── data/                       # Per-chapter data sets (ch03..ch09) bundled into /data
+├── read/                           # Static HTML5 English Web Book (GitHub Pages)
+├── es/read/                        # Static HTML5 Spanish Web Book (GitHub Pages)
 ├── docker/
-│   ├── Dockerfile                 # Standalone dsin Docker image definition
-│   ├── UPSTREAM_AUDIT.md          # Upstream audit and fixes for dsatcl2e issues
-│   ├── config.nu                  # Custom Nushell configuration for dsin
-│   ├── dsin_tools.nu              # Nushell modeling commands (VW, Tapkee, K-Means)
-│   └── update-dsin-nushell.nu     # Updater script copy in docker/
-├── update-dsin-nushell.nu         # Primary Nushell upgrade automation script
-├── README.md                      # Primary English documentation
-└── README.es.md                   # Spanish documentation
+│   ├── Dockerfile                  # Standalone dsin Docker image definition
+│   ├── UPSTREAM_AUDIT.md           # Upstream audit and fixes for dsatcl2e issues
+│   ├── config.nu                   # Custom Nushell configuration for dsin
+│   ├── dsin_tools.nu               # Nushell modeling commands (VW, Tapkee, K-Means)
+│   └── update-dsin-nushell.nu      # Updater script copy in docker/
+├── update-dsin-nushell.nu          # Primary Nushell upgrade automation script
+├── README.md                       # Primary English documentation
+└── README.es.md                    # Spanish documentation
 ```

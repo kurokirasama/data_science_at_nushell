@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <meta name="dcterms.date" content="2026-11-24" />
+  <title>Serial and Parallel Data Pipelines</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #ececec; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { color: #bb00ff; } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { color: #ffa500; } /* Constant */
+code span.co { color: #008f00; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fu { color: #006666; font-weight: bold; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { color: #e45649; } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Data Science at the Linux Terminal with Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Course Portal</a>
+      <a class="header-pill" href="../es/read/">Español</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.epub" download>EPUB</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contents</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="7-chapter-7-data-exploration.html" accesskey="p" rel="prev">&larr; Exploratory Data Analysis and Visualization</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" accesskey="u" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="9-chapter-9-polyglot-modeling.html" accesskey="n" rel="next">Polyglot Data Modeling &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="8" id="chapter-8-parallel-pipelines"><span
+class="header-section-number">8</span> Serial and Parallel Data
+Pipelines</h1>
+<p>Computational data science pipelines routinely handle computationally
+intensive tasks: iterating over thousands of URLs, parsing gigabytes of
+server logs, computing cross-validated machine learning benchmarks, or
+applying image processing algorithms across thousands of images.</p>
+<p>When tasks are executed sequentially (in series), throughput is bound
+by a single CPU core, leaving the remaining cores of modern multicore
+processors idle. In this chapter, we explore how to parallelize
+pipelines using Nushell native multi-threaded iterator
+<strong><code>par-each</code></strong> as well as the external process
+parallelizer <strong>GNU <code>parallel</code></strong>.</p>
+<p>We begin by navigating into <code>/data/ch08</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="op">/</span>data<span class="op">/</span>ch08</span></code></pre></div>
+<p>From this point forward, commands in this chapter execute within
+<code>/data/ch08</code>. Let us inspect the available files:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span></span></code></pre></div>
+<h2 data-number="8.1"
+id="serial-processing-iterating-over-data-with-each"><span
+class="header-section-number">8.1</span> Serial Processing: Iterating
+Over Data with <code>each</code></h2>
+<p>The <code>each</code> command iterates sequentially over elements in
+a collection, list, or table, evaluating a closure for each element and
+emitting results in original input order.</p>
+<p>Consider evaluating an integer sequence from 1 to 10 to identify
+multiples of 3:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..10</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span>x<span class="op">|</span> {n: <span class="va">$x</span>, cuadrado: (<span class="va">$x</span> <span class="op">*</span> <span class="va">$x</span>), es_mult_3: ((<span class="va">$x</span> mod <span class="dv">3</span>) <span class="op">==</span> <span class="dv">0</span>)} }</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..10</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span>x<span class="op">|</span> {n: <span class="va">$x</span>, cuadrado: (<span class="va">$x</span> <span class="op">*</span> <span class="va">$x</span>), es_mult_3: ((<span class="va">$x</span> mod <span class="dv">3</span>) <span class="op">==</span> <span class="dv">0</span>)} } <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> squares_table.<span class="bu">csv</span></span></code></pre></div>
+<p>For high-precision mathematical operations, external utilities like
+<strong><code>bc -l</code></strong> can be invoked from within
+closures:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..5</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">pbc</span> <span class="st">&quot;{1}^2&quot;</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span>v<span class="op">|</span> <span class="va">$v</span> <span class="op">|</span> <span class="bu">into int</span> }</span></code></pre></div>
+<h3 data-number="8.1.1" id="iterating-over-lines-and-rows"><span
+class="header-section-number">8.1.1</span> Iterating Over Lines and
+Rows</h3>
+<p>When iterating over structured datasets, <code>each</code> receives
+entire records, granting access to individual fields via record dot
+notation. Here, we iterate over <code>input.csv</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> movies.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span><span class="bu">row</span><span class="op">|</span> {<span class="bu">idx</span>: <span class="va">$row.index</span>, movie: (<span class="va">$row.item</span> <span class="op">|</span> <span class="bu">str trim</span>), <span class="bu">chars</span>: (<span class="va">$row.item</span> <span class="op">|</span> <span class="bu">str length</span>)} }</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> movies.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span><span class="bu">row</span><span class="op">|</span> {<span class="bu">idx</span>: <span class="va">$row.index</span>, movie: (<span class="va">$row.item</span> <span class="op">|</span> <span class="bu">str trim</span>), <span class="bu">chars</span>: (<span class="va">$row.item</span> <span class="op">|</span> <span class="bu">str length</span>)} } <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> movies_summary.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="8.1.2" id="iterating-over-files"><span
+class="header-section-number">8.1.2</span> Iterating Over Files</h3>
+<p>To process collections of files sequentially, we pipeline directory
+listings from <code>ls</code> into <code>each</code>, transforming and
+persisting each artifact:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">*</span>.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span>f<span class="op">|</span> {archivo: <span class="va">$f.name</span>, <span class="bu">bytes</span>: <span class="va">$f.size</span>, filas: (<span class="bu">open</span> <span class="va">$f.name</span> <span class="op">|</span> <span class="bu">length</span>)} }</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">*</span>.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span>f<span class="op">|</span> {archivo: <span class="va">$f.name</span>, <span class="bu">bytes</span>: <span class="va">$f.size</span>, filas: (<span class="bu">open</span> <span class="va">$f.name</span> <span class="op">|</span> <span class="bu">length</span>)} } <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> csv_inventory.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="8.2"
+id="parallel-processing-in-nushell-with-par-each"><span
+class="header-section-number">8.2</span> Parallel Processing in Nushell
+with <code>par-each</code></h2>
+<p>While <code>each</code> processes items sequentially,
+<strong><code>par-each</code></strong> distributes closures across an
+asynchronous thread pool, processing multiple items concurrently across
+available CPU cores.</p>
+<figure>
+<img src="../Files/dscl_0801.png" style="width:85.0%"
+alt="Conceptual comparison between sequential and parallel execution" />
+<figcaption aria-hidden="true">Conceptual comparison between sequential
+and parallel execution</figcaption>
+</figure>
+<p>To quantify performance differences between serial and parallel
+execution, we use <code>timeit</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..4</span> <span class="op">|</span> <span class="bu">par-each</span> <span class="at">--threads</span> <span class="dv">4</span> {<span class="op">|</span>i<span class="op">|</span> {<span class="bu">job</span>: <span class="va">$i</span>, msg: <span class="st">$&quot;Tarea </span><span class="op">(</span><span class="va">$i</span><span class="op">)</span><span class="st"> completada&quot;</span>} }</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..4</span> <span class="op">|</span> <span class="bu">par-each</span> <span class="at">--threads</span> <span class="dv">4</span> <span class="at">--keep-order</span> {<span class="op">|</span>i<span class="op">|</span> {<span class="bu">job</span>: <span class="va">$i</span>, cuadrado: (<span class="va">$i</span> <span class="op">*</span> <span class="va">$i</span>)} } <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> parallel_jobs.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="8.2.1"
+id="concurrent-execution-and-thread-control"><span
+class="header-section-number">8.2.1</span> Concurrent Execution and
+Thread Control</h3>
+<p>Two essential flags govern <code>par-each</code> behavior:</p>
+<ul>
+<li><strong><code>--threads</code> (<code>-t</code>):</strong> Restricts
+the maximum number of concurrent threads allocated to the execution
+pool.</li>
+<li><strong><code>--keep-order</code> (<code>-k</code>):</strong>
+Guarantees that outputs appear in the exact order of the input
+collection, even if worker threads complete out of sequence.</li>
+</ul>
+<h2 data-number="8.3"
+id="process-parallelization-with-gnu-parallel-from-nushell"><span
+class="header-section-number">8.3</span> Process Parallelization with
+GNU <code>parallel</code> from Nushell</h2>
+<p>When parallelization involves coordinating external CLI binaries,
+legacy shell scripts, or distributing work across remote networked
+clusters via SSH, <strong>GNU <code>parallel</code></strong> provides an
+industrial-grade workload manager.</p>
+<figure>
+<img src="../Files/dscl_0802.png" style="width:85.0%"
+alt="Execution flow of GNU parallel distributing arguments across multiple cores" />
+<figcaption aria-hidden="true">Execution flow of GNU parallel
+distributing arguments across multiple cores</figcaption>
+</figure>
+<h3 data-number="8.3.1"
+id="specifying-arguments-and-replacement-tokens"><span
+class="header-section-number">8.3.1</span> Specifying Arguments and
+Replacement Tokens</h3>
+<p>GNU <code>parallel</code> utilizes positional token placeholders to
+inject arguments into target commands:</p>
+<ul>
+<li><strong><code>{}</code>:</strong> Complete input argument
+string.</li>
+<li><strong><code>{/}</code>:</strong> Filename basename with directory
+components stripped.</li>
+<li><strong><code>{.}</code>:</strong> Filename stem with directory
+intact but final extension stripped.</li>
+<li><strong><code>{/.}</code>:</strong> Basename with both parent
+directory and extension stripped.</li>
+<li><strong><code>{#}</code>:</strong> Incremental job sequence
+number.</li>
+</ul>
+<p>We can invoke <code>parallel</code> directly from Nushell, piping its
+output into a structured table:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="bu">input</span>.<span class="bu">csv</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">input</span>.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">parallel</span> <span class="at">--colsep</span> <span class="st">&#39;,&#39;</span> <span class="at">--header</span> : <span class="st">&quot;echo {name}:{quantity}&quot;</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">|</span> <span class="bu">str contains</span> <span class="st">&quot;:&quot;</span>) <span class="op">|</span> <span class="bu">split column</span> <span class="st">&quot;:&quot;</span> nombre cantidad <span class="op">|</span> <span class="kw">collect</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> input_parallel.<span class="bu">csv</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> input_parallel.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="8.3.2" id="controlling-concurrent-jobs"><span
+class="header-section-number">8.3.2</span> Controlling Concurrent
+Jobs</h3>
+<p>By default, GNU <code>parallel</code> spawns one worker job per CPU
+core. The <code>--jobs</code> (<code>-j</code>) flag adjusts concurrency
+explicitly (e.g., <code>-j 4</code>, <code>-j 200%</code>, or
+<code>-j +2</code>):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..4</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">parallel</span> <span class="at">-j</span> <span class="dv">4</span> <span class="st">&quot;sh slow.sh {}&quot;</span> <span class="op">|</span> <span class="bu">lines</span></span></code></pre></div>
+<h3 data-number="8.3.3" id="output-logging-and-tagging"><span
+class="header-section-number">8.3.3</span> Output Logging and
+Tagging</h3>
+<p>When multiple background processes write to standard output
+concurrently, their emissions can become interleaved.</p>
+<figure>
+<img src="../Files/dscl_0803.png" style="width:85.0%"
+alt="Interleaved outputs when multiple processes write concurrently" />
+<figcaption aria-hidden="true">Interleaved outputs when multiple
+processes write concurrently</figcaption>
+</figure>
+<p>GNU <code>parallel</code> prevents interleaved corruption by
+capturing process buffers and emitting complete outputs per job. Useful
+control flags include:</p>
+<ul>
+<li><strong><code>--keep-order</code> (<code>-k</code>):</strong> Emits
+output in input order.</li>
+<li><strong><code>--tag</code>:</strong> Prefixes each output line with
+its input argument.</li>
+<li><strong><code>--results &lt;dir&gt;</code>:</strong> Directs stdout,
+stderr, and exit codes into a structured directory hierarchy.</li>
+</ul>
+<p>We run <code>parallel</code> with
+<code>--results salida_parallel</code> and parse the generated records
+directly in Nushell:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..5</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">parallel</span> <span class="at">-k</span> <span class="at">--tag</span> <span class="st">&quot;echo $(( {} * 10 ))&quot;</span> <span class="op">|</span> <span class="bu">from tsv</span> <span class="at">--noheaders</span> <span class="op">|</span> <span class="bu">rename</span> arg resultado</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..5</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">parallel</span> <span class="at">-k</span> <span class="at">--tag</span> <span class="st">&quot;echo $(( {} * 10 ))&quot;</span> <span class="op">|</span> <span class="bu">from tsv</span> <span class="at">--noheaders</span> <span class="op">|</span> <span class="bu">rename</span> arg resultado <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tagged_output.<span class="bu">csv</span></span></code></pre></div>
+<p>We can likewise combine <code>parallel</code> with utilities like
+<strong><code>seq</code></strong>, <strong><code>bc</code></strong>, or
+<strong><code>jq</code></strong>:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>[<span class="st">&quot;Nushell&quot;</span>, <span class="st">&quot;Polars&quot;</span>] <span class="op">|</span> <span class="bu">str join</span> <span class="st">&quot;\n&quot;</span> <span class="op">|</span> <span class="bu">parallel</span> <span class="at">-k</span> <span class="st">&quot;cowsay {}&quot;</span></span></code></pre></div>
+<h3 data-number="8.3.4" id="parallel-tools-and-block-processing"><span
+class="header-section-number">8.3.4</span> Parallel Tools and Block
+Processing</h3>
+<p>When processing massive single files (such as a multi-gigabyte CSV or
+JSON stream), parallelizing line-by-line is inefficient. The
+<strong><code>--pipe</code></strong> flag partitions input streams into
+multi-megabyte blocks, feeding each block to a separate worker
+process:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> movies.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">parallel</span> <span class="at">--pipe</span> <span class="at">-N</span> <span class="dv">3</span> <span class="st">&quot;wc -l&quot;</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> {<span class="op">|</span>x<span class="op">|</span> <span class="va">$x</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">into int</span> } <span class="op">|</span> <span class="bu">math sum</span></span></code></pre></div>
+<h2 data-number="8.4"
+id="distributed-computing-across-multiple-nodes"><span
+class="header-section-number">8.4</span> Distributed Computing Across
+Multiple Nodes</h2>
+<p>Beyond single-machine multicore execution, GNU <code>parallel</code>
+can distribute computations across clusters of remote servers using
+SSH.</p>
+<h3 data-number="8.4.1" id="discovering-active-cluster-nodes"><span
+class="header-section-number">8.4.1</span> Discovering Active Cluster
+Nodes</h3>
+<p>Cluster node hostnames or IP addresses can be enumerated in a
+configuration file (<code>~/.parallel/cluster_hosts</code> or
+<code>/data/ch08/servers.txt</code>).</p>
+<h3 data-number="8.4.2"
+id="running-commands-across-all-cluster-nodes"><span
+class="header-section-number">8.4.2</span> Running Commands Across All
+Cluster Nodes</h3>
+<p>To audit operating system metrics or check software versions across
+all cluster nodes:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">parallel</span> <span class="at">--nonall</span> <span class="at">--slf</span> hosts.txt <span class="st">&quot;nu --version&quot;</span></span></code></pre></div>
+<h3 data-number="8.4.3"
+id="distributing-local-data-streams-across-cluster-nodes"><span
+class="header-section-number">8.4.3</span> Distributing Local Data
+Streams Across Cluster Nodes</h3>
+<p>To stream local data chunks across cluster nodes for distributed
+processing:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> gran_dataset.csv <span class="kw">|</span> <span class="ex">parallel</span> <span class="at">--pipe</span> <span class="at">--header</span> : <span class="at">--block</span> 50M <span class="at">--slf</span> hosts.txt <span class="st">&quot;nu -c </span><span class="dt">\&quot;</span><span class="st">from csv | where amount &gt; 100 | to csv</span><span class="dt">\&quot;</span><span class="st">&quot;</span> <span class="op">&gt;</span> filtrado_distribuido.csv</span></code></pre></div>
+<h3 data-number="8.4.4" id="processing-files-on-remote-nodes"><span
+class="header-section-number">8.4.4</span> Processing Files on Remote
+Nodes</h3>
+<p>GNU <code>parallel</code> can automatically upload input files to
+remote nodes via SCP/rsync, execute analytical workloads remotely, and
+transfer result files back to the local coordinator:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="pp">*</span>.csv <span class="kw">|</span> <span class="ex">parallel</span> <span class="at">--slf</span> hosts.txt <span class="at">--transferfile</span> {} <span class="at">--return</span> {.}_clean.csv <span class="st">&quot;nu limpiar_lote.nu {} {.}_clean.csv&quot;</span></span></code></pre></div>
+<h2 data-number="8.5" id="summary-2"><span
+class="header-section-number">8.5</span> Summary</h2>
+<p>Parallel processing accelerates computationally intensive data
+science pipelines by fully utilizing modern multicore and networked
+hardware. Nushell native <strong><code>par-each</code></strong> provides
+zero-overhead in-memory concurrency for internal table and collection
+transformations. For orchestrating external binaries, batch file
+transformations, or distributed cluster computing across SSH nodes,
+<strong>GNU <code>parallel</code></strong> pairs seamlessly with Nushell
+pipelines.</p>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="7-chapter-7-data-exploration.html" rel="prev">&larr; Exploratory Data Analysis and Visualization</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="9-chapter-9-polyglot-modeling.html" rel="next">Polyglot Data Modeling &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Data Science at the Linux Terminal with Nushell</span>
+    <span>&bull; November 24, 2026</span>
+    <span>&bull; <a href="../">Course Portal</a></span>
+  </footer>
+
+  <script src="../Files/web_book.js" defer></script>
+</body>
+</html>

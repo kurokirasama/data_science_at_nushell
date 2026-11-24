@@ -6,9 +6,10 @@
 
 **Guía práctica y libro** de **Ciencia de Datos en la Línea de Comandos** con **Nushell**
 
-- 📖 **Portal Web y Descarga Directa:** [https://kurokirasama.github.io/data_science_at_nushell/es/](https://kurokirasama.github.io/data_science_at_nushell/es/)
-- 📄 **Edición Oficial en Español (PDF):** [DataScienceNushell.es.pdf](Files/DataScienceNushell.es.pdf) • [Enlace directo en línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)
-- 📄 **Edición en Inglés (PDF):** [DataScienceNushell.pdf](Files/DataScienceNushell.pdf) • [Enlace directo en línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.pdf)
+- 📖 **Portal Web y Descargas:** [https://kurokirasama.github.io/data_science_at_nushell/es/](https://kurokirasama.github.io/data_science_at_nushell/es/)
+- 🌐 **Leer en línea (Libro Web HTML5):** [Edición en Español](https://kurokirasama.github.io/data_science_at_nushell/es/read/) • [Edición en Inglés](https://kurokirasama.github.io/data_science_at_nushell/read/)
+- 📄 **Edición Oficial en Español:** [PDF](Files/DataScienceNushell.es.pdf) ([En línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.pdf)) • [EPUB3](Files/DataScienceNushell.es.epub) ([En línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.es.epub))
+- 📄 **Edición en Inglés:** [PDF](Files/DataScienceNushell.pdf) ([En línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.pdf)) • [EPUB3](Files/DataScienceNushell.epub) ([En línea](https://kurokirasama.github.io/data_science_at_nushell/Files/DataScienceNushell.epub))
 
 ## Descripción
 
@@ -76,41 +77,40 @@ nu update-dsin-nushell.nu
 nu update-dsin-nushell.nu --version 0.117.0 --push
 ```
 
-## Compilación del Libro a PDF
+## Compilación del Libro (PDF, EPUB3 y Libro Web)
 
-Para generar el documento PDF oficial con XeLaTeX, resaltado de sintaxis nativo para Nushell y ocultamiento transparente de directivas de prueba mediante el filtro Lua:
+Para compilar las ediciones en PDF (XeLaTeX), EPUB3 y libro web HTML5 multipágina (`read/`, `es/read/`) con resaltado de sintaxis nativo para Nushell y ocultamiento de directivas mediante `hide_skip.lua`:
 
 ```bash
-# Compilar todas las ediciones mediante el script en Nushell:
+# Compilar todas las ediciones y formatos (PDF, EPUB3 y Libro Web):
 nu Files/compile_books.nu
 
-# O compilar directamente con Pandoc:
-cd Files
-pandoc --pdf-engine=xelatex \
-  --lua-filter=hide_skip.lua \
-  --syntax-definition=nu.xml \
-  --syntax-definition=nushell.xml \
-  --syntax-highlighting=pandoc_highlight.theme \
-  DataScienceNushell.es.md -o DataScienceNushell.es.pdf
+# O compilar un formato ("pdf", "epub" o "web") o edición específica ("en", "es"):
+nu Files/compile_books.nu --edition es --format epub
+nu Files/compile_books.nu --edition all --format web
 ```
 
 ## Estructura del Repositorio
 
 ```text
 ├── Files/
-│   ├── DataScienceNushell.md      # Texto principal del libro en inglés (Pandoc Markdown)
-│   ├── DataScienceNushell.es.md   # Versión original en español (Pandoc Markdown)
-│   ├── DataScienceNushell.pdf     # Versión compilada en PDF en inglés (XeLaTeX)
-│   ├── DataScienceNushell.es.pdf  # Versión compilada en PDF en español (XeLaTeX)
-│   ├── *.png / *.jpg              # Figuras y diagramas de la obra
-│   └── data/                      # Datos por capítulo (ch03..ch09) integrados en /data
+│   ├── DataScienceNushell.md       # Texto principal del libro en inglés (Pandoc Markdown)
+│   ├── DataScienceNushell.es.md    # Versión original en español (Pandoc Markdown)
+│   ├── DataScienceNushell.pdf      # Versión compilada en PDF en inglés (XeLaTeX)
+│   ├── DataScienceNushell.es.pdf   # Versión compilada en PDF en español (XeLaTeX)
+│   ├── DataScienceNushell.epub     # Versión compilada en EPUB3 en inglés
+│   ├── DataScienceNushell.es.epub  # Versión compilada en EPUB3 en español
+│   ├── *.png / *.jpg               # Figuras y diagramas de la obra
+│   └── data/                       # Datos por capítulo (ch03..ch09) integrados en /data
+├── read/                           # Libro web HTML5 en inglés (GitHub Pages)
+├── es/read/                        # Libro web HTML5 en español (GitHub Pages)
 ├── docker/
-│   ├── Dockerfile                 # Definición de la imagen independiente dsin
-│   ├── UPSTREAM_AUDIT.md          # Auditoría y corrección de issues de dsatcl2e
-│   ├── config.nu                  # Configuración personalizada de Nushell para dsin
-│   ├── dsin_tools.nu              # Comandos Nushell para modelación (VW, Tapkee, K-Means)
-│   └── update-dsin-nushell.nu     # Copia del script actualizador en docker/
-├── update-dsin-nushell.nu         # Script principal para actualizar Nushell en dsin
-├── README.md                      # Documentación principal en inglés
-└── README.es.md                   # Documentación en español
+│   ├── Dockerfile                  # Definición de la imagen independiente dsin
+│   ├── UPSTREAM_AUDIT.md           # Auditoría y corrección de issues de dsatcl2e
+│   ├── config.nu                   # Configuración personalizada de Nushell para dsin
+│   ├── dsin_tools.nu               # Comandos Nushell para modelación (VW, Tapkee, K-Means)
+│   └── update-dsin-nushell.nu      # Copia del script actualizador en docker/
+├── update-dsin-nushell.nu          # Script principal para actualizar Nushell en dsin
+├── README.md                       # Documentación principal en inglés
+└── README.es.md                    # Documentación en español
 ```

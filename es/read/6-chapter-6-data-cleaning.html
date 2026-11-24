@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <title>Depuración y Transformación de Datos</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #ececec; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { color: #bb00ff; } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { color: #ffa500; } /* Constant */
+code span.co { color: #008f00; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fu { color: #006666; font-weight: bold; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { color: #e45649; } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Ciencia de Datos en la Terminal Linux con Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Portal del Curso</a>
+      <a class="header-pill" href="../../read/">English</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.epub" download>EPUB</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contenido</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="5-chapter-5-data-acquisition.html" accesskey="p" rel="prev">&larr; Obtención de Datos</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" accesskey="u" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="7-chapter-7-data-exploration.html" accesskey="n" rel="next">Exploración y Visualización de Datos &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="6" id="chapter-6-data-cleaning"><span
+class="header-section-number">6</span> Depuración y Transformación de
+Datos</h1>
+<p>Este capítulo aborda el segundo paso del modelo OSEMN:
+<strong>depurar y transformar los datos</strong> (<em>Scrub</em>). Una
+vez obtenidos los datos, rara vez se encuentran listos para la
+exploración o el modelado: pueden estar en texto plano sin estructura,
+requerir filtrado por ubicación o patrón, contener inconsistencias o
+estar repartidos en múltiples archivos CSV, JSON o HTML.</p>
+<p>Comenzamos ingresando al directorio <code>/data/ch06</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="op">/</span>data<span class="op">/</span>ch06</span></code></pre></div>
+<p>A partir de este punto, todos los ejemplos de este capítulo se
+desarrollan dentro de <code>/data/ch06</code>. Inspeccionemos sus
+archivos:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> name</span></code></pre></div>
+<h2 data-number="6.1"
+id="transformaciones-en-un-pipeline-de-datos"><span
+class="header-section-number">6.1</span> Transformaciones en un Pipeline
+de Datos</h2>
+<p>Con frecuencia, la salida de una herramienta requiere una
+transformación intermedia antes de poder alimentar la siguiente etapa
+del análisis. Tomemos los primeros 100 elementos de la secuencia
+<em>FizzBuzz</em> generados con <code>fizzbuzz.py</code> en
+<code>/data/ch06</code>, guardémoslos en <code>fb.seq</code>, y luego
+contemos en Nushell cuántas veces aparecen <code>fizz</code>,
+<code>buzz</code> y <code>fizzbuzz</code>, mostrando la tabla resultante
+y guardándola en <code>fb.csv</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..100</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">python3</span> fizzbuzz.py <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fb.<span class="bu">seq</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> conteo_fb <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> fb.<span class="bu">seq</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">lines</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&quot;fizz|buzz&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">rename</span> <span class="bu">value</span> <span class="bu">count</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="va">$conteo_fb</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="va">$conteo_fb</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fb.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.2" id="texto-plano"><span
+class="header-section-number">6.2</span> Texto Plano</h2>
+<p>El texto plano (<em>plain text</em>) consiste en secuencias de
+caracteres legibles por humanos divididas por saltos de línea. En
+Nushell convertimos cualquier archivo de texto plano en una lista de
+cadenas mediante <code>open --raw &lt;archivo&gt; | lines</code>.</p>
+<h3 data-number="6.2.1" id="filtrando-líneas"><span
+class="header-section-number">6.2.1</span> Filtrando Líneas</h3>
+<h4 data-number="6.2.1.1" id="basado-en-la-ubicación"><span
+class="header-section-number">6.2.1.1</span> Basado en la Ubicación</h4>
+<p>En <code>/data/ch06</code> disponemos del archivo <code>lines</code>
+con 10 líneas numeradas (<code>Line 1</code> a <code>Line 10</code>).
+Veamos cómo filtrar líneas según su posición con <code>first</code>,
+<code>last</code>, <code>skip</code>, <code>drop</code> y
+<code>slice</code>, mostrando los resultados y guardando los
+subconjuntos en archivos:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span></span></code></pre></div>
+<ul>
+<li><strong>Primeras 3 líneas (<code>first 3</code>) y últimas 3 líneas
+(<code>last 3</code>):</strong></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">3</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">last</span> <span class="dv">3</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">3</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> lines_primeras3.<span class="bu">txt</span></span></code></pre></div>
+<ul>
+<li><strong>Omitir las primeras 3 líneas (<code>skip 3</code>), omitir
+las últimas 3 (<code>drop 3</code>) y extraer las líneas 4, 5 y 6
+(<code>slice 3..5</code>):</strong></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">skip</span> <span class="dv">3</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">drop</span> <span class="dv">3</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">slice</span> <span class="fl">3..5</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">slice</span> <span class="fl">3..5</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> lines_4_a_6.<span class="bu">txt</span></span></code></pre></div>
+<ul>
+<li><strong>Extraer únicamente las líneas en posiciones impares usando
+<code>enumerate</code> y el operador módulo
+(<code>mod</code>):</strong></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it.index</span> mod <span class="dv">2</span>) <span class="op">==</span> <span class="dv">0</span> <span class="op">|</span> <span class="bu">get</span> item</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it.index</span> mod <span class="dv">2</span>) <span class="op">==</span> <span class="dv">0</span> <span class="op">|</span> <span class="bu">get</span> item <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> lines_impares.<span class="bu">txt</span></span></code></pre></div>
+<h4 data-number="6.2.1.2" id="basado-en-un-patrón"><span
+class="header-section-number">6.2.1.2</span> Basado en un Patrón</h4>
+<p>Para conservar o descartar líneas según una expresión regular,
+utilizamos <code>where ($it =~ "patrón")</code> (o <code>!~</code> para
+invertir la coincidencia). En <code>/data/ch06/alice.txt</code>,
+extraigamos los encabezados de capítulos que comienzan con
+<code>CHAPTER</code> seguidos de <code>The</code>, y contemos el total
+de líneas no vacías del libro:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;(?i)^chapter&#39;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^CHAPTER (.*)\. The&#39;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^CHAPTER (.*)\. The&#39;</span>) <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> capitulos_the.<span class="bu">txt</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">is-not-empty</span>) <span class="op">|</span> <span class="bu">length</span></span></code></pre></div>
+<h4 data-number="6.2.1.3" id="basado-en-aleatoriedad-muestreo"><span
+class="header-section-number">6.2.1.3</span> Basado en Aleatoriedad
+(Muestreo)</h4>
+<p>Cuando formulamos un pipeline sobre un archivo muy grande, resulta
+útil tomar una muestra aleatoria con el comando nativo
+<strong><code>shuffle</code></strong> combinado con
+<strong><code>first</code></strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..1000</span> <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>i<span class="op">|</span> <span class="st">$&quot;Line </span><span class="op">(</span><span class="va">$i</span><span class="op">)</span><span class="st">&quot;</span> } <span class="op">|</span> <span class="bu">shuffle</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..1000</span> <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>i<span class="op">|</span> <span class="st">$&quot;Line </span><span class="op">(</span><span class="va">$i</span><span class="op">)</span><span class="st">&quot;</span> } <span class="op">|</span> <span class="bu">shuffle</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> muestra_10_lineas.<span class="bu">txt</span></span></code></pre></div>
+<h3 data-number="6.2.2" id="extrayendo-valores"><span
+class="header-section-number">6.2.2</span> Extrayendo Valores</h3>
+<p>Para extraer únicamente el número romano y el título de cada capítulo
+de <code>alice.txt</code> en una tabla estructurada de dos columnas,
+usamos <code>parse --regex</code> con grupos con nombre y guardamos el
+resultado en <code>capitulos_alice.csv</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> caps <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">lines</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^CHAPTER &#39;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&#39;^CHAPTER (?P&lt;numero&gt;[IVXLCDM]+)\.\s+(?P&lt;titulo&gt;.*)$&#39;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="va">$caps</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="va">$caps</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> capitulos_alice.<span class="bu">csv</span></span></code></pre></div>
+<p>Y si deseamos construir un conjunto de datos con todas las palabras
+únicas de <code>alice.txt</code> que comienzan con la letra
+<code>a</code> y terminan con la letra <code>e</code>, mostramos las
+primeras 15 y guardamos el listado completo en
+<code>palabras_a_e.csv</code>:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> palabras_ae <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&#39;(?P&lt;palabra&gt;[a-z]{2,})&#39;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> palabra</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^a.*e$&#39;</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">wrap</span> palabra</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="va">$palabras_ae</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">15</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="va">$palabras_ae</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> palabras_a_e.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.2.3" id="reemplazando-y-eliminando-valores"><span
+class="header-section-number">6.2.3</span> Reemplazando y Eliminando
+Valores</h3>
+<p>En Nushell, la familia de comandos <code>str</code>
+(<code>str replace</code>, <code>str uppercase</code>,
+<code>str lowercase</code>, <code>str trim</code>) opera nativamente
+sobre texto <strong>UTF-8</strong>, por lo que convierte correctamente
+caracteres acentuados y no ASCII (como <code>'hallo wêreld!'</code> o
+<code>'helló világ'</code>) donde la herramienta clásica <code>tr</code>
+fallaba por operar sobre bytes individuales:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hello world!&quot;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="st">&quot; &quot;</span> <span class="st">&quot;_&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hello world!&quot;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="at">--regex</span> <span class="st">&#39;[ !]&#39;</span> <span class="st">&#39;&#39;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hallo wêreld!&quot;</span> <span class="op">|</span> <span class="bu">str uppercase</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;helló világ&quot;</span> <span class="op">|</span> <span class="bu">str uppercase</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;  hello     world!  &quot;</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="at">--regex</span> <span class="st">&#39;\s+&#39;</span> <span class="st">&#39; &#39;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;hello&quot;</span> <span class="st">&quot;bye&quot;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;  hello     world!  &quot;</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="at">--regex</span> <span class="st">&#39;\s+&#39;</span> <span class="st">&#39; &#39;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;hello&quot;</span> <span class="st">&quot;bye&quot;</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> saludo_limpio.<span class="bu">txt</span></span></code></pre></div>
+<h2 data-number="6.3" id="formateando-salida-de-comandos-parsing"><span
+class="header-section-number">6.3</span> Formateando salida de comandos
+(parsing)</h2>
+<p>Nushell ofrece la posibilidad de transformar la salida de comandos
+nushell, con diferentes formas de lograr el mismo objetivo.</p>
+<p>Las funciones integradas que se pueden utilizar incluyen:</p>
+<ul>
+<li><code>lines</code></li>
+<li><code>detect columns</code></li>
+<li><code>parse</code></li>
+<li><code>str ...</code></li>
+<li><code>from ssv</code></li>
+</ul>
+<p>A continuación, se muestran algunos ejemplos ilustrativos de salida
+tabular.</p>
+<h3 data-number="6.3.1" id="detect-columns-bastante-automático"><span
+class="header-section-number">6.3.1</span> <code>detect columns</code>
+(bastante automático)</h3>
+<p>Esta herramienta intenta dividir automáticamente el texto en varias
+columnas.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df <span class="at">-h</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="at">-h</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;Mounted on&quot;</span> Mounted_On <span class="op">|</span> <span class="bu">detect columns</span></span></code></pre></div>
+<p>Para una salida como la de <code>df</code> esta es probablemente la
+forma más compacta de lograr una salida tabular.
+<code>str replace</code> es necesario porque uno de los encabezados de
+columna tiene un espacio en él.</p>
+<h3 data-number="6.3.2" id="usando-from-ssv"><span
+class="header-section-number">6.3.2</span> Usando
+<code>from ssv</code></h3>
+<p>También se puede usar el analizador de datos <code>from</code>
+incorporado para <code>ssv</code> (<em>s</em>pace <em>s</em>eparated
+<em>v</em>alues):</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df <span class="at">-h</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;Mounted on&quot;</span> Mounted_On <span class="op">|</span> <span class="bu">from ssv</span> <span class="at">--aligned-columns</span> <span class="at">--minimum-spaces</span> <span class="dv">1</span></span></code></pre></div>
+<p>La salida es idéntica al ejemplo anterior. <code>from ssv</code>
+admite varias opciones para ajustar su comportamiento. Notar que de
+todas formas se debe corregir los encabezados de las columnas si
+contienen espacios inesperados.</p>
+<h3 data-number="6.3.3" id="usando-parse"><span
+class="header-section-number">6.3.3</span> Usando
+<code>parse</code></h3>
+<p>Permite analizar un patrón arbitrario de una cadena de texto en una
+tabla de varias columnas.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;nu = &quot;0.116.1&quot; # A new type of shell</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">ttt = &quot;1.8.0&quot; # Terminal text editor&#39;</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">parse</span> <span class="st">&#39;{crate_name} = &quot;{version}&quot; #{description}&#39;</span> <span class="op">|</span> <span class="bu">update</span> description { <span class="bu">str trim</span> }</span></code></pre></div>
+<h2 data-number="6.4" id="csv-y-tablas-estructuradas"><span
+class="header-section-number">6.4</span> CSV y Tablas Estructuradas</h2>
+<h3 data-number="6.4.1" id="cuerpos-encabezados-y-columnas"><span
+class="header-section-number">6.4.1</span> Cuerpos, Encabezados y
+Columnas</h3>
+<p>En las herramientas clásicas de texto (<code>grep</code>,
+<code>sed</code>, <code>tr</code>, <code>sort</code>), filtrar u ordenar
+un archivo CSV requería utilidades auxiliares (<code>body</code>,
+<code>header</code>, <code>cols</code>) para evitar mezclar el
+encabezado con los datos o modificar columnas equivocadas.</p>
+<p>En <strong>Nushell</strong>, al abrir un archivo CSV con
+<code>open</code>, el encabezado se convierte automáticamente en el
+esquema de nombres de columnas de la tabla, y cualquier operación
+(<code>sort-by</code>, <code>where</code>, <code>update</code>) actúa
+exclusivamente sobre las filas o la columna indicada sin corromper jamás
+el encabezado.</p>
+<p>Por ejemplo, en <code>/data/ch06</code>, convirtamos a mayúsculas
+únicamente la columna <code>day</code> de <code>tips.csv</code>,
+mostrando las primeras 5 filas y guardando la tabla resultante en
+<code>tips_day_upper.csv</code>:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">update</span> day { <span class="bu">str uppercase</span> } <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">update</span> day { <span class="bu">str uppercase</span> } <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_day_upper.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.2" id="realizando-consultas-sql-en-csv"><span
+class="header-section-number">6.4.2</span> Realizando Consultas SQL en
+CSV</h3>
+<p>Cuando deseamos expresar transformaciones complejas utilizando
+sintaxis <strong>SQL</strong> sobre archivos CSV, Nushell permite volcar
+cualquier tabla directamente a una base de datos SQLite con
+<code>into sqlite</code> y consultarla con <code>query db</code>. Veamos
+cómo consultar <code>tips.csv</code> con SQL y guardar el resultado en
+<code>tips_sql_resultado.csv</code>:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">rm</span> <span class="at">-f</span> tips_temp.<span class="bu">db</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">into sqlite</span> tips_temp.<span class="bu">db</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips_temp.<span class="bu">db</span> <span class="op">|</span> <span class="bu">query db</span> <span class="st">&quot;SELECT bill, tip, day, time, size FROM main WHERE bill &gt; 40.0 AND day LIKE &#39;S%&#39;&quot;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips_temp.<span class="bu">db</span> <span class="op">|</span> <span class="bu">query db</span> <span class="st">&quot;SELECT bill, tip, day, time, size FROM main WHERE bill &gt; 40.0 AND day LIKE &#39;S%&#39;&quot;</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_sql_resultado.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.3" id="extrayendo-y-reordenando-columnas"><span
+class="header-section-number">6.4.3</span> Extrayendo y Reordenando
+Columnas</h3>
+<p>Para extraer un subconjunto de columnas en un orden específico
+utilizamos <code>select</code>, y para excluir una o más columnas
+conservando el resto utilizamos <code>reject</code>:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> iris.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> sepal_length petal_length sepal_width petal_width <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> iris.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">reject</span> species <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> iris.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> sepal_length petal_length sepal_width petal_width <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> iris_columnas_reordenadas.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.4" id="filtrando-filas"><span
+class="header-section-number">6.4.4</span> Filtrando Filas</h3>
+<p>En Nushell filtramos filas de tablas CSV combinando condiciones
+numéricas y expresiones regulares legibles mediante
+<code>where</code>:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="kw">where</span> <span class="bu">size</span> <span class="op">&gt;=</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">6</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="kw">where</span> bill <span class="op">&gt;</span> <span class="fl">40.0</span> <span class="bu">and</span> day <span class="op">=~</span> <span class="st">&#39;^S&#39;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="kw">where</span> bill <span class="op">&gt;</span> <span class="fl">40.0</span> <span class="bu">and</span> day <span class="op">=~</span> <span class="st">&#39;^S&#39;</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_altos_finde.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.5"
+id="combinar-columnas-y-robustez-ante-comas-internas"><span
+class="header-section-number">6.4.5</span> Combinar Columnas (y Robustez
+ante Comas Internas)</h3>
+<p>Consideremos los archivos <code>names.csv</code> y
+<code>names-comma.csv</code> en <code>/data/ch06</code>, los cuales
+contienen compositores cuyos nombres (<code>first_name</code>) y
+apellidos (<code>last_name</code>) deseamos combinar en una columna
+<code>full_name</code>:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> names.<span class="bu">csv</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> names<span class="at">-comma</span>.<span class="bu">csv</span></span></code></pre></div>
+<p>En <code>names-comma.csv</code>, el último registro contiene una coma
+dentro del apellido (<code>"Stravinsky, Jr."</code>). Mientras que
+<code>sed</code>, <code>awk</code> y <code>cut</code> fallaban al partir
+por esa coma interna, el analizador CSV de Nushell respeta las comillas
+del estándar RFC 4180 y construye <code>full_name</code> de manera
+impecable:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nombres_limpios <span class="op">=</span> <span class="bu">open</span> names<span class="at">-comma</span>.<span class="bu">csv</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">insert</span> full_name { <span class="op">|</span><span class="bu">row</span><span class="op">|</span> <span class="st">$&quot;</span><span class="op">(</span><span class="va">$row.first_name</span><span class="op">)</span><span class="st"> </span><span class="op">(</span><span class="va">$row.last_name</span><span class="op">)</span><span class="st">&quot;</span> }</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">select</span> <span class="bu">id</span> full_name born</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="va">$nombres_limpios</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="va">$nombres_limpios</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> names_completos.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.6" id="combinando-múltiples-archivos-csv"><span
+class="header-section-number">6.4.6</span> Combinando Múltiples Archivos
+CSV</h3>
+<h4 data-number="6.4.6.1" id="concatenar-horizontalmente-merge"><span
+class="header-section-number">6.4.6.1</span> Concatenar Horizontalmente
+(<code>merge</code>)</h4>
+<p>En <code>/data/ch06</code> podemos dividir <code>tips.csv</code> en
+tres archivos CSV con distintas columnas (<code>bills.csv</code>,
+<code>datetime.csv</code> y <code>customers.csv</code>) y luego volver a
+unirlos horizontalmente lado a lado mediante el comando
+<strong><code>merge</code></strong>, guardando el resultado en
+<code>tips_horizontal.csv</code>:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> bill tip <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> bills.<span class="bu">csv</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> day time <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> <span class="bu">datetime</span>.<span class="bu">csv</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> sex smoker <span class="bu">size</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> customers.<span class="bu">csv</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> unido_horizontal <span class="op">=</span> <span class="bu">open</span> bills.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">merge</span> (<span class="bu">open</span> customers.<span class="bu">csv</span>) <span class="op">|</span> <span class="bu">merge</span> (<span class="bu">open</span> <span class="bu">datetime</span>.<span class="bu">csv</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="va">$unido_horizontal</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="va">$unido_horizontal</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_horizontal.<span class="bu">csv</span></span></code></pre></div>
+<h4 data-number="6.4.6.2" id="unión-relacional-join"><span
+class="header-section-number">6.4.6.2</span> Unión Relacional
+(<code>join</code>)</h4>
+<p>Cuando dos tablas comparten una columna clave (como
+<code>species</code> en <code>iris.csv</code> e
+<code>irismeta.csv</code>), realizamos un cruce relacional (<em>inner
+join</em>) con el comando <strong><code>join</code></strong>,
+seleccionamos las columnas de interés y guardamos el resultado en
+<code>iris_usda.csv</code>:</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> irismeta.<span class="bu">csv</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> iris_enriquecido <span class="op">=</span> <span class="bu">open</span> iris.<span class="bu">csv</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">join</span> (<span class="bu">open</span> irismeta.<span class="bu">csv</span>) species</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">select</span> sepal_length sepal_width species usda_id</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="va">$iris_enriquecido</span> <span class="op">|</span> <span class="bu">slice</span> <span class="fl">48..53</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="va">$iris_enriquecido</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> iris_usda.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.5" id="trabajando-con-xmlhtml-y-json"><span
+class="header-section-number">6.5</span> Trabajando con XML/HTML y
+JSON</h2>
+<p>En <code>/data/ch06</code> contamos con el archivo JSON
+<code>users.json</code> y los archivos extraídos de Wikipedia
+<code>wiki.html</code>, <code>table.html</code> y
+<code>table.json</code>.</p>
+<p>En lugar de modificar <code>users.json</code> con expresiones
+regulares de texto como <code>sed</code> (lo cual podría alterar valores
+además de nombres de claves), en Nushell abrimos <code>users.json</code>
+como estructura de datos, renombramos el campo <code>gender</code> a
+<code>sex</code> en la tabla <code>results</code> y guardamos el
+resultado tanto en JSON como en CSV:</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> usuarios <span class="op">=</span> <span class="bu">open</span> <span class="bu">users</span>.<span class="bu">json</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> results</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">select</span> gender email nat phone</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">rename</span> sex email nat phone</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="va">$usuarios</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="va">$usuarios</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> users_sex.<span class="bu">csv</span></span></code></pre></div>
+<p>De igual manera, a partir de la tabla HTML convertida a JSON en
+<code>table.json</code> (lista de países y territorios por relación
+frontera/superficie de Wikipedia), podemos extraer las filas en Nushell
+y guardar el conjunto de datos tabular en
+<code>countries_from_json.csv</code>:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> countries.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> countries.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> countries_top10.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.6" id="el-plugin-polars-de-nushell"><span
+class="header-section-number">6.6</span> El plugin polars de
+Nushell</h2>
+<p>Polars se define como una biblioteca de <code>DataFrame</code> para
+Rust que se caracteriza por su extrema rapidez y eficiencia en el uso de
+la memoria. El plugin <code>polars</code> para Nushell permite utilizar
+las potentes capacidades de Polars directamente desde la línea de
+comandos. Esto abre un mundo de posibilidades para el análisis y la
+manipulación de datos a alta velocidad, directamente en la terminal.</p>
+<p>La filosofía de Polars se centra en aprovechar al máximo el hardware
+moderno, utilizando un motor de consulta paralelizado y optimizado para
+la ejecución en múltiples núcleos. Esto significa que se pueden procesar
+conjuntos de datos mucho más grandes que con las herramientas
+tradicionales de línea de comandos, y a menudo de forma mucho más rápida
+que con soluciones en memoria como Pandas.</p>
+<h3 data-number="6.6.1" id="casos-de-uso"><span
+class="header-section-number">6.6.1</span> Casos de uso</h3>
+<p>El plugin <code>polars</code> resulta ideal para:</p>
+<ul>
+<li><strong>Análisis exploratorio de datos (EDA)</strong>: se pueden
+investigar y resumir rápidamente grandes conjuntos de datos.</li>
+<li><strong>Canalizaciones de limpieza y transformación de
+datos</strong>: se pueden crear potentes canalizaciones para limpiar y
+transformar datos.</li>
+<li><strong>Procesamiento de datos por lotes</strong>: se pueden
+procesar grandes volúmenes de datos de manera eficiente.</li>
+<li><strong>Alternativa a <code>pandas</code> o <code>dplyr</code> en la
+línea de comandos</strong>: se pueden realizar operaciones complejas de
+<code>DataFrames</code> sin salir de la terminal.</li>
+</ul>
+<h3 data-number="6.6.2" id="conceptos-básicos"><span
+class="header-section-number">6.6.2</span> Conceptos básicos</h3>
+<p>Los dos conceptos principales en Polars son el <code>DataFrame</code>
+y la <code>Serie</code>.</p>
+<ul>
+<li><strong><code>DataFrame</code></strong>: se define como una
+estructura de datos tabular bidimensional, similar a una hoja de cálculo
+o una tabla SQL. Consta de filas y columnas, donde cada columna es una
+<code>Serie</code>.</li>
+<li><strong><code>Serie</code></strong>: se describe como una matriz
+unidimensional de datos, que representa una única columna en un
+<code>DataFrame</code>.</li>
+</ul>
+<h4 data-number="6.6.2.1"
+id="diferencia-entre-dataframes-de-polars-y-tablas-de-nushell"><span
+class="header-section-number">6.6.2.1</span> Diferencia entre DataFrames
+de Polars y Tablas de Nushell</h4>
+<p>Es importante entender la diferencia entre un <code>DataFrame</code>
+de Polars y una tabla de Nushell. Aunque a primera vista pueden parecer
+similares, se observan diferencias fundamentales en su diseño y uso:</p>
+<ul>
+<li><p><strong>Representación en Memoria:</strong> Las tablas de Nushell
+se representan como una lista de filas, donde cada fila es una colección
+de pares clave-valor. Esto resulta ideal para la mayoría de las tareas
+de la línea de comandos. Los <code>DataFrames</code> de Polars, por otro
+lado, utilizan un formato columnar. Esto significa que los datos de cada
+columna se almacenan juntos en memoria, lo que permite un procesamiento
+y análisis de datos mucho más rápido, especialmente para conjuntos de
+datos grandes.</p></li>
+<li><p><strong>API y Operaciones:</strong> Las tablas de Nushell se
+manipulan utilizando los comandos estándar de Nushell como
+<code>where</code>, <code>sort-by</code>, <code>group-by</code>, etc.
+Los <code>DataFrames</code> de Polars tienen su propio conjunto de
+comandos (los que comienzan con <code>polars</code>), que están
+optimizados para operaciones de datos a gran escala.</p></li>
+<li><p><strong>Rendimiento:</strong> Para conjuntos de datos pequeños y
+medianos, el rendimiento de las tablas de Nushell es excelente. Sin
+embargo, para conjuntos de datos muy grandes, los
+<code>DataFrames</code> de Polars ofrecen un rendimiento
+significativamente mayor debido a su diseño columnar y su capacidad para
+realizar operaciones en paralelo.</p></li>
+</ul>
+<p>En resumen, se puede pensar en las tablas de Nushell como una forma
+versátil y fácil de usar para trabajar con datos estructurados en la
+línea de comandos, mientras que los <code>DataFrames</code> de Polars
+son una herramienta más especializada y de alto rendimiento para el
+análisis de datos a gran escala. El plugin <code>polars</code> permite
+cambiar sin problemas entre estos dos paradigmas, brindando lo mejor de
+ambos mundos.</p>
+<h3 data-number="6.6.3" id="uso-básico"><span
+class="header-section-number">6.6.3</span> Uso básico</h3>
+<p>Para utilizar el plugin <code>polars</code>, primero se deben cargar
+los datos en un <code>DataFrame</code>. El plugin <code>polars</code>
+admite una variedad de formatos de archivo, incluidos CSV, JSON, Parquet
+y más.</p>
+<h4 data-number="6.6.3.1" id="carga-de-datos"><span
+class="header-section-number">6.6.3.1</span> Carga de datos</h4>
+<p>Para este ejemplo, se utilizará un conjunto de datos de ventas de
+videojuegos. Se pueden descargar los datos usando el siguiente
+comando:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> vgsales.<span class="bu">csv</span></span></code></pre></div>
+<blockquote>
+<p>Fuente: <a
+href="https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv">https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv</a></p>
+</blockquote>
+<p>Ahora, se puede cargar el archivo <code>vgsales.csv</code> en un
+DataFrame de Polars de la siguiente manera:</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="bu">open</span> vgsales.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">polars into-df</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">describe</span></span></code></pre></div>
+<p>Esto crea un <code>DataFrame</code> de Polars que puede usarse para
+su posterior análisis.</p>
+<blockquote>
+<p>En caso de error con <code>polars open</code>, se puede abrir el
+archivo usando el comando
+<code>open vgsales.csv | polars into-df</code>.</p>
+</blockquote>
+<h4 data-number="6.6.3.2" id="exploración-de-datos-1"><span
+class="header-section-number">6.6.3.2</span> Exploración de datos</h4>
+<p>Una vez que se han cargado los datos en un <code>DataFrame</code>, se
+puede ver su esquema usando el comando <code>polars schema</code>. Esto
+mostrará los nombres de las columnas y sus tipos de datos.</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars schema</span></span></code></pre></div>
+<p>Se observa que algunas variables aparecen de tipo
+<code>object</code>, que es el tipo de datos predeterminado para Polars
+cuando no se especifica un tipo de datos específico. En estos casos, se
+puede especificar el tipo de datos adecuado usando el comando
+<code>polars into-df</code> con la opción <code>--schema</code>.</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="bu">open</span> vgsales.<span class="bu">csv</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars into-df</span> <span class="at">--schema</span> {</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>      <span class="bu">number</span>: i64,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>      game: <span class="bu">str</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      release_date: <span class="bu">str</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>      price: <span class="bu">str</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>      owners: <span class="bu">str</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>      developer: <span class="bu">str</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>      publisher: <span class="bu">str</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>      average_playtime: <span class="bu">str</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>      median_playtime: <span class="bu">str</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>      metascore: <span class="bu">str</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div>
+<blockquote>
+<p>Cuando hay valores <code>NA</code>, se definen temporalmente las
+variables numéricas de tipo <code>str</code>.</p>
+</blockquote>
+<h4 data-number="6.6.3.3" id="conversión-de-tipos-de-datos"><span
+class="header-section-number">6.6.3.3</span> Conversión de tipos de
+datos</h4>
+<p>Para poder abrir el archivo, se tuvo que usar el tipo
+<code>str</code> para las columnas <code>number</code>,
+<code>price</code>, <code>owners</code>, <code>average_playtime</code>,
+<code>median_playtime</code>, y <code>metascore</code>.</p>
+<p>Para convertir estas columnas al tipo apropiado se utilizan:</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="va">$df</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="kw">collect</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars with-column</span> [</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;Free&quot;</span> <span class="at">--replace</span> <span class="st">&quot;0&quot;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> <span class="bu">polars cast</span> f64</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> average_playtime <span class="op">|</span> <span class="bu">polars cast</span> i64),</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> median_playtime <span class="op">|</span> <span class="bu">polars cast</span> i64),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> metascore <span class="op">|</span> <span class="bu">polars cast</span> i64)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars schema</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars summary</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars summary</span> <span class="op">|</span> <span class="bu">polars select</span> descriptor <span class="st">&quot;price (f64)&quot;</span> <span class="st">&quot;average_playtime (i64)&quot;</span> <span class="st">&quot;median_playtime (i64)&quot;</span> <span class="st">&quot;metascore (i64)&quot;</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<p>En este proceso:</p>
+<ul>
+<li><code>collect</code>: Recolecta un flujo (<em>stream</em>) en un
+valor.</li>
+<li><code>polars with-column</code>: Añade una o varias
+series/expresiones a un <code>DataFrame</code> o
+<code>LazyFrame</code>.</li>
+<li><code>polars col</code>: Crea una expresión que referencia una
+columna existente (p. ej. <code>polars col price</code>).</li>
+<li><code>polars str-replace-all</code>: Reemplaza todas las ocurrencias
+que casan con un patrón regex por una cadena dada.</li>
+<li><code>polars cast</code>: Convierte (castea) el tipo de una
+expresión o columna a un dtype especificado (p. ej. <code>f64</code>,
+<code>i64</code>).</li>
+</ul>
+<p>Se debe notar que se tuvo que limpiar la columna <code>price</code>
+antes de poder convertirla a un número.</p>
+<p>La columna <code>price</code> original contenía la palabra
+“<strong>Free</strong>” (Gratis) en algunas filas. No se puede convertir
+(hacer <code>cast</code>) directamente una columna que contiene texto
+(como “Free”) a un tipo numérico (como <code>f64</code>). Intentar
+hacerlo fallaría porque el computador no sabe qué número corresponde a
+“Free”.</p>
+<p>Para arreglar esto, se usa un proceso de dos pasos dentro del comando
+<code>with-column</code>:</p>
+<ol type="1">
+<li><code>polars str-replace-all --pattern "Free" --replace "0"</code>:
+Este comando encontró cada instancia del texto “Free” en la columna
+<code>price</code> y la reemplazó por el texto “0”.</li>
+<li><code>polars cast f64</code>: <em>Después</em> de que todos los
+valores “Free” fueran reemplazados por “0”, la columna solo contenía
+textos que parecían números (ej. “1.99”, “59.99”, y ahora “0”). En ese
+momento, ya era seguro convertir toda la columna a <code>f64</code> (un
+número de punto flotante de 64 bits) sin errores.</li>
+</ol>
+<h3 data-number="6.6.4" id="manipulación-de-datos"><span
+class="header-section-number">6.6.4</span> Manipulación de datos</h3>
+<p>El plugin <code>polars</code> proporciona una amplia gama de comandos
+para manipular <code>DataFrames</code>.</p>
+<h4 data-number="6.6.4.1" id="selección-de-columnas"><span
+class="header-section-number">6.6.4.1</span> Selección de columnas</h4>
+<p>Se pueden seleccionar columnas de un <code>DataFrame</code> usando el
+comando <code>polars select</code>. Por ejemplo, para seleccionar las
+columnas <code>game</code>, <code>price</code>, y <code>metascore</code>
+del <code>DataFrame</code> de ventas de videojuegos, se usaría el
+siguiente comando:</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars select</span> game price metascore</span></code></pre></div>
+<p>Se observa que se obtiene lo siguiente:</p>
+<pre><code>╭────────────────┬───────────────────────────────────────────────────────╮
+│ plan           │ SELECT [col(&quot;game&quot;), col(&quot;price&quot;), col(&quot;metascore&quot;)]  │
+│                │   DF [&quot;number&quot;, &quot;game&quot;, &quot;release_date&quot;, &quot;price&quot;,      │
+│                │   ...]; PROJECT */10 COLUMNS                          │
+│ optimized_plan │ DF [&quot;number&quot;, &quot;game&quot;, &quot;release_date&quot;, &quot;price&quot;, ...];  │
+│                │   PROJECT[&quot;game&quot;, &quot;price&quot;, &quot;metascore&quot;] 3/10 COLUMNS  │
+╰────────────────┴───────────────────────────────────────────────────────╯</code></pre>
+<p>Este resultado es el <strong>plan de consulta</strong> de Polars. Es
+una mirada interna a cómo el motor de Polars procesará la solicitud. Se
+divide en dos partes:</p>
+<ul>
+<li><p><strong><code>plan</code> (Plan Lógico):</strong> Esta es la
+traducción directa del comando a una serie de operaciones. En este caso,
+<code>SELECT [col("game"), col("price"), col("metascore")]</code> indica
+que se ha solicitado seleccionar esas tres columnas.</p></li>
+<li><p><strong><code>optimized_plan</code> (Plan Optimizado):</strong>
+Este es el plan de ejecución real que Polars utilizará. El motor de
+Polars analiza el plan lógico y lo optimiza para obtener la máxima
+eficiencia. En este ejemplo, el plan optimizado muestra que realizará
+una operación de “proyección” para seleccionar solo las 3 columnas que
+se solicitaron de las 10 columnas totales del DataFrame.</p></li>
+</ul>
+<p>Esta es una característica clave de la <strong>evaluación perezosa
+(lazy evaluation)</strong> de Polars. En lugar de ejecutar cada comando
+de inmediato, se construye un plan de todas las operaciones, se optimiza
+y luego se ejecuta de la manera más eficiente posible. Esto es lo que
+hace que Polars sea tan rápido, especialmente con grandes conjuntos de
+datos.</p>
+<p>Para ver el resultado, se debe terminar la <em>pipeline</em> con
+<code>polars collect</code>. Esto ejecutará el plan optimizado y
+devolverá el resultado como un DataFrame.</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars select</span> game price metascore <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<h4 data-number="6.6.4.2" id="filtrado-de-filas"><span
+class="header-section-number">6.6.4.2</span> Filtrado de filas</h4>
+<p>Se pueden filtrar filas de un <code>DataFrame</code> usando el
+comando <code>polars filter</code>. Por ejemplo, para filtrar el
+<code>DataFrame</code> de ventas de videojuegos para incluir solo los
+juegos cuyo nombre de desarrollador (<em>developer</em>) contiene la
+palabra “Action”, se usaría el siguiente comando:</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#búsqueda Insensible a Mayúsculas/Minúsculas</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> filter_condition <span class="op">=</span> <span class="bu">polars col</span> developer <span class="op">|</span> <span class="bu">polars contains</span> <span class="st">&quot;(?i)Action&quot;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars filter</span> <span class="va">$filter_condition</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co">#búsqueda Sensible a Mayúsculas/Minúsculas</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> filter_condition <span class="op">=</span> <span class="bu">polars col</span> developer <span class="op">|</span> <span class="bu">polars contains</span> <span class="st">&quot;Action&quot;</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars filter</span> <span class="va">$filter_condition</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="co">#eliminar na in price</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> filter_condition <span class="op">=</span> <span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars is-not-null</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars filter</span> <span class="va">$filter_condition</span> <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<p>Por otro lado, para eliminar todas las filas con valores nulos en
+todas las columnas, se usaría el siguiente comando:</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df_filtered <span class="op">=</span> <span class="va">$df</span> <span class="op">|</span> <span class="bu">polars drop-nulls</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<h4 data-number="6.6.4.3" id="ordenación-de-datos"><span
+class="header-section-number">6.6.4.3</span> Ordenación de datos</h4>
+<p>Se puede ordenar un <code>DataFrame</code> usando el comando
+<code>polars sort-by</code>. Por ejemplo, para ordenar el
+<code>DataFrame</code> de ventas de videojuegos por la columna
+<code>price</code> en orden descendente, se usaría el siguiente
+comando:</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars sort-by</span> price <span class="at">--reverse</span> [<span class="cn">true</span>]</span></code></pre></div>
+<h4 data-number="6.6.4.4" id="agrupación-y-agregación"><span
+class="header-section-number">6.6.4.4</span> Agrupación y
+agregación</h4>
+<p>Se pueden agrupar y agregar datos en un <code>DataFrame</code> usando
+los comandos <code>group-by</code> y <code>agg</code>. Por ejemplo, para
+agrupar el <code>DataFrame</code> de ventas de videojuegos por la
+columna <code>developer</code> y calcular el número total de juegos por
+cada desarrollador, se usaría el siguiente comando:</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> developer <span class="op">|</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> (<span class="bu">polars col</span> game <span class="op">|</span> <span class="bu">polars count</span>) <span class="op">|</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars sort-by</span> game <span class="at">--reverse</span> [<span class="cn">true</span>] <span class="op">|</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars collect</span></span></code></pre></div>
+<ul>
+<li>Para estadísticas por <code>developer</code>:</li>
+</ul>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> developer <span class="op">|</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> [</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars mean</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;price_mean&quot;</span>),</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> game  <span class="op">|</span> <span class="bu">polars count</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;n_games&quot;</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars sort-by</span> developer <span class="op">|</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars collect</span></span></code></pre></div>
+<ul>
+<li>Para estadísticas por año de <code>release_date</code>:</li>
+</ul>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#se mira la columna release_date</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars select</span> release_date <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co">#primero se extrae año, luego se agrupa</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> data_by_year <span class="op">=</span> <span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars with-column</span> [</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> release_date</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;.*,</span><span class="sc">\\</span><span class="st">s*(</span><span class="sc">\\</span><span class="st">d{4})$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;$1&quot;</span> <span class="co"># extrae el año</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;^</span><span class="sc">\\</span><span class="st">s+|</span><span class="sc">\\</span><span class="st">s+$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;&quot;</span>        <span class="co"># trim</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars cast</span> i64</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;year&quot;</span>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>   ] <span class="op">|</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> year <span class="op">|</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> [</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars mean</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;price_mean&quot;</span>),</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> game  <span class="op">|</span> <span class="bu">polars count</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;n_games&quot;</span>)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars sort-by</span> year <span class="op">|</span></span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars collect</span></span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a><span class="co">#se visualiza</span></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span></span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">describe</span></span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="co">#tabla nu</span></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="op">|</span> <span class="bu">describe</span></span></code></pre></div>
+<h3 data-number="6.6.5" id="guardado-y-formatos"><span
+class="header-section-number">6.6.5</span> Guardado y formatos</h3>
+<p>Para guardar un <code>DataFrame</code> en un archivo, se usaría el
+comando <code>polars save</code>. Por ejemplo, para guardar el
+<code>DataFrame</code> de ventas de videojuegos filtrado en un archivo
+CSV, se usaría el siguiente comando:</p>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> vgsales_filtered.parquet</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> vgsales_filtered.<span class="bu">csv</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars save</span> data_by_year.<span class="bu">csv</span></span></code></pre></div>
+<p>Si lo anterior no funciona, en algunos casos es necesario entregar la
+ruta completa del archivo. Por ejemplo:</p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> (<span class="va">$env.PWD</span> <span class="op">|</span> <span class="bu">path join</span> vgsales_filtered.<span class="bu">csv</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> vgsales_filtered.<span class="bu">csv</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars save</span> data_by_year.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.6.6" id="pivoteo-de-columnas"><span
+class="header-section-number">6.6.6</span> Pivoteo de columnas</h3>
+<p>El comando <code>polars pivot</code> en Nushell es una operación de
+transformación de datos que convierte un DataFrame del formato largo al
+formato ancho, similar a la función PIVOT en SQL o la función
+<code>pivot_wider</code> en R. Esta operación es fundamental para
+reorganizar datos tabulares, permitiendo que valores únicos de una
+columna se conviertan en nuevas columnas, mientras que los valores de
+otra columna se distribuyen como datos en estas nuevas columnas. Es
+especialmente útil para crear tablas de resumen, reportes y
+visualizaciones donde se necesita mostrar múltiples métricas organizadas
+por categorías específicas.</p>
+<p>Dentro de sus opciones principales se encuentran:</p>
+<ul>
+<li><p><strong><code>--index</code> (<code>-i</code>)</strong>: Define
+las columnas que servirán como identificadores únicos de las filas en el
+resultado. Estas columnas mantienen su estructura original y no se
+transforman, funcionando como las claves que identifican cada fila en el
+formato ancho resultante.</p></li>
+<li><p><strong><code>--on</code> (<code>-o</code>)</strong>: Especifica
+la columna cuyos valores únicos se convertirán en los nombres de las
+nuevas columnas en el DataFrame resultante. Cada valor distinto en esta
+columna generará una nueva columna en el formato ancho.</p></li>
+<li><p><strong><code>--values</code> (<code>-v</code>)</strong>:
+Determina las columnas cuyos valores se distribuirán en las nuevas
+columnas creadas a partir de los valores únicos de la columna
+especificada con <code>--on</code>. Estas son las columnas que contienen
+los datos numéricos o categóricos que se desean reorganizar.</p></li>
+</ul>
+<p>El comando también incluye opciones adicionales como
+<code>--aggregate</code> para definir funciones de agregación cuando hay
+valores duplicados, <code>--separator</code> para personalizar el
+delimitador en nombres de columnas generadas, y <code>--sort</code> para
+ordenar las columnas resultantes.</p>
+<p>Para ilustración, se considera el siguiente ejemplo.</p>
+<p>Primero, se preparan los datos para el pivoteo:</p>
+<ul>
+<li>Se repite el procesamiento anterior a
+<code>release_date</code>.</li>
+<li>Se extraen columnas <code>developer</code>, <code>price</code>,
+<code>year</code>.</li>
+<li>Se agrupa por <code>developer</code> y <code>year</code>.</li>
+<li>Se calcula promedio de <code>price</code> de acuerdo al
+agrupamiento.</li>
+</ul>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df_aggregated <span class="op">=</span> <span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars with-column</span> [</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> release_date</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;.*,</span><span class="sc">\\</span><span class="st">s*(</span><span class="sc">\\</span><span class="st">d{4})$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;$1&quot;</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;^</span><span class="sc">\\</span><span class="st">s+|</span><span class="sc">\\</span><span class="st">s+$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars cast</span> i64</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;year&quot;</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars select</span> [</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> developer)</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price)</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> year)</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> [developer year] <span class="op">|</span></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> [(<span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars mean</span> <span class="op">|</span> <span class="bu">polars as</span> price_mean)]</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a><span class="va">$df_aggregated</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a><span class="va">$df_aggregated</span> <span class="op">|</span> <span class="bu">polars sort-by</span> year <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a><span class="va">$df_aggregated</span> <span class="op">|</span> <span class="bu">polars sort-by</span> developer <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<p>Se hace el pivoteo:</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df_pivoted <span class="op">=</span> <span class="va">$df_aggregated</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars sort-by</span> year</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars pivot</span> <span class="at">--index</span> [developer] <span class="at">--on</span> [year] <span class="at">--values</span> [price_mean]</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stable</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars sort-by</span> developer</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="va">$df_pivoted</span> <span class="op">|</span> <span class="bu">polars first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">polars into-nu</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="va">$df_pivoted</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> vgsales_pivot.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.6.7" id="buenas-prácticas-y-recomendaciones"><span
+class="header-section-number">6.6.7</span> Buenas prácticas y
+recomendaciones</h3>
+<ul>
+<li>Siempre se deben nombrar explícitamente las columnas creadas con
+<code>polars as</code> dentro de expresiones complejas.</li>
+<li>Se deben limpiar los formatos de moneda y separadores antes de
+castear a numérico.</li>
+<li>Se debe llamar <code>collect</code> o <code>save</code> al final de
+una <em>pipeline</em>.</li>
+<li>Se prefieren formatos columnares (Parquet, Arrow) para
+almacenamiento intermedio o persistente.</li>
+<li>Se debe revisar el <code>schema</code> y <code>summary</code> con
+frecuencia para detectar valores atípicos y NA.</li>
+<li>Para desarrollos iterativos, usar
+<code>polars collect | polars into-nu</code> permite inspeccionar
+resultados en formato de tabla de Nushell y combinar con otras
+utilidades de la shell.</li>
+</ul>
+<h3 data-number="6.6.8" id="conclusión"><span
+class="header-section-number">6.6.8</span> Conclusión</h3>
+<p>El plugin <code>polars</code> para Nushell combina la expresividad y
+conveniencia de la shell con el rendimiento de Polars. Permite construir
+pipelines de limpieza, transformación, agregación y guardado de datos de
+manera eficiente. Usando estrategias sencillas; limpieza de cadenas, uso
+de <code>polars as</code> para nombrar columnas, evaluación perezosa
+(lazyframes) y formatos columnares; se pueden crear flujos reproducibles
+y escalables directamente desde la terminal.</p>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="5-chapter-5-data-acquisition.html" rel="prev">&larr; Obtención de Datos</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="7-chapter-7-data-exploration.html" rel="next">Exploración y Visualización de Datos &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Ciencia de Datos en la Terminal Linux con Nushell</span>
+    <span>&bull; 24 Noviembre 2026</span>
+    <span>&bull; <a href="../">Portal del Curso</a></span>
+  </footer>
+
+  <script src="../../Files/web_book.js" defer></script>
+</body>
+</html>

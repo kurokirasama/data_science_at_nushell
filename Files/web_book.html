@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+$for(author-meta)$
+  <meta name="author" content="$author-meta$" />
+$endfor$
+$if(date-meta)$
+  <meta name="dcterms.date" content="$date-meta$" />
+$endif$
+  <title>$if(title-prefix)$$title-prefix$ — $endif$$pagetitle$</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+$if(highlighting-css)$
+  <style>
+$highlighting-css$
+  </style>
+$endif$
+$for(css)$
+  <link rel="stylesheet" href="$css$" />
+$endfor$
+$for(header-includes)$
+  $header-includes$
+$endfor$
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="$if(top)$$top.url$$else$index.html$endif$">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">$if(top)$$top.title$$else$$title$$endif$</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="$portal_url$">$portal_label$</a>
+      <a class="header-pill" href="$alt_lang_url$">$alt_lang_label$</a>
+      <a class="header-pill" href="$epub_url$" download>EPUB</a>
+      <a class="header-pill" href="$pdf_url$" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">$toc_heading$</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+$if(toc)$
+$table-of-contents$
+$endif$
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+$if(previous.url)$
+          <a href="$previous.url$" accesskey="p" rel="prev">&larr; $previous.title$</a>
+$endif$
+        </div>
+        <div class="nav-slot nav-up">
+$if(up.url)$
+          <a href="$up.url$" accesskey="u" rel="up">$up.title$</a>
+$endif$
+        </div>
+        <div class="nav-slot nav-next">
+$if(next.url)$
+          <a href="$next.url$" accesskey="n" rel="next">$next.title$ &rarr;</a>
+$endif$
+        </div>
+      </nav>
+
+$if(top)$
+$else$
+$if(title)$
+      <div class="book-cover-header">
+        <h1 class="book-title">$title$</h1>
+$if(subtitle)$
+        <p class="book-subtitle">$subtitle$</p>
+$endif$
+        <div class="book-meta-row">
+$for(author)$
+          <span class="book-author">$author$</span>
+$endfor$
+$if(date)$
+          <span class="book-date">$date$</span>
+$endif$
+        </div>
+      </div>
+$endif$
+$endif$
+
+      <article class="reader-content">
+$body$
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+$if(previous.url)$
+          <a href="$previous.url$" rel="prev">&larr; $previous.title$</a>
+$endif$
+        </div>
+        <div class="nav-slot nav-up">
+$if(up.url)$
+          <a href="$up.url$" rel="up">$up.title$</a>
+$endif$
+        </div>
+        <div class="nav-slot nav-next">
+$if(next.url)$
+          <a href="$next.url$" rel="next">$next.title$ &rarr;</a>
+$endif$
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>$footer_note$</span>
+    $if(date)$<span>&bull; $date$</span>$endif$
+    <span>&bull; <a href="$portal_url$">$portal_label$</a></span>
+  </footer>
+
+  <script src="$js_url$" defer></script>
+</body>
+</html>

@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <meta name="dcterms.date" content="2026-11-24" />
+  <title>Programming and Creating Command-Line Tools</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #ececec; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { color: #bb00ff; } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { color: #ffa500; } /* Constant */
+code span.co { color: #008f00; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fu { color: #006666; font-weight: bold; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { color: #e45649; } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Data Science at the Linux Terminal with Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Course Portal</a>
+      <a class="header-pill" href="../es/read/">Español</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.epub" download>EPUB</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contents</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="3-chapter-3-nushell-fundamentals.html" accesskey="p" rel="prev">&larr; Nushell Fundamentals and Data Structures</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" accesskey="u" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="5-chapter-5-data-acquisition.html" accesskey="n" rel="next">Data Acquisition &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="4" id="chapter-4-programming-cli-tools"><span
+class="header-section-number">4</span> Programming and Creating
+Command-Line Tools</h1>
+<h2 data-number="4.1" id="programming-in-nushell"><span
+class="header-section-number">4.1</span> Programming in Nushell</h2>
+<p>This section explores Nushell in depth as a general-purpose
+programming language.</p>
+<p>Just as traditional programming languages provide functions for
+encapsulating reusable logic, Nushell employs custom commands
+(<em>custom commands</em>) for this purpose.</p>
+<p>Nushell <em>aliases</em> function similarly to aliases in
+conventional shells, but exist as native constructs within the language
+rather than mere textual substitutions.</p>
+<p>Standard data transformations, from arithmetic evaluation to regular
+expression matching, are performed using <em>operators</em>. Because
+operations are strictly validated against operand types, Nushell
+provides immediate syntax and type diagnostics whenever an incompatible
+operation is attempted.</p>
+<p>Intermediate values can be assigned to <em>variables</em>. Nushell
+variables can be immutable (<code>let</code>), mutable
+(<code>mut</code>), or parse-time constants (<code>const</code>).</p>
+<p><em>Scripts</em> represent the simplest mechanism for organizing
+code: assemble pipeline statements in a file and execute them directly.
+Moreover, Nushell scripts can function as standalone executable CLI
+utilities featuring strongly typed argument signatures via the
+<code>main</code> command.</p>
+<h3 data-number="4.1.1" id="operators"><span
+class="header-section-number">4.1.1</span> Operators</h3>
+<p>Nushell supports the following operators across arithmetic, logic,
+and string manipulation:</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>Add</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>Subtract</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>Multiply</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>Divide</td>
+</tr>
+<tr>
+<td><code>//</code></td>
+<td>Floor division</td>
+</tr>
+<tr>
+<td><code>mod</code></td>
+<td>Modulo</td>
+</tr>
+<tr>
+<td><code>**</code></td>
+<td>Exponentiation (power)</td>
+</tr>
+<tr>
+<td><code>==</code></td>
+<td>Equal</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>Not equal</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>Less than</td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>Less than or equal to</td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td>Greater than</td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>Greater than or equal to</td>
+</tr>
+<tr>
+<td><code>=~</code></td>
+<td>Regex match / string contains</td>
+</tr>
+<tr>
+<td><code>!~</code></td>
+<td>Inverse regex match / string does not contain</td>
+</tr>
+<tr>
+<td><code>in</code></td>
+<td>Value in collection</td>
+</tr>
+<tr>
+<td><code>not-in</code></td>
+<td>Value not in collection</td>
+</tr>
+<tr>
+<td><code>not</code></td>
+<td>Logical NOT</td>
+</tr>
+<tr>
+<td><code>and</code></td>
+<td>Short-circuit logical AND</td>
+</tr>
+<tr>
+<td><code>or</code></td>
+<td>Short-circuit logical OR</td>
+</tr>
+<tr>
+<td><code>xor</code></td>
+<td>Logical XOR</td>
+</tr>
+<tr>
+<td><code>bit-or</code></td>
+<td>Bitwise OR</td>
+</tr>
+<tr>
+<td><code>bit-xor</code></td>
+<td>Bitwise XOR</td>
+</tr>
+<tr>
+<td><code>bit-and</code></td>
+<td>Bitwise AND</td>
+</tr>
+<tr>
+<td><code>bit-shl</code></td>
+<td>Bitwise shift left</td>
+</tr>
+<tr>
+<td><code>bit-shr</code></td>
+<td>Bitwise shift right</td>
+</tr>
+<tr>
+<td><code>starts-with</code></td>
+<td>String starts with</td>
+</tr>
+<tr>
+<td><code>ends-with</code></td>
+<td>String ends with</td>
+</tr>
+<tr>
+<td><code>++</code></td>
+<td>Append lists</td>
+</tr>
+</tbody>
+</table>
+<p>Parentheses can be used for subexpression grouping to dictate
+evaluation precedence or to invoke commands and embed their structured
+results directly inside an expression.</p>
+<h4 data-number="4.1.1.1" id="order-of-operations"><span
+class="header-section-number">4.1.1.1</span> Order of Operations</h4>
+<p>To inspect operator precedence rules directly from the terminal, run:
+<code>help operators | sort-by precedence -r</code>.</p>
+<p>Arranged in descending order of precedence, Nushell evaluates
+expressions as follows:</p>
+<ul>
+<li>Parentheses (<code>()</code>)</li>
+<li>Exponentiation (<code>**</code>)</li>
+<li>Multiplication (<code>*</code>), Division (<code>/</code>), Floor
+Division (<code>//</code>), and Modulo (<code>mod</code>)</li>
+<li>Addition (<code>+</code>) and Subtraction (<code>-</code>)</li>
+<li>Bitwise shifts (<code>bit-shl</code>, <code>bit-shr</code>)</li>
+<li>Comparison operators (<code>==</code>, <code>!=</code>,
+<code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>,
+<code>&gt;=</code>), membership tests (<code>in</code>,
+<code>not-in</code>, <code>starts-with</code>, <code>ends-with</code>),
+regex matching (<code>=~</code>, <code>!~</code>), and list
+concatenation (<code>++</code>)</li>
+<li>Bitwise AND (<code>bit-and</code>)</li>
+<li>Bitwise XOR (<code>bit-xor</code>)</li>
+<li>Bitwise OR (<code>bit-or</code>)</li>
+<li>Logical AND (<code>and</code>)</li>
+<li>Logical XOR (<code>xor</code>)</li>
+<li>Logical OR (<code>or</code>)</li>
+<li>Assignment operations</li>
+<li>Logical NOT (<code>not</code>)</li>
+</ul>
+<p>For example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span>)</span></code></pre></div>
+<h4 data-number="4.1.1.2" id="types"><span
+class="header-section-number">4.1.1.2</span> Types</h4>
+<p>Not all operations make semantic sense across every data type. When
+attempting an operation between incompatible types, Nushell halts
+evaluation with an explanatory error diagnostic:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> <span class="st">&quot;spam&quot;</span> <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Error: <span class="bu">nu</span>::parser::unsupported_operation (<span class="bu">link</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  × Tipos no coincidentes para la operación.</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>   ╭─[entry <span class="co">#49:1:1]</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> │ <span class="st">&quot;spam&quot;</span> <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>   · ───┬── ┬ ┬</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>   ·    │   │ ╰── <span class="dt">int</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>   ·    │   ╰── no admite estos valores.</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>   ·    ╰── <span class="dt">string</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>   ╰────</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="bu">help</span>: Cambie <span class="dt">string</span> o <span class="dt">int</span> para que sean los tipos correctos e intente nuevamente.</span></code></pre></div>
+<p>These static typing boundaries may initially seem strict, yet they
+systematically eliminate unexpected runtime side effects and subtle type
+coercion bugs common in traditional shells.</p>
+<h4 data-number="4.1.1.3"
+id="regular-expression-and-substring-matching-operators"><span
+class="header-section-number">4.1.1.3</span> Regular Expression and
+Substring Matching Operators</h4>
+<p>The <code>=~</code> and <code>!~</code> operators provide an
+ergonomic syntax for evaluating regular expressions without invoking
+external utilities. Even without complex regular expressions, they serve
+as a straightforward mechanism for testing whether a string contains a
+target substring:</p>
+<ul>
+<li><code>string =~ pattern</code> evaluates to <strong>true</strong> if
+<code>string</code> contains a match for <code>pattern</code>, and
+<strong>false</strong> otherwise.</li>
+<li><code>string !~ pattern</code> evaluates to <strong>false</strong>
+if <code>string</code> contains a match for <code>pattern</code>, and
+<strong>true</strong> otherwise.</li>
+</ul>
+<p>For example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;foobarbaz&quot;</span> <span class="op">=~</span> <span class="st">&quot;bar&quot;</span> <span class="co"># devuelve true</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;foobarbaz&quot;</span> <span class="op">!~</span> <span class="st">&quot;bar&quot;</span> <span class="co"># devuelve false</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">|</span> <span class="kw">where</span> name <span class="op">=~</span> <span class="op">^</span><span class="bu">nu</span> <span class="co"># devuelve todos los archivos cuyos nombres comienzan con &quot;nu&quot;</span></span></code></pre></div>
+<h4 data-number="4.1.1.4" id="case-sensitivity"><span
+class="header-section-number">4.1.1.4</span> Case Sensitivity</h4>
+<p>Nushell operators enforce case sensitivity when comparing text.
+Several idioms allow performing case-insensitive string evaluations:</p>
+<ol type="1">
+<li>In regular expression operators, supply the case-insensitive inline
+flag <code>(?i)</code>:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;FOO&quot;</span> <span class="op">=~</span> <span class="st">&quot;foo&quot;</span> <span class="co"># devuelve falso</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;FOO&quot;</span> <span class="op">=~</span> <span class="st">&quot;(?i)foo&quot;</span> <span class="co"># devuelve verdadero</span></span></code></pre></div>
+<ol start="2" type="1">
+<li>Pass the <code>--ignore-case</code> flag to the
+<code>str contains</code> command:</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;FOO&quot;</span> <span class="op">|</span> <span class="bu">str contains</span> <span class="at">--ignore-case</span> <span class="st">&quot;foo&quot;</span></span></code></pre></div>
+<ol start="3" type="1">
+<li>Convert strings to lowercase via <code>str downcase</code> prior to
+evaluation:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(<span class="st">&quot;FOO&quot;</span> <span class="op">|</span> <span class="bu">str downcase</span>) <span class="op">==</span> (<span class="st">&quot;Foo&quot;</span> <span class="op">|</span> <span class="bu">str downcase</span>)</span></code></pre></div>
+<h4 data-number="4.1.1.5" id="the-spread-operator"><span
+class="header-section-number">4.1.1.5</span> The Spread Operator</h4>
+<p>Nushell provides a spread operator (<code>...</code>) designed to
+unpack lists and records. It expands compound collections into
+individual values or key-value attributes wherever multiple arguments or
+parameters are expected.</p>
+<p>The spread operator is valid in three operational contexts:</p>
+<ul>
+<li>Inside list literals.</li>
+<li>Inside record literals.</li>
+<li>Across command invocations.</li>
+</ul>
+<h5 data-number="4.1.1.5.1" id="in-list-literals"><span
+class="header-section-number">4.1.1.5.1</span> In List Literals</h5>
+<p>Suppose we need to concatenate multiple lists while interspersing
+individual scalar elements. While this can be achieved by chaining
+<code>append</code> and <code>prepend</code>, the spread operator offers
+significantly cleaner syntax:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> dogs <span class="op">=</span> [Spot, Teddy, Tommy]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> cats <span class="op">=</span> [<span class="st">&quot;Mr. Humphrey Montgomery&quot;</span>, Kitten]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ...<span class="va">$dogs</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    Polly</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    ...(<span class="va">$cats</span> <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>elt<span class="op">|</span> <span class="st">$&quot;</span><span class="op">(</span><span class="va">$elt</span><span class="op">)</span><span class="st"> </span><span class="sc">\(</span><span class="st">cat\)&quot;</span> })</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ...[Porky Bessie]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ...Nemo</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>The following pipeline represents the equivalent transformation
+constructed with <code>append</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$dogs</span> <span class="op">|</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">append</span> Polly <span class="op">|</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">append</span> (<span class="va">$cats</span> <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>elt<span class="op">|</span> <span class="st">$&quot;</span><span class="op">(</span><span class="va">$elt</span><span class="op">)</span><span class="st"> </span><span class="sc">\(</span><span class="st">cat\)&quot;</span> }) <span class="op">|</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">append</span> [Porky Bessie] <span class="op">|</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">append</span> ...Nemo</span></code></pre></div>
+<p>We observe that each invocation of <code>append</code> allocates a
+new intermediate list in memory. In this second pipeline, three
+superfluous intermediate collections are instantiated. The spread
+operator eliminates these allocations, yielding concrete performance
+advantages when combining multiple large collections.</p>
+<p>Note that the final item in the resulting list above is
+<code>"...Nemo"</code>. Within list literals, the spread operator can
+only unpack list collections, not bare strings. Consequently, inside
+list literals, <code>...</code> is recognized exclusively before
+variables (<code>...$foo</code>), subexpressions
+(<code>...(foo)</code>), and nested list literals
+(<code>...[foo]</code>).</p>
+<p>Furthermore, <code>...</code> will not be parsed as a spread operator
+if whitespace separates the dots from the target expression:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>[ ... [] ]</span></code></pre></div>
+<p>This parsing constraint prevents ambiguity with standard filesystem
+paths, such as <code>mv ... $dir</code>.</p>
+<h5 data-number="4.1.1.5.2" id="in-record-literals"><span
+class="header-section-number">4.1.1.5.2</span> In Record Literals</h5>
+<p>Consider a configuration record where additional attributes must be
+merged dynamically:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> my_config <span class="op">=</span> { <span class="bu">path</span>: <span class="op">/</span>tmp, limit: <span class="dv">5</span> }</span></code></pre></div>
+<p>We can derive a new record combining all attributes from
+<code>$my_config</code> alongside new entries using the spread operator.
+Multiple records can be unpacked simultaneously within a single record
+literal:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    ...<span class="va">$my_config</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">users</span>: [alice bob],</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    ...{ <span class="bu">url</span>: <span class="bu">example</span>.com },</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    ...(<span class="bu">sys mem</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Analogous to lists, the spread operator within record literals is
+recognized exclusively before variables (<code>...$foo</code>),
+subexpressions (<code>...(foo)</code>), and nested record literals
+(<code>...{foo:bar}</code>). Whitespace between <code>...</code> and the
+target expression is strictly prohibited.</p>
+<h5 data-number="4.1.1.5.3" id="in-command-invocations"><span
+class="header-section-number">4.1.1.5.3</span> In Command
+Invocations</h5>
+<p>Arguments can also be unpacked dynamically into command calls,
+provided the receiving command declares a <code>rest</code> parameter or
+corresponds to an external system binary.</p>
+<p>Here is an example custom command featuring a <code>rest</code>
+parameter:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo [ <span class="at">--flag</span> req <span class="bu">opt</span>? ...args ] { [<span class="va">$flag</span>, <span class="va">$req</span>, <span class="va">$opt</span>, <span class="va">$args</span>] <span class="op">|</span> <span class="bu">to nuon</span> }</span></code></pre></div>
+<p>This command declares a named flag (<code>--flag</code>), a required
+positional parameter (<code>req</code>), an optional positional
+parameter (<code>opt?</code>), and a variable rest parameter
+(<code>args</code>).</p>
+<p>To pass an existing list into <code>args</code>, spread it just as
+you would inside a list literal. Identical parsing rules apply: the
+spread operator is recognized solely before variables, subexpressions,
+and list literals, with no whitespace permitted:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>foo <span class="st">&quot;bar&quot;</span> <span class="st">&quot;baz&quot;</span> ...[<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="co"># Con ..., los números se tratan como argumentos separados</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>foo <span class="st">&quot;bar&quot;</span> <span class="st">&quot;baz&quot;</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="co"># Sin ..., [1 2 3] se trata como un solo argumento</span></span></code></pre></div>
+<p>A frequent application of the spread operator arises when writing
+wrapper commands that forward variable arguments directly to an
+underlying command:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bar [ ...args ] { foo <span class="at">--flag</span> <span class="st">&quot;bar&quot;</span> <span class="st">&quot;baz&quot;</span> ...<span class="va">$args</span> }</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>bar <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span></code></pre></div>
+<p>Multiple collections can be unpacked within a single invocation
+alongside individual positional arguments:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>foo <span class="st">&quot;bar&quot;</span> <span class="st">&quot;baz&quot;</span> <span class="dv">1</span> ...[<span class="dv">2</span> <span class="dv">3</span>] <span class="dv">4</span> <span class="dv">5</span> ...(<span class="fl">6..9</span> <span class="op">|</span> <span class="bu">take</span> <span class="dv">2</span>) <span class="bu">last</span></span></code></pre></div>
+<p>Named flags can appear after a spread argument, just as they can
+follow conventional <code>rest</code> parameters:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>foo <span class="st">&quot;bar&quot;</span> <span class="st">&quot;baz&quot;</span> <span class="dv">1</span> ...[<span class="dv">2</span> <span class="dv">3</span>] <span class="at">--flag</span> <span class="dv">4</span></span></code></pre></div>
+<p>If a spread argument precedes an optional positional parameter, that
+optional parameter is treated as omitted:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>foo <span class="st">&quot;bar&quot;</span> ...[<span class="dv">1</span> <span class="dv">2</span>] <span class="st">&quot;not opt&quot;</span></span></code></pre></div>
+<h3 data-number="4.1.2" id="variables-in-scripts-and-cli-tools"><span
+class="header-section-number">4.1.2</span> Variables in Scripts and CLI
+Tools</h3>
+<p>The conceptual variable model of Nushell, naming conventions, and the
+architectural distinction between <code>let</code>, <code>mut</code>,
+and <code>const</code> were established in <a
+href="3-chapter-3-nushell-fundamentals.html#declaracion-y-ciclo-de-vida-de-variables-let-mut-y-const">Chapter
+3</a>. When designing reusable CLI tools and functions, the governing
+principle is to prioritize immutable variables with <code>let</code> and
+continuous pipeline streams, reserving <code>mut</code> strictly for
+imperative algorithms where local state accumulation is indispensable
+and <code>const</code> for static dependencies evaluated during
+compilation (<code>source</code>, <code>use</code>).</p>
+<h3 data-number="4.1.3" id="custom-commands"><span
+class="header-section-number">4.1.3</span> Custom Commands</h3>
+<p>Nushell ability to compose extended pipelines provides granular
+control over data and system state. However, typing lengthy pipelines
+repeatedly quickly becomes inefficient. Reusable pipelines should be
+encapsulated into callable routines.</p>
+<p>This is where custom commands come in.</p>
+<p>Here is a basic custom command definition:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name:<span class="dt">string</span>] {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  [<span class="st">&#39;hello&#39;</span> <span class="va">$name</span>]</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>This definition declares the command <code>greet</code>, accepting a
+single parameter <code>name</code>. Following the parameter signature is
+the code block executed when the command is invoked. Upon invocation,
+the argument supplied for <code>name</code> is bound to
+<code>$name</code> and made accessible throughout the block.</p>
+<p>To execute the custom command, invoke it identically to built-in
+commands:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>greet <span class="st">&quot;world&quot;</span></span></code></pre></div>
+<blockquote>
+<p>The value yielded by the final expression of a command automatically
+becomes its return value. In this case, the command returns a list
+containing the string <code>'hello'</code> and <code>$name</code>. To
+suppress output, pipe to <code>ignore</code> or append
+<code>null</code>: <code>['hello' $name] | ignore</code>. Note also that
+most filesystem commands, such as <code>save</code> or <code>cd</code>,
+always return <code>null</code>.</p>
+</blockquote>
+<blockquote>
+<p>To produce a formatted string directly, use string interpolation
+syntax to embed <code>$name</code>:</p>
+</blockquote>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name:<span class="dt">string</span>] {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>greet nushell</span></code></pre></div>
+<h3 data-number="4.1.4" id="command-names"><span
+class="header-section-number">4.1.4</span> Command Names</h3>
+<p>In Nushell, command names are plain strings. Valid identifiers
+include: <code>greet</code>, <code>get-size</code>,
+<code>mycommand123</code>, <code>my command</code>, and
+<code>emoji_cmd</code> (including supported Unicode symbols).</p>
+<blockquote>
+<p>Idiomatic Nushell convention separates words in command names with
+hyphens (<code>-</code>) for enhanced readability. For instance, prefer
+<code>get-size</code> over <code>getsize</code> or
+<code>get_size</code>.</p>
+</blockquote>
+<h3 data-number="4.1.5" id="subcommands"><span
+class="header-section-number">4.1.5</span> Subcommands</h3>
+<p>Subcommands are defined naturally by separating command components
+with spaces. For example, to extend <code>str</code> with a new
+subcommand, declare a command whose name begins with
+<code>"str "</code>:`</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="st">&quot;str mycommand&quot;</span> [] {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;hello&quot;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The custom command can then be invoked identically to native
+subcommands of <code>str</code>:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="st">&quot;str mycommand&quot;</span> [] { <span class="st">&quot;hello&quot;</span> }</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">str</span> mycommand</span></code></pre></div>
+<p>Commands containing whitespace in their primary names are declared
+following the identical syntax:</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="st">&quot;custom command&quot;</span> [] {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;this is a custom command with a space in the name!&quot;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 data-number="4.1.6" id="parameter-types"><span
+class="header-section-number">4.1.6</span> Parameter Types</h3>
+<p>When declaring custom commands, parameters can be annotated with
+explicit static types. For instance, the earlier example can be
+annotated as:</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name: <span class="dt">string</span>] {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Parameter type annotations are optional. When omitted, Nushell
+assigns the type <code>any</code>. When a static type is declared,
+Nushell validates the argument at parse time before execution
+begins.</p>
+<p>For instance, suppose we require an <code>int</code> parameter
+instead:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name: <span class="dt">int</span>] {</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>greet world</span></code></pre></div>
+<p>If we attempt to supply an incompatible argument, Nushell halts
+evaluation with an explicit type mismatch error:</p>
+<pre><code>error: Type Error
+  ┌─ shell:6:7
+  │
+5 │ greet world
+  │       ^^^^^ Expected int</code></pre>
+<p>This mechanism ensures callers supply data of the expected shape. For
+a full inventory of supported Nushell types (<code>string</code>,
+<code>int</code>, <code>float</code>, <code>filesize</code>,
+<code>datetime</code>, <code>table</code>, etc.), refer to <a
+href="3-chapter-3-nushell-fundamentals.html#chapter-3-nushell-fundamentals">Table
+1 in Chapter 3</a>.</p>
+<h3 data-number="4.1.7" id="parameters-with-default-values"><span
+class="header-section-number">4.1.7</span> Parameters with Default
+Values</h3>
+<p>To make a parameter optional while specifying a fallback value,
+assign a default directly in the parameter list:</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [age, name <span class="op">=</span> <span class="st">&quot;nushell&quot;</span>] {</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st"> + </span><span class="op">(</span><span class="va">$age</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The command can then be called with or without an explicit
+argument:</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name <span class="op">=</span> <span class="st">&quot;nushell&quot;</span>] { <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st">&quot;</span> }</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>greet</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>greet world</span></code></pre></div>
+<p>Default values can be combined seamlessly with static type
+annotations:</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> congratulate [age: <span class="dt">int</span> <span class="op">=</span> <span class="dv">18</span>] {</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">$&quot;Happy birthday! You are </span><span class="op">(</span><span class="va">$age</span><span class="op">)</span><span class="st"> years old now!&quot;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>When you need to determine whether an optional argument was
+explicitly provided rather than relying on a static fallback, use
+optional positional parameters instead.</p>
+<h3 data-number="4.1.8" id="optional-positional-parameters"><span
+class="header-section-number">4.1.8</span> Optional Positional
+Parameters</h3>
+<p>By default, positional parameters are strictly required. Omitting a
+required positional argument produces a syntax error:</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>  × Missing required positional argument.</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>   ╭─[entry <span class="co">#23:1:1]</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> │ greet</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>   ·      ▲</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>   ·      ╰── missing name</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>   ╰────</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">help</span>: Usage: greet <span class="op">&lt;</span>name<span class="op">&gt;</span></span></code></pre></div>
+<p>A positional parameter can be marked optional by appending a question
+mark (<code>?</code>) to its identifier:</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name?: <span class="dt">string</span>] {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>greet</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>greet world</span></code></pre></div>
+<p>Marking a parameter optional does not alter its identifier within the
+command body; it remains accessible via <code>$name</code>, without the
+trailing <code>?</code>.</p>
+<p>When an optional parameter is omitted by the caller, its value inside
+the command body resolves to <code>null</code>. This allows branching on
+whether an argument was provided:</p>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [name?: <span class="dt">string</span>] {</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">if</span> (<span class="va">$name</span> <span class="op">==</span> <span class="cn">null</span>) {</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;hello, I don&#39;t know your name!&quot;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  } else {</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">$&quot;hello </span><span class="op">(</span><span class="va">$name</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>greet</span></code></pre></div>
+<p>If the objective is simply to substitute a fallback value when an
+argument is missing, declaring a default value is typically more
+concise.</p>
+<p>When combining required and optional positional parameters, required
+parameters must precede optional ones in the signature.</p>
+<h3 data-number="4.1.9" id="flags"><span
+class="header-section-number">4.1.9</span> Flags</h3>
+<p>In addition to positional arguments, commands can accept named
+parameters by defining flags.</p>
+<p>For example:</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  name: <span class="dt">string</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--age</span>: <span class="dt">int</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>] {</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  [<span class="va">$name</span> <span class="va">$age</span>]</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>In this definition of <code>greet</code>, we declare the positional
+parameter <code>name</code> alongside an optional named flag
+<code>age</code>. Callers can optionally provide the <code>--age</code>
+flag during invocation.</p>
+<p>The command can be invoked as:</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>greet world <span class="at">--age</span> <span class="dv">10</span></span></code></pre></div>
+<p>Or:</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>greet <span class="at">--age</span> <span class="dv">10</span> world</span></code></pre></div>
+<p>Or by omitting the flag entirely:</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>greet world</span></code></pre></div>
+<p>Flags can also define shorthand single-character aliases, allowing
+both concise interactive use and self-documenting scripts.</p>
+<p>We extend the previous command to provide <code>-a</code> as a
+shorthand for <code>--age</code>:</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  name: <span class="dt">string</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--age</span> (<span class="at">-a</span>): <span class="dt">int</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>] {</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  [<span class="va">$name</span> <span class="va">$age</span>]</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<blockquote>
+<p><em>Note:</em> Flags are bound inside the command body using their
+full name; the example above accesses <code>$age</code> rather than
+<code>$a</code>.</p>
+</blockquote>
+<p>The updated command can now be invoked using the shorthand flag:</p>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>greet <span class="at">-a</span> <span class="dv">10</span> hello</span></code></pre></div>
+<p>Flags can also serve as boolean switches. Their presence or absence
+indicates a true or false condition. Extending the definition:</p>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  name: <span class="dt">string</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--age</span> (<span class="at">-a</span>): <span class="dt">int</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--twice</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>] {</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">if</span> <span class="va">$twice</span> {</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    [<span class="va">$name</span> <span class="va">$name</span> <span class="va">$age</span> <span class="va">$age</span>]</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  } else {</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    [<span class="va">$name</span> <span class="va">$age</span>]</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The command can now be executed with the switch:</p>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>greet <span class="at">-a</span> <span class="dv">10</span> <span class="at">--twice</span> hello</span></code></pre></div>
+<p>Or without it:</p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>greet <span class="at">-a</span> <span class="dv">10</span> hello</span></code></pre></div>
+<p>Boolean values can also be passed explicitly to enable or disable
+switches:</p>
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>greet <span class="at">-a</span> <span class="dv">10</span> <span class="at">--twice</span><span class="op">=</span><span class="cn">false</span> hello</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>greet <span class="at">-a</span> <span class="dv">10</span> <span class="at">--twice</span><span class="op">=</span><span class="cn">true</span> hello</span></code></pre></div>
+<p>Flag names may contain hyphens. When accessed inside the command
+body, hyphens are translated to underscores:</p>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  name: <span class="dt">string</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--age</span> (<span class="at">-a</span>): <span class="dt">int</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--two-times</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>] {</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">if</span> <span class="va">$two_times</span> {</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    [<span class="va">$name</span> <span class="va">$name</span> <span class="va">$age</span> <span class="va">$age</span>]</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  } else {</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    [<span class="va">$name</span> <span class="va">$age</span>]</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 data-number="4.1.10" id="rest-parameters"><span
+class="header-section-number">4.1.10</span> Rest Parameters</h3>
+<p>When a command needs to accept an arbitrary number of positional
+arguments, declare a <code>rest</code> parameter using the
+<code>...</code> syntax:</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [...name: <span class="dt">string</span>] {</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span> <span class="st">&quot;hello all:&quot;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">for</span> <span class="va">$n</span> <span class="cn">in</span> <span class="va">$name</span> {</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span> <span class="va">$n</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>greet earth mars jupiter venus</span></code></pre></div>
+<p>The <code>greet</code> command can now be called with any number of
+arguments, including none. All supplied values are gathered into
+<code>$name</code> as a typed list.</p>
+<p>Rest parameters can follow standard positional parameters:</p>
+<div class="sourceCode" id="cb45"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [vip: <span class="dt">string</span>, ...name: <span class="dt">string</span>] {</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span> <span class="st">$&quot;hello to our VIP </span><span class="op">(</span><span class="va">$vip</span><span class="op">)</span><span class="st">&quot;</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span> <span class="st">&quot;and hello to everybody else:&quot;</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">for</span> <span class="va">$n</span> <span class="cn">in</span> <span class="va">$name</span> {</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span> <span class="va">$n</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>greet moon earth mars jupiter venus</span></code></pre></div>
+<p>To pass an existing list into a <code>rest</code> parameter, use the
+spread operator (<code>...</code>):</p>
+<div class="sourceCode" id="cb46"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> planets <span class="op">=</span> [earth mars jupiter venus]</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>greet moon ...<span class="va">$planets</span></span></code></pre></div>
+<h3 data-number="4.1.11" id="documenting-a-command"><span
+class="header-section-number">4.1.11</span> Documenting a Command</h3>
+<p>To streamline usage and maintainability, Nushell allows embedding
+detailed documentation for commands, parameters, and flags directly in
+the source definition.</p>
+<p>Additionally, Nushell provides an annotation system utilizing
+<code>@</code> prefixes placed immediately before <code>def</code>:</p>
+<ul>
+<li><strong><code>@category &lt;name&gt;</code>:</strong> Classifies the
+command within the system catalog (visible in
+<code>help commands</code>).</li>
+<li><strong><code>@search-terms &lt;terms...&gt;</code>:</strong>
+Registers keywords enabling semantic discovery via
+<code>help --find</code>.</li>
+<li><strong><code>@example "description" { code } --result outcome</code>:</strong>
+Embeds executable test examples with expected outputs, rendered
+automatically in the examples section of <code>help</code>.</li>
+</ul>
+<p>The following listing illustrates a fully documented command
+definition:</p>
+<div class="sourceCode" id="cb47"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Comando de saludo personalizado que ilustra anotaciones y documentación</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>@<span class="bu">category</span> utilidades</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>@<span class="bu">search</span><span class="at">-terms</span> saludo bienvenida mensaje</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>@<span class="bu">example</span> <span class="st">&quot;Saludar indicando la edad&quot;</span> { greet <span class="st">&quot;Carlos&quot;</span> <span class="at">--age</span> <span class="dv">28</span> } <span class="at">--result</span> [<span class="st">&quot;Carlos&quot;</span>, <span class="dv">28</span>]</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet [</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  name: <span class="dt">string</span>      <span class="co"># Nombre de la persona a saludar</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--age</span> (<span class="at">-a</span>): <span class="dt">int</span>   <span class="co"># Edad opcional de la persona</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>] {</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  [<span class="va">$name</span> <span class="va">$age</span>]</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Once defined, running <code>help greet</code> generates an exhaustive
+technical reference sheet automatically:</p>
+<pre class="text"><code>Comando de saludo personalizado que ilustra anotaciones y documentación
+
+Search terms: saludo, bienvenida, mensaje
+
+Usage:
+  &gt; greet &lt;name&gt; {flags}
+
+Flags:
+  -a, --age &lt;int&gt;: Edad opcional de la persona
+  -h, --help: Muestra este mensaje de ayuda
+
+Parameters:
+  name &lt;string&gt;: Nombre de la persona a saludar
+
+Examples:
+  Saludar indicando la edad
+  &gt; greet &quot;Carlos&quot; --age 28
+  ╭───┬────────╮
+  │ 0 │ Carlos │
+  │ 1 │     28 │
+  ╰───┴────────╯</code></pre>
+<p>Running <code>help greet</code> on a standard command similarly
+provides formatted guidance:</p>
+<pre class="text"><code>A greeting command that can greet the caller
+
+Usage:
+  &gt; greet &lt;name&gt; {flags}
+
+Parameters:
+  &lt;name&gt; The name of the person to greet
+
+Flags:
+  -h, --help: Display this help message
+  -a, --age &lt;integer&gt;: The age of the person</code></pre>
+<h3 data-number="4.1.12" id="closures"><span
+class="header-section-number">4.1.12</span> Closures</h3>
+<p>A <strong>closure</strong> in Nushell is an anonymous, first-class
+block of executable code capable of receiving arguments, consuming
+pipeline input (<code>$in</code>), and capturing variables from its
+enclosing lexical scope. Closures can be stored in variables, passed
+into higher-order commands, and evaluated dynamically on demand.</p>
+<h4 data-number="4.1.12.1" id="syntax-and-parameters"><span
+class="header-section-number">4.1.12.1</span> Syntax and Parameters</h4>
+<p>Closures are enclosed in curly braces <code>{ ... }</code>. When
+declaring formal parameters, specify them between vertical bars at the
+beginning of the block (<code>{ |param1, param2| ... }</code>),
+optionally including static type annotations:</p>
+<div class="sourceCode" id="cb50"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Cierre con un parámetro tipado</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> duplicar <span class="op">=</span> { <span class="op">|</span>x: <span class="dt">int</span><span class="op">|</span> <span class="va">$x</span> <span class="op">*</span> <span class="dv">2</span> }</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Cierre con dos parámetros</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ponderar <span class="op">=</span> { <span class="op">|</span>val: <span class="dt">float</span>, peso: <span class="dt">float</span><span class="op">|</span> <span class="va">$val</span> <span class="op">*</span> <span class="va">$peso</span> }</span></code></pre></div>
+<h4 data-number="4.1.12.2" id="dynamic-invocation-with-do"><span
+class="header-section-number">4.1.12.2</span> Dynamic Invocation with
+<code>do</code></h4>
+<p>To execute a closure stored in a variable, invoke it using the
+built-in <code>do</code> command:</p>
+<div class="sourceCode" id="cb51"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="bu">do</span> <span class="va">$duplicar</span> <span class="dv">21</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="bu">do</span> <span class="va">$ponderar</span> <span class="fl">4.5</span> <span class="fl">0.8</span></span></code></pre></div>
+<h4 data-number="4.1.12.3"
+id="higher-order-functions-in-pipelines"><span
+class="header-section-number">4.1.12.3</span> Higher-Order Functions in
+Pipelines</h4>
+<p>In data science workflows, closures achieve their primary utility
+when processing tables and collections via higher-order commands such as
+<code>each</code>, <code>where</code>, <code>filter</code>,
+<code>reduce</code>, and <code>par-each</code>:</p>
+<div class="sourceCode" id="cb52"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformación elemento a elemento con each</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">5</span>] <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>n<span class="op">|</span> <span class="va">$n</span> <span class="op">**</span> <span class="dv">2</span> }</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrado condicional con where</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">10</span> <span class="dv">25</span> <span class="dv">3</span> <span class="dv">48</span> <span class="dv">7</span>] <span class="op">|</span> <span class="kw">where</span> { <span class="op">|</span>val<span class="op">|</span> <span class="va">$val</span> <span class="op">&gt;</span> <span class="dv">20</span> }</span></code></pre></div>
+<p>When a closure omits explicit parameters between <code>|...|</code>,
+it can access incoming pipeline records directly via the special
+variable <code>$in</code>:</p>
+<div class="sourceCode" id="cb53"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">5</span> <span class="dv">12</span> <span class="dv">18</span>] <span class="op">|</span> <span class="bu">each</span> { <span class="va">$in</span> <span class="op">*</span> <span class="dv">10</span> }</span></code></pre></div>
+<h4 data-number="4.1.12.4" id="lexical-scoping-and-immutability"><span
+class="header-section-number">4.1.12.4</span> Lexical Scoping and
+Immutability</h4>
+<p>A closure can capture immutable variables (<code>let</code> or
+<code>const</code>) from its defining scope. However, by architectural
+design to ensure thread safety and deterministic concurrency across
+parallel pipelines, <strong>closures in Nushell are strictly prohibited
+from capturing and mutating mutable variables
+(<code>mut</code>)</strong>. Any attempt to mutate an exterior mutable
+variable from within a closure produces an immediate parse error
+(<code>nu::shell::capture_of_mutable_var</code>).</p>
+<h3 data-number="4.1.13" id="pipeline-output"><span
+class="header-section-number">4.1.13</span> Pipeline Output</h3>
+<p>Custom commands stream their output downstream just like native
+commands. For example:</p>
+<div class="sourceCode" id="cb54"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">|</span> <span class="bu">get</span> name</span></code></pre></div>
+<p>We wrap <code>ls</code> inside a custom command:</p>
+<div class="sourceCode" id="cb55"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> my<span class="at">-ls</span> [] { <span class="bu">ls</span> }</span></code></pre></div>
+<p>We can consume the output of this custom command identically to
+<code>ls</code>:</p>
+<div class="sourceCode" id="cb56"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>my<span class="at">-ls</span> <span class="op">|</span> <span class="bu">get</span> name</span></code></pre></div>
+<p>This design allows constructing modular command pipelines that pass
+structured tables between stages. Note that Nushell does not require
+explicit return statements; instead, pipelines generate continuous data
+streams that connect cleanly into subsequent pipeline stages.</p>
+<h3 data-number="4.1.14" id="pipeline-input"><span
+class="header-section-number">4.1.14</span> Pipeline Input</h3>
+<p>Custom commands can also accept incoming pipeline streams. Incoming
+data is passed automatically to the command body.</p>
+<p>Consider the following command that doubles each element in an
+incoming list:</p>
+<div class="sourceCode" id="cb57"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> double [] {</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">each</span> { <span class="op">|</span>elt<span class="op">|</span> <span class="dv">2</span> <span class="op">*</span> <span class="va">$elt</span> }</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>It can be consumed directly from a pipeline:</p>
+<div class="sourceCode" id="cb58"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="op">|</span> double</span></code></pre></div>
+<p>Pipeline input can also be captured explicitly for multi-stage
+processing using <code>$in</code>:</p>
+<div class="sourceCode" id="cb59"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nullify [...cols] {</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> <span class="bu">start</span> <span class="op">=</span> <span class="va">$in</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">$cols</span> <span class="op">|</span> <span class="bu">reduce</span> <span class="at">--fold</span> <span class="va">$start</span> { <span class="op">|</span><span class="bu">col</span>, df<span class="op">|</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">$df</span> <span class="op">|</span> <span class="bu">upsert</span> <span class="va">$col</span> <span class="cn">null</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 data-number="4.1.15" id="control-flow"><span
+class="header-section-number">4.1.15</span> Control Flow</h3>
+<p>Nushell provides robust control flow constructs to govern conditional
+branching and iterative execution.</p>
+<h4 data-number="4.1.15.1" id="conditionals"><span
+class="header-section-number">4.1.15.1</span> Conditionals</h4>
+<p>Conditional expressions execute code blocks based on boolean
+conditions.</p>
+<div class="tip">
+<p>In Nushell, conditional constructs are expressions that evaluate to
+concrete values, unlike statement-based control flow in conventional
+shells. This means conditionals can be embedded directly within
+pipelines:</p>
+<div class="sourceCode" id="cb60"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;foo&#39;</span> <span class="op">|</span> <span class="kw">if</span> <span class="va">$in</span> <span class="op">==</span> <span class="st">&#39;foo&#39;</span> { <span class="dv">1</span> } else { <span class="dv">0</span> } <span class="op">|</span> <span class="va">$in</span> <span class="op">+</span> <span class="dv">2</span></span></code></pre></div>
+</div>
+<h5 data-number="4.1.15.1.1" id="if"><span
+class="header-section-number">4.1.15.1.1</span> <code>if</code></h5>
+<p><code>if</code> evaluates conditional branches, executing code based
+on the truth value of one or more expressions. For example:</p>
+<div class="sourceCode" id="cb61"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> x <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="va">$x</span> <span class="op">&gt;</span> <span class="dv">0</span> { <span class="st">&#39;positivo&#39;</span> }</span></code></pre></div>
+<p>This returns <code>'positive'</code> when the condition is
+<code>true</code> (<code>$x &gt; 0</code>) and <code>null</code> when
+<code>false</code> (<code>$x &lt;= 0</code>).</p>
+<p>An <code>else</code> branch can be appended to provide an explicit
+fallback value when the condition evaluates to <code>false</code>:</p>
+<div class="sourceCode" id="cb62"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="va">$x</span> <span class="op">&gt;</span> <span class="dv">0</span> { <span class="st">&#39;positivo&#39;</span> } else { <span class="st">&#39;no-positivo&#39;</span> }</span></code></pre></div>
+<p>This returns <code>'positive'</code> when <code>$x &gt; 0</code> and
+<code>'non-positive'</code> otherwise.</p>
+<p>Multiple conditions can be chained using <code>else if</code>:</p>
+<div class="sourceCode" id="cb63"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="va">$x</span> <span class="op">&gt;</span> <span class="dv">0</span> { <span class="st">&#39;positive&#39;</span> } else <span class="kw">if</span> <span class="va">$x</span> <span class="op">==</span> <span class="dv">0</span> { <span class="st">&#39;zero&#39;</span> } else { <span class="st">&quot;negative&quot;</span> }</span></code></pre></div>
+<p>Or formatted across multiple lines:</p>
+<div class="sourceCode" id="cb64"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="va">$x</span> <span class="op">&gt;</span> <span class="dv">0</span> {</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>   <span class="st">&#39;positive&#39;</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>} else <span class="kw">if</span> <span class="va">$x</span> <span class="op">==</span> <span class="dv">0</span> {</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>   <span class="st">&#39;zero&#39;</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>} else {</span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>   <span class="st">&quot;negativo&quot;</span></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>When the first condition is <code>true</code>
+(<code>$x &gt; 0</code>), it returns <code>'positive'</code>; when the
+second condition holds (<code>$x == 0</code>), it returns
+<code>'zero'</code>; otherwise, it returns <code>'negative'</code>.</p>
+<h5 data-number="4.1.15.1.2" id="match"><span
+class="header-section-number">4.1.15.1.2</span> <code>match</code></h5>
+<p><code>match</code> performs pattern matching against an incoming
+value, branching execution to the matching arm. It can unpack structured
+compound types such as lists and records.</p>
+<p>In its simplest form, <code>match</code> functions analogously to a
+<code>switch</code> statement in other programming languages. It
+compares the target value against each arm before <code>=&gt;</code>,
+executing the block corresponding to the first match:</p>
+<div class="sourceCode" id="cb65"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="kw">match</span> <span class="dv">2</span> {</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="op">=&gt;</span> <span class="st">&#39;one&#39;</span>,</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="op">=&gt;</span> {</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> w <span class="op">=</span> <span class="st">&#39;w&#39;</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;t&#39;</span> <span class="op">+</span> <span class="va">$w</span> <span class="op">+</span> <span class="st">&#39;o&#39;</span></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span> <span class="op">=&gt;</span> <span class="st">&#39;three&#39;</span>,</span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span> <span class="op">=&gt;</span> <span class="st">&#39;four&#39;</span></span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Arms can return single values or full expression blocks.</p>
+<h6 data-number="4.1.15.1.2.1" id="wildcard-arm"><span
+class="header-section-number">4.1.15.1.2.1</span> Wildcard Arm</h6>
+<p>A wildcard arm (<code>_</code>) matches any value not caught by
+earlier arms, serving as a catch-all branch:</p>
+<div class="sourceCode" id="cb66"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> foo <span class="op">=</span> <span class="kw">match</span> <span class="dv">7</span> {</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="op">=&gt;</span> <span class="st">&#39;one&#39;</span>,</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="op">=&gt;</span> <span class="st">&#39;two&#39;</span>,</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span> <span class="op">=&gt;</span> <span class="st">&#39;three&#39;</span>,</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="st">&#39;other number&#39;</span></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a><span class="va">$foo</span></span></code></pre></div>
+<blockquote>
+<p>Because <code>match</code> is an expression, its result can be
+assigned directly to a variable.</p>
+</blockquote>
+<h6 data-number="4.1.15.1.2.2" id="pattern-matching"><span
+class="header-section-number">4.1.15.1.2.2</span> Pattern Matching</h6>
+<p>Compound values such as records and lists can be destructured using
+pattern matching. Variable bindings in the pattern capture corresponding
+components for use within the arm expression:</p>
+<div class="sourceCode" id="cb67"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> foo <span class="op">=</span> { name: <span class="st">&#39;bar&#39;</span>, <span class="bu">count</span>: <span class="dv">7</span> }</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="kw">match</span> <span class="va">$foo</span> {</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>    { name: <span class="st">&#39;bar&#39;</span>, <span class="bu">count</span>: <span class="va">$it</span> } <span class="op">=&gt;</span> (<span class="va">$it</span> <span class="op">+</span> <span class="dv">3</span>),</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>    { name: _, <span class="bu">count</span>: <span class="va">$it</span> } <span class="op">=&gt;</span> (<span class="va">$it</span> <span class="op">+</span> <span class="dv">7</span>),</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="dv">1</span></span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The wildcard <code>_</code> in the second arm matches any record
+containing fields <code>name</code> and <code>count</code>, regardless
+of the value stored in <code>name</code>.</p>
+<h6 data-number="4.1.15.1.2.3" id="guards"><span
+class="header-section-number">4.1.15.1.2.3</span> Guards</h6>
+<p>Guards add boolean conditions to pattern arms using <code>if</code>,
+ensuring an arm matches only when both the structural pattern and the
+guard condition are satisfied:</p>
+<div class="sourceCode" id="cb68"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> foo <span class="op">=</span> { name: <span class="st">&#39;bar&#39;</span>, <span class="bu">count</span>: <span class="dv">7</span> }</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a><span class="kw">match</span> <span class="va">$foo</span> {</span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>    { name: <span class="st">&#39;bar&#39;</span>, <span class="bu">count</span>: <span class="va">$it</span> } <span class="kw">if</span> <span class="va">$it</span> <span class="op">&lt;</span> <span class="dv">5</span> <span class="op">=&gt;</span> (<span class="va">$it</span> <span class="op">+</span> <span class="dv">3</span>),</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>    { name: <span class="st">&#39;bar&#39;</span>, <span class="bu">count</span>: <span class="va">$it</span> } <span class="kw">if</span> <span class="va">$it</span> <span class="op">&gt;=</span> <span class="dv">5</span> <span class="op">=&gt;</span> (<span class="va">$it</span> <span class="op">+</span> <span class="dv">7</span>),</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="dv">1</span></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h4 data-number="4.1.15.2" id="loops"><span
+class="header-section-number">4.1.15.2</span> Loops</h4>
+<p>Loop constructs repeatedly execute a block of code.</p>
+<h5 data-number="4.1.15.2.1"
+id="loops-versus-functional-iterators"><span
+class="header-section-number">4.1.15.2.1</span> Loops versus Functional
+Iterators</h5>
+<p>Loop commands share functionality with higher-order iteration
+commands like <code>each</code> and <code>where</code>. Often, identical
+transformations can be accomplished using either paradigm:</p>
+<div class="sourceCode" id="cb69"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mut</span> result <span class="op">=</span> []</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> <span class="va">$it</span> <span class="cn">in</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] {</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>   <span class="va">$result</span> <span class="op">=</span> (<span class="va">$result</span> <span class="op">|</span> <span class="bu">append</span> (<span class="va">$it</span> <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a><span class="va">$result</span></span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="op">|</span> <span class="bu">each</span> { <span class="va">$in</span> <span class="op">+</span> <span class="dv">1</span> }</span></code></pre></div>
+<p>While imperative loops may feel familiar to programmers arriving from
+other languages, the idiomatic Nushell standard is to favor functional
+pipeline commands that apply closures. This preference stems from a
+fundamental architectural limitation of loops.</p>
+<h6 data-number="4.1.15.2.1.1" id="disadvantages-of-loops"><span
+class="header-section-number">4.1.15.2.1.1</span> Disadvantages of
+Loops</h6>
+<p>The primary disadvantage of loops is that they are statements rather
+than expressions. Commands like <code>each</code> are expressions that
+invariably evaluate to structured output, whereas loop statements return
+nothing.</p>
+<p>Consequently, loops cannot be used with immutable variables. Without
+a mutable accumulator variable initialized prior to the loop, it is
+impossible for <code>for</code> to return an accumulated collection.</p>
+<p>Furthermore, loop statements cannot be embedded inside Nushell
+pipelines. Attempting to pipe into or out of a loop triggers a syntax
+error:</p>
+<div class="sourceCode" id="cb70"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="op">|</span> <span class="kw">for</span> x <span class="cn">in</span> <span class="va">$in</span> { <span class="va">$x</span> <span class="op">+</span> <span class="dv">1</span> } <span class="op">|</span> <span class="va">$in</span> <span class="op">++</span> [<span class="dv">5</span> <span class="dv">6</span> <span class="dv">7</span>]</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>Error: <span class="bu">nu</span>::parser::unexpected_keyword</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>  × Statement used <span class="cn">in</span> pipeline.</span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>   ╭─[entry <span class="co">#5:1:1]</span></span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> │ [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="op">|</span> <span class="kw">for</span> x <span class="cn">in</span> <span class="va">$in</span> { <span class="va">$x</span> <span class="op">+</span> <span class="dv">1</span> } <span class="op">|</span> <span class="va">$in</span> <span class="op">++</span> [<span class="dv">5</span> <span class="dv">6</span> <span class="dv">7</span>]</span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>   ·           ─┬─</span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>   ·            ╰── <span class="bu">not</span> allowed <span class="cn">in</span> pipeline</span>
+<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-15"><a href="#cb70-15" aria-hidden="true" tabindex="-1"></a>   ╰────</span>
+<span id="cb70-16"><a href="#cb70-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-17"><a href="#cb70-17" aria-hidden="true" tabindex="-1"></a>  <span class="bu">help</span>: <span class="st">&#39;for&#39;</span> keyword is <span class="bu">not</span> allowed <span class="cn">in</span> pipeline. Use <span class="st">&#39;for&#39;</span> by itself, outside of a pipeline.</span></code></pre></div>
+<p>Because Nushell is fundamentally pipeline-centric, expression
+commands like <code>each</code> integrate far more naturally into data
+transformations.</p>
+<h6 data-number="4.1.15.2.1.2" id="when-loops-are-appropriate"><span
+class="header-section-number">4.1.15.2.1.2</span> When Loops are
+Appropriate</h6>
+<p>Why do loops exist if expression commands are preferred? One reason
+is that closures, such as those passed to <code>each</code>, cannot
+mutate variables in their enclosing scope. Attempting to modify an
+exterior mutable variable from within a closure produces an error:</p>
+<div class="sourceCode" id="cb71"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mut</span> foo <span class="op">=</span> []</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="op">|</span> <span class="bu">each</span> { <span class="va">$foo</span> <span class="op">=</span> (<span class="va">$foo</span> <span class="op">|</span> <span class="bu">append</span> (<span class="va">$in</span> <span class="op">+</span> <span class="dv">1</span>)) }</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>Error: <span class="bu">nu</span>::parser::expected_keyword</span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>  × Capture of mutable variable.</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>   ╭─[entry <span class="co">#8:1:1]</span></span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> │ [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] <span class="op">|</span> <span class="bu">each</span> { <span class="va">$foo</span> <span class="op">=</span> (<span class="va">$foo</span> <span class="op">|</span> <span class="bu">append</span> (<span class="va">$in</span> <span class="op">+</span> <span class="dv">1</span>)) }</span>
+<span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a>   ·                  ──┬─</span>
+<span id="cb71-14"><a href="#cb71-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-15"><a href="#cb71-15" aria-hidden="true" tabindex="-1"></a>   ·                    ╰── capture of mutable variable</span>
+<span id="cb71-16"><a href="#cb71-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-17"><a href="#cb71-17" aria-hidden="true" tabindex="-1"></a>   ╰────</span></code></pre></div>
+<p>While a closure can modify environment variables locally within its
+own execution scope, those changes do not persist outside. Loops,
+however, execute standard blocks rather than closures, allowing them to
+mutate exterior state or update environment variables across the broader
+scope:</p>
+<div class="sourceCode" id="cb72"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mut</span> result <span class="op">=</span> []</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> <span class="va">$it</span> <span class="cn">in</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] { <span class="va">$result</span> <span class="op">=</span> (<span class="va">$result</span> <span class="op">|</span> <span class="bu">append</span> (<span class="va">$it</span> <span class="op">+</span> <span class="dv">1</span>)) }</span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a><span class="va">$result</span></span></code></pre></div>
+<h5 data-number="4.1.15.2.2" id="for"><span
+class="header-section-number">4.1.15.2.2</span> <code>for</code></h5>
+<p><code>for</code> iterates over collections, such as ranges, lists, or
+tables:</p>
+<div class="sourceCode" id="cb73"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> x <span class="cn">in</span> [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>] { <span class="va">$x</span> <span class="op">*</span> <span class="va">$x</span> <span class="op">|</span> <span class="bu">print</span> }</span></code></pre></div>
+<h6 data-number="4.1.15.2.2.1" id="expression-alternatives-to-for"><span
+class="header-section-number">4.1.15.2.2.1</span> Expression
+Alternatives to <code>for</code></h6>
+<ul>
+<li><code>each</code></li>
+<li><code>par-each</code></li>
+<li><code>where</code></li>
+<li><code>reduce</code></li>
+</ul>
+<h5 data-number="4.1.15.2.3" id="while"><span
+class="header-section-number">4.1.15.2.3</span> <code>while</code></h5>
+<p><code>while</code> repeatedly executes a block as long as its
+condition evaluates to <code>true</code>:</p>
+<div class="sourceCode" id="cb74"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mut</span> x <span class="op">=</span> <span class="dv">0</span>;</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a><span class="kw">while</span> <span class="va">$x</span> <span class="op">&lt;</span> <span class="dv">10</span> { <span class="va">$x</span> <span class="op">=</span> <span class="va">$x</span> <span class="op">+</span> <span class="dv">1</span> }</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a><span class="va">$x</span></span></code></pre></div>
+<h6 data-number="4.1.15.2.3.1"
+id="expression-alternatives-to-while"><span
+class="header-section-number">4.1.15.2.3.1</span> Expression
+Alternatives to <code>while</code></h6>
+<ul>
+<li><code>take until</code></li>
+<li><code>take while</code></li>
+<li><code>skip until</code></li>
+<li><code>skip while</code></li>
+</ul>
+<h5 data-number="4.1.15.2.4" id="loop"><span
+class="header-section-number">4.1.15.2.4</span> <code>loop</code></h5>
+<p><code>loop</code> repeats a block indefinitely. It is typically
+controlled via <code>break</code> and is useful for continuous
+monitoring routines or interactive prompts:</p>
+<div class="sourceCode" id="cb75"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mut</span> x <span class="op">=</span> <span class="dv">0</span>; <span class="kw">loop</span> { <span class="kw">if</span> <span class="va">$x</span> <span class="op">&gt;</span> <span class="dv">10</span> { <span class="kw">break</span> }; <span class="va">$x</span> <span class="op">=</span> <span class="va">$x</span> <span class="op">+</span> <span class="dv">1</span> }; <span class="va">$x</span></span></code></pre></div>
+<h5 data-number="4.1.15.2.5" id="break"><span
+class="header-section-number">4.1.15.2.5</span> <code>break</code></h5>
+<p><code>break</code> terminates loop execution immediately,
+transferring control to the statement following the loop block:</p>
+<div class="sourceCode" id="cb76"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> x <span class="cn">in</span> <span class="fl">1..10</span> { <span class="kw">if</span> <span class="va">$x</span> <span class="op">&gt;</span> <span class="dv">3</span> { <span class="kw">break</span> }; <span class="bu">print</span> <span class="va">$x</span> }</span></code></pre></div>
+<h5 data-number="4.1.15.2.6" id="continue"><span
+class="header-section-number">4.1.15.2.6</span>
+<code>continue</code></h5>
+<p><code>continue</code> halts the current iteration, skipping remaining
+statements in the loop body and proceeding to the next iteration:</p>
+<div class="sourceCode" id="cb77"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="kw">mut</span> x <span class="op">=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="kw">while</span> <span class="va">$x</span> <span class="op">&lt;=</span> <span class="dv">6</span> {</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">$x</span> <span class="op">=</span> <span class="va">$x</span> <span class="op">+</span> <span class="dv">1</span>;</span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="va">$x</span> mod <span class="dv">3</span> <span class="op">==</span> <span class="dv">0</span> {</span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">continue</span></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span> <span class="va">$x</span></span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h5 data-number="4.1.15.2.7" id="errors"><span
+class="header-section-number">4.1.15.2.7</span> Errors</h5>
+<h6 data-number="4.1.15.2.7.1" id="error-make"><span
+class="header-section-number">4.1.15.2.7.1</span>
+<code>error make</code></h6>
+<p><code>error make</code> raises a runtime error that halts execution
+up through the call stack until caught by a <code>try</code> block or
+terminating the script with a diagnostic report:</p>
+<div class="sourceCode" id="cb78"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="bu">error make</span> { msg: <span class="st">&#39;Some error info&#39;</span> }; <span class="bu">print</span> <span class="st">&#39;unprinted&#39;</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>Error:   × Some <span class="bu">error</span> <span class="bu">info</span></span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>   ╭─[entry <span class="co">#9:1:1]</span></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> │ <span class="bu">print</span> <span class="st">&#39;printed&#39;</span>; <span class="bu">error make</span> { msg: <span class="st">&#39;Some error info&#39;</span> }; <span class="bu">print</span> <span class="st">&#39;unprinted&#39;</span></span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>   ·                  ─────┬────</span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>   ·                       ╰── originates <span class="bu">from</span> here</span>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a>   ╰────</span></code></pre></div>
+<p>The record passed to <code>error make</code> provides metadata for
+upstream error handlers or terminal diagnostics.</p>
+<h6 data-number="4.1.15.2.7.2" id="try"><span
+class="header-section-number">4.1.15.2.7.2</span> <code>try</code></h6>
+<p><code>try</code> catches runtime errors occurring within its block,
+resuming execution cleanly after the block:</p>
+<div class="sourceCode" id="cb79"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="kw">try</span> { <span class="bu">error make</span> { msg: <span class="st">&#39;Some error info&#39;</span> }}; <span class="bu">print</span> <span class="st">&#39;Resuming&#39;</span></span></code></pre></div>
+<p>This includes intercepting built-in evaluation errors such as
+division by zero:</p>
+<div class="sourceCode" id="cb80"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="kw">try</span> { <span class="dv">1</span> <span class="op">/</span> <span class="dv">0</span> }; <span class="bu">print</span> <span class="st">&#39;Resuming&#39;</span></span></code></pre></div>
+<p>The resulting value is <code>nothing</code> if an error occurs, or
+the return value of the block if execution succeeds.</p>
+<p>An optional <code>catch</code> block executes custom recovery logic
+when an error is trapped:</p>
+<div class="sourceCode" id="cb81"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="kw">try</span> { <span class="dv">1</span> <span class="op">/</span> <span class="dv">0</span> } catch { <span class="st">&#39;An error happened!&#39;</span> } <span class="op">|</span> <span class="va">$in</span> <span class="op">++</span> <span class="st">&#39; And now I am resuming.&#39;</span></span></code></pre></div>
+<blockquote>
+<p>The <code>catch</code> block is bypassed entirely when execution
+succeeds without errors.</p>
+</blockquote>
+<div class="sourceCode" id="cb82"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="kw">try</span> { <span class="dv">1</span> <span class="op">/</span> <span class="dv">0</span> } catch { <span class="op">|</span>e<span class="op">|</span> <span class="va">$e.msg</span> }</span></code></pre></div>
+<h5 data-number="4.1.15.2.8" id="other-statements"><span
+class="header-section-number">4.1.15.2.8</span> Other Statements</h5>
+<h6 data-number="4.1.15.2.8.1" id="return"><span
+class="header-section-number">4.1.15.2.8.1</span>
+<code>return</code></h6>
+<p><code>return</code> terminates a custom command or closure early,
+returning the specified value immediately. While rarely required because
+the final expression in a block automatically forms its return value,
+<code>return</code> is useful for early exit conditions:</p>
+<div class="sourceCode" id="cb83"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="st">&#39;positive-check&#39;</span> [it] {</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="va">$it</span> <span class="op">&gt;</span> <span class="dv">0</span> {</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="st">&#39;positive&#39;</span></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>    };</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;non-positive&#39;</span></span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb84"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>positive<span class="at">-check</span> <span class="dv">3</span></span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>positive<span class="at">-check</span> (<span class="op">-</span><span class="dv">3</span>)</span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> positive_check <span class="op">=</span> {<span class="op">|</span>elt<span class="op">|</span> <span class="kw">if</span> <span class="va">$elt</span> <span class="op">&gt;</span> <span class="dv">0</span> { <span class="kw">return</span> <span class="st">&#39;positive&#39;</span> }; <span class="st">&#39;non-positive&#39;</span> }</span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a><span class="bu">do</span> <span class="va">$positive_check</span> <span class="dv">3</span></span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a><span class="bu">do</span> <span class="va">$positive_check</span> (<span class="op">-</span><span class="dv">3</span>)</span></code></pre></div>
+<h2 data-number="4.2"
+id="converting-one-liners-into-command-line-tools"><span
+class="header-section-number">4.2</span> Converting One-Liners into
+Command-Line Tools</h2>
+<p>Throughout this textbook, we construct numerous compact, single-line
+pipelines (<em>one-liners</em>). When a one-liner is needed repeatedly
+across different files or with variable arguments, it is best converted
+into an <strong>executable command-line tool</strong>.</p>
+<p>In <code>/data/ch04</code>, we have the complete unabridged text of
+<em>Alice’s Adventures in Wonderland</em> (<code>alice.txt</code>)
+alongside a stopword list (<code>stopwords</code>):</p>
+<div class="sourceCode" id="cb85"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span></span></code></pre></div>
+<p>First, we demonstrate how to compute the 10 most frequent words from
+<code>alice.txt</code> in Nushell (both unfiltered and filtering
+stopwords), rendering the output to the terminal and saving it as a CSV
+file:</p>
+<div class="sourceCode" id="cb86"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span></span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">str lowercase</span> <span class="op">|</span></span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&#39;(?P&lt;word&gt;[a-z]{2,})&#39;</span> <span class="op">|</span></span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-7"><a href="#cb86-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">get</span> word <span class="op">|</span></span>
+<span id="cb86-8"><a href="#cb86-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-9"><a href="#cb86-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">uniq</span> <span class="at">-c</span> <span class="op">|</span></span>
+<span id="cb86-10"><a href="#cb86-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-11"><a href="#cb86-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">rename</span> word <span class="bu">count</span> <span class="op">|</span></span>
+<span id="cb86-12"><a href="#cb86-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-13"><a href="#cb86-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span> <span class="op">|</span></span>
+<span id="cb86-14"><a href="#cb86-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-15"><a href="#cb86-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">first</span> <span class="dv">10</span></span></code></pre></div>
+<p>Next, we filter out stopwords using <code>stopwords</code> and save
+the resulting table both to the console and to
+<code>top10_alice.csv</code>:</p>
+<div class="sourceCode" id="cb87"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sw <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> stopwords <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> { <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str lowercase</span> }</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> top10 <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&#39;(?P&lt;word&gt;[a-z]{2,})&#39;</span></span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> word</span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> { <span class="op">|</span>w<span class="op">|</span> <span class="bu">not</span> (<span class="va">$w</span> <span class="cn">in</span> <span class="va">$sw</span>) }</span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">rename</span> word <span class="bu">count</span></span>
+<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb87-11"><a href="#cb87-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb87-12"><a href="#cb87-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-13"><a href="#cb87-13" aria-hidden="true" tabindex="-1"></a><span class="va">$top10</span></span>
+<span id="cb87-14"><a href="#cb87-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-15"><a href="#cb87-15" aria-hidden="true" tabindex="-1"></a><span class="va">$top10</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> top10_alice.<span class="bu">csv</span></span></code></pre></div>
+<p>To convert this one-liner into a reusable, parameterized command-line
+tool in Nushell, we follow <strong>six systematic steps</strong>:</p>
+<ol type="1">
+<li>Create the script file (<code>top-words-1.nu</code>).</li>
+<li>Grant execution permissions (<code>chmod u+x</code>).</li>
+<li>Define the shebang directive
+(<code>#!/usr/bin/env -S nu --stdin</code>).</li>
+<li>Decouple fixed input to read dynamically from standard input
+(<code>$in</code>).</li>
+<li>Add typed arguments and flags via <code>def main [...]</code>.</li>
+<li>Place the binary in <code>$env.PATH</code>.</li>
+</ol>
+<h3 data-number="4.2.1" id="step-1-create-the-file"><span
+class="header-section-number">4.2.1</span> Step 1: Create the File</h3>
+<p>In <code>/data/ch04</code>, we save the initial pipeline within
+<code>top-words-1.nu</code> (which can be edited interactively via
+<code>ttt top-words-1.nu</code>):</p>
+<div class="sourceCode" id="cb88"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Código de top-words-1.nu</span></span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sw <span class="op">=</span> <span class="kw">if</span> (<span class="st">&quot;stopwords&quot;</span> <span class="op">|</span> <span class="bu">path exists</span>) {</span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">open</span> <span class="at">--raw</span> stopwords <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> { <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str lowercase</span> }</span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>} else {</span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>    []</span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&quot;(?P&lt;word&gt;[a-z]{2,})&quot;</span></span>
+<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">get</span> word</span>
+<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="kw">where</span> { <span class="op">|</span>w<span class="op">|</span> <span class="bu">not</span> (<span class="va">$w</span> <span class="cn">in</span> <span class="va">$sw</span>) }</span>
+<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">rename</span> word <span class="bu">count</span></span>
+<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span></code></pre></div>
+<p>To inspect script source code directly from the terminal, Nushell
+prints raw text via <code>open --raw &lt;file&gt;</code>. Additionally,
+for syntax highlighting and line numbers, the environment includes
+<strong><code>bat</code></strong> (<code>bat top-words-1.nu</code>). For
+custom Nushell commands and functions loaded in memory (such as commands
+from <code>dsin_tools.nu</code>), the environment provides
+<strong><code>view-code</code></strong>
+(<code>view-code &lt;command&gt;</code>), which displays
+syntax-highlighted source code directly from the shell runtime. We
+utilize <code>bat</code> for script inspections and
+<code>view-code</code> for custom command inspections throughout this
+text:</p>
+<div class="sourceCode" id="cb89"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> top<span class="at">-words-1</span>.<span class="bu">nu</span></span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>bat top<span class="at">-words-1</span>.<span class="bu">nu</span></span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a><span class="bu">nu</span> top<span class="at">-words-1</span>.<span class="bu">nu</span></span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-7"><a href="#cb89-7" aria-hidden="true" tabindex="-1"></a><span class="bu">nu</span> top<span class="at">-words-1</span>.<span class="bu">nu</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> salida_paso1.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="4.2.2" id="step-2-grant-execution-permissions"><span
+class="header-section-number">4.2.2</span> Step 2: Grant Execution
+Permissions</h3>
+<p>We copy <code>top-words-1.nu</code> to <code>top-words-2.nu</code>
+and grant execution permissions to the owner via
+<code>chmod u+x</code>:</p>
+<div class="sourceCode" id="cb90"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Código de top-words-2.nu (idéntico en contenido a top-words-1.nu)</span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sw <span class="op">=</span> <span class="kw">if</span> (<span class="st">&quot;stopwords&quot;</span> <span class="op">|</span> <span class="bu">path exists</span>) {</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">open</span> <span class="at">--raw</span> stopwords <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> { <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str lowercase</span> }</span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a>} else {</span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>    []</span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&quot;(?P&lt;word&gt;[a-z]{2,})&quot;</span></span>
+<span id="cb90-11"><a href="#cb90-11" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">get</span> word</span>
+<span id="cb90-12"><a href="#cb90-12" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="kw">where</span> { <span class="op">|</span>w<span class="op">|</span> <span class="bu">not</span> (<span class="va">$w</span> <span class="cn">in</span> <span class="va">$sw</span>) }</span>
+<span id="cb90-13"><a href="#cb90-13" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb90-14"><a href="#cb90-14" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">rename</span> word <span class="bu">count</span></span>
+<span id="cb90-15"><a href="#cb90-15" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb90-16"><a href="#cb90-16" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span></code></pre></div>
+<p>We inspect the updated permissions using <code>chmod</code> and
+<code>ls</code>:</p>
+<div class="sourceCode" id="cb91"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cp</span> top<span class="at">-words-1</span>.<span class="bu">nu</span> top<span class="at">-words-2</span>.<span class="bu">nu</span></span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>chmod u<span class="op">+</span>x top<span class="at">-words-2</span>.<span class="bu">nu</span></span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="at">-l</span> top<span class="at">-words-1</span>.<span class="bu">nu</span> top<span class="at">-words-2</span>.<span class="bu">nu</span> <span class="op">|</span> <span class="bu">select</span> name <span class="bu">mode</span> <span class="bu">size</span></span></code></pre></div>
+<p>In the <code>mode</code> column (e.g., <code>-rwxr-xr-x</code>), the
+leading <code>-</code> denotes a regular file, followed by permission
+triads for read (<code>r</code>), write (<code>w</code>), and execute
+(<code>x</code>) across user (<code>u</code>), group (<code>g</code>),
+and others (<code>o</code>).</p>
+<h3 data-number="4.2.3" id="step-3-define-the-shebang"><span
+class="header-section-number">4.2.3</span> Step 3: Define the
+Shebang</h3>
+<p>The shebang directive (<code>#!/usr/bin/env -S nu --stdin</code>) on
+the first line instructs the operating system kernel which interpreter
+to invoke when calling the script directly as an executable binary
+(<code>./top-words-3.nu</code>):</p>
+<div class="sourceCode" id="cb92"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Código de top-words-3.nu</span></span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env -S nu --stdin</span></span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> sw <span class="op">=</span> <span class="kw">if</span> (<span class="st">&quot;stopwords&quot;</span> <span class="op">|</span> <span class="bu">path exists</span>) {</span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">open</span> <span class="at">--raw</span> stopwords <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> { <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str lowercase</span> }</span>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a>} else {</span>
+<span id="cb92-6"><a href="#cb92-6" aria-hidden="true" tabindex="-1"></a>    []</span>
+<span id="cb92-7"><a href="#cb92-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb92-8"><a href="#cb92-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-9"><a href="#cb92-9" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb92-10"><a href="#cb92-10" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb92-11"><a href="#cb92-11" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&quot;(?P&lt;word&gt;[a-z]{2,})&quot;</span></span>
+<span id="cb92-12"><a href="#cb92-12" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">get</span> word</span>
+<span id="cb92-13"><a href="#cb92-13" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="kw">where</span> { <span class="op">|</span>w<span class="op">|</span> <span class="bu">not</span> (<span class="va">$w</span> <span class="cn">in</span> <span class="va">$sw</span>) }</span>
+<span id="cb92-14"><a href="#cb92-14" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb92-15"><a href="#cb92-15" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">rename</span> word <span class="bu">count</span></span>
+<span id="cb92-16"><a href="#cb92-16" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb92-17"><a href="#cb92-17" aria-hidden="true" tabindex="-1"></a><span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span></code></pre></div>
+<p>We inspect the script with <code>bat</code> and execute it
+directly:</p>
+<div class="sourceCode" id="cb93"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>bat top<span class="at">-words-3</span>.<span class="bu">nu</span></span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>.<span class="op">/</span>top<span class="at">-words-3</span>.<span class="bu">nu</span></span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a>.<span class="op">/</span>top<span class="at">-words-3</span>.<span class="bu">nu</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> salida_paso3.<span class="bu">json</span></span></code></pre></div>
+<h3 data-number="4.2.4" id="step-4-remove-fixed-input"><span
+class="header-section-number">4.2.4</span> Step 4: Remove Fixed
+Input</h3>
+<p>By replacing the hardcoded reference to <code>alice.txt</code> with
+<code>$in</code> inside a <code>main</code> function in
+<code>top-words-4.nu</code>, the tool decouples from specific files and
+processes any stream received via a pipeline (<code>|</code>):</p>
+<div class="sourceCode" id="cb94"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Código de top-words-4.nu</span></span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env -S nu --stdin</span></span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="bu">main</span> [] {</span>
+<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">$in</span></span>
+<span id="cb94-5"><a href="#cb94-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb94-6"><a href="#cb94-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&quot;(?P&lt;word&gt;[a-z]{2,})&quot;</span></span>
+<span id="cb94-7"><a href="#cb94-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> word</span>
+<span id="cb94-8"><a href="#cb94-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb94-9"><a href="#cb94-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb94-10"><a href="#cb94-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb94-11"><a href="#cb94-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Inspect with <code>bat</code> and test pipeline streaming from the
+terminal:</p>
+<div class="sourceCode" id="cb95"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>bat top<span class="at">-words-4</span>.<span class="bu">nu</span></span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> .<span class="op">/</span>top<span class="at">-words-4</span>.<span class="bu">nu</span></span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> .<span class="op">/</span>top<span class="at">-words-4</span>.<span class="bu">nu</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> salida_paso4.<span class="bu">json</span></span></code></pre></div>
+<h3 data-number="4.2.5"
+id="step-5-add-typed-arguments-and-options-def-main"><span
+class="header-section-number">4.2.5</span> Step 5: Add Typed Arguments
+and Options (<code>def main</code>)</h3>
+<p>By declaring formal parameters in
+<code>def main [num_words: int = 10, --stopwords-file (-s): path = "stopwords"]</code>
+inside <code>top-words-5.nu</code>, Nushell enforces static type
+checking, assigns default values, and auto-generates the
+<code>--help</code> manual:</p>
+<div class="sourceCode" id="cb96"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Código de top-words-5.nu</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env -S nu --stdin</span></span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb96-4"><a href="#cb96-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Extrae las palabras más frecuentes de un texto excluyendo stopwords</span></span>
+<span id="cb96-5"><a href="#cb96-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="bu">main</span> [</span>
+<span id="cb96-6"><a href="#cb96-6" aria-hidden="true" tabindex="-1"></a>    num_words: <span class="dt">int</span> <span class="op">=</span> <span class="dv">10</span> <span class="co"># Número de palabras frecuentes a retornar</span></span>
+<span id="cb96-7"><a href="#cb96-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stopwords-file</span> (<span class="at">-s</span>): <span class="bu">path</span> <span class="op">=</span> <span class="st">&quot;stopwords&quot;</span> <span class="co"># Archivo de palabras vacías</span></span>
+<span id="cb96-8"><a href="#cb96-8" aria-hidden="true" tabindex="-1"></a>] {</span>
+<span id="cb96-9"><a href="#cb96-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> input_text <span class="op">=</span> <span class="va">$in</span></span>
+<span id="cb96-10"><a href="#cb96-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> sw <span class="op">=</span> <span class="kw">if</span> (<span class="va">$stopwords_file</span> <span class="op">|</span> <span class="bu">path exists</span>) {</span>
+<span id="cb96-11"><a href="#cb96-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">open</span> <span class="at">--raw</span> <span class="va">$stopwords_file</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">each</span> { <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str lowercase</span> }</span>
+<span id="cb96-12"><a href="#cb96-12" aria-hidden="true" tabindex="-1"></a>    } else {</span>
+<span id="cb96-13"><a href="#cb96-13" aria-hidden="true" tabindex="-1"></a>        []</span>
+<span id="cb96-14"><a href="#cb96-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb96-15"><a href="#cb96-15" aria-hidden="true" tabindex="-1"></a>    <span class="va">$input_text</span></span>
+<span id="cb96-16"><a href="#cb96-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb96-17"><a href="#cb96-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&quot;(?P&lt;word&gt;[a-z]{2,})&quot;</span></span>
+<span id="cb96-18"><a href="#cb96-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> word</span>
+<span id="cb96-19"><a href="#cb96-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> { <span class="op">|</span>w<span class="op">|</span> <span class="bu">not</span> (<span class="va">$w</span> <span class="cn">in</span> <span class="va">$sw</span>) }</span>
+<span id="cb96-20"><a href="#cb96-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb96-21"><a href="#cb96-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">rename</span> word <span class="bu">count</span></span>
+<span id="cb96-22"><a href="#cb96-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb96-23"><a href="#cb96-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">first</span> <span class="va">$num_words</span></span>
+<span id="cb96-24"><a href="#cb96-24" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Inspect with <code>bat</code> and execute while passing positional
+parameters:</p>
+<div class="sourceCode" id="cb97"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>bat top<span class="at">-words-5</span>.<span class="bu">nu</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> .<span class="op">/</span>top<span class="at">-words-5</span>.<span class="bu">nu</span> <span class="dv">8</span></span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> .<span class="op">/</span>top<span class="at">-words-5</span>.<span class="bu">nu</span> <span class="dv">8</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> top8_alice.<span class="bu">json</span></span></code></pre></div>
+<h3 data-number="4.2.6" id="step-6-extend-env.path"><span
+class="header-section-number">4.2.6</span> Step 6: Extend
+<code>$env.PATH</code></h3>
+<p>To invoke the utility from any directory without specifying
+<code>./</code>, install the script into a directory registered in
+<code>$env.PATH</code> (such as <code>/home/dsin/bin</code>):</p>
+<div class="sourceCode" id="cb98"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cp</span> top<span class="at">-words-5</span>.<span class="bu">nu</span> <span class="op">/</span>home<span class="op">/</span><span class="bu">dsin</span><span class="op">/</span>bin<span class="op">/</span>top<span class="at">-words-nu</span></span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>chmod <span class="op">+</span>x <span class="op">/</span>home<span class="op">/</span><span class="bu">dsin</span><span class="op">/</span>bin<span class="op">/</span>top<span class="at">-words-nu</span></span>
+<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> top<span class="at">-words-nu</span> <span class="dv">5</span></span>
+<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb98-7"><a href="#cb98-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> top<span class="at">-words-nu</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> top5_alice.<span class="bu">json</span></span></code></pre></div>
+<h2 data-number="4.3"
+id="creating-command-line-tools-with-python-and-r"><span
+class="header-section-number">4.3</span> Creating Command-Line Tools
+with Python and R</h2>
+<p>Because the command line is language-agnostic, scripts written in
+<strong>Python</strong> (<code>#!/usr/bin/env python3</code>) and
+<strong>R</strong> (<code>#!/usr/bin/env Rscript</code>) integrate
+smoothly into Nushell pipelines. Following our established methodology,
+we inspect the <code>.py</code> or <code>.R</code> script inside the
+chapter directory, invoke it from Nushell, parse its standard output
+into a structured table via <code>from csv</code>, and persist the
+results.</p>
+<h3 data-number="4.3.1" id="porting-the-tool-to-python-and-r"><span
+class="header-section-number">4.3.1</span> Porting the Tool to Python
+and R</h3>
+<p>In <code>/data/ch04</code>, we have complete implementations in
+Python (<code>top-words.py</code>) and R (<code>top-words.R</code>).
+First, inspect <code>top-words.py</code> and run it from Nushell:</p>
+<div class="sourceCode" id="cb99"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>bat top<span class="at">-words</span>.py</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">python3</span> top<span class="at">-words</span>.py <span class="dv">5</span> <span class="op">|</span> <span class="bu">from csv</span></span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">python3</span> top<span class="at">-words</span>.py <span class="dv">5</span> <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> top_words_py.<span class="bu">csv</span></span></code></pre></div>
+<p>Now inspect the R implementation (<code>top-words.R</code>), execute
+it against <code>alice.txt</code>, parse its output into a Nushell
+table, and save it to <code>top_words_r.csv</code>:</p>
+<div class="sourceCode" id="cb100"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>bat top<span class="at">-words</span>.R</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">Rscript</span> top<span class="at">-words</span>.R <span class="dv">5</span> <span class="op">|</span> <span class="bu">from csv</span></span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">Rscript</span> top<span class="at">-words</span>.R <span class="dv">5</span> <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> top_words_r.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="4.3.2" id="streaming-data-from-stdin"><span
+class="header-section-number">4.3.2</span> Streaming Data from
+<code>stdin</code></h3>
+<p>When input arrives as a line-by-line stream, both Python and R can
+process lines incrementally as they arrive over <code>stdin</code>. In
+<code>/data/ch04</code>, <code>fizzbuzz.py</code> and
+<code>fizzbuzz.R</code> implement the classic FizzBuzz challenge
+(printing <code>"fizz"</code> for multiples of 3, <code>"buzz"</code>
+for multiples of 5, and <code>"fizzbuzz"</code> for multiples of
+15):</p>
+<div class="sourceCode" id="cb101"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>bat fizzbuzz.py</span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..15</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">python3</span> fizzbuzz.py <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">wrap</span> resultado_py</span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a><span class="fl">1..15</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">python3</span> fizzbuzz.py <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">wrap</span> resultado_py <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fizzbuzz_py.<span class="bu">csv</span></span></code></pre></div>
+<p>And identically with the R script <code>fizzbuzz.R</code>:</p>
+<div class="sourceCode" id="cb102"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>bat fizzbuzz.R</span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..15</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">Rscript</span> fizzbuzz.R <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">wrap</span> resultado_r</span>
+<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a><span class="fl">1..15</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">Rscript</span> fizzbuzz.R <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">wrap</span> resultado_r <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fizzbuzz_r.<span class="bu">csv</span></span></code></pre></div>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="3-chapter-3-nushell-fundamentals.html" rel="prev">&larr; Nushell Fundamentals and Data Structures</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="5-chapter-5-data-acquisition.html" rel="next">Data Acquisition &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Data Science at the Linux Terminal with Nushell</span>
+    <span>&bull; November 24, 2026</span>
+    <span>&bull; <a href="../">Course Portal</a></span>
+  </footer>
+
+  <script src="../Files/web_book.js" defer></script>
+</body>
+</html>

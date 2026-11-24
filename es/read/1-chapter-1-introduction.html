@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <title>Introducción</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Ciencia de Datos en la Terminal Linux con Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Portal del Curso</a>
+      <a class="header-pill" href="../../read/">English</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.epub" download>EPUB</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contenido</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" accesskey="p" rel="prev">&larr; Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" accesskey="u" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="2-chapter-2-installation.html" accesskey="n" rel="next">Instalación de Software &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="1" id="chapter-1-introduction"><span
+class="header-section-number">1</span> Introducción</h1>
+<p>En la práctica contemporánea de la ciencia de datos, la escala
+masiva, la heterogeneidad y el dinamismo de los flujos de información
+exigen herramientas capaces de trascender la rigidez de las interfaces
+gráficas y la sobrecarga computacional propia de los entornos de
+desarrollo monolíticos. Durante más de cinco décadas, la consola de
+comandos de Unix se ha consolidado como el estándar de referencia para
+la reproducibilidad científica, la automatización desatendida y la
+eficiencia algorítmica. Su filosofía fundacional postula una premisa de
+notable vigencia: articular sistemas a partir de programas compactos y
+modulares, concebidos para resolver una tarea concreta con precisión
+técnica y acoplarse con naturalidad mediante canales estandarizados de
+comunicación.</p>
+<p>Sin embargo, las shells tradicionales (entre las que destacan Bash y
+Zsh) fueron proyectadas en una época en que la información en tránsito
+se interpretaba exclusivamente como secuencias no estructuradas de
+caracteres. Bajo este esquema clásico, operar sobre matrices de datos,
+estructuras tabulares complejas o registros jerárquicos demanda
+intrincadas combinaciones de expresiones regulares y utilidades de corte
+léxico (tales como <code>sed</code>, <code>awk</code> y
+<code>cut</code>). Semejante paradigma introduce una fragilidad
+persistente; resulta vulnerable a delimitadores imprevistos, sufre ante
+secuencias de escape y, de modo crítico, despoja a las variables de sus
+atributos semánticos y tipos fundamentales.</p>
+<p>Nushell (<code>nu</code>) supera de raíz esta limitación histórica
+mediante una arquitectura concebida expresamente para las exigencias del
+análisis de datos contemporáneo. En lugar de canalizar flujos de bytes
+planos y opacos, los pipelines de Nushell transportan estructuras de
+datos enriquecidas: tablas bidimensionales tipadas, registros
+jerárquicos indexados por clave y valor, listas ordenadas y valores
+primitivos regulados por esquemas estrictos. Al reconocer de forma
+nativa enteros, valores en coma flotante, marcas temporales con huso
+horario, rutas del sistema de archivos y magnitudes de memoria, Nushell
+permite filtrar, ordenar, remodelar y agregar conjuntos de información
+mediante una sintaxis declarativa, concisa y elegante.</p>
+<p>A esta claridad expresiva se suma un desempeño computacional
+extraordinario. Su integración profunda con el motor columnar Polars
+(programado en Rust y edificado sobre el estándar en memoria Apache
+Arrow) dota a la terminal de una capacidad analítica sin precedentes.
+Esta sinergia hace viable ejecutar consultas analíticas multihilo sobre
+millones de registros en fracciones de segundo, preservando en todo
+momento la inmediatez y la ligereza del flujo interactivo en la línea de
+comandos.</p>
+<p>Este libro se basa en el trabajo de Jeroen Janssens en su obra
+<em>Data Science at the Command Line</em> (O’Reilly Media). Su propuesta
+demostró que la terminal de Unix es un entorno ágil y eficaz para el
+análisis de datos. Sin embargo, las herramientas de línea de comandos
+han evolucionado notablemente en los últimos años.</p>
+<p>Mientras que el libro original utilizaba herramientas clásicas
+orientadas a texto plano y utilidades como <code>csvkit</code>, este
+libro adopta Nushell y su modelo de datos estructurados. Esto permite
+mantener los principios de modularidad y reproducibilidad de Unix, pero
+con tablas tipadas, esquemas claros y mayor robustez al procesar
+información.</p>
+<p>Este libro está pensado para trabajarse de manera práctica, con la
+terminal abierta junto a la lectura. Por esta razón, la mayoría de los
+ejemplos de código no incluyen la salida de los comandos (salvo gráficos
+en consola, imágenes o diagramas indispensables). La intención es que
+ejecutes cada comando, explores sus resultados y experimentes
+directamente con Nushell.</p>
+<p>Omitir las salidas en los ejemplos responde a tres objetivos
+prácticos: primero, fomentar el aprendizaje activo escribiendo y
+ejecutando los comandos en lugar de solo leerlos; segundo, aprovechar
+las capacidades interactivas de Nushell (como <code>explore</code>, la
+paginación de tablas y el autocompletado), que se aprecian mejor en
+vivo; y tercero, desarrollar el hábito de inspeccionar datos intermedios
+con <code>describe</code> y diagnosticar errores de forma autónoma. Te
+invitamos a modificar los parámetros, probar filtros alternativos y
+explorar los resultados en tu propia terminal.</p>
+<p>Para garantizar que cada experiencia práctica se ejecute en
+condiciones rigurosamente reproducibles e inmunes a divergencias de
+configuración local, el texto se apoya en un entorno unificado
+denominado <code>dsin</code> (Data Science in Nushell), distribuido como
+imagen pública de Docker en
+<code>ghcr.io/kurokirasama/dsin:latest</code>. Dicho contenedor
+constituye una estación analítica completa. Encapsula la versión más
+reciente de Nushell con un perfil afinado para el procesamiento de
+datos, su ecosistema de complementos (con soporte nativo para Polars,
+manipulación de formatos estructurados, consultas relacionales
+avanzadas, control de versiones y graficación en terminal), entornos
+robustos de Python y R configurados con sus bibliotecas científicas
+indispensables, algoritmos de alto rendimiento para modelado predictivo
+(como Vowpal Wabbit, Tapkee y SKLL), herramientas modernas de línea de
+comandos (entre las que destacan el editor interactivo <code>ttt</code>
+y el visor gráfico de alta fidelidad <code>timg</code>), así como la
+totalidad de los conjuntos de datos del curso, organizados
+meticulosamente por capítulos en el directorio <code>/data</code>.</p>
+<p>Este libro está organizado siguiendo las etapas del ciclo clásico
+OSEMN (<em>Obtain</em>, <em>Scrub</em>, <em>Explore</em>, <em>Model</em>
+e <em>iNterpret</em>), propuesto originalmente por Hilary Mason y Chris
+Wiggins. El recorrido comienza en el <a
+href="2-chapter-2-installation.html#chapter-2-installation">capítulo
+2</a> con la instalación del software y la preparación del entorno de
+trabajo reproducible mediante Docker y el contenedor <code>dsin</code>.
+A continuación, el <a
+href="3-chapter-3-nushell-fundamentals.html#chapter-3-nushell-fundamentals">capítulo
+3</a> establece las bases operativas de la línea de comandos y el
+sistema de tipos de datos en Nushell, mientras que el <a
+href="4-chapter-4-programming-cli-tools.html#chapter-4-programming-cli-tools">capítulo
+4</a> profundiza en la programación estructurada y la creación de
+herramientas modulares reutilizables. El <a
+href="5-chapter-5-data-acquisition.html#chapter-5-data-acquisition">capítulo
+5</a> aborda las estrategias de obtención e ingesta de datos desde la
+web, APIs, archivos estructurados y bases de datos relacionales.
+Posteriormente, el <a
+href="6-chapter-6-data-cleaning.html#chapter-6-data-cleaning">capítulo
+6</a> introduce la limpieza y transformación de datos junto a la
+analítica columnar con Polars. La exploración estadística y la
+visualización gráfica en la terminal se desarrollan en el <a
+href="7-chapter-7-data-exploration.html#chapter-7-data-exploration">capítulo
+7</a>, dando paso en el <a
+href="8-chapter-8-parallel-pipelines.html#chapter-8-parallel-pipelines">capítulo
+8</a> a la orquestación de flujos de trabajo, procesamiento en serie y
+pipelines paralelos. El <a
+href="9-chapter-9-polyglot-modeling.html#chapter-9-polyglot-modeling">capítulo
+9</a> aborda el modelado predictivo políglota, integrando reducción de
+dimensionalidad, agrupamiento no supervisado, regresión y clasificación
+supervisada. Finalmente, el <a
+href="10-chapter-conclusion.html#chapter-conclusion">capítulo 10</a>
+sintetiza los principios arquitectónicos, computacionales y
+metodológicos que transforman la línea de comandos en un riguroso
+laboratorio de inteligencia de datos.</p>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" rel="prev">&larr; Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="2-chapter-2-installation.html" rel="next">Instalación de Software &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Ciencia de Datos en la Terminal Linux con Nushell</span>
+    <span>&bull; 24 Noviembre 2026</span>
+    <span>&bull; <a href="../">Portal del Curso</a></span>
+  </footer>
+
+  <script src="../../Files/web_book.js" defer></script>
+</body>
+</html>

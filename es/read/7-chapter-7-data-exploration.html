@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <title>Exploración y Visualización de Datos</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #ececec; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { color: #bb00ff; } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { color: #ffa500; } /* Constant */
+code span.co { color: #008f00; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fu { color: #006666; font-weight: bold; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { color: #e45649; } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Ciencia de Datos en la Terminal Linux con Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Portal del Curso</a>
+      <a class="header-pill" href="../../read/">English</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.epub" download>EPUB</a>
+      <a class="header-pill" href="../../Files/DataScienceNushell.es.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contenido</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="6-chapter-6-data-cleaning.html" accesskey="p" rel="prev">&larr; Depuración y Transformación de Datos</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" accesskey="u" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="8-chapter-8-parallel-pipelines.html" accesskey="n" rel="next">Procesamiento en Serie y Pipelines Paralelos &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="7" id="chapter-7-data-exploration"><span
+class="header-section-number">7</span> Exploración y Visualización de
+Datos</h1>
+<p>El cuarto paso del flujo de trabajo OSEMN consiste en explorar los
+datos. Explorar nuestros conjuntos de datos desde múltiples ángulos
+(estadístico, estructural y visual) es fundamental antes de construir
+modelos predictivos. Como destacó John W. Tukey en su clásico libro
+<em>Exploratory Data Analysis</em> (<a
+href="12-chapter-references.html#ref-tukey1977">1977</a>), el análisis
+exploratorio de datos (EDA) nos permite descubrir patrones inesperados,
+detectar valores atípicos (<em>outliers</em>), verificar supuestos y
+formular hipótesis informadas.</p>
+<p>En este capítulo abordaremos la exploración y visualización de datos
+desde tres perspectivas complementarias dentro de la imagen Docker
+<code>dsin</code>:</p>
+<ol type="1">
+<li><strong>Inspección de propiedades estructurales y estadísticas en
+Nushell</strong>, utilizando los comandos nativos de inspección
+(<code>columns</code>, <code>describe</code>, <code>uniq</code>,
+<code>histogram</code>), el módulo matemático (<code>math</code>) y el
+motor de DataFrames <code>polars</code>.</li>
+<li><strong>Cálculo de estadísticas descriptivas y pruebas diagnósticas
+mediante scripts en R y Python</strong>, integrando sus salidas
+directamente en pipelines de Nushell para presentarlas como tablas
+estructuradas.</li>
+<li><strong>Creación y visualización de gráficos estadísticos en la
+terminal</strong>, generando figuras mediante scripts modulares con
+<code>ggplot2</code> en R y <code>matplotlib</code>/<code>seaborn</code>
+en Python, e inspeccionándolas directamente dentro de la terminal
+mediante el visor gráfico <strong><code>timg</code></strong>
+preinstalado en la imagen <code>dsin</code>.</li>
+</ol>
+<p>Todos los archivos y scripts de este capítulo se encuentran en
+<code>/data/ch07</code>. Para comenzar, nos posicionamos en este
+directorio:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="op">/</span>data<span class="op">/</span>ch07</span></code></pre></div>
+<p>A partir de este punto, ejecutaremos todas las actividades dentro de
+<code>/data/ch07</code>. Inspeccionemos los archivos disponibles:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span></span></code></pre></div>
+<h2 data-number="7.1" id="inspeccionando-datos-y-sus-propiedades"><span
+class="header-section-number">7.1</span> Inspeccionando Datos y sus
+Propiedades</h2>
+<p>Antes de graficar o modelar un conjunto de datos, necesitamos
+responder preguntas fundamentales sobre su estructura: ¿cuántas filas y
+columnas tiene?, ¿qué nombres y tipos de datos poseen las variables?,
+¿existen columnas constantes o con valores faltantes?</p>
+<p>En Nushell, dado que cualquier archivo tabular cargado con
+<code>open</code> se convierte inmediatamente en una tabla tipada en
+memoria, podemos responder estas preguntas combinando selectores y
+filtros nativos, y guardar los resúmenes o tablas depuradas directamente
+en disco.</p>
+<h3 data-number="7.1.1"
+id="tiene-encabezado-cuántos-registros-y-qué-columnas"><span
+class="header-section-number">7.1.1</span> ¿Tiene Encabezado, Cuántos
+Registros y Qué Columnas?</h3>
+<p>Inspeccionemos el archivo <code>venture.csv</code> ubicado en
+<code>/data/ch07</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> venture.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span></code></pre></div>
+<p>Al abrirlo de forma estructurada con <code>open venture.csv</code>,
+Nushell interpreta automáticamente la primera línea como encabezado y
+tipifica cada columna. Podemos consultar el número total de registros
+con <code>length</code> y listar los nombres de las columnas junto con
+su índice usando <code>columns</code> y <code>enumerate</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> venture.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">length</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> venture.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">columns</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">15</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> venture.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">columns</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="bu">wrap</span> col_info <span class="op">|</span> <span class="bu">flatten</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> venture_columns.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="7.1.2"
+id="inspeccionando-tipos-de-datos-e-inferencia-de-esquemas"><span
+class="header-section-number">7.1.2</span> Inspeccionando Tipos de Datos
+e Inferencia de Esquemas</h3>
+<p>Veamos el archivo <code>datatypes.csv</code>, diseñado
+específicamente para ilustrar distintos tipos de datos (enteros,
+flotantes, booleanos, fechas y cadenas):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> datatypes.<span class="bu">csv</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> datatypes.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> datatypes_copy.<span class="bu">json</span></span></code></pre></div>
+<p>Para conocer el tipo exacto que Nushell o Polars asignó a cada
+columna, podemos emplear <code>describe</code> o convertir la tabla a un
+DataFrame de Polars y consultar <code>polars schema</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> datatypes.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">polars into-df</span> <span class="op">|</span> <span class="bu">polars schema</span> <span class="op">|</span> <span class="bu">transpose</span> <span class="bu">column</span> dtype</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> datatypes.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">polars into-df</span> <span class="op">|</span> <span class="bu">polars schema</span> <span class="op">|</span> <span class="bu">transpose</span> <span class="bu">column</span> dtype <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> datatypes_schema.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="7.1.3"
+id="identificando-valores-únicos-y-eliminando-columnas-constantes"><span
+class="header-section-number">7.1.3</span> Identificando Valores Únicos
+y Eliminando Columnas Constantes</h3>
+<p>En muchos conjuntos de datos administrativos o financieros (como
+<code>venture.csv</code>), existen columnas que contienen exactamente el
+mismo valor en todas las filas y que, por tanto, no aportan información
+estadística ni poder predictivo.</p>
+<p>En Nushell podemos detectar el número de valores únicos de cada
+columna trasponiendo el primer registro o iterando sobre los nombres de
+las columnas con <code>get</code> y <code>uniq</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="bu">open</span> venture.<span class="bu">csv</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> non_const_cols <span class="op">=</span> <span class="va">$df</span> <span class="op">|</span> <span class="bu">columns</span> <span class="op">|</span> <span class="kw">where</span> {<span class="op">|</span>c<span class="op">|</span> (<span class="va">$df</span> <span class="op">|</span> <span class="bu">get</span> <span class="va">$c</span> <span class="op">|</span> <span class="bu">uniq</span> <span class="op">|</span> <span class="bu">length</span>) <span class="op">&gt;</span> <span class="dv">1</span> }</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">select</span> ...<span class="va">$non_const_cols</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">select</span> ...<span class="va">$non_const_cols</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> venture_clean.<span class="bu">csv</span></span></code></pre></div>
+<p>Observa la claridad del flujo: identificamos programáticamente todas
+las columnas con más de un valor único
+(<code>uniq | length &gt; 1</code>), filtramos la tabla original
+conservando únicamente dichas columnas mediante el operador de expansión
+<code>...$non_const_cols</code>, y guardamos el resultado limpio en
+<code>venture_clean.csv</code>.</p>
+<h2 data-number="7.2" id="calculando-estadísticas-descriptivas"><span
+class="header-section-number">7.2</span> Calculando Estadísticas
+Descriptivas</h2>
+<p>Trabajemos ahora con el clásico conjunto de datos
+<code>tips.csv</code> (propinas en un restaurante según el total de la
+cuenta, sexo, hábito de fumar, día, horario y tamaño del grupo), ubicado
+en <code>/data/ch07/tips.csv</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_sample.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="7.2.1"
+id="estadísticas-con-math-y-polars-summary-en-nushell"><span
+class="header-section-number">7.2.1</span> Estadísticas con
+<code>math</code> y <code>polars summary</code> en Nushell</h3>
+<p>Nushell incluye la familia de comandos <code>math</code>
+(<code>math sum</code>, <code>math avg</code>, <code>math median</code>,
+<code>math stddev</code>, <code>math variance</code>,
+<code>math min</code>, <code>math max</code>, <code>math mode</code>),
+que operan sobre listas numéricas o sobre todas las columnas numéricas
+de una tabla:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> bill tip <span class="bu">size</span> <span class="op">|</span> <span class="bu">math avg</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> bill tip <span class="bu">size</span> <span class="op">|</span> <span class="bu">math stddev</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> bill tip <span class="bu">size</span> <span class="op">|</span> <span class="bu">math median</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_median.<span class="bu">json</span></span></code></pre></div>
+<p>Si deseamos obtener simultáneamente el conteo, media, desviación
+estándar, mínimo, cuartiles (25%, 50%, 75%) y máximo de todas las
+variables del dataset, <code>polars summary</code> genera una tabla
+resumen completa en un solo paso:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">polars into-df</span> <span class="op">|</span> <span class="bu">polars summary</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars into-nu</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">polars into-df</span> <span class="op">|</span> <span class="bu">polars summary</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_summary.<span class="bu">csv</span></span></code></pre></div>
+<p>Para variables categóricas (como <code>day</code> o
+<code>time</code>), el comando nativo <code>histogram</code> calcula el
+conteo absoluto, cuantiles y porcentaje relativo, incluyendo además un
+gráfico de barras ASCII en la propia tabla:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">histogram</span> day</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">histogram</span> day <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_day_freq.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="7.2.2"
+id="transformaciones-y-resúmenes-estadísticos-con-scripts-en-r-y-python"><span
+class="header-section-number">7.2.2</span> Transformaciones y Resúmenes
+Estadísticos con Scripts en R y Python</h3>
+<p>En un flujo de trabajo políglota, frecuentemente deseamos aplicar
+funciones estadísticas especializadas de R (<code>dplyr</code>) o Python
+(<code>pandas</code> / <code>scipy</code>) y capturar el resultado de
+vuelta en Nushell como una tabla estructurada. En lugar de escribir
+código difícil de mantener en una sola línea, creamos archivos
+<code>.R</code> y <code>.py</code> modulares en nuestro directorio de
+trabajo y los invocamos desde Nushell.</p>
+<p>Por ejemplo, revisemos el script <code>mutate_tips.R</code> en
+<code>/data/ch07</code>, que calcula el porcentaje de propina
+(<code>percent = tip / bill * 100</code>) usando
+<code>dplyr::mutate</code> y escribe el CSV resultante en la salida
+estándar:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>bat mutate_tips.R</span></code></pre></div>
+<p>Al ejecutar <code>Rscript mutate_tips.R</code> y canalizar su salida
+hacia <code>from csv</code>, Nushell recibe una tabla tipada que podemos
+filtrar, ordenar y guardar en disco:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> mutate_tips.R <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> mutate_tips.R <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_with_percent.<span class="bu">csv</span></span></code></pre></div>
+<p>Del mismo modo, el script <code>summary_tips.R</code> agrupa las
+propinas por día y horario (<code>group_by(day, time)</code>) y calcula
+el conteo, la cuenta media y la propina media:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>bat summary_tips.R</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> summary_tips.R <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> mean_tip <span class="at">-r</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> summary_tips.R <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> mean_tip <span class="at">-r</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_grouped_summary.<span class="bu">csv</span></span></code></pre></div>
+<p>Y con Python (<code>corr_tips.py</code>), podemos calcular la matriz
+de correlación de Pearson entre <code>bill</code>, <code>tip</code> y
+<code>size</code> usando <code>pandas</code> y devolverla como tabla a
+Nushell:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>bat corr_tips.py</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">python3</span> corr_tips.py <span class="op">|</span> <span class="bu">from csv</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="bu">python3</span> corr_tips.py <span class="op">|</span> <span class="bu">from csv</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_correlations.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="7.3"
+id="creando-visualizaciones-estadísticas-desde-la-línea-de-comandos"><span
+class="header-section-number">7.3</span> Creando Visualizaciones
+Estadísticas desde la Línea de Comandos</h2>
+<p>Las estadísticas resumen nunca sustituyen por completo a la
+inspección visual (como demuestra el célebre <em>Cuarteto de
+Anscombe</em>, donde cuatro conjuntos de datos con idéntica media,
+varianza y correlación exhiben estructuras geométricas radicalmente
+distintas).</p>
+<p>En nuestro entorno <code>dsin</code>, combinamos la potencia gráfica
+de <strong><code>ggplot2</code></strong> (en R) y
+<strong><code>matplotlib</code>/<code>seaborn</code></strong> (en
+Python) con el visor de imágenes de terminal
+<strong><code>timg</code></strong>. Como tanto <code>Rscript</code>,
+<code>python3</code> y <code>timg</code> están configurados en el
+<code>PATH</code> por defecto del contenedor <code>dsin</code>, podemos
+invocarlos directamente por su nombre sin prefijos especiales.</p>
+<p>Veamos primero el script <code>plot_faceted.R</code>, que genera un
+gráfico de dispersión de <code>tip</code> versus <code>bill</code> con
+rectas de regresión lineal separadas por sexo y día
+(<code>tips_faceted.png</code>):</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>bat plot_faceted.R</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_faceted.R</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> tips_faceted.png</span></code></pre></div>
+<h3 data-number="7.3.1"
+id="visualizando-imágenes-directamente-en-la-terminal-con-timg"><span
+class="header-section-number">7.3.1</span> Visualizando Imágenes
+Directamente en la Terminal con <code>timg</code></h3>
+<p>En el flujo de trabajo tradicional de los contenedores Docker sin
+servidor gráfico X11, el usuario debía copiar cada imagen generada hacia
+el sistema anfitrión para poder abrirla. En la imagen <code>dsin</code>,
+incluimos <strong><code>timg</code></strong> (<em>Terminal Image and
+Video Viewer</em>), una herramienta que renderiza archivos PNG, JPEG,
+SVG o incluso animaciones directamente dentro de la terminal utilizando
+bloques Unicode de alta resolución o protocolos gráficos avanzados.</p>
+<blockquote>
+<p>[!NOTE] <strong>Fidelidad gráfica y resolución original en la
+terminal:</strong> Cuando se utiliza un emulador de terminal moderno
+compatible con protocolos gráficos en mapa de bits —como el protocolo de
+gráficos de Kitty (<em>Kitty Graphics Protocol</em>) o Sixel,
+incorporados de forma nativa en emuladores como
+<strong>Ghostty</strong>, Kitty o WezTerm—, <code>timg</code> detecta
+las capacidades del canal y proyecta las imágenes en su
+<strong>resolución nativa píxel por píxel</strong>, sin degradación a
+caracteres de texto. En terminales estándar o conexiones SSH
+desprovistas de dicho soporte, <code>timg</code> conmuta de forma
+automática a una matriz de medios bloques Unicode de alta densidad
+(<code>-g 80x25</code>), garantizando la inspección visual inmediata en
+cualquier entorno.</p>
+</blockquote>
+<p>Para visualizar cualquier gráfico generado en
+<code>/data/ch07</code>, basta con ejecutar:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">-g</span> <span class="dv">80</span>x25 tips_faceted.png</span></code></pre></div>
+<figure>
+<img src="../../Files/tips_faceted.png" style="width:85.0%"
+alt="Dispersión segmentada por día de facturas y propinas" />
+<figcaption aria-hidden="true">Dispersión segmentada por día de facturas
+y propinas</figcaption>
+</figure>
+<p>También podemos mostrar varios gráficos en una cuadrícula comparativa
+dentro de la terminal usando la bandera <code>--grid</code>:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_histogram.R</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_density.R</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">--grid</span><span class="op">=</span><span class="dv">2</span>x1 <span class="at">-g</span> <span class="dv">80</span>x25 tips_histogram.png tips_density.png</span></code></pre></div>
+<figure>
+<img src="../../Files/tips_grid.png" style="width:90.0%"
+alt="Galería comparativa en terminal de histograma y estimación de densidad" />
+<figcaption aria-hidden="true">Galería comparativa en terminal de
+histograma y estimación de densidad</figcaption>
+</figure>
+<h3 data-number="7.3.2"
+id="alternativa-remota-copiando-gráficos-con-scp"><span
+class="header-section-number">7.3.2</span> Alternativa Remota: Copiando
+Gráficos con <code>scp</code></h3>
+<p>Si te encuentras conectado por SSH desde una terminal antigua que no
+soporta color verdadero de 24 bits, siempre puedes descargar la imagen
+hacia tu máquina local utilizando <code>scp</code> (<em>secure
+copy</em>):</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scp</span> usuario@servidor:/data/ch07/tips_faceted.png .</span></code></pre></div>
+<h2 data-number="7.4"
+id="catálogo-de-gráficos-estadísticos-con-scripts-en-r-y-python"><span
+class="header-section-number">7.4</span> Catálogo de Gráficos
+Estadísticos con Scripts en R y Python</h2>
+<p>La gramática de los gráficos (<em>Grammar of Graphics</em>)
+implementada en <code>ggplot2</code> descompone toda visualización
+estadística en tres elementos esenciales:</p>
+<ol type="1">
+<li><strong>Datos (<code>data</code>)</strong>: el DataFrame tabular que
+deseamos representar.</li>
+<li><strong>Mapeos estéticos (<code>aes</code>)</strong>: la
+correspondencia entre columnas de los datos y propiedades visuales como
+posición (<code>x</code>, <code>y</code>), color (<code>color</code>,
+<code>fill</code>), forma (<code>shape</code>) o tamaño
+(<code>size</code>).</li>
+<li><strong>Objetos geométricos (<code>geom_*</code>)</strong>: la
+representación gráfica concreta (barras, puntos, líneas, cajas, violines
+o curvas de densidad).</li>
+</ol>
+<p>En <code>/data/ch07</code> disponemos de una colección completa de
+scripts listos para usar que ilustran los gráficos fundamentales del
+análisis exploratorio.</p>
+<h3 data-number="7.4.1" id="gráfico-de-barras"><span
+class="header-section-number">7.4.1</span> Gráfico de Barras</h3>
+<p>Para visualizar la distribución de frecuencias de una variable
+categórica o discreta, como la cantidad de mesas atendidas por día de la
+semana en <code>tips.csv</code>, ejecutamos <code>plot_bar.R</code>:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>bat plot_bar.R</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_bar.R</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">-g</span> <span class="dv">80</span>x25 tips_bar.png</span></code></pre></div>
+<figure>
+<img src="../../Files/dscl_0702.png"
+alt="Gráfico de barras generado con ggplot2" />
+<figcaption aria-hidden="true">Gráfico de barras generado con
+ggplot2</figcaption>
+</figure>
+<h3 data-number="7.4.2" id="histograma"><span
+class="header-section-number">7.4.2</span> Histograma</h3>
+<p>Para inspeccionar la distribución empírica de una variable continua
+como el monto total de la cuenta (<code>bill</code>), ejecutamos
+<code>plot_histogram.R</code>:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>bat plot_histogram.R</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_histogram.R</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">-g</span> <span class="dv">80</span>x25 tips_histogram.png</span></code></pre></div>
+<figure>
+<img src="../../Files/dscl_0703.png"
+alt="Histograma del total de la cuenta" />
+<figcaption aria-hidden="true">Histograma del total de la
+cuenta</figcaption>
+</figure>
+<p>Ajustar el número de intervalos (<code>bins</code>) es crucial para
+evitar tanto el sobre-suavizado (pocas barras que ocultan
+multimodalidad) como el ruido excesivo (demasiadas barras
+estrechas).</p>
+<h3 data-number="7.4.3" id="gráfico-de-densidad"><span
+class="header-section-number">7.4.3</span> Gráfico de Densidad</h3>
+<p>Una alternativa suave al histograma es la estimación de densidad por
+núcleos (<em>Kernel Density Estimation</em>, KDE), implementada en
+<code>plot_density.R</code>:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>bat plot_density.R</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_density.R</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">-g</span> <span class="dv">80</span>x25 tips_density.png</span></code></pre></div>
+<figure>
+<img src="../../Files/dscl_0706.png"
+alt="Estimación de densidad por núcleos" />
+<figcaption aria-hidden="true">Estimación de densidad por
+núcleos</figcaption>
+</figure>
+<h3 data-number="7.4.4"
+id="gráfico-de-líneas-para-series-temporales"><span
+class="header-section-number">7.4.4</span> Gráfico de Líneas para Series
+Temporales</h3>
+<p>Cuando trabajamos con registros indexados en el tiempo, como la serie
+de fallecimientos mensuales por accidentes de tránsito en el Reino Unido
+(<code>Fatalities.csv</code>), un gráfico de líneas revela tendencias
+seculares y patrones estacionales. Veamos y ejecutemos
+<code>plot_accident.R</code>:</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> Fatalities.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> Fatalities.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fatalities_head.<span class="bu">csv</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>bat plot_accident.R</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_accident.R</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">-g</span> <span class="dv">80</span>x25 fatalities_line.png</span></code></pre></div>
+<figure>
+<img src="../../Files/dscl_0707.png"
+alt="Serie temporal de accidentes" />
+<figcaption aria-hidden="true">Serie temporal de accidentes</figcaption>
+</figure>
+<h3 data-number="7.4.5" id="diagrama-de-dispersión-y-tendencia"><span
+class="header-section-number">7.4.5</span> Diagrama de Dispersión y
+Tendencia</h3>
+<p>Para estudiar la relación conjunta entre dos variables cuantitativas
+continuas (<code>bill</code> y <code>tip</code>), utilizamos
+<code>plot_scatter.R</code> y <code>plot_trend.R</code>:</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>bat plot_scatter.R</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_scatter.R</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>bat plot_trend.R</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_trend.R</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">--grid</span><span class="op">=</span><span class="dv">2</span>x1 <span class="at">-g</span> <span class="dv">80</span>x25 tips_scatter.png tips_trend.png</span></code></pre></div>
+<figure>
+<img src="../../Files/dscl_0710.png"
+alt="Diagrama de dispersión con curva de tendencia suavizada" />
+<figcaption aria-hidden="true">Diagrama de dispersión con curva de
+tendencia suavizada</figcaption>
+</figure>
+<h3 data-number="7.4.6" id="diagrama-de-caja-y-gráfico-de-violín"><span
+class="header-section-number">7.4.6</span> Diagrama de Caja y Gráfico de
+Violín</h3>
+<p>Para comparar la distribución de una variable continua
+(<code>bill</code>) a través de varios grupos categóricos
+(<code>day</code>), los diagramas de caja (<em>boxplots</em>) resumen la
+mediana, el rango intercuartílico
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">IQR</mtext><mo>=</mo><msub><mi>Q</mi><mn>3</mn></msub><mo>−</mo><msub><mi>Q</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\text{IQR} = Q_3 - Q_1</annotation></semantics></math>)
+y los valores atípicos, mientras que los gráficos de violín muestran
+además la forma completa de la densidad en cada grupo:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>bat plot_boxplot.R</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_boxplot.R</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>bat plot_violin.R</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="bu">Rscript</span> plot_violin.R</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">--grid</span><span class="op">=</span><span class="dv">2</span>x1 <span class="at">-g</span> <span class="dv">80</span>x25 tips_boxplot.png tips_violin.png</span></code></pre></div>
+<figure>
+<img src="../../Files/dscl_0713.png"
+alt="Diagrama de caja de cuentas por día" />
+<figcaption aria-hidden="true">Diagrama de caja de cuentas por
+día</figcaption>
+</figure>
+<h3 data-number="7.4.7"
+id="visualización-estadística-equivalente-en-python"><span
+class="header-section-number">7.4.7</span> Visualización Estadística
+Equivalente en Python</h3>
+<p>También podemos generar visualizaciones multipanel desde Python
+ejecutando <code>plot_tips_py.py</code>, el cual produce el archivo
+<code>tips_python.png</code> y devuelve en formato JSON las estadísticas
+por día hacia Nushell:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>bat plot_tips_py.py</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">python3</span> plot_tips_py.py <span class="op">|</span> <span class="bu">from json</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="bu">python3</span> plot_tips_py.py <span class="op">|</span> <span class="bu">from json</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_py_summary.<span class="bu">json</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="bu">timg</span> <span class="at">-g</span> <span class="dv">80</span>x25 tips_python.png</span></code></pre></div>
+<figure>
+<img src="../../Files/tips_python.png" style="width:85.0%"
+alt="Panel comparativo dual generado con Python y matplotlib" />
+<figcaption aria-hidden="true">Panel comparativo dual generado con
+Python y matplotlib</figcaption>
+</figure>
+<h2 data-number="7.5" id="resumen"><span
+class="header-section-number">7.5</span> Resumen</h2>
+<p>En este capítulo aprendimos a explorar tanto la estructura como la
+distribución estadística de nuestros datos desde la línea de comandos.
+Combinamos la inspección nativa de tablas en Nushell
+(<code>columns</code>, <code>uniq</code>, <code>math</code>,
+<code>histogram</code>, <code>polars summary</code>) con scripts
+modulares en R y Python (<code>mutate_tips.R</code>,
+<code>summary_tips.R</code>, <code>corr_tips.py</code>,
+<code>plot_*.R</code>, <code>plot_tips_py.py</code>), guardando los
+datos procesados en archivos estructurados y visualizando cada gráfico
+directamente dentro de la terminal gracias a <code>timg</code>.</p>
+<p>En el próximo capítulo estudiaremos cómo acelerar drásticamente el
+procesamiento de datos y la ejecución de comandos externos utilizando
+las capacidades de paralelismo nativo de Nushell (<code>par-each</code>)
+junto con GNU <code>parallel</code>.</p>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="6-chapter-6-data-cleaning.html" rel="prev">&larr; Depuración y Transformación de Datos</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-ciencia-de-datos-en-la-terminal-linux-con-nushell-1.html" rel="up">Ciencia de Datos en la Terminal Linux con Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="8-chapter-8-parallel-pipelines.html" rel="next">Procesamiento en Serie y Pipelines Paralelos &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Ciencia de Datos en la Terminal Linux con Nushell</span>
+    <span>&bull; 24 Noviembre 2026</span>
+    <span>&bull; <a href="../">Portal del Curso</a></span>
+  </footer>
+
+  <script src="../../Files/web_book.js" defer></script>
+</body>
+</html>

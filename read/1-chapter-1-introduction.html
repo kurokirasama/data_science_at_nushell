@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <meta name="dcterms.date" content="2026-11-24" />
+  <title>Introduction</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Data Science at the Linux Terminal with Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Course Portal</a>
+      <a class="header-pill" href="../es/read/">Español</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.epub" download>EPUB</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contents</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" accesskey="p" rel="prev">&larr; Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" accesskey="u" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="2-chapter-2-installation.html" accesskey="n" rel="next">Software Installation &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="1" id="chapter-1-introduction"><span
+class="header-section-number">1</span> Introduction</h1>
+<p>In modern data science practice, the sheer scale, heterogeneity, and
+volatility of incoming information streams demand tools that move beyond
+rigid graphical interfaces and the computational overhead of monolithic
+notebook platforms. For over half a century, the Unix command-line
+console has served as the gold standard for scientific reproducibility,
+unattended automation, and algorithmic efficiency. Its founding
+philosophy remains remarkably pertinent: build dependable systems out of
+small, focused programs designed to handle one concrete task with
+precision, and connect them effortlessly across standardized
+communication channels.</p>
+<p>Traditional shells like Bash and Zsh, however, were conceived in an
+era when text in transit was treated strictly as unstructured character
+streams. Under this legacy model, manipulating data matrices,
+multi-tiered tabular structures, or nested records requires fragile
+chains of regular expressions and text-slicing utilities such as
+<code>sed</code>, <code>awk</code>, and <code>cut</code>. This paradigm
+introduces persistent friction. It breaks when delimiters shift
+unexpectedly, chokes on escape sequences, and strips variables of their
+fundamental data types.</p>
+<p>Nushell (<code>nu</code>) resolves this architectural bottleneck by
+redesigning the shell around the demands of contemporary data analysis.
+Rather than piping opaque byte streams from command to command, Nushell
+pipelines transport typed, structured data: two-dimensional tables with
+explicit schemas, key-value records, ordered lists, and primitive types
+governed by strict semantics. Because Nushell natively understands
+integers, floating-point numbers, time zones, file paths, and memory
+sizes, you can filter, sort, transform, and aggregate datasets using a
+clean, declarative syntax.</p>
+<p>This expressive clarity is paired with high computational throughput.
+Nushell integrates directly with Polars, a blazingly fast columnar
+engine written in Rust and powered by Apache Arrow. This pairing brings
+industrial-grade analytical capabilities directly into your shell.
+Multithreaded analytical queries across millions of rows execute in
+fractions of a second, without sacrificing the interactive immediacy of
+the command line.</p>
+<p>This textbook builds upon the foundational methodology introduced by
+Jeroen Janssens in <em>Data Science at the Command Line</em> (O’Reilly
+Media). Janssens demonstrated that the command line provides a nimble,
+versatile environment for practical data science. Yet command-line
+tooling has evolved substantially since that work was published.</p>
+<p>Where the original text relied on plain-text stream processors and
+auxiliary suites like <code>csvkit</code>, this book adopts Nushell and
+its structured data model. This approach preserves the core Unix virtues
+of composition and modularity while providing typed tables, clear
+schemas, and robust data handling.</p>
+<p>This book is designed as a hands-on laboratory, meant to be read with
+a terminal running side by side. For this reason, most code examples
+omit command output (with the exception of terminal plots, figures, and
+essential schema demonstrations). We expect you to execute each
+pipeline, inspect intermediate tables, and explore Nushell
+interactively.</p>
+<p>Omitting printed outputs serves three concrete pedagogical goals:
+first, it encourages active learning through direct execution rather
+than passive reading; second, it leverages interactive shell features
+like <code>explore</code>, live table scrolling, and autocompletion,
+which are best appreciated firsthand; and third, it develops the habit
+of inspecting data structures with <code>describe</code> and diagnosing
+issues independently. We encourage you to tweak parameters, test
+alternative filters, and examine the resulting tables in your own
+shell.</p>
+<p>To ensure that every pipeline runs in a strictly reproducible
+environment unaffected by local host quirks, this text relies on a
+unified container image named <code>dsin</code> (Data Science in
+Nushell), available publicly on GitHub Container Registry at
+<code>ghcr.io/kurokirasama/dsin:latest</code>. This container serves as
+a self-contained data science workstation. It bundles the latest Nushell
+release configured for analytical work, its official plugin suite
+(including native Polars integration, structured format parsers,
+relational database querying, Git inspection, and terminal plotting),
+complete Python and R scientific stacks, high-performance modeling
+engines (Vowpal Wabbit, Tapkee, and SKLL), terminal utilities such as
+the <code>ttt</code> text editor and <code>timg</code> image viewer, and
+the complete set of course datasets neatly organized by chapter inside
+<code>/data</code>.</p>
+<p>The curriculum follows the classic OSEMN lifecycle (<em>Obtain</em>,
+<em>Scrub</em>, <em>Explore</em>, <em>Model</em>, and
+<em>iNterpret</em>), originally formulated by Hilary Mason and Chris
+Wiggins. Our progression begins in <a
+href="2-chapter-2-installation.html#chapter-2-installation">Chapter
+2</a> with software setup and container preparation using Docker and
+<code>dsin</code>. <a
+href="3-chapter-3-nushell-fundamentals.html#chapter-3-nushell-fundamentals">Chapter
+3</a> establishes the operational fundamentals of the terminal alongside
+Nushell’s data types, while <a
+href="4-chapter-4-programming-cli-tools.html#chapter-4-programming-cli-tools">Chapter
+4</a> covers structured scripting, closures, and building modular
+command-line tools. <a
+href="5-chapter-5-data-acquisition.html#chapter-5-data-acquisition">Chapter
+5</a> examines data ingestion from web APIs, compressed archives, Excel
+spreadsheets, and SQLite databases. <a
+href="6-chapter-6-data-cleaning.html#chapter-6-data-cleaning">Chapter
+6</a> explores data scrubbing, restructuring, and columnar analytics
+with Polars. Statistical data exploration and in-terminal plotting take
+center stage in <a
+href="7-chapter-7-data-exploration.html#chapter-7-data-exploration">Chapter
+7</a>, followed by pipeline orchestration, serial iteration, and
+multi-core parallelization in <a
+href="8-chapter-8-parallel-pipelines.html#chapter-8-parallel-pipelines">Chapter
+8</a>. <a
+href="9-chapter-9-polyglot-modeling.html#chapter-9-polyglot-modeling">Chapter
+9</a> develops polyglot statistical and machine learning workflows
+across dimensionality reduction, unsupervised clustering, regression,
+and supervised classification. Finally, <a
+href="10-chapter-conclusion.html#chapter-conclusion">Chapter 10</a>
+synthesizes the architectural, computational, and methodological
+principles that turn the command line into a rigorous data intelligence
+laboratory.</p>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" rel="prev">&larr; Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="2-chapter-2-installation.html" rel="next">Software Installation &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Data Science at the Linux Terminal with Nushell</span>
+    <span>&bull; November 24, 2026</span>
+    <span>&bull; <a href="../">Course Portal</a></span>
+  </footer>
+
+  <script src="../Files/web_book.js" defer></script>
+</body>
+</html>

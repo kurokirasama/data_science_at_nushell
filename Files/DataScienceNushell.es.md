@@ -1,7 +1,7 @@
 ---
 title: Ciencia de Datos en la Terminal Linux con Nushell
 author: Luis Gómez Guzmán
-date: "10 Noviembre 2026"
+date: "24 Noviembre 2026"
 number_sections: true
 output: pdf_document
 graphics: true
@@ -236,14 +236,9 @@ De acuerdo a la definición de Hilary Mason y Chris H. Wiggins ([2010](#ref-maso
 
 En este libro veremos los primeros 4 pasos.
 
-Aunque estos 5 pasos se discuten en forma lineal e incremental, en la practica es común el moverse de uno a otro o incluso realizarlos en paralelo (\refer{Figura}{fig:osemn}). Es decir, la ciencia de datos es un proceso iterativo no lineal.
+Aunque estos 5 pasos se discuten en forma lineal e incremental, en la practica es común el moverse de uno a otro o incluso realizarlos en paralelo ([@fig:osemn]). Es decir, la ciencia de datos es un proceso iterativo no lineal.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{dscl_0101.png}
-\caption{Proceso de la ciencia de datos.}
-\label{fig:osemn}
-\end{figure}
+![Proceso de la ciencia de datos.](dscl_0101.png){#fig:osemn width=80%}
 
 
 
@@ -301,39 +296,19 @@ La _terminal_ (_terminal emulator_) en un programa o interfaz que nos permite ac
 
 Originalmente, una terminal era una pieza de _hardware_ usado para ingresar y mostrar datos a/desde un computador.
 
-Los primeros computadores, eran maquinas que ocupaban mucho espacio (ver \refer{Figura}{fig:first}) y las primeras terminales eran tele-impresoras electrónicas (teletypewriter o tty) como se muestra en la (ver \refer{Figura}{fig:firstterminal}).
+Los primeros computadores, eran maquinas que ocupaban mucho espacio (ver [@fig:first]) y las primeras terminales eran tele-impresoras electrónicas (teletypewriter o tty) como se muestra en la [@fig:firstterminal].
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{univac-9400.jpg}
-\caption{Primeros computadores.}
-\label{fig:first}
-\end{figure}
+![Primeros computadores.](univac-9400.jpg){#fig:first width=80%}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{teletype-model-33.jpg}
-\caption{Primeras terminales.}
-\label{fig:firstterminal}
-\end{figure}
+![Primeras terminales.](teletype-model-33.jpg){#fig:firstterminal width=50%}
 
-Conforme fue avanzando la tecnología, estas terminales se reemplazaron por terminales de video (ver \refer{Figura}{fig:videoterminal}).
+Conforme fue avanzando la tecnología, estas terminales se reemplazaron por terminales de video (ver [@fig:videoterminal]).
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{DEC-VT100-terminal.jpg}
-\caption{Primeras terminales de video.}
-\label{fig:videoterminal}
-\end{figure}
+![Primeras terminales de video.](DEC-VT100-terminal.jpg){#fig:videoterminal width=50%}
 
-Notar que lo mostrado en la \refer{Figura}{fig:videoterminal} no es un computador, es solo la interfaz para poder conectarse al computador. En la \refer{Figura}{fig:videoterminal2} se muestra conectada a uno.
+Notar que lo mostrado en la [@fig:videoterminal] no es un computador, es solo la interfaz para poder conectarse al computador. En la [@fig:videoterminal2] se muestra conectada a uno.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{DEC-VT52-terminal-PDP-11-55.jpg}
-\caption{Primeras terminales conectadas a un computador.}
-\label{fig:videoterminal2}
-\end{figure}
+![Primeras terminales conectadas a un computador.](DEC-VT52-terminal-PDP-11-55.jpg){#fig:videoterminal2 width=50%}
 
 En la actualidad no son necesarias estas terminales de _hardware_, por lo que se usan emuladores de terminales para realizar la comunicación directa con el sistema operativo sin necesidad de una interfaz gráfica (gui), esto ultimo siendo lo mas conocido (ventanas, botones, etc).
 

@@ -1,7 +1,7 @@
 ---
 title: Data Science at the Linux Terminal with Nushell
 author: Luis Gómez Guzmán
-date: "November 10, 2026"
+date: "November 24, 2026"
 number_sections: true
 output: pdf_document
 graphics: true
@@ -226,14 +226,9 @@ According to Hilary Mason and Chris H. Wiggins ([2010](#ref-mason2010)), *data s
 
 This book focuses hands-on attention on the first four computational stages.
 
-Although these five stages are often presented sequentially, practical data science work moves fluidly back and forth between them, frequently executing multiple stages in parallel (\refer{Figure}{fig:osemn}). Data science is fundamentally an iterative, non-linear discipline.
+Although these five stages are often presented sequentially, practical data science work moves fluidly back and forth between them, frequently executing multiple stages in parallel ([@fig:osemn]). Data science is fundamentally an iterative, non-linear discipline.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{dscl_0101.png}
-\caption{The data science lifecycle (OSEMN framework).}
-\label{fig:osemn}
-\end{figure}
+![The data science lifecycle (OSEMN framework).](dscl_0101.png){#fig:osemn width=80%}
 
 ### Obtaining Data
 
@@ -288,39 +283,19 @@ A *terminal emulator* is a program that provides access to the *command-line int
 
 Historically, a terminal was a dedicated physical hardware device used to transmit keystrokes to and display characters from a host computer.
 
-Early computers were massive, room-sized installations (\refer{Figure}{fig:first}). The earliest interactive terminals were electromechanical teletypewriters (commonly abbreviated *tty*), as illustrated in \refer{Figure}{fig:firstterminal}.
+Early computers were massive, room-sized installations ([@fig:first]). The earliest interactive terminals were electromechanical teletypewriters (commonly abbreviated *tty*), as illustrated in [@fig:firstterminal].
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{univac-9400.jpg}
-\caption{Early mainframe computer systems.}
-\label{fig:first}
-\end{figure}
+![Early mainframe computer systems.](univac-9400.jpg){#fig:first width=80%}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{teletype-model-33.jpg}
-\caption{Electromechanical teleprinters (teletypewriter or tty).}
-\label{fig:firstterminal}
-\end{figure}
+![Electromechanical teleprinters (teletypewriter or tty).](teletype-model-33.jpg){#fig:firstterminal width=50%}
 
-As semiconductor and cathode-ray tube technology progressed, mechanical printers gave way to video display terminals (\refer{Figure}{fig:videoterminal}).
+As semiconductor and cathode-ray tube technology progressed, mechanical printers gave way to video display terminals ([@fig:videoterminal]).
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{DEC-VT100-terminal.jpg}
-\caption{Classic video display terminals (DEC VT100).}
-\label{fig:videoterminal}
-\end{figure}
+![Classic video display terminals (DEC VT100).](DEC-VT100-terminal.jpg){#fig:videoterminal width=50%}
 
-It is worth emphasizing that the device pictured in \refer{Figure}{fig:videoterminal} contains no onboard computer; it is solely an interface terminal connected across serial lines to a remote mainframe. \refer{Figure}{fig:videoterminal2} illustrates a terminal cabled directly to its host computer.
+It is worth emphasizing that the device pictured in [@fig:videoterminal] contains no onboard computer; it is solely an interface terminal connected across serial lines to a remote mainframe. [@fig:videoterminal2] illustrates a terminal cabled directly to its host computer.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{DEC-VT52-terminal-PDP-11-55.jpg}
-\caption{Video terminal cabled to a PDP-11 minicomputer.}
-\label{fig:videoterminal2}
-\end{figure}
+![Video terminal cabled to a PDP-11 minicomputer.](DEC-VT52-terminal-PDP-11-55.jpg){#fig:videoterminal2 width=50%}
 
 Today, dedicated physical terminals are obsolete. Instead, software applications known as *terminal emulators* simulate historical display hardware, communicating directly with the operating system without requiring graphical widgets (windows, buttons, dialog boxes).
 

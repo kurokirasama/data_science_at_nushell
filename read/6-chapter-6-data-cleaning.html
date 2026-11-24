@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Luis Gómez Guzmán" />
+  <meta name="dcterms.date" content="2026-11-24" />
+  <title>Data Cleaning and Transformation</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230f172a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-size=%2216%22 font-weight=%22bold%22 fill=%22%2338bdf8%22>&gt;_</text></svg>">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('dsin-reader-theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #ececec; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { color: #bb00ff; } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { color: #ffa500; } /* Constant */
+code span.co { color: #008f00; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fu { color: #006666; font-weight: bold; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { color: #e45649; } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="$t.web_css" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#reader-main">Skip to content</a>
+
+  <header class="reader-header">
+    <div class="reader-header-left">
+      <button id="toc-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="reader-sidebar" aria-label="Toggle table of contents">
+        &#9776;
+      </button>
+      <a class="reader-brand" href="index.html">
+        <span class="brand-prompt">&gt;_</span>
+        <span class="brand-title">Data Science at the Linux Terminal with Nushell</span>
+      </a>
+    </div>
+    <nav class="reader-header-actions" aria-label="Reader actions">
+      <a class="header-pill" href="../">Course Portal</a>
+      <a class="header-pill" href="../es/read/">Español</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.epub" download>EPUB</a>
+      <a class="header-pill" href="../Files/DataScienceNushell.pdf" target="_blank" rel="noopener">PDF</a>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle color theme" title="Toggle theme">
+        &#9680;
+      </button>
+    </nav>
+  </header>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+  <div class="reader-layout">
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Book navigation">
+      <div class="sidebar-head">
+        <span class="sidebar-heading">Contents</span>
+      </div>
+      <nav id="sidebar-toc" aria-label="Table of Contents">
+      </nav>
+    </aside>
+
+    <main id="reader-main" class="reader-main">
+      <nav class="chapter-nav chapter-nav-top" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="5-chapter-5-data-acquisition.html" accesskey="p" rel="prev">&larr; Data Acquisition</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" accesskey="u" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="7-chapter-7-data-exploration.html" accesskey="n" rel="next">Exploratory Data Analysis and Visualization &rarr;</a>
+        </div>
+      </nav>
+
+
+      <article class="reader-content">
+<h1 data-number="6" id="chapter-6-data-cleaning"><span
+class="header-section-number">6</span> Data Cleaning and
+Transformation</h1>
+<p>This chapter explores the second stage of the OSEMN framework:
+<strong>data cleaning and transformation</strong> (<em>Scrub</em>). Raw
+data acquired from files, databases, or web endpoints is rarely
+organized for immediate modeling. It frequently contains missing
+entries, extraneous delimiters, inconsistent character encodings,
+unstructured free text, or unnormalized schemas.</p>
+<p>We begin by entering the <code>/data/ch06</code> working
+directory:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="op">/</span>data<span class="op">/</span>ch06</span></code></pre></div>
+<p>From this point forward, all transformations in this chapter execute
+within <code>/data/ch06</code>. Let us inspect the available files:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> name</span></code></pre></div>
+<h2 data-number="6.1" id="transformations-in-a-data-pipeline"><span
+class="header-section-number">6.1</span> Transformations in a Data
+Pipeline</h2>
+<p>A central advantage of command-line data science is the ability to
+stream transformations progressively through chained pipes
+(<code>|</code>). In Nushell, transformations operate on strongly typed
+in-memory values rather than unparsed byte streams.</p>
+<p>Consider generating a FizzBuzz evaluation sequence from 1 to 100,
+restructuring it into a typed table, and persisting it to
+<code>fb.csv</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..100</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">python3</span> fizzbuzz.py <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fb.<span class="bu">seq</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> conteo_fb <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> fb.<span class="bu">seq</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">lines</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&quot;fizz|buzz&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span> <span class="at">-c</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">rename</span> <span class="bu">value</span> <span class="bu">count</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span><span class="at">-by</span> <span class="bu">count</span> <span class="at">--reverse</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="va">$conteo_fb</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="va">$conteo_fb</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> fb.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.2" id="plain-text"><span
+class="header-section-number">6.2</span> Plain Text</h2>
+<p>When analytical inputs arrive as unstructured raw text (such as raw
+log entries, exported documents, or scraped book transcripts), Nushell
+provides specialized operators to filter lines, extract token fields,
+and normalize text without needing legacy tools like <code>sed</code> or
+<code>awk</code>.</p>
+<h3 data-number="6.2.1" id="filtering-lines"><span
+class="header-section-number">6.2.1</span> Filtering Lines</h3>
+<p>The file <code>alice.txt</code> contains the full text of <em>Alice’s
+Adventures in Wonderland</em>. We can inspect and partition text subsets
+into files:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span></span></code></pre></div>
+<ul>
+<li><strong>First 3 lines (<code>first 3</code>) and last 3 lines
+(<code>last 3</code>):</strong></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">3</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">last</span> <span class="dv">3</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">3</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> lines_primeras3.<span class="bu">txt</span></span></code></pre></div>
+<ul>
+<li><strong>Skip the first 3 lines (<code>skip 3</code>), and slice
+lines 4, 5, and 6 (<code>slice 3..5</code>):</strong></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">skip</span> <span class="dv">3</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">drop</span> <span class="dv">3</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">slice</span> <span class="fl">3..5</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">slice</span> <span class="fl">3..5</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> lines_4_a_6.<span class="bu">txt</span></span></code></pre></div>
+<ul>
+<li><strong>Extract strictly even- or odd-positioned lines by pairing
+<code>enumerate</code> with the modulo operator
+(<code>mod</code>):</strong></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it.index</span> mod <span class="dv">2</span>) <span class="op">==</span> <span class="dv">0</span> <span class="op">|</span> <span class="bu">get</span> item</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">enumerate</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it.index</span> mod <span class="dv">2</span>) <span class="op">==</span> <span class="dv">0</span> <span class="op">|</span> <span class="bu">get</span> item <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> lines_impares.<span class="bu">txt</span></span></code></pre></div>
+<h4 data-number="6.2.1.1" id="pattern-based-filtering"><span
+class="header-section-number">6.2.1.1</span> Pattern-Based
+Filtering</h4>
+<p>To isolate lines containing specific syntactic patterns (such as
+roman-numeral chapter headers <code>CHAPTER I</code>,
+<code>CHAPTER II</code>), we filter lines with regular expression
+anchors (<code>=~ '^CHAPTER [IVXLCDM]+'</code>). To remove empty lines,
+we exclude blank strings via <code>str trim</code> and
+<code>where</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;(?i)^chapter&#39;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^CHAPTER (.*)\. The&#39;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^CHAPTER (.*)\. The&#39;</span>) <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> capitulos_the.<span class="bu">txt</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">is-not-empty</span>) <span class="op">|</span> <span class="bu">length</span></span></code></pre></div>
+<h4 data-number="6.2.1.2" id="random-sampling"><span
+class="header-section-number">6.2.1.2</span> Random Sampling</h4>
+<p>When analyzing large text corpora, inspecting a random sample is
+often preferable to reading sequential head lines. We shuffle line
+arrays using <strong><code>shuffle</code></strong>, combined with
+<strong><code>first</code></strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode nu"><code class="sourceCode nu"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1..1000</span> <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>i<span class="op">|</span> <span class="st">$&quot;Line </span><span class="op">(</span><span class="va">$i</span><span class="op">)</span><span class="st">&quot;</span> } <span class="op">|</span> <span class="bu">shuffle</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1..1000</span> <span class="op">|</span> <span class="bu">each</span> { <span class="op">|</span>i<span class="op">|</span> <span class="st">$&quot;Line </span><span class="op">(</span><span class="va">$i</span><span class="op">)</span><span class="st">&quot;</span> } <span class="op">|</span> <span class="bu">shuffle</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span> <span class="op">|</span> <span class="bu">to text</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> muestra_10_lineas.<span class="bu">txt</span></span></code></pre></div>
+<h3 data-number="6.2.2" id="extracting-values"><span
+class="header-section-number">6.2.2</span> Extracting Values</h3>
+<p>To extract structured attributes from unstructured text, the
+<strong><code>parse --regex</code></strong> command applies named
+capturing groups (<code>(?P&lt;group_name&gt;pattern)</code>),
+converting matching patterns directly into typed table columns.</p>
+<p>Here, we parse roman numeral chapter numbers and chapter titles from
+<code>alice.txt</code>, persisting the structured catalog to
+<code>capitulos_alice.csv</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> caps <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">lines</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^CHAPTER &#39;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&#39;^CHAPTER (?P&lt;numero&gt;[IVXLCDM]+)\.\s+(?P&lt;titulo&gt;.*)$&#39;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="va">$caps</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="va">$caps</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> capitulos_alice.<span class="bu">csv</span></span></code></pre></div>
+<p>Similarly, to construct a dataset of words containing both the letter
+“a” and the letter “e”, we tokenize words via regular expressions,
+filter by length and character membership, deduplicate counts, and save
+the result to <code>palabras_a_e.csv</code>:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> palabras_ae <span class="op">=</span> <span class="bu">open</span> <span class="at">--raw</span> alice.<span class="bu">txt</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">str lowercase</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">parse</span> <span class="at">--regex</span> <span class="st">&#39;(?P&lt;palabra&gt;[a-z]{2,})&#39;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> palabra</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="kw">where</span> (<span class="va">$it</span> <span class="op">=~</span> <span class="st">&#39;^a.*e$&#39;</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">uniq</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">sort</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">wrap</span> palabra</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="va">$palabras_ae</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">15</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="va">$palabras_ae</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> palabras_a_e.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.2.3" id="replacing-and-stripping-values"><span
+class="header-section-number">6.2.3</span> Replacing and Stripping
+Values</h3>
+<p>For character-level and substring replacements, Nushell provides
+<code>str replace</code>. When batch character transliteration is
+required (such as converting between case variants or translating
+specific character sets), the native Linux utility
+<strong><code>tr</code></strong> can be invoked directly on byte
+streams:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hello world!&quot;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="st">&quot; &quot;</span> <span class="st">&quot;_&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hello world!&quot;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="at">--regex</span> <span class="st">&#39;[ !]&#39;</span> <span class="st">&#39;&#39;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;hallo wêreld!&quot;</span> <span class="op">|</span> <span class="bu">str uppercase</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;helló világ&quot;</span> <span class="op">|</span> <span class="bu">str uppercase</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;  hello     world!  &quot;</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="at">--regex</span> <span class="st">&#39;\s+&#39;</span> <span class="st">&#39; &#39;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;hello&quot;</span> <span class="st">&quot;bye&quot;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;  hello     world!  &quot;</span> <span class="op">|</span> <span class="bu">str trim</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="at">-a</span> <span class="at">--regex</span> <span class="st">&#39;\s+&#39;</span> <span class="st">&#39; &#39;</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;hello&quot;</span> <span class="st">&quot;bye&quot;</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> saludo_limpio.<span class="bu">txt</span></span></code></pre></div>
+<h2 data-number="6.3" id="parsing-command-output"><span
+class="header-section-number">6.3</span> Parsing Command Output</h2>
+<p>Many command-line utilities emit tabular information as formatted
+plain text rather than structured objects (for example,
+<code>df -h</code> or <code>docker ps</code>). Nushell provides three
+complementary strategies to parse text streams into structured, typed
+tables:</p>
+<ol type="1">
+<li><strong><code>detect columns</code>:</strong> Automatically
+identifies column boundaries based on spacing between text
+headings.</li>
+<li><strong><code>from ssv</code>:</strong> Parses space-separated
+values (<em>space-separated values</em>), with support for multi-space
+alignment.</li>
+<li><strong><code>parse</code>:</strong> Extracts column fields
+according to an explicit template string.</li>
+</ol>
+<p>Let us examine the output of <code>df -h</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df <span class="at">-h</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="at">-h</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;Mounted on&quot;</span> Mounted_On <span class="op">|</span> <span class="bu">detect columns</span></span></code></pre></div>
+<p>For command output formatted with tabular column headers like
+<code>df</code>, <code>detect columns</code> is typically the most
+direct parsing strategy:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df <span class="at">-h</span> <span class="op">|</span> <span class="bu">str replace</span> <span class="st">&quot;Mounted on&quot;</span> Mounted_On <span class="op">|</span> <span class="bu">from ssv</span> <span class="at">--aligned-columns</span> <span class="at">--minimum-spaces</span> <span class="dv">1</span></span></code></pre></div>
+<p>Alternatively,
+<strong><code>from ssv --aligned-columns</code></strong> parses columns
+where values are aligned beneath space-padded headers:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;nu = &quot;0.116.1&quot; # A new type of shell</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">ttt = &quot;1.8.0&quot; # Terminal text editor&#39;</span> <span class="op">|</span> <span class="bu">lines</span> <span class="op">|</span> <span class="bu">parse</span> <span class="st">&#39;{crate_name} = &quot;{version}&quot; #{description}&#39;</span> <span class="op">|</span> <span class="bu">update</span> description { <span class="bu">str trim</span> }</span></code></pre></div>
+<p>Finally, when output contains irregular spacing or complex
+formatting, <strong><code>parse</code></strong> provides explicit
+template extraction:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">update</span> day { <span class="bu">str uppercase</span> } <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">update</span> day { <span class="bu">str uppercase</span> } <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_day_upper.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.4" id="csv-and-structured-tables"><span
+class="header-section-number">6.4</span> CSV and Structured Tables</h2>
+<p>The CSV (<em>Comma-Separated Values</em>) format is the lingua franca
+of tabular datasets. In <code>/data/ch06</code>, we have
+<code>tips.csv</code>, which documents restaurant transactions, customer
+gratuities, party sizes, and customer demographics.</p>
+<h3 data-number="6.4.1" id="headers-bodies-and-columns"><span
+class="header-section-number">6.4.1</span> Headers, Bodies, and
+Columns</h3>
+<p>When opening <code>tips.csv</code> with <code>open</code>, Nushell
+parses column types and headers automatically. We can transform column
+attributes using <code>upsert</code> or <code>update</code>, such as
+capitalizing day names and saving to
+<code>tips_day_upper.csv</code>:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">rm</span> <span class="at">-f</span> tips_temp.<span class="bu">db</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">into sqlite</span> tips_temp.<span class="bu">db</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips_temp.<span class="bu">db</span> <span class="op">|</span> <span class="bu">query db</span> <span class="st">&quot;SELECT bill, tip, day, time, size FROM main WHERE bill &gt; 40.0 AND day LIKE &#39;S%&#39;&quot;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips_temp.<span class="bu">db</span> <span class="op">|</span> <span class="bu">query db</span> <span class="st">&quot;SELECT bill, tip, day, time, size FROM main WHERE bill &gt; 40.0 AND day LIKE &#39;S%&#39;&quot;</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_sql_resultado.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.2" id="executing-sql-queries-on-csv"><span
+class="header-section-number">6.4.2</span> Executing SQL Queries on
+CSV</h3>
+<p>Nushell allows running SQL queries directly on tabular CSV streams
+using <strong><code>query db</code></strong>. Below, we aggregate tips
+by customer sex and smoking preference, saving the summary to
+<code>tips_sql_resultado.csv</code>:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> iris.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> sepal_length petal_length sepal_width petal_width <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> iris.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">reject</span> species <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> iris.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> sepal_length petal_length sepal_width petal_width <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> iris_columnas_reordenadas.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.3" id="extracting-and-reordering-columns"><span
+class="header-section-number">6.4.3</span> Extracting and Reordering
+Columns</h3>
+<p>To project specific variables into an analytical dataset, we pass
+target columns to <code>select</code>. When we need to remove unwanted
+variables while retaining all others, we use <code>reject</code>:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="kw">where</span> <span class="bu">size</span> <span class="op">&gt;=</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">6</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="kw">where</span> bill <span class="op">&gt;</span> <span class="fl">40.0</span> <span class="bu">and</span> day <span class="op">=~</span> <span class="st">&#39;^S&#39;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="kw">where</span> bill <span class="op">&gt;</span> <span class="fl">40.0</span> <span class="bu">and</span> day <span class="op">=~</span> <span class="st">&#39;^S&#39;</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_altos_finde.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.4" id="filtering-rows"><span
+class="header-section-number">6.4.4</span> Filtering Rows</h3>
+<p>Filtering rows in Nushell is performed with <code>where</code>,
+passing boolean conditions evaluated per row:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> names.<span class="bu">csv</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> names<span class="at">-comma</span>.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.5"
+id="combining-columns-and-quoted-delimiter-robustness"><span
+class="header-section-number">6.4.5</span> Combining Columns and Quoted
+Delimiter Robustness</h3>
+<p>We can concatenate text columns into composite identifiers (such as
+combining <code>first_name</code> and <code>last_name</code> into
+<code>full_name</code>) using <code>insert</code> with string
+interpolation:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nombres_limpios <span class="op">=</span> <span class="bu">open</span> names<span class="at">-comma</span>.<span class="bu">csv</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">insert</span> full_name { <span class="op">|</span><span class="bu">row</span><span class="op">|</span> <span class="st">$&quot;</span><span class="op">(</span><span class="va">$row.first_name</span><span class="op">)</span><span class="st"> </span><span class="op">(</span><span class="va">$row.last_name</span><span class="op">)</span><span class="st">&quot;</span> }</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">select</span> <span class="bu">id</span> full_name born</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="va">$nombres_limpios</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="va">$nombres_limpios</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> names_completos.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.4.6" id="combining-multiple-csv-files"><span
+class="header-section-number">6.4.6</span> Combining Multiple CSV
+Files</h3>
+<h4 data-number="6.4.6.1" id="horizontal-merging-merge"><span
+class="header-section-number">6.4.6.1</span> Horizontal Merging
+(<code>merge</code>)</h4>
+<p>To join two tables by appending columns horizontally on a row-by-row
+index, use <code>merge</code>. For example, from <code>tips.csv</code>,
+we generate two sub-tables (<code>bills.csv</code> and
+<code>tips.csv</code>) and merge them column-wise:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> bill tip <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> bills.<span class="bu">csv</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> day time <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> <span class="bu">datetime</span>.<span class="bu">csv</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> tips.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">select</span> sex smoker <span class="bu">size</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> customers.<span class="bu">csv</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> unido_horizontal <span class="op">=</span> <span class="bu">open</span> bills.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">merge</span> (<span class="bu">open</span> customers.<span class="bu">csv</span>) <span class="op">|</span> <span class="bu">merge</span> (<span class="bu">open</span> <span class="bu">datetime</span>.<span class="bu">csv</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="va">$unido_horizontal</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="va">$unido_horizontal</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> tips_horizontal.<span class="bu">csv</span></span></code></pre></div>
+<h4 data-number="6.4.6.2" id="relational-joins-join"><span
+class="header-section-number">6.4.6.2</span> Relational Joins
+(<code>join</code>)</h4>
+<p>When datasets share a key identifier column, relational joins are
+performed using the <strong><code>join</code></strong> command.</p>
+<p>In <code>/data/ch06</code>, two related CSV files illustrate
+relational joins: <code>iris.csv</code> (150 morphological observations
+referencing <code>species_id</code>) and <code>irismeta.csv</code>
+(taxonomic metadata mapping <code>species_id</code> to
+<code>species_name</code>):</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> irismeta.<span class="bu">csv</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> iris_enriquecido <span class="op">=</span> <span class="bu">open</span> iris.<span class="bu">csv</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">join</span> (<span class="bu">open</span> irismeta.<span class="bu">csv</span>) species</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">select</span> sepal_length sepal_width species usda_id</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="va">$iris_enriquecido</span> <span class="op">|</span> <span class="bu">slice</span> <span class="fl">48..53</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="va">$iris_enriquecido</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> iris_usda.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.5" id="working-with-xmlhtml-and-json"><span
+class="header-section-number">6.5</span> Working with XML/HTML and
+JSON</h2>
+<p>In <code>/data/ch06</code>, we examine <code>users.json</code>
+alongside Wikipedia extracts <code>wiki.html</code>,
+<code>table.html</code>, and <code>table.json</code>.</p>
+<p>Rather than attempting to manipulate structured JSON using stream
+text tools like <code>sed</code> (which risks corrupting nested data or
+inadvertently altering key names), Nushell loads <code>users.json</code>
+directly into typed memory structures. We select desired attributes from
+the <code>results</code> table, rename <code>gender</code> to
+<code>sex</code>, and persist the cleaned dataset to both JSON and
+CSV:</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> usuarios <span class="op">=</span> <span class="bu">open</span> <span class="bu">users</span>.<span class="bu">json</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">get</span> results</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">select</span> gender email nat phone</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> <span class="bu">rename</span> sex email nat phone</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="va">$usuarios</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">5</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="va">$usuarios</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> users_sex.<span class="bu">csv</span></span></code></pre></div>
+<p>Similarly, from the HTML table converted to JSON in
+<code>table.json</code> (listing national boundary-to-area ratios from
+Wikipedia), we extract tabular rows and persist the structured dataset
+to <code>countries_from_json.csv</code>:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> countries.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span> countries.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">first</span> <span class="dv">10</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> countries_top10.<span class="bu">csv</span></span></code></pre></div>
+<h2 data-number="6.6" id="the-nushell-polars-plugin"><span
+class="header-section-number">6.6</span> The Nushell Polars Plugin</h2>
+<p>Polars is a lightning-fast DataFrame library implemented in Rust and
+built upon the Apache Arrow columnar memory format. It provides a
+declarative query engine that optimizes computation graphs
+automatically, enabling high-throughput data processing via lazy
+evaluation and multi-core parallelism.</p>
+<h3 data-number="6.6.1" id="use-cases"><span
+class="header-section-number">6.6.1</span> Use Cases</h3>
+<ul>
+<li>Processing datasets that exceed available RAM or make in-memory
+native shell table manipulation impractical.</li>
+<li>High-performance analytical operations on large Apache Parquet
+archives.</li>
+<li>Vectorized, parallel execution of complex grouping, filtering, and
+aggregation pipelines.</li>
+</ul>
+<h3 data-number="6.6.2" id="foundational-concepts-1"><span
+class="header-section-number">6.6.2</span> Foundational Concepts</h3>
+<h4 data-number="6.6.2.1"
+id="polars-dataframes-versus-nushell-tables"><span
+class="header-section-number">6.6.2.1</span> Polars DataFrames Versus
+Nushell Tables</h4>
+<ul>
+<li><strong>Nushell Tables:</strong> Strongly typed, in-memory records
+designed for interactive terminal exploration. Users manipulate rows and
+columns using commands such as <code>select</code>, <code>where</code>,
+and <code>update</code>.</li>
+<li><strong>Polars DataFrames:</strong> Columnar, highly optimized
+structures backed by Apache Arrow memory buffers. They support lazy
+evaluation query plans, SIMD vectorization, and multi-threaded
+execution. Nushell tables convert seamlessly to Polars DataFrames via
+<code>polars into-df</code>, and back to native Nushell tables using
+<code>polars into-nu</code>.</li>
+</ul>
+<h3 data-number="6.6.3" id="basic-usage"><span
+class="header-section-number">6.6.3</span> Basic Usage</h3>
+<p>To use <code>nu_plugin_polars</code>, data must first be ingested
+into a <code>DataFrame</code>. The Polars plugin supports diverse file
+formats, including CSV, JSON, Parquet, and IPC.</p>
+<h4 data-number="6.6.3.1" id="data-ingestion"><span
+class="header-section-number">6.6.3.1</span> Data Ingestion</h4>
+<p>In this walkthrough, we analyze video game sales records from
+<code>vgsales.csv</code>. We verify the local dataset in
+<code>/data/ch06</code>:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">ls</span> vgsales.<span class="bu">csv</span></span></code></pre></div>
+<blockquote>
+<p>Source: <a
+href="https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv">https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv</a></p>
+</blockquote>
+<p>We ingest <code>vgsales.csv</code> into an in-memory Polars
+DataFrame:</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="bu">open</span> vgsales.<span class="bu">csv</span> <span class="op">|</span> <span class="bu">polars into-df</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">describe</span></span></code></pre></div>
+<p>This creates a Polars <code>DataFrame</code> ready for
+high-performance analytics.</p>
+<blockquote>
+<p>If <code>polars open</code> encounters path resolution issues in
+certain environments, load the file into a DataFrame using
+<code>open vgsales.csv | polars into-df</code>.</p>
+</blockquote>
+<h4 data-number="6.6.3.2" id="data-exploration"><span
+class="header-section-number">6.6.3.2</span> Data Exploration</h4>
+<p>Once loaded, we inspect DataFrame properties using Polars exploration
+commands. To examine column names and inferred data types, query its
+schema:</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars schema</span></span></code></pre></div>
+<p>Notice that string attributes default to <code>object</code> type,
+and missing values appear as typed <code>null</code> entries in fields
+like <code>metascore</code>.</p>
+<h4 data-number="6.6.3.3" id="type-casting-and-schema-enforcement"><span
+class="header-section-number">6.6.3.3</span> Type Casting and Schema
+Enforcement</h4>
+<p>Polars infers types from initial rows, but analytical workflows
+frequently require strict schema definitions to avoid downstream type
+errors. To explicitly cast <code>number</code> to <code>i64</code> and
+<code>price</code> to <code>f64</code> during ingestion, pass a schema
+definition via <code>--schema</code>:</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="bu">open</span> vgsales.<span class="bu">csv</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars into-df</span> <span class="at">--schema</span> {</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>      <span class="bu">number</span>: i64,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>      game: <span class="bu">str</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      release_date: <span class="bu">str</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>      price: <span class="bu">str</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>      owners: <span class="bu">str</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>      developer: <span class="bu">str</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>      publisher: <span class="bu">str</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>      average_playtime: <span class="bu">str</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>      median_playtime: <span class="bu">str</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>      metascore: <span class="bu">str</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div>
+<blockquote>
+<p>When missing values (<code>NA</code>) are present in raw data, define
+numerical columns temporarily as <code>string</code> and cast them to
+numeric types following cleansing steps.</p>
+</blockquote>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df <span class="op">=</span> <span class="va">$df</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="kw">collect</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars with-column</span> [</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;Free&quot;</span> <span class="at">--replace</span> <span class="st">&quot;0&quot;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> <span class="bu">polars cast</span> f64</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> average_playtime <span class="op">|</span> <span class="bu">polars cast</span> i64),</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> median_playtime <span class="op">|</span> <span class="bu">polars cast</span> i64),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> metascore <span class="op">|</span> <span class="bu">polars cast</span> i64)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars schema</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars summary</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars summary</span> <span class="op">|</span> <span class="bu">polars select</span> descriptor <span class="st">&quot;price (f64)&quot;</span> <span class="st">&quot;average_playtime (i64)&quot;</span> <span class="st">&quot;median_playtime (i64)&quot;</span> <span class="st">&quot;metascore (i64)&quot;</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<p>In this transformation:</p>
+<ul>
+<li><code>collect</code>: Materializes an internal stream into an
+in-memory DataFrame before evaluating expressions.</li>
+<li><code>with-column</code>: Appends derived columns or modifies
+existing series using vectorized Polars expressions.</li>
+<li><code>str-slice</code>: Extracts text substrings.</li>
+<li><code>as-date</code>: Parses formatted text strings into temporal
+date values.</li>
+</ul>
+<h3 data-number="6.6.4" id="data-manipulation"><span
+class="header-section-number">6.6.4</span> Data Manipulation</h3>
+<h4 data-number="6.6.4.1" id="column-selection"><span
+class="header-section-number">6.6.4.1</span> Column Selection</h4>
+<p>To project specific columns from a DataFrame, use
+<code>polars select</code>. For example, to isolate <code>game</code>,
+<code>price</code>, and <code>metascore</code>:</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars select</span> game price metascore</span></code></pre></div>
+<p>Polars outputs the following evaluation structure:</p>
+<pre><code>╭────────────────┬───────────────────────────────────────────────────────╮
+│ plan           │ SELECT [col(&quot;game&quot;), col(&quot;price&quot;), col(&quot;metascore&quot;)]  │
+│                │   DF [&quot;number&quot;, &quot;game&quot;, &quot;release_date&quot;, &quot;price&quot;,      │
+│                │   ...]; PROJECT */10 COLUMNS                          │
+│ optimized_plan │ DF [&quot;number&quot;, &quot;game&quot;, &quot;release_date&quot;, &quot;price&quot;, ...];  │
+│                │   PROJECT[&quot;game&quot;, &quot;price&quot;, &quot;metascore&quot;] 3/10 COLUMNS  │
+╰────────────────┴───────────────────────────────────────────────────────╯</code></pre>
+<p>This output represents the Polars <strong>query plan</strong>,
+illustrating how the query optimizer structures execution to maximize
+computational efficiency. To materialize the actual dataset records,
+invoke <code>polars collect</code>:</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars select</span> game price metascore <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<h4 data-number="6.6.4.2" id="row-filtering"><span
+class="header-section-number">6.6.4.2</span> Row Filtering</h4>
+<p>To filter rows based on boolean conditions, use
+<code>polars filter-with</code>. For example, to filter rows where the
+price is greater than 10 and the metascore exceeds 80:</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#búsqueda Insensible a Mayúsculas/Minúsculas</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> filter_condition <span class="op">=</span> <span class="bu">polars col</span> developer <span class="op">|</span> <span class="bu">polars contains</span> <span class="st">&quot;(?i)Action&quot;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars filter</span> <span class="va">$filter_condition</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co">#búsqueda Sensible a Mayúsculas/Minúsculas</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> filter_condition <span class="op">=</span> <span class="bu">polars col</span> developer <span class="op">|</span> <span class="bu">polars contains</span> <span class="st">&quot;Action&quot;</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars filter</span> <span class="va">$filter_condition</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="co">#eliminar na in price</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> filter_condition <span class="op">=</span> <span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars is-not-null</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">|</span> <span class="bu">polars filter</span> <span class="va">$filter_condition</span> <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<p>Alternatively, to drop all rows containing null values across any
+column, use <code>polars drop-nulls</code>:</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df_filtered <span class="op">=</span> <span class="va">$df</span> <span class="op">|</span> <span class="bu">polars drop-nulls</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<h4 data-number="6.6.4.3" id="sorting-data-1"><span
+class="header-section-number">6.6.4.3</span> Sorting Data</h4>
+<p>To order a DataFrame by column values, use
+<code>polars sort-by</code>. For example, to sort records in descending
+order of <code>price</code>:</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars sort-by</span> price <span class="at">--reverse</span> [<span class="cn">true</span>]</span></code></pre></div>
+<h4 data-number="6.6.4.4" id="grouping-and-aggregation"><span
+class="header-section-number">6.6.4.4</span> Grouping and
+Aggregation</h4>
+<p>Polars aggregates data across categories using
+<code>polars group-by</code> combined with <code>polars agg</code>. For
+example, to compute mean price and mean metascore grouped by game
+developer:</p>
+<div class="sourceCode" id="cb37"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> developer <span class="op">|</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> (<span class="bu">polars col</span> game <span class="op">|</span> <span class="bu">polars count</span>) <span class="op">|</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars sort-by</span> game <span class="at">--reverse</span> [<span class="cn">true</span>] <span class="op">|</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars collect</span></span></code></pre></div>
+<ul>
+<li>For aggregated statistics grouped by <code>developer</code>:</li>
+</ul>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> developer <span class="op">|</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> [</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars mean</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;price_mean&quot;</span>),</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> game  <span class="op">|</span> <span class="bu">polars count</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;n_games&quot;</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars sort-by</span> developer <span class="op">|</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars collect</span></span></code></pre></div>
+<ul>
+<li>For aggregated statistics grouped by <code>release_date</code>
+publication year:</li>
+</ul>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#se mira la columna release_date</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars select</span> release_date <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co">#primero se extrae año, luego se agrupa</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> data_by_year <span class="op">=</span> <span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars with-column</span> [</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> release_date</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;.*,</span><span class="sc">\\</span><span class="st">s*(</span><span class="sc">\\</span><span class="st">d{4})$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;$1&quot;</span> <span class="co"># extrae el año</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;^</span><span class="sc">\\</span><span class="st">s+|</span><span class="sc">\\</span><span class="st">s+$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;&quot;</span>        <span class="co"># trim</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars cast</span> i64</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;year&quot;</span>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>   ] <span class="op">|</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> year <span class="op">|</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> [</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars mean</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;price_mean&quot;</span>),</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> game  <span class="op">|</span> <span class="bu">polars count</span> <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;n_games&quot;</span>)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars sort-by</span> year <span class="op">|</span></span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars collect</span></span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a><span class="co">#se visualiza</span></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span></span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">describe</span></span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="co">#tabla nu</span></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="op">|</span> <span class="bu">describe</span></span></code></pre></div>
+<h3 data-number="6.6.5" id="file-formats-and-persistence"><span
+class="header-section-number">6.6.5</span> File Formats and
+Persistence</h3>
+<p>To export a DataFrame to disk, use <code>polars save</code>. The
+plugin natively writes to Apache Parquet, CSV, and Arrow IPC binary
+formats:</p>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> vgsales_filtered.parquet</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> vgsales_filtered.<span class="bu">csv</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars save</span> data_by_year.<span class="bu">csv</span></span></code></pre></div>
+<p>When saving in certain pipeline environments, specify an absolute
+target path:</p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> (<span class="va">$env.PWD</span> <span class="op">|</span> <span class="bu">path join</span> vgsales_filtered.<span class="bu">csv</span>)</span></code></pre></div>
+<p>Or save directly to standard CSV format:</p>
+<div class="sourceCode" id="cb42"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df_filtered</span> <span class="op">|</span> <span class="bu">polars collect</span> <span class="op">|</span> <span class="bu">polars save</span> vgsales_filtered.<span class="bu">csv</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="va">$data_by_year</span> <span class="op">|</span> <span class="bu">polars save</span> data_by_year.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.6.6" id="column-pivoting"><span
+class="header-section-number">6.6.6</span> Column Pivoting</h3>
+<p>The <code>polars pivot</code> command reshapes data from long format
+to wide format by transposing unique categorical values into distinct
+columns while aggregating cell values.</p>
+<p>To illustrate pivoting with the video game dataset, we first
+aggregate mean prices by <code>developer</code> and
+<code>year</code>:</p>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df_aggregated <span class="op">=</span> <span class="va">$df_filtered</span> <span class="op">|</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars with-column</span> [</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> release_date</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;.*,</span><span class="sc">\\</span><span class="st">s*(</span><span class="sc">\\</span><span class="st">d{4})$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;$1&quot;</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars str-replace-all</span> <span class="at">--pattern</span> <span class="st">&quot;^</span><span class="sc">\\</span><span class="st">s+|</span><span class="sc">\\</span><span class="st">s+$&quot;</span> <span class="at">--replace</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars cast</span> i64</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">|</span> <span class="bu">polars as</span> <span class="st">&quot;year&quot;</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars select</span> [</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> developer)</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> price)</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">polars col</span> year)</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  ] <span class="op">|</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars group-by</span> [developer year] <span class="op">|</span></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  <span class="bu">polars agg</span> [(<span class="bu">polars col</span> price <span class="op">|</span> <span class="bu">polars mean</span> <span class="op">|</span> <span class="bu">polars as</span> price_mean)]</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a><span class="va">$df_aggregated</span> <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a><span class="va">$df_aggregated</span> <span class="op">|</span> <span class="bu">polars sort-by</span> year <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a><span class="va">$df_aggregated</span> <span class="op">|</span> <span class="bu">polars sort-by</span> developer <span class="op">|</span> <span class="bu">polars collect</span></span></code></pre></div>
+<p>We then perform the relational pivot operation:</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode nu"><code class="sourceCode nu"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> df_pivoted <span class="op">=</span> <span class="va">$df_aggregated</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars sort-by</span> year</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars pivot</span> <span class="at">--index</span> [developer] <span class="at">--on</span> [year] <span class="at">--values</span> [price_mean]</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--stable</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars sort-by</span> developer</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="bu">polars collect</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="va">$df_pivoted</span> <span class="op">|</span> <span class="bu">polars first</span> <span class="dv">5</span> <span class="op">|</span> <span class="bu">polars into-nu</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a><span class="va">$df_pivoted</span> <span class="op">|</span> <span class="bu">polars into-nu</span> <span class="op">|</span> <span class="bu">save</span> <span class="at">-f</span> vgsales_pivot.<span class="bu">csv</span></span></code></pre></div>
+<h3 data-number="6.6.7" id="best-practices-and-recommendations"><span
+class="header-section-number">6.6.7</span> Best Practices and
+Recommendations</h3>
+<ul>
+<li><strong>Name Columns Explicitly:</strong> When applying aggregations
+or creating derived columns, assign unambiguous column names using
+descriptive aliases.</li>
+<li><strong>Leverage Lazy Evaluation:</strong> Build execution plans
+with <code>polars into-lazy</code> before calling
+<code>polars collect</code>, allowing the optimizer to prune unused
+columns and minimize RAM overhead.</li>
+<li><strong>Enforce Schemas During Ingestion:</strong> Defining explicit
+schemas with <code>--schema</code> prevents misinferred column types and
+eliminates runtime type coercion issues.</li>
+<li><strong>Prefer Parquet for Storage:</strong> For medium to large
+datasets, persist files in Apache Parquet rather than CSV to reduce
+storage footprint and achieve orders-of-magnitude faster ingestion.</li>
+</ul>
+<h3 data-number="6.6.8" id="summary"><span
+class="header-section-number">6.6.8</span> Summary</h3>
+<p>The Nushell Polars plugin delivers enterprise-grade analytical
+capabilities for large-scale structured data, uniting the raw
+performance of Rust with Nushell’s ergonomic pipeline syntax. By
+mastering data ingestion, vectorized filtering, multi-level aggregation,
+and pivoting in Polars, data engineers can run high-throughput workflows
+directly from the terminal with production-grade efficiency.</p>
+      </article>
+
+      <nav class="chapter-nav chapter-nav-bottom" aria-label="Chapter navigation">
+        <div class="nav-slot nav-prev">
+          <a href="5-chapter-5-data-acquisition.html" rel="prev">&larr; Data Acquisition</a>
+        </div>
+        <div class="nav-slot nav-up">
+          <a href="0-data-science-at-the-linux-terminal-with-nushell-1.html" rel="up">Data Science at the Linux Terminal with Nushell</a>
+        </div>
+        <div class="nav-slot nav-next">
+          <a href="7-chapter-7-data-exploration.html" rel="next">Exploratory Data Analysis and Visualization &rarr;</a>
+        </div>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="reader-footer">
+    <span>Data Science at the Linux Terminal with Nushell</span>
+    <span>&bull; November 24, 2026</span>
+    <span>&bull; <a href="../">Course Portal</a></span>
+  </footer>
+
+  <script src="../Files/web_book.js" defer></script>
+</body>
+</html>
